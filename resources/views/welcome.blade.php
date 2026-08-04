@@ -1,36 +1,86 @@
 @extends('layouts.landing')
 @section('content')
 
-{{-- ===== HERO with Spline 3D scene ===== --}}
-<section class="relative w-full h-screen overflow-hidden bg-gray-950">
-    <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.98/build/spline-viewer.js" async></script>
+{{-- ===== HERO with reveal cover over video ===== --}}
+<section class="relative w-full h-[180vh] bg-white" id="heroSection">
 
-    <div class="absolute inset-0 overflow-hidden">
-        <spline-viewer id="hero-spline" url="https://prod.spline.design/ca00gvFiPNVeGnr4/scene.splinecode"
-            loading="eager" loading-anim-type="none"
-            style="position:absolute; top:50%; left:50%; width:130%; height:130%; transform:translate(-50%,-50%) scale(1.25);">
-        </spline-viewer>
+    <div class="sticky top-0 w-full h-screen overflow-hidden">
+
+        <video autoplay muted loop playsinline
+            class="absolute inset-0 w-full h-full object-cover"
+            src="{{ asset('videos/hero.mp4') }}">
+        </video>
+
+        <div class="absolute inset-0 bg-black/40"></div>
+
+        <div id="heroCover" class="absolute inset-x-0 top-0 bg-white z-30" style="height:80%;">
+            <div class="absolute inset-0 flex flex-col items-start justify-center text-left px-8 md:px-16">
+                <p class="text-gray-500 text-sm tracking-widest mb-3">CAMPULSY</p>
+                <h1 class="text-gray-900 text-3xl md:text-5xl font-bold leading-tight max-w-md">Work, sell, get paid.<br>All in one place.</h1>
+                <a href="{{ route('register') }}" class="mt-8 px-8 py-3 rounded-full bg-gray-900 text-white font-semibold w-max">Get Started</a>
+
+                <div id="heroCard1" class="hero-anim-card absolute bg-white shadow-xl rounded-2xl p-4 text-sm" style="top:20%; right:10%;">
+                    <p class="text-gray-400 text-xs">This Month</p>
+                    <p class="font-semibold text-indigo-600">+₦8,400</p>
+                </div>
+                <div id="heroCard2" class="hero-anim-card absolute bg-white shadow-xl rounded-2xl p-4 text-sm" style="top:55%; right:20%;">
+                    <p class="text-gray-400 text-xs">Referrals</p>
+                    <p class="font-semibold">14 active</p>
+                </div>
+            </div>
+        </div>
+
     </div>
-
-    <div class="absolute bottom-0 right-0 w-40 h-12 bg-gray-950 z-10"></div>
-
-    <div class="absolute inset-0 flex flex-col items-start justify-center text-left px-8 md:px-16 pointer-events-none z-20">
-        <p class="text-white/70 text-sm tracking-widest mb-3">CAMPULSY</p>
-        <h1 class="text-white text-3xl md:text-5xl font-bold leading-tight max-w-md">Work, sell, get paid.<br>All in one place.</h1>
-        <a href="{{ route('register') }}" class="pointer-events-auto mt-8 px-8 py-3 rounded-full bg-white text-gray-900 font-semibold">Get Started</a>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const viewer = document.getElementById('hero-spline');
-            viewer.addEventListener('load', function () {
-                setTimeout(function () {
-                    viewer.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-                }, 300);
-            });
-        });
-    </script>
 </section>
+
+<style>
+#heroCover {
+    transition: height 0.1s linear, opacity 0.2s linear;
+}
+.hero-anim-card {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.hero-anim-card.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const heroSection = document.getElementById('heroSection');
+    const heroCover = document.getElementById('heroCover');
+    const card1 = document.getElementById('heroCard1');
+    const card2 = document.getElementById('heroCard2');
+
+    function onScroll() {
+        const rect = heroSection.getBoundingClientRect();
+        const total = heroSection.offsetHeight - window.innerHeight;
+        const scrolled = Math.min(Math.max(-rect.top, 0), total);
+        const progress = total > 0 ? scrolled / total : 0;
+
+        const coverHeight = Math.max(80 - progress * 80, 0);
+        heroCover.style.height = coverHeight + '%';
+        heroCover.style.opacity = progress > 0.85 ? (1 - (progress - 0.85) / 0.15) : 1;
+
+        if (progress > 0.3) {
+            card1.classList.add('show');
+        } else {
+            card1.classList.remove('show');
+        }
+        if (progress > 0.5) {
+            card2.classList.add('show');
+        } else {
+            card2.classList.remove('show');
+        }
+    }
+
+    window.addEventListener('scroll', onScroll);
+    onScroll();
+});
+</script>
 
 {{-- ===== Pillars ===== --}}
 <section class="max-w-6xl mx-auto px-4 py-20">
