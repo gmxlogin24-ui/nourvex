@@ -1,0 +1,106 @@
+/* ===================================================
+   NEUMORPHIC MARKETPLACE — soft-UI listing cards, pills, badges
+   Loaded only on marketplace pages. Overrides .listing-card visually,
+   doesn't touch its DOM structure or any JS/data binding.
+=================================================== */
+
+.listing-card{
+  background: var(--color-card,#FAFAF8) !important;
+  border: none !important;
+  border-radius: 24px !important;
+  box-shadow:
+    9px 9px 18px rgba(0,0,0,0.07),
+    -7px -7px 16px rgba(255,255,255,0.85) !important;
+  transition: transform 0.35s cubic-bezier(.22,1,.36,1), box-shadow 0.35s ease !important;
+}
+.listing-card:hover{
+  transform: translateY(-6px) !important;
+  box-shadow:
+    14px 14px 28px rgba(0,0,0,0.10),
+    -10px -10px 22px rgba(255,255,255,0.9) !important;
+}
+[data-theme="dark"] .listing-card{
+  background: #16161c !important;
+  box-shadow:
+    9px 9px 20px rgba(0,0,0,0.55),
+    -7px -7px 16px rgba(255,255,255,0.03) !important;
+}
+[data-theme="dark"] .listing-card:hover{
+  box-shadow:
+    14px 14px 30px rgba(0,0,0,0.6),
+    -10px -10px 20px rgba(255,255,255,0.04) !important;
+}
+
+.listing-img{
+  border-radius: 18px 18px 0 0 !important;
+  margin: 10px 10px 0 !important;
+  width: calc(100% - 20px) !important;
+  border-radius: 16px !important;
+}
+
+.type-badge{
+  background: rgba(255,255,255,0.85) !important;
+  backdrop-filter: blur(8px) saturate(160%);
+  -webkit-backdrop-filter: blur(8px) saturate(160%);
+  color: #16181d !important;
+  border: none !important;
+  border-radius: 999px !important;
+  padding: 4px 12px !important;
+  box-shadow: 3px 3px 8px rgba(0,0,0,0.12) !important;
+  font-weight: 600 !important;
+}
+[data-theme="dark"] .type-badge{
+  background: rgba(30,30,36,0.85) !important;
+  color: #f5f3ee !important;
+}
+
+.verified-badge{
+  background: linear-gradient(145deg, #d4af37, #b8860b) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 999px !important;
+  padding: 3px 10px !important;
+  box-shadow: 3px 3px 8px rgba(184,134,11,0.35) !important;
+  font-weight: 600 !important;
+}
+
+/* neumorphic category pills */
+.cat-pill{
+  background: var(--color-card,#FAFAF8) !important;
+  border: none !important;
+  border-radius: 999px !important;
+  box-shadow:
+    5px 5px 12px rgba(0,0,0,0.08),
+    -4px -4px 10px rgba(255,255,255,0.85) !important;
+  transition: box-shadow 0.25s ease, transform 0.25s ease !important;
+}
+.cat-pill:active{ transform: scale(0.96) !important; }
+.cat-pill.active{
+  background: linear-gradient(145deg, #d4af37, #b8860b) !important;
+  color: #fff !important;
+  box-shadow:
+    3px 3px 8px rgba(184,134,11,0.4),
+    inset 1px 1px 3px rgba(255,255,255,0.3) !important;
+}
+[data-theme="dark"] .cat-pill{
+  background: #16161c !important;
+  box-shadow:
+    5px 5px 12px rgba(0,0,0,0.5),
+    -4px -4px 10px rgba(255,255,255,0.03) !important;
+}
+
+/* neumorphic price / sponsored panel */
+#marketAdSlot{
+  border: none !important;
+  border-radius: 20px !important;
+  box-shadow: inset 4px 4px 10px rgba(0,0,0,0.05), inset -4px -4px 10px rgba(255,255,255,0.8) !important;
+}
+[data-theme="dark"] #marketAdSlot{
+  box-shadow: inset 4px 4px 10px rgba(0,0,0,0.4), inset -4px -4px 10px rgba(255,255,255,0.03) !important;
+}
+
+/* price tag: pressed-in chip look */
+.listing-card p.font-semibold.text-accent{
+  display: inline-block;
+  margin-top: 8px !important;
+}

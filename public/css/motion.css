@@ -1,0 +1,129 @@
+/* ===================================================
+   MOTION LAYER — cloth-touch bg, marquee, magnetic buttons
+   Loaded only on pages that opt in (currently: welcome page)
+=================================================== */
+.motion-cloth-canvas{
+  position:fixed; inset:0; z-index:-1;
+  pointer-events:auto; touch-action:pan-y;
+  display:none;
+}
+@media (max-width:768px){
+  .motion-cloth-canvas{ display:block; }
+}
+
+.magnetic{ will-change:transform; transition:transform 0.15s ease-out; }
+
+.motion-marquee{
+  overflow:hidden; white-space:nowrap;
+  padding:14px 0; margin:28px 0;
+  border-top:1px solid rgba(255,255,255,0.08);
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+.motion-marquee-track{ display:inline-block; animation:motionMarqueeScroll 20s linear infinite; }
+.motion-marquee-track span{
+  display:inline-block; padding:0 2rem;
+  font-weight:600; font-size:0.9rem; letter-spacing:0.06em;
+  color:var(--color-muted, #888); text-transform:uppercase;
+}
+@keyframes motionMarqueeScroll{
+  from{ transform:translateX(0); }
+  to{ transform:translateX(-50%); }
+}
+
+/* ===================================================
+   DARK MOTION ZONE — shared dark GSAP scrollstory treatment
+   Reused across every guest-facing page (not logged-in app pages)
+=================================================== */
+.motion-zone{
+  position:relative;
+  background:#0B0B14;
+  overflow:hidden;
+  isolation:isolate;
+}
+.motion-zone h1, .motion-zone h2, .motion-zone h3,
+.motion-zone p, .motion-zone .font-semibold{ color:#F5F3FF; }
+.motion-zone .text-muted{ color:#a8a3c0 !important; }
+.motion-zone .btn-secondary{ background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.16); color:#F5F3FF; }
+
+.motion-mesh{
+  position:absolute; inset:-20%; z-index:0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(124,92,252,0.35), transparent 40%),
+    radial-gradient(circle at 80% 20%, rgba(62,146,204,0.30), transparent 45%),
+    radial-gradient(circle at 50% 80%, rgba(233,79,155,0.28), transparent 45%),
+    #0B0B14;
+  filter:blur(60px);
+  pointer-events:none;
+}
+.motion-blob{ position:absolute; border-radius:50%; filter:blur(70px); opacity:0.45; z-index:0; pointer-events:none; }
+.mb-1{ width:380px; height:380px; background:#7C5CFC; top:0%; left:5%; }
+.mb-2{ width:320px; height:320px; background:#3E92CC; top:40%; left:75%; }
+.mb-3{ width:280px; height:280px; background:#E94F9B; top:70%; left:10%; }
+#motionParticles{ position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+#motionParticles .particle{ position:absolute; width:3px; height:3px; border-radius:50%; background:rgba(245,243,255,0.5); }
+
+.motion-zone > .max-w-6xl, .motion-zone > section, .motion-zone .motion-steps-pin{ position:relative; z-index:2; }
+
+/* horizontal pinned "how it works" */
+.motion-steps-pin{ height:220vh; }
+.motion-steps-viewport{ height:70vh; position:sticky; top:10vh; overflow:hidden; display:flex; align-items:center; }
+.motion-steps-track{ display:flex; gap:24px; will-change:transform; padding-left:6vw; }
+.motion-step-card{
+  width:min(78vw,300px); flex-shrink:0; padding:28px;
+  background:rgba(255,255,255,0.06); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,0.12); border-radius:20px;
+}
+.motion-step-num{ font-size:0.78rem; color:#E94F9B; font-weight:700; letter-spacing:0.05em; }
+.motion-step-card p.font-semibold{ font-size:1.15rem; margin-top:10px; }
+.motion-zone .teaser-slider{ background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); }
+
+/* generic text-reveal, reused on logged-in pages too (headings only, no full reskin) */
+.text-reveal{ opacity:0; transform:translateY(18px); }
+
+/* ===================================================
+   DARK MOTION ZONE — shared dark GSAP scrollstory treatment
+   Reused across every guest-facing page (not logged-in app pages)
+=================================================== */
+.motion-zone{
+  position:relative;
+  background:#0B0B14;
+  overflow:hidden;
+  isolation:isolate;
+}
+.motion-zone h1, .motion-zone h2, .motion-zone h3,
+.motion-zone p, .motion-zone .font-semibold{ color:#F5F3FF; }
+.motion-zone .text-muted{ color:#a8a3c0 !important; }
+.motion-zone .btn-secondary{ background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.16); color:#F5F3FF; }
+
+.motion-mesh{
+  position:absolute; inset:-20%; z-index:0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(124,92,252,0.35), transparent 40%),
+    radial-gradient(circle at 80% 20%, rgba(62,146,204,0.30), transparent 45%),
+    radial-gradient(circle at 50% 80%, rgba(233,79,155,0.28), transparent 45%),
+    #0B0B14;
+  filter:blur(60px);
+  pointer-events:none;
+}
+.motion-blob{ position:absolute; border-radius:50%; filter:blur(70px); opacity:0.45; z-index:0; pointer-events:none; }
+.mb-1{ width:380px; height:380px; background:#7C5CFC; top:0%; left:5%; }
+.mb-2{ width:320px; height:320px; background:#3E92CC; top:40%; left:75%; }
+.mb-3{ width:280px; height:280px; background:#E94F9B; top:70%; left:10%; }
+#motionParticles{ position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+#motionParticles .particle{ position:absolute; width:3px; height:3px; border-radius:50%; background:rgba(245,243,255,0.5); }
+
+.motion-zone > .max-w-6xl, .motion-zone > section, .motion-zone .motion-steps-pin{ position:relative; z-index:2; }
+
+.motion-steps-pin{ height:220vh; }
+.motion-steps-viewport{ height:70vh; position:sticky; top:10vh; overflow:hidden; display:flex; align-items:center; }
+.motion-steps-track{ display:flex; gap:24px; will-change:transform; padding-left:6vw; }
+.motion-step-card{
+  width:min(78vw,300px); flex-shrink:0; padding:28px;
+  background:rgba(255,255,255,0.06); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,0.12); border-radius:20px;
+}
+.motion-step-num{ font-size:0.78rem; color:#E94F9B; font-weight:700; letter-spacing:0.05em; }
+.motion-step-card p.font-semibold{ font-size:1.15rem; margin-top:10px; }
+.motion-zone .teaser-slider{ background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); }
+
+.text-reveal{ opacity:0; transform:translateY(18px); }

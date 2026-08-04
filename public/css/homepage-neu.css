@@ -1,0 +1,94 @@
+/* ===================================================
+   NEUMORPHIC PILLAR CARDS — homepage Section 2 only
+=================================================== */
+.cp-pillar-card{
+  background: var(--color-card,#FAFAF8) !important;
+  border: none !important;
+  border-radius: 26px !important;
+  box-shadow:
+    10px 10px 22px rgba(0,0,0,0.07),
+    -8px -8px 18px rgba(255,255,255,0.85) !important;
+}
+.cp-pillar-card:hover{
+  box-shadow:
+    14px 14px 30px rgba(0,0,0,0.10),
+    -10px -10px 22px rgba(255,255,255,0.9) !important;
+}
+[data-theme="dark"] .cp-pillar-card{
+  background:#16161c !important;
+  box-shadow:
+    10px 10px 24px rgba(0,0,0,0.55),
+    -8px -8px 18px rgba(255,255,255,0.03) !important;
+}
+[data-theme="dark"] .cp-pillar-card:hover{
+  box-shadow:
+    14px 14px 32px rgba(0,0,0,0.6),
+    -10px -10px 20px rgba(255,255,255,0.04) !important;
+}
+.cp-pillar-icon{
+  border-radius: 16px !important;
+  box-shadow: inset 3px 3px 7px rgba(0,0,0,0.06), inset -3px -3px 7px rgba(255,255,255,0.9) !important;
+  background: var(--color-card,#FAFAF8) !important;
+}
+[data-theme="dark"] .cp-pillar-icon{
+  box-shadow: inset 3px 3px 7px rgba(0,0,0,0.4), inset -3px -3px 7px rgba(255,255,255,0.03) !important;
+  background:#16161c !important;
+}
+.cp-pillar-link{
+  padding: 6px 14px; border-radius: 999px; width: fit-content;
+  box-shadow: 3px 3px 8px rgba(0,0,0,0.06), -3px -3px 8px rgba(255,255,255,0.8);
+  transition: box-shadow .25s ease, transform .2s ease;
+}
+.cp-pillar-link:active{ transform: scale(0.96); }
+[data-theme="dark"] .cp-pillar-link{ box-shadow: 3px 3px 8px rgba(0,0,0,0.4), -3px -3px 8px rgba(255,255,255,0.03); }
+
+/* ---------- Section 3 depth: cards scale/blur based on distance from center ---------- */
+
+.cp-story-bg-video{
+  animation: cpKenBurns 26s ease-in-out infinite alternate;
+}
+@keyframes cpKenBurns{ from{ transform:scale(1); } to{ transform:scale(1.12); } }
+
+/* ---------- Section 6: Pricing ---------- */
+.cp-pricing{ padding:96px 24px 100px; max-width:1180px; margin:0 auto; background:#fff; }
+[data-theme="dark"] .cp-pricing{ background:var(--color-bg,#0a0a0f); }
+.cp-pricing-head{ text-align:center; max-width:560px; margin:0 auto 48px; }
+.cp-pricing-head h2{ font-size:clamp(1.8rem,4vw,2.6rem); font-weight:700; letter-spacing:-0.02em; }
+.cp-pricing-head p{ margin-top:10px; color:var(--color-muted,#6b7280); font-size:15px; }
+.cp-pricing-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+@media (max-width:960px){ .cp-pricing-grid{ grid-template-columns:repeat(2,1fr); } }
+@media (max-width:560px){ .cp-pricing-grid{ grid-template-columns:1fr; } }
+.cp-plan-card{
+  background:var(--color-card,#FAFAF8); border:none; border-radius:26px; padding:30px 24px;
+  box-shadow:10px 10px 22px rgba(0,0,0,0.07), -8px -8px 18px rgba(255,255,255,0.85);
+  display:flex; flex-direction:column; position:relative;
+}
+[data-theme="dark"] .cp-plan-card{ background:#16161c; box-shadow:10px 10px 24px rgba(0,0,0,0.55), -8px -8px 18px rgba(255,255,255,0.03); }
+.cp-plan-card.cp-featured{ box-shadow:10px 10px 26px rgba(184,134,11,0.18), -8px -8px 18px rgba(255,255,255,0.85); border:1px solid rgba(184,134,11,0.3); }
+.cp-plan-badge{ position:absolute; top:-12px; left:24px; background:linear-gradient(145deg,#d4af37,#b8860b); color:#fff; font-size:11px; font-weight:700; padding:5px 14px; border-radius:999px; }
+.cp-plan-name{ font-size:13px; color:var(--color-muted,#6b7280); }
+.cp-plan-title{ font-size:1.3rem; font-weight:700; margin:4px 0 12px; }
+.cp-plan-price{ font-size:1.9rem; font-weight:700; color:var(--color-accent,#b8860b); }
+.cp-plan-price span{ font-size:12px; color:var(--color-muted,#6b7280); font-weight:400; }
+.cp-plan-card ul{ list-style:none; display:flex; flex-direction:column; gap:8px; font-size:13px; color:var(--color-muted,#6b7280); margin:18px 0 24px; flex:1; }
+.cp-plan-card ul li{ display:flex; align-items:center; gap:7px; }
+.cp-plan-card ul li svg{ width:14px; height:14px; color:var(--color-accent,#b8860b); flex-shrink:0; }
+.cp-plan-cta{
+  text-align:center; padding:12px; border-radius:999px; font-weight:600; font-size:14px; text-decoration:none;
+  background:var(--color-card,#FAFAF8); color:var(--color-text,#16181d);
+  box-shadow:5px 5px 12px rgba(0,0,0,0.08), -4px -4px 10px rgba(255,255,255,0.85);
+}
+.cp-plan-cta.cp-cta-primary{ background:linear-gradient(145deg,#d4af37,#b8860b); color:#fff; box-shadow:0 8px 20px -6px rgba(184,134,11,0.5); }
+
+/* ---------- Pricing card hover ---------- */
+.cp-plan-card{ transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease, border-color .3s ease; cursor: pointer; }
+.cp-plan-card:hover{
+  transform: translateY(-6px);
+  box-shadow: 16px 16px 32px rgba(0,0,0,0.12), -12px -12px 24px rgba(255,255,255,0.9) !important;
+  border: 1px solid rgba(184,134,11,0.35) !important;
+}
+[data-theme="dark"] .cp-plan-card:hover{
+  box-shadow: 16px 16px 34px rgba(0,0,0,0.65), -12px -12px 24px rgba(255,255,255,0.05) !important;
+}
+.cp-plan-cta{ transition: transform .2s ease, box-shadow .2s ease; }
+.cp-plan-cta:hover{ transform: translateY(-2px); box-shadow: 6px 6px 14px rgba(0,0,0,0.1), -5px -5px 12px rgba(255,255,255,0.9); }

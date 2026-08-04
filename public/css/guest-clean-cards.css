@@ -1,0 +1,189 @@
+/* Clean, solid styling for the GUEST marketplace page only.
+   Overrides the site-wide glass/clay/glow skins — scoped under
+   .marketplace-guest-page so nothing else on the site is touched. */
+
+.marketplace-guest-page .listing-card,
+.marketplace-guest-page .flip-card-face,
+.marketplace-guest-page .cat-pill {
+  background: var(--color-card) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+.marketplace-guest-page .listing-card {
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0 !important;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.14) !important;
+}
+.marketplace-guest-page .listing-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 36px rgba(0,0,0,0.18) !important;
+}
+.marketplace-guest-page .listing-card::before,
+.marketplace-guest-page .listing-card::after {
+  content: none !important;
+  display: none !important;
+}
+.marketplace-guest-page .listing-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-muted);
+  background: var(--color-surface);
+}
+
+.marketplace-guest-page .cat-pill {
+  border: 1px solid var(--border-color) !important;
+  color: var(--color-text) !important;
+}
+.marketplace-guest-page .cat-pill.active {
+  background: var(--color-accent) !important;
+  color: #fff !important;
+  border-color: var(--color-accent) !important;
+}
+
+/* Self-contained theme toggle for this page — doesn't rely on the sitewide drawer */
+.mg-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  border: 2px solid #b8860b;
+  background: #ffffff !important;
+  color: #16181d !important;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+[data-theme="dark"] .mg-theme-toggle {
+  background: #ffffff !important;
+  color: #16181d !important;
+}
+
+/* === Dark mode fixes for this page ===
+   Site-wide dark theme swaps --color-accent to purple/blue and makes
+   --border-color nearly invisible on the near-black background. Keep
+   this page's accent gold (matches the brand) and give cards a real
+   visible edge in dark mode instead of blending into the background. */
+[data-theme="dark"] .marketplace-guest-page .text-accent {
+  color: #d4af37 !important;
+}
+[data-theme="dark"] .marketplace-guest-page .cat-pill.active {
+  background: #b8860b !important;
+  border-color: #b8860b !important;
+}
+[data-theme="dark"] .marketplace-guest-page .listing-card,
+[data-theme="dark"] .marketplace-guest-page .flip-card-face {
+  border: 1px solid rgba(255,255,255,0.14) !important;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.5) !important;
+}
+[data-theme="dark"] .marketplace-guest-page .cat-pill {
+  border: 1px solid rgba(255,255,255,0.14) !important;
+}
+[data-theme="dark"] .marketplace-guest-page .gigs-section-link {
+  color: #d4af37 !important;
+}
+
+/* === Lock this page's accent to gold, both themes ===
+   app-v2.css has 8 different --color-accent values scattered across
+   the file with no page scoping, so it flips unpredictably between
+   gold/purple/blue on reload. Force explicit hex values here instead
+   of relying on the shared variable at all. */
+.marketplace-guest-page .text-accent,
+.marketplace-guest-page .gigs-section-link,
+.marketplace-guest-page .gigs-section-link i {
+  color: #b8860b !important;
+}
+.marketplace-guest-page .cat-pill.active {
+  background: #b8860b !important;
+  border-color: #b8860b !important;
+  color: #fff !important;
+}
+.marketplace-guest-page .type-item { background: rgba(37,99,235,0.7) !important; }
+.marketplace-guest-page .type-service { background: rgba(22,163,74,0.7) !important; }
+.marketplace-guest-page .type-rent { background: rgba(202,138,4,0.7) !important; }
+.marketplace-guest-page .type-store { background: rgba(184,134,11,0.75) !important; }
+
+/* === Match Technova reference exactly ===
+   Remove all color-coded type badges (blue/green/gold-by-type) — the
+   reference uses plain dark pill tags, not color-per-category. White
+   cards with soft shadow in light mode, no colored borders. */
+.marketplace-guest-page .type-badge,
+.marketplace-guest-page .type-item,
+.marketplace-guest-page .type-service,
+.marketplace-guest-page .type-rent,
+.marketplace-guest-page .type-store {
+  background: rgba(22,24,29,0.85) !important;
+  color: #fff !important;
+}
+
+.marketplace-guest-page .listing-card {
+  background: #ffffff !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+}
+[data-theme="dark"] .marketplace-guest-page .listing-card {
+  background: #1a1a22 !important;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.5) !important;
+}
+
+.marketplace-guest-page .cat-pill {
+  background: #ffffff !important;
+  border: 1px solid rgba(0,0,0,0.08) !important;
+  color: #16181d !important;
+}
+[data-theme="dark"] .marketplace-guest-page .cat-pill {
+  background: #1a1a22 !important;
+  border: 1px solid rgba(255,255,255,0.14) !important;
+  color: #f5f5f7 !important;
+}
+.marketplace-guest-page .cat-pill.active {
+  background: #b8860b !important;
+  border-color: #b8860b !important;
+  color: #fff !important;
+}
+
+/* === Override [data-page="marketplace"] forced dark background ===
+   app-v2.css hardcodes --color-bg: #05070d and blue accent for ANY
+   page with data-page="marketplace" — meant for the logged-in
+   dashboard, but this guest page shares the same route name so it
+   inherited it too, unconditionally (not gated by theme at all).
+   Restore normal light/dark variables just for this page. */
+body[data-page="marketplace"] {
+  --color-bg: #f5f8fc !important;
+  --color-surface: #eef3f8 !important;
+  --color-card: #ffffff !important;
+  --color-accent: #b8860b !important;
+  --color-accent-light: #d4af37 !important;
+  --border-color: rgba(0,0,0,0.08) !important;
+  background-color: #f5f8fc !important;
+}
+[data-theme="dark"] body[data-page="marketplace"] {
+  --color-bg: #0a0a0d !important;
+  --color-surface: #131318 !important;
+  --color-card: #1a1a22 !important;
+  --border-color: rgba(255,255,255,0.09) !important;
+  background-color: #0a0a0d !important;
+}
+
+
+/* === Square off every remaining corner — images, badges, ad cards === */
+.marketplace-guest-page .listing-img,
+.marketplace-guest-page .listing-placeholder,
+.marketplace-guest-page .type-badge,
+.marketplace-guest-page .flip-front .listing-img,
+.marketplace-guest-page .flip-back .listing-img {
+  border-radius: 0 !important;
+}
+.marketplace-guest-page .exhibition-card,
+.marketplace-guest-page .exhibition-card img,
+.marketplace-guest-page .exhibition-card video {
+  border-radius: 0 !important;
+}
+.marketplace-guest-page .cat-pill {
+  border-radius: 0 !important;
+}

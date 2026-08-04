@@ -1,0 +1,1037 @@
+
+/* ===================================================
+   DOCK WHEEL — bigger bubbles, labels, better arc
+=================================================== */
+.dock-wheel-item {
+  width: 3.4rem !important;
+  height: 3.4rem !important;
+  flex-direction: column !important;
+  gap: 0.15rem !important;
+}
+.dock-wheel-label {
+  font-size: 0.55rem !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+.dock-wheel-item.active .dock-wheel-label { color: white !important; }
+
+/* Slightly larger arc radius to fit bigger bubbles comfortably */
+.dock-wheel.open .dock-wheel-item {
+  animation-name: bubblePopWide;
+}
+@keyframes bubblePopWide {
+  0% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(0) rotate(calc(-1 * var(--angle))) scale(0); opacity: 0; }
+  60% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(5.6rem) rotate(calc(-1 * var(--angle))) scale(1.1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(5.2rem) rotate(calc(-1 * var(--angle))) scale(1); opacity: 1; }
+}
+
+/* Backdrop dim behind the wheel when open, so bubbles pop visually */
+.dock-wheel::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0);
+  pointer-events: none;
+  transition: background 0.3s ease;
+  z-index: -1;
+}
+.dock-wheel.open::before {
+  background: rgba(0,0,0,0.25);
+  pointer-events: auto;
+}
+
+/* ===================================================
+   SITE LOGO — applied globally to every .logo-badge
+=================================================== */
+.logo-badge {
+  background-image: url('/images/logo.svg') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-color: transparent !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18) !important;
+}
+
+/* ===================================================
+   FINAL: two fixed glass panels, no hover-collapse
+=================================================== */
+.app-sidebar-wrap {
+  position: fixed !important;
+  top: 1.25rem; left: 1.25rem; bottom: 1.25rem;
+  z-index: 40;
+  gap: 0.85rem;
+}
+.app-sidebar-icons {
+  width: 68px !important;
+  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  background: rgba(255,255,255,0.18) !important;
+  backdrop-filter: blur(20px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+  border: 1px solid rgba(255,255,255,0.4) !important;
+  border-radius: 9999px !important;
+  padding: 1.25rem 0 !important;
+  box-shadow: 0 14px 34px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.5) !important;
+  overflow-y: auto;
+}
+[data-theme="dark"] .app-sidebar-icons {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+}
+.app-sidebar-icons a {
+  display: flex; align-items: center; justify-content: center;
+  width: 42px; height: 42px; border-radius: 9999px;
+  color: rgba(30,30,35,0.65) !important;
+  flex-shrink: 0;
+}
+[data-theme="dark"] .app-sidebar-icons a { color: rgba(255,255,255,0.6) !important; }
+.app-sidebar-icons a i { stroke: currentColor !important; }
+.app-sidebar-icons a.active {
+  background: rgba(255,255,255,0.9) !important;
+  color: #1a1a1a !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18) !important;
+}
+
+.app-sidebar-labels {
+  width: 220px !important;
+  display: flex; flex-direction: column;
+  background: rgba(255,255,255,0.16) !important;
+  backdrop-filter: blur(20px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+  border: 1px solid rgba(255,255,255,0.4) !important;
+  border-radius: 2rem !important;
+  padding: 1.5rem 1rem !important;
+  box-shadow: 0 14px 34px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.5) !important;
+  gap: 1rem; overflow-y: auto;
+}
+[data-theme="dark"] .app-sidebar-labels {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+}
+.sidebar-logo { display: flex; align-items: center; gap: 0.6rem; padding: 0 0.35rem; }
+
+@media (min-width: 768px) {
+  body:has(.app-sidebar-wrap) main,
+  body:has(.app-sidebar-wrap) .app-nav {
+    margin-left: 340px !important;
+  }
+}
+
+/* Logo — always visible, correct shape, works in both panels */
+.logo-badge {
+  background-image: url('/images/logo.svg') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-color: transparent !important;
+  border-radius: 9999px !important;
+  width: 2.4rem !important;
+  height: 2.4rem !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.18) !important;
+}
+
+/* ===================================================
+   FINAL: theme/team gradient wash — guaranteed to win
+=================================================== */
+.photo-bg {
+  position: fixed !important;
+}
+.photo-bg::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--color-accent) 22%, transparent) 0%, transparent 60%) !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+[data-team="boys"] .photo-bg::before {
+  background: linear-gradient(160deg, rgba(56,217,232,0.22) 0%, transparent 60%) !important;
+}
+[data-team="girls"] .photo-bg::before {
+  background: linear-gradient(160deg, rgba(244,114,182,0.22) 0%, transparent 60%) !important;
+}
+[data-theme="dark"] .photo-bg::before {
+  opacity: 0.55 !important;
+}
+
+/* ===================================================
+   BALANCE CARD — cap width on desktop, full width mobile
+=================================================== */
+@media (min-width: 768px) {
+  .balance-card {
+    max-width: 420px !important;
+  }
+}
+
+/* ===================================================
+   DOCK v3 — 3D bezel icons, beam-glow active indicator,
+   glowing squircle center button
+=================================================== */
+
+/* Beam of light shooting up from the active/hovered icon */
+.dock-beam {
+  position: absolute;
+  top: -0.5rem;
+  height: 3.2rem;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, var(--color-accent) 0%, transparent 90%);
+  filter: blur(2px);
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.35s ease, opacity 0.25s ease;
+  z-index: 0;
+  pointer-events: none;
+}
+.dock-beam::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 60%; height: 3px;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  box-shadow: 0 0 10px 3px color-mix(in srgb, var(--color-accent) 80%, transparent);
+}
+
+/* 3D embossed icon buttons */
+.dock-bar-item {
+  position: relative;
+  z-index: 1;
+  padding: 0.4rem 0.5rem !important;
+  border-radius: 1rem;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.25s ease, text-shadow 0.25s ease;
+}
+.dock-bar-item i {
+  filter: drop-shadow(0 1px 1px rgba(255,255,255,0.4)) drop-shadow(0 -1px 1px rgba(0,0,0,0.15));
+}
+[data-theme="dark"] .dock-bar-item i {
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,0.4)) drop-shadow(0 -1px 0 rgba(255,255,255,0.08));
+}
+.dock-bar-item.active,
+.dock-bar-item:hover {
+  transform: translateY(-6px) scale(1.15);
+  color: var(--color-accent) !important;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--color-accent) 60%, transparent);
+}
+.dock-bar-item.active i,
+.dock-bar-item:hover i {
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--color-accent) 70%, transparent));
+}
+
+/* Center button: raised glowing squircle, not a full circle */
+.dock-center-btn {
+  width: 3.8rem !important;
+  height: 3.8rem !important;
+  border-radius: 1.35rem !important;
+  bottom: 1.3rem !important;
+  background: linear-gradient(155deg, rgba(255,255,255,0.55), var(--color-accent) 55%, color-mix(in srgb, var(--color-accent) 65%, black) 100%) !important;
+  border: 1.5px solid rgba(255,255,255,0.6) !important;
+  box-shadow:
+    0 10px 28px color-mix(in srgb, var(--color-accent) 55%, transparent),
+    0 0 0 6px color-mix(in srgb, var(--color-accent) 12%, transparent),
+    inset 0 3px 6px rgba(255,255,255,0.55),
+    inset 0 -4px 8px rgba(0,0,0,0.18) !important;
+  animation: dockPulseGlow 2.4s ease-in-out infinite;
+}
+@keyframes dockPulseGlow {
+  0%, 100% {
+    box-shadow:
+      0 10px 28px color-mix(in srgb, var(--color-accent) 55%, transparent),
+      0 0 0 6px color-mix(in srgb, var(--color-accent) 12%, transparent),
+      inset 0 3px 6px rgba(255,255,255,0.55),
+      inset 0 -4px 8px rgba(0,0,0,0.18);
+  }
+  50% {
+    box-shadow:
+      0 10px 32px color-mix(in srgb, var(--color-accent) 70%, transparent),
+      0 0 0 11px color-mix(in srgb, var(--color-accent) 18%, transparent),
+      inset 0 3px 6px rgba(255,255,255,0.6),
+      inset 0 -4px 8px rgba(0,0,0,0.18);
+  }
+}
+.dock-center-btn.open {
+  transform: rotate(135deg) scale(1.08) !important;
+  border-radius: 50% !important;
+}
+.dock-center-btn:active { transform: scale(0.9) !important; }
+
+/* ===================================================
+   DOCK v3 — 3D bezel icons, beam-glow active indicator,
+   glowing squircle center button
+=================================================== */
+
+/* Beam of light shooting up from the active/hovered icon */
+.dock-beam {
+  position: absolute;
+  top: -0.5rem;
+  height: 3.2rem;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, var(--color-accent) 0%, transparent 90%);
+  filter: blur(2px);
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.35s ease, opacity 0.25s ease;
+  z-index: 0;
+  pointer-events: none;
+}
+.dock-beam::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 60%; height: 3px;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  box-shadow: 0 0 10px 3px color-mix(in srgb, var(--color-accent) 80%, transparent);
+}
+
+/* 3D embossed icon buttons */
+.dock-bar-item {
+  position: relative;
+  z-index: 1;
+  padding: 0.4rem 0.5rem !important;
+  border-radius: 1rem;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.25s ease, text-shadow 0.25s ease;
+}
+.dock-bar-item i {
+  filter: drop-shadow(0 1px 1px rgba(255,255,255,0.4)) drop-shadow(0 -1px 1px rgba(0,0,0,0.15));
+}
+[data-theme="dark"] .dock-bar-item i {
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,0.4)) drop-shadow(0 -1px 0 rgba(255,255,255,0.08));
+}
+.dock-bar-item.active,
+.dock-bar-item:hover {
+  transform: translateY(-6px) scale(1.15);
+  color: var(--color-accent) !important;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--color-accent) 60%, transparent);
+}
+.dock-bar-item.active i,
+.dock-bar-item:hover i {
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--color-accent) 70%, transparent));
+}
+
+/* Center button: raised glowing squircle, not a full circle */
+.dock-center-btn {
+  width: 3.8rem !important;
+  height: 3.8rem !important;
+  border-radius: 1.35rem !important;
+  bottom: 1.3rem !important;
+  background: linear-gradient(155deg, rgba(255,255,255,0.55), var(--color-accent) 55%, color-mix(in srgb, var(--color-accent) 65%, black) 100%) !important;
+  border: 1.5px solid rgba(255,255,255,0.6) !important;
+  box-shadow:
+    0 10px 28px color-mix(in srgb, var(--color-accent) 55%, transparent),
+    0 0 0 6px color-mix(in srgb, var(--color-accent) 12%, transparent),
+    inset 0 3px 6px rgba(255,255,255,0.55),
+    inset 0 -4px 8px rgba(0,0,0,0.18) !important;
+  animation: dockPulseGlow 2.4s ease-in-out infinite;
+}
+@keyframes dockPulseGlow {
+  0%, 100% {
+    box-shadow:
+      0 10px 28px color-mix(in srgb, var(--color-accent) 55%, transparent),
+      0 0 0 6px color-mix(in srgb, var(--color-accent) 12%, transparent),
+      inset 0 3px 6px rgba(255,255,255,0.55),
+      inset 0 -4px 8px rgba(0,0,0,0.18);
+  }
+  50% {
+    box-shadow:
+      0 10px 32px color-mix(in srgb, var(--color-accent) 70%, transparent),
+      0 0 0 11px color-mix(in srgb, var(--color-accent) 18%, transparent),
+      inset 0 3px 6px rgba(255,255,255,0.6),
+      inset 0 -4px 8px rgba(0,0,0,0.18);
+  }
+}
+.dock-center-btn.open {
+  transform: rotate(135deg) scale(1.08) !important;
+  border-radius: 50% !important;
+}
+.dock-center-btn:active { transform: scale(0.9) !important; }
+
+/* ===================================================
+   WHEEL FIX — wider arc radius, smaller bubbles so 7
+   items fit without overlapping labels or the dock bar
+=================================================== */
+.dock-wheel-item {
+  width: 3rem !important;
+  height: 3rem !important;
+}
+.dock-wheel-label {
+  font-size: 0.5rem !important;
+}
+@keyframes bubblePopWide {
+  0% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(0) rotate(calc(-1 * var(--angle))) scale(0); opacity: 0; }
+  60% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(7.4rem) rotate(calc(-1 * var(--angle))) scale(1.1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(7rem) rotate(calc(-1 * var(--angle))) scale(1); opacity: 1; }
+}
+
+/* Only the actual current page glows teal — not every open bubble */
+.dock-wheel-item:not(.active) {
+  background: rgba(255,255,255,0.5) !important;
+  color: #2a2a2a !important;
+}
+[data-theme="dark"] .dock-wheel-item:not(.active) {
+  background: rgba(255,255,255,0.12) !important;
+  color: #f0f0f0 !important;
+}
+
+/* ===================================================
+   FORCE GLOW — guaranteed final override, in case
+   earlier dock rules are still winning somehow
+=================================================== */
+.dock-center-btn {
+  border-radius: 1.35rem !important;
+  animation: dockPulseGlow 2.4s ease-in-out infinite !important;
+}
+.dock-bar-item.active,
+.dock-bar-item:hover {
+  transform: translateY(-6px) scale(1.15) !important;
+  color: var(--color-accent) !important;
+}
+
+/* ===================================================
+   DOCK v3 — 3D bezel icons, beam-glow active indicator,
+   glowing squircle center button
+=================================================== */
+
+/* Beam of light shooting up from the active/hovered icon */
+.dock-beam {
+  position: absolute;
+  top: -0.5rem;
+  height: 3.2rem;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, var(--color-accent) 0%, transparent 90%);
+  filter: blur(2px);
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.35s ease, opacity 0.25s ease;
+  z-index: 0;
+  pointer-events: none;
+}
+.dock-beam::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 60%; height: 3px;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  box-shadow: 0 0 10px 3px color-mix(in srgb, var(--color-accent) 80%, transparent);
+}
+
+/* 3D embossed icon buttons */
+.dock-bar-item {
+  position: relative;
+  z-index: 1;
+  padding: 0.4rem 0.5rem !important;
+  border-radius: 1rem;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.25s ease, text-shadow 0.25s ease;
+}
+.dock-bar-item i {
+  filter: drop-shadow(0 1px 1px rgba(255,255,255,0.4)) drop-shadow(0 -1px 1px rgba(0,0,0,0.15));
+}
+[data-theme="dark"] .dock-bar-item i {
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,0.4)) drop-shadow(0 -1px 0 rgba(255,255,255,0.08));
+}
+.dock-bar-item.active,
+.dock-bar-item:hover {
+  transform: translateY(-6px) scale(1.15);
+  color: var(--color-accent) !important;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--color-accent) 60%, transparent);
+}
+.dock-bar-item.active i,
+.dock-bar-item:hover i {
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--color-accent) 70%, transparent));
+}
+
+/* Center button: raised glowing squircle, not a full circle */
+.dock-center-btn {
+  width: 3.8rem !important;
+  height: 3.8rem !important;
+  border-radius: 1.35rem !important;
+  bottom: 1.3rem !important;
+  background: linear-gradient(155deg, rgba(255,255,255,0.55), var(--color-accent) 55%, color-mix(in srgb, var(--color-accent) 65%, black) 100%) !important;
+  border: 1.5px solid rgba(255,255,255,0.6) !important;
+  box-shadow:
+    0 10px 28px color-mix(in srgb, var(--color-accent) 55%, transparent),
+    0 0 0 6px color-mix(in srgb, var(--color-accent) 12%, transparent),
+    inset 0 3px 6px rgba(255,255,255,0.55),
+    inset 0 -4px 8px rgba(0,0,0,0.18) !important;
+  animation: dockPulseGlow 2.4s ease-in-out infinite;
+}
+@keyframes dockPulseGlow {
+  0%, 100% {
+    box-shadow:
+      0 10px 28px color-mix(in srgb, var(--color-accent) 55%, transparent),
+      0 0 0 6px color-mix(in srgb, var(--color-accent) 12%, transparent),
+      inset 0 3px 6px rgba(255,255,255,0.55),
+      inset 0 -4px 8px rgba(0,0,0,0.18);
+  }
+  50% {
+    box-shadow:
+      0 10px 32px color-mix(in srgb, var(--color-accent) 70%, transparent),
+      0 0 0 11px color-mix(in srgb, var(--color-accent) 18%, transparent),
+      inset 0 3px 6px rgba(255,255,255,0.6),
+      inset 0 -4px 8px rgba(0,0,0,0.18);
+  }
+}
+.dock-center-btn.open {
+  transform: rotate(135deg) scale(1.08) !important;
+  border-radius: 50% !important;
+}
+.dock-center-btn:active { transform: scale(0.9) !important; }
+
+/* ===================================================
+   WATER SCENE — registration page background
+=================================================== */
+.water-scene {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #cfe8f0 0%, #7fb8c9 35%, #2e6b85 70%, #164a5f 100%) !important;
+}
+[data-theme="dark"] .water-scene {
+  background: linear-gradient(180deg, #0d2530 0%, #123244 35%, #0a1e2b 70%, #05121b 100%) !important;
+}
+
+.water-surface {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(100deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 2px, transparent 2px, transparent 40px),
+    repeating-linear-gradient(80deg, rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 60px);
+  animation: waterRipple 12s linear infinite;
+  opacity: 0.6;
+}
+@keyframes waterRipple {
+  0% { background-position: 0 0, 0 0; }
+  100% { background-position: 200px 100px, -150px 80px; }
+}
+
+.bubble {
+  position: absolute;
+  bottom: -40px;
+  width: 10px; height: 10px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9), rgba(255,255,255,0.15) 70%);
+  animation: bubbleRise 6s ease-in infinite;
+  opacity: 0;
+}
+.bubble:nth-child(odd) { width: 6px; height: 6px; }
+.bubble:nth-child(3n) { width: 14px; height: 14px; }
+@keyframes bubbleRise {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  10% { opacity: 0.8; }
+  90% { opacity: 0.4; }
+  100% { transform: translateY(-110vh) translateX(20px); opacity: 0; }
+}
+
+.water-scene .auth-card {
+  box-shadow:
+    0 30px 70px rgba(0,20,30,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.6) !important;
+}
+
+/* ===================================================
+   TEAM SYSTEM REMOVED — neutralize all data-team rules
+=================================================== */
+[data-team="boys"], [data-team="girls"] {
+  all: unset !important;
+  display: contents !important;
+}
+
+/* ===================================================
+   PERSONAL ACCENT COLOR — set inline per-user in layout
+=================================================== */
+[style*="--user-accent"] {
+  --color-accent: var(--user-accent) !important;
+}
+
+/* ===================================================
+   SITE FOOTER — glass, consistent across every page
+=================================================== */
+.site-footer {
+  position: relative;
+  z-index: 2;
+  margin-top: 3rem;
+  padding: 2rem 1.5rem;
+}
+@media (min-width: 768px) {
+  body:has(.app-sidebar-wrap) .site-footer {
+    margin-left: 340px;
+  }
+}
+@media (max-width: 767px) {
+  .site-footer { padding-bottom: 8rem; }
+}
+.site-footer-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+[data-theme="dark"] .site-footer-inner {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.site-footer-links {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 0.85rem;
+}
+.site-footer-links a { color: var(--color-muted); }
+.site-footer-links a:hover { color: var(--color-accent); }
+
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+@media (max-width: 500px) {
+  .quick-grid { grid-template-columns: repeat(3, 1fr); }
+}
+.quick-grid-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0.5rem;
+  border-radius: 1.25rem;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.4);
+  text-decoration: none;
+  color: var(--color-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}
+[data-theme="dark"] .quick-grid-item {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.quick-grid-icon {
+  width: 2.6rem; height: 2.6rem;
+  border-radius: 9999px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ===================================================
+   SLIDING BALANCE CARD CAROUSEL — glass, 3 colors
+=================================================== */
+.balance-carousel { position: relative; }
+.balance-carousel-track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  gap: 1rem;
+  scrollbar-width: none;
+}
+.balance-carousel-track::-webkit-scrollbar { display: none; }
+
+.balance-carousel .balance-card {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  max-width: 100% !important;
+}
+
+.balance-card-1 {
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 2px, transparent 2px, transparent 14px),
+    linear-gradient(150deg, #1a1f3d 0%, #2a2560 45%, #4c3fd9 100%) !important;
+}
+.balance-card-2 {
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 2px, transparent 2px, transparent 14px),
+    linear-gradient(150deg, #0d3b3d 0%, #0f5c60 45%, #14b8a6 100%) !important;
+  color: white !important;
+}
+.balance-card-3 {
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 2px, transparent 2px, transparent 14px),
+    linear-gradient(150deg, #3d1a35 0%, #6b2560 45%, #d93fb0 100%) !important;
+  color: white !important;
+}
+
+.balance-mini-chart {
+  width: 100%;
+  height: 40px;
+  margin-top: 0.5rem;
+  opacity: 0.9;
+}
+
+.balance-carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+}
+.balance-carousel-dots .dot {
+  width: 6px; height: 6px;
+  border-radius: 9999px;
+  background: rgba(120,120,130,0.35);
+  cursor: pointer;
+  transition: width 0.25s ease, background 0.25s ease;
+}
+.balance-carousel-dots .dot.active {
+  width: 20px;
+  background: var(--color-accent);
+}
+
+/* ===================================================
+   FINAL FORCE: water scene bubbles + ripple, guaranteed
+   to win over any later background override
+=================================================== */
+.water-scene.auth-scene {
+  background: linear-gradient(180deg, #cfe8f0 0%, #7fb8c9 35%, #2e6b85 70%, #164a5f 100%) !important;
+}
+[data-theme="dark"] .water-scene.auth-scene {
+  background: linear-gradient(180deg, #0d2530 0%, #123244 35%, #0a1e2b 70%, #05121b 100%) !important;
+}
+.water-scene .water-surface {
+  display: block !important;
+  opacity: 0.6 !important;
+}
+.water-scene .bubble {
+  display: block !important;
+  animation: bubbleRise 6s ease-in infinite !important;
+}
+
+/* ===================================================
+   GUEST BROWSING SHELL — landing-style nav, not app UI
+=================================================== */
+.guest-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(255,255,255,0.4);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(255,255,255,0.4);
+}
+[data-theme="dark"] .guest-topbar {
+  background: rgba(10,10,15,0.55);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.guest-cta-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-align: center;
+  font-size: 0.8rem;
+  padding: 0.6rem 1rem;
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  color: var(--color-text);
+}
+.guest-cta-banner a { color: var(--color-accent); font-weight: 600; text-decoration: underline; }
+
+/* When guest nav is active, content shouldn't have sidebar margin */
+body:has(.guest-topbar) main {
+  margin-left: 0 !important;
+  max-width: 100% !important;
+}
+
+.merchant-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-accent) 18%, transparent);
+  color: var(--color-accent);
+  vertical-align: middle;
+  margin-left: 0.4rem;
+}
+
+/* ===================================================
+   DESKTOP OVERFLOW FIX — content must shrink to fit
+   available width, not overflow past the sidebar
+=================================================== */
+html, body {
+  overflow-x: hidden !important;
+}
+@media (min-width: 768px) {
+  body:has(.app-sidebar-wrap) main {
+    width: calc(100vw - 380px) !important;
+    max-width: 1400px !important;
+    box-sizing: border-box !important;
+  }
+}
+* {
+  box-sizing: border-box;
+}
+.grid, .flex {
+  min-width: 0;
+}
+
+.scrollable-feed {
+  max-height: 260px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+.scrollable-feed::-webkit-scrollbar { width: 4px; }
+.scrollable-feed::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.25);
+  border-radius: 9999px;
+}
+
+/* ===================================================
+   TIKTOK-STYLE REEL FEED
+=================================================== */
+.reel-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 420px;
+  margin: 0 auto;
+  max-height: 640px;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 1.75rem;
+  padding: 0.5rem;
+}
+.reel-feed::-webkit-scrollbar { width: 4px; }
+.reel-feed::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.25); border-radius: 9999px; }
+
+.reel-card {
+  position: relative;
+  scroll-snap-align: start;
+  min-height: 560px;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-color: #16181d;
+  flex-shrink: 0;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+}
+
+.reel-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.reel-overlay {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 1.5rem;
+  background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 55%, transparent 100%);
+  z-index: 2;
+}
+
+/* Gig reel cards get a color gradient background since no photo exists yet */
+.reel-card-gig {
+  background: linear-gradient(155deg, #1a1f3d 0%, #2a2560 45%, #4c3fd9 100%);
+}
+
+/* Swipe-up hint on first card */
+.reel-feed .reel-card:first-child::before {
+  content: "";
+  position: absolute;
+  bottom: 1rem; left: 50%;
+  transform: translateX(-50%);
+  width: 40px; height: 5px;
+  border-radius: 9999px;
+  background: rgba(255,255,255,0.6);
+  z-index: 3;
+  animation: swipeHint 1.8s ease-in-out infinite;
+}
+@keyframes swipeHint {
+  0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.6; }
+  50% { transform: translateX(-50%) translateY(-10px); opacity: 1; }
+}
+
+/* Fade/scale entrance as cards scroll into view */
+@supports (animation-timeline: view()) {
+  .reel-card {
+    animation: reelEntrance linear;
+    animation-timeline: view();
+    animation-range: entry 0% cover 30%;
+  }
+  @keyframes reelEntrance {
+    from { opacity: 0.4; transform: scale(0.94); }
+    to { opacity: 1; transform: scale(1); }
+  }
+}
+
+.mobile-nav-drawer {
+  position: fixed;
+  top: 0; right: -100%;
+  width: 78%; max-width: 320px;
+  height: 100vh;
+  background: var(--color-bg, #0b0b14);
+  border-left: 1px solid rgba(255,255,255,0.08);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 5rem 1.5rem 2rem;
+  transition: right 0.3s ease;
+}
+.mobile-nav-drawer.open { right: 0; }
+.mobile-nav-drawer a {
+  padding: 0.85rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: 0.95rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ===================================================
+   CARD-ON-WATER: droplets falling off the auth card
+   into the surface below it
+=================================================== */
+.water-scene {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+.water-scene .auth-card {
+  position: relative;
+  z-index: 3;
+  animation: cardFloat 5s ease-in-out infinite;
+}
+@keyframes cardFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Reflection glow under the card, on the water */
+.water-scene .auth-card::after {
+  content: "";
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: -18px;
+  height: 14px;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.35) 0%, transparent 75%);
+  filter: blur(4px);
+  z-index: -1;
+  animation: reflectionPulse 5s ease-in-out infinite;
+}
+@keyframes reflectionPulse {
+  0%, 100% { opacity: 0.5; transform: scaleX(1); }
+  50% { opacity: 0.8; transform: scaleX(0.92); }
+}
+
+/* Droplets falling from the card's bottom edge */
+.droplet {
+  position: absolute;
+  bottom: 50%;
+  width: 5px;
+  height: 8px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95), rgba(180,220,235,0.5) 70%);
+  opacity: 0;
+  z-index: 2;
+  animation: dropletFall 2.6s ease-in infinite;
+}
+@keyframes dropletFall {
+  0% { transform: translateY(0) scale(1); opacity: 0; }
+  8% { opacity: 0.9; }
+  70% { opacity: 0.7; }
+  100% { transform: translateY(140px) scale(0.4); opacity: 0; }
+}
+
+/* Small ripple ring where each droplet lands */
+.droplet-ripple {
+  position: absolute;
+  bottom: calc(50% - 145px);
+  width: 20px;
+  height: 8px;
+  border: 1px solid rgba(255,255,255,0.5);
+  border-radius: 50%;
+  opacity: 0;
+  z-index: 1;
+  animation: rippleExpand 2.6s ease-out infinite;
+}
+@keyframes rippleExpand {
+  0%, 65% { opacity: 0; transform: scale(0.3); }
+  75% { opacity: 0.6; }
+  100% { opacity: 0; transform: scale(2.2); }
+}
+
+/* ===================================================
+   REAL OCEAN PHOTO — replaces the gradient placeholder,
+   with a dark gradient overlay for text legibility
+   (matches the reference: photo left, frosted card right)
+=================================================== */
+.water-scene {
+  background-image:
+    linear-gradient(115deg, rgba(5,15,25,0.55) 0%, rgba(5,15,25,0.25) 45%, rgba(5,15,25,0.15) 100%),
+    url('/images/ocean.jpg') !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+[data-theme="dark"] .water-scene {
+  background-image:
+    linear-gradient(115deg, rgba(2,8,14,0.75) 0%, rgba(2,8,14,0.5) 45%, rgba(2,8,14,0.3) 100%),
+    url('/images/ocean.jpg') !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+.water-scene.auth-scene {
+  background-image:
+    linear-gradient(115deg, rgba(5,15,25,0.55) 0%, rgba(5,15,25,0.25) 45%, rgba(5,15,25,0.15) 100%),
+    url('/images/ocean.jpg') !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+/* Frosted glass card, matching the reference's translucent panel */
+.water-scene .auth-card {
+  background: rgba(255,255,255,0.14) !important;
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid rgba(255,255,255,0.25) !important;
+  color: #fff;
+}
+.water-scene .auth-card label,
+.water-scene .auth-card p,
+.water-scene .auth-card h1 {
+  color: #fff !important;
+}
+.water-scene .auth-card .glass-input {
+  background: rgba(255,255,255,0.12) !important;
+  border: 1px solid rgba(255,255,255,0.3) !important;
+  color: #fff !important;
+}
+.water-scene .auth-card .glass-input::placeholder {
+  color: rgba(255,255,255,0.6) !important;
+}
+
+/* Stronger float + shadow so the card visibly sits above the water */
+.water-scene .auth-card {
+  animation: cardFloatDeep 6s ease-in-out infinite;
+  box-shadow:
+    0 40px 90px rgba(0,10,20,0.5),
+    0 10px 30px rgba(0,10,20,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.3) !important;
+}
+@keyframes cardFloatDeep {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(0.3deg); }
+}

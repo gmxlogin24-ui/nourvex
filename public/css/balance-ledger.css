@@ -1,0 +1,551 @@
+.ledger-card{
+  position:relative; overflow:hidden; border-radius:1.75rem; padding:0 !important;
+  background:linear-gradient(160deg,#0c0c11 0%,#171319 55%,#1f1620 100%) !important;
+  box-shadow:0 24px 50px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+  color:#f5f3ee; touch-action:pan-y;
+}
+.ledger-glow{
+  position:absolute; top:-60px; right:-60px; width:220px; height:220px; border-radius:50%;
+  background:radial-gradient(circle, color-mix(in srgb, var(--color-accent,#ff5b2e) 35%, transparent), transparent 70%);
+  filter:blur(10px); pointer-events:none;
+}
+.ledger-track{ display:flex; cursor:grab; }
+.ledger-track:active{ cursor:grabbing; }
+.ledger-page{ flex:0 0 100%; padding:1.75rem; }
+.ledger-top{ display:flex; align-items:center; gap:8px; }
+.ledger-pulse{ width:7px; height:7px; border-radius:50%; background:var(--color-accent,#ff5b2e); box-shadow:0 0 8px var(--color-accent,#ff5b2e); }
+.ledger-eyebrow{ font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; opacity:.6; }
+.ledger-value{ font-family:'Unbounded',sans-serif; font-size:2.1rem; font-weight:700; letter-spacing:-.02em; font-variant-numeric:tabular-nums; margin-top:.4rem; }
+.ledger-spark{ width:100%; height:34px; margin-top:.6rem; }
+.ledger-spark polyline{ fill:none; stroke:var(--color-accent,#ff5b2e); stroke-width:2; vector-effect:non-scaling-stroke; }
+.ledger-caption{ font-size:.75rem; opacity:.55; margin-top:.6rem; }
+.ledger-dots{ display:flex; gap:6px; justify-content:center; padding-bottom:1rem; }
+.ledger-dots span{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.2); transition:background .25s; }
+.ledger-dots span.active{ background:var(--color-accent,#ff5b2e); }
+
+/* ===== Ledger card — 3D folder treatment (v2, opaque + depth) ===== */
+.ledger-folder{
+  overflow: visible !important;
+  position: relative;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+.ledger-folder .folder-back{
+  position: absolute;
+  inset: 0;
+  border-radius: 1.25rem;
+  background: linear-gradient(160deg, #3c3c42 0%, #1a1a1d 55%, #060607 100%);
+  box-shadow:
+    0 30px 55px -12px rgba(0,0,0,.65),
+    0 10px 18px rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(255,255,255,.09);
+  z-index: 1;
+}
+.ledger-folder .folder-back::before{
+  content:"";
+  position:absolute; inset:0;
+  border-radius: inherit;
+  background: radial-gradient(120% 90% at 15% 0%, rgba(255,255,255,.16), transparent 55%);
+  pointer-events:none;
+}
+.ledger-folder .folder-tab{
+  position: absolute;
+  top: -13px; left: 22px;
+  width: 72px; height: 19px;
+  background: linear-gradient(160deg, #3c3c42, #1a1a1d);
+  border-radius: 9px 9px 0 0;
+  box-shadow: 0 -3px 8px rgba(0,0,0,.35);
+  z-index: 0;
+}
+.ledger-folder .folder-stack-edge{
+  position: absolute;
+  left: 12px; right: 12px; bottom: 30px;
+  height: 48%;
+  border-radius: 1.05rem;
+  background: linear-gradient(150deg, #4a4a50, #232326);
+  transform: translateY(6px) scale(.965);
+  box-shadow: 0 10px 20px rgba(0,0,0,.4);
+  z-index: 2;
+  pointer-events: none;
+}
+.folder-card-slot{
+  position: relative;
+  z-index: 6;
+  transform: translateY(70px);
+  transition: transform .5s cubic-bezier(.22,1,.36,1), filter .5s ease;
+  filter: drop-shadow(0 14px 22px rgba(0,0,0,.45));
+}
+.ledger-folder.is-peek .folder-card-slot{ transform: translateY(24px) scale(1.015); }
+.ledger-folder.is-open .folder-card-slot{
+  transform: translateY(-52px) scale(1.035);
+  transition: transform .9s cubic-bezier(.16,1,.3,1), filter .9s ease;
+  z-index: 20;
+  filter: drop-shadow(0 32px 46px rgba(0,0,0,.6));
+}
+.folder-front{
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 56%;
+  z-index: 10;
+  background: linear-gradient(168deg, #616168 0%, #2b2b2f 60%, #101012 100%);
+  clip-path: polygon(0% 32%, 100% 6%, 100% 100%, 0% 100%);
+  border-radius: 0 0 1.25rem 1.25rem;
+  box-shadow:
+    0 -1px 0 rgba(255,255,255,.10) inset,
+    0 22px 34px -8px rgba(0,0,0,.55);
+  transition: opacity .5s ease, filter .5s ease;
+}
+.folder-front::before{
+  content:"";
+  position:absolute; inset:0;
+  clip-path: inherit;
+  background: linear-gradient(115deg, rgba(255,255,255,.14), transparent 45%);
+  pointer-events:none;
+}
+.ledger-folder.is-open .folder-front{ opacity: .65; filter: brightness(.8); }
+.ledger-folder .ledger-dots{ position: relative; z-index: 25; }
+
+/* ===== Ledger card — v3: real bank-card face + deeper tuck ===== */
+.ledger-page{
+  position: relative;
+  aspect-ratio: 1.586 / 1;
+  border-radius: 1.1rem;
+  padding: 1.3rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: .55rem;
+  color: #fff;
+  overflow: hidden;
+  background: linear-gradient(150deg, #57575e 0%, #232327 55%, #0a0a0b 100%);
+  box-shadow: 0 18px 30px -8px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.14);
+}
+.ledger-page::after{
+  content:"";
+  position:absolute; inset:0;
+  background: linear-gradient(120deg, rgba(255,255,255,.20), transparent 42%);
+  pointer-events:none;
+}
+.ledger-card-brand{
+  position:absolute; top:1.3rem; right:1.4rem;
+  font-family:'Unbounded',sans-serif; font-weight:700;
+  font-size:.72rem; letter-spacing:.14em; opacity:.85;
+}
+.ledger-chip-row{ display:flex; align-items:center; gap:12px; margin-top:.15rem; }
+.ledger-chip{
+  width:32px; height:23px; border-radius:5px; position:relative;
+  background: linear-gradient(155deg,#f4e7c1,#c9a86a);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.15);
+}
+.ledger-chip::before,.ledger-chip::after{ content:""; position:absolute; left:5px; right:5px; height:1px; background:rgba(0,0,0,.35); }
+.ledger-chip::before{ top:7px; } .ledger-chip::after{ top:14px; }
+.ledger-contactless{ opacity:.9; transform:rotate(90deg); }
+.ledger-page .ledger-top{ margin-top:.1rem; }
+.ledger-page .ledger-value{ margin-top:.15rem; }
+.ledger-bottom-row{
+  margin-top:auto;
+  display:flex; align-items:flex-end; justify-content:space-between; gap:.75rem;
+}
+.ledger-card-mask{
+  font-family:'Unbounded',sans-serif; font-size:.72rem; letter-spacing:.14em; opacity:.85;
+}
+.ledger-bottom-row .ledger-caption{ margin-top:0; opacity:.75; }
+.ledger-page .ledger-spark{ opacity:.4; }
+
+/* Deeper tuck so the card visibly meets/overlaps the flap, balance shown by default */
+.folder-card-slot{ transform: translateY(52px); }
+.ledger-folder.is-peek .folder-card-slot{ transform: translateY(14px) scale(1.015); }
+.ledger-folder.is-open .folder-card-slot{ transform: translateY(-58px) scale(1.04); }
+.folder-front{ height: 40%; }
+
+/* ===== Ledger card — v4: kill the leftover purple override + contain the glow ===== */
+#ledgerCard.ledger-folder{
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+.folder-glow-clip{
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+}
+.folder-glow-clip .ledger-glow{ opacity: .5; }
+
+/* ===== Ledger card — v5: stacked deck + metallic faces + smaller footprint ===== */
+.ledger-track{ display:block !important; position:relative; cursor:default; }
+.folder-card-slot{ max-width:84%; margin:0 auto; }
+.ledger-page{
+  position:absolute !important;
+  inset:0;
+  flex:none !important;
+  transform-origin:center bottom;
+  cursor:pointer;
+  background: linear-gradient(155deg, #6f6f76 0%, #2b2b2f 45%, #050506 100%) !important;
+}
+.ledger-page::before{
+  content:"";
+  position:absolute; inset:0;
+  border-radius:inherit;
+  background: repeating-linear-gradient(115deg, rgba(255,255,255,.07) 0px, rgba(255,255,255,.07) 2px, transparent 2px, transparent 7px);
+  mix-blend-mode: overlay;
+  pointer-events:none;
+}
+.ledger-page::after{
+  background: linear-gradient(120deg, rgba(255,255,255,.30), transparent 38%) !important;
+}
+.ledger-chip{ background: linear-gradient(155deg,#e9e9ec,#9a9aa2) !important; }
+
+/* ===== Ledger card — v6: taller wrapper + distinct per-card gradients ===== */
+#ledgerCard.ledger-folder{ min-height: 260px; }
+@media (min-width: 641px){
+  .kpi-row{ grid-template-rows: minmax(150px,1fr) minmax(150px,1fr) !important; }
+}
+.ledger-page{ background: linear-gradient(160deg, #ff8145 0%, #7a2c0a 45%, #050506 100%) !important; }
+.ledger-page[data-tint="blue"]{ background: linear-gradient(160deg, #3c7bff 0%, #0d1f5c 45%, #050506 100%) !important; }
+.ledger-page[data-tint="green"]{ background: linear-gradient(160deg, #34d17a 0%, #0a3d1f 45%, #050506 100%) !important; }
+
+/* ===== Ledger card — v7: real height fix, remove stray decoration, slower motion ===== */
+.folder-stack-edge{ display:none !important; }
+
+.folder-card-slot{
+  height: clamp(190px, 48vw, 240px) !important;
+  transform: translateY(66px);
+  transition: transform .9s cubic-bezier(.22,1,.36,1), filter .9s ease;
+}
+.ledger-track{ height: 100% !important; }
+.ledger-page{
+  height: 100% !important;
+  width: 100% !important;
+  aspect-ratio: auto !important;
+}
+.ledger-folder.is-peek .folder-card-slot{ transform: translateY(18px) scale(1.015); }
+.ledger-folder.is-open .folder-card-slot{
+  transform: translateY(-84px) scale(1.04);
+  transition: transform 1.4s cubic-bezier(.16,1,.3,1), filter 1.4s ease;
+}
+#ledgerCard.ledger-folder{ min-height: 320px; }
+.folder-front{ transition: opacity .9s ease; }
+
+/* ===== Ledger card — v8: correct height, curved pocket edge, inner shadow ===== */
+#ledgerCard.ledger-folder{ min-height: 240px; }
+.folder-card-slot{
+  height: clamp(150px, 38vw, 190px) !important;
+  transform: translateY(52px);
+}
+.ledger-folder.is-peek .folder-card-slot{ transform: translateY(10px) scale(1.015); }
+.ledger-folder.is-open .folder-card-slot{ transform: translateY(-62px) scale(1.04); }
+
+.folder-back{
+  box-shadow:
+    0 30px 55px -12px rgba(0,0,0,.65),
+    0 10px 18px rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(255,255,255,.09),
+    inset 0 46px 42px -18px rgba(0,0,0,.72) !important;
+}
+
+.folder-front{
+  clip-path: none !important;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0,0 C20,24 80,24 100,0 L100,100 L0,100 Z' fill='black'/%3E%3C/svg%3E");
+  -webkit-mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0,0 C20,24 80,24 100,0 L100,100 L0,100 Z' fill='black'/%3E%3C/svg%3E");
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  height: 58% !important;
+}
+.folder-front::before{ clip-path: none !important; }
+
+/* ===== Ledger card — v9: -10% size, wallet texture, edge thickness, reflection sweep ===== */
+#ledgerCard.ledger-folder{ min-height: 216px !important; }
+.folder-card-slot{
+  height: clamp(135px, 34vw, 171px) !important;
+  max-width: 76% !important;
+  transform: translateY(46px);
+}
+.ledger-folder.is-peek .folder-card-slot{ transform: translateY(9px) scale(1.015); }
+.ledger-folder.is-open .folder-card-slot{ transform: translateY(-56px) scale(1.04); }
+
+.folder-back{
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.035) 0 2px, transparent 2px 6px),
+    repeating-linear-gradient(-45deg, rgba(0,0,0,.05) 0 2px, transparent 2px 6px),
+    linear-gradient(160deg, #3c3c42 0%, #1a1a1d 55%, #060607 100%) !important;
+  box-shadow:
+    0 30px 55px -12px rgba(0,0,0,.65),
+    0 10px 18px rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(255,255,255,.09),
+    inset 0 46px 42px -18px rgba(0,0,0,.72),
+    0 2px 0 #000, 0 4px 0 #050505, 0 6px 0 #0a0a0a !important;
+}
+.folder-front{
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.045) 0 2px, transparent 2px 6px),
+    repeating-linear-gradient(-45deg, rgba(0,0,0,.07) 0 2px, transparent 2px 6px),
+    linear-gradient(168deg, #616168 0%, #2b2b2f 60%, #101012 100%);
+  box-shadow:
+    0 -1px 0 rgba(255,255,255,.10) inset,
+    0 22px 34px -8px rgba(0,0,0,.55),
+    0 2px 0 rgba(0,0,0,.5), 0 4px 0 rgba(0,0,0,.35);
+}
+
+.ledger-page{
+  box-shadow:
+    0 18px 30px -8px rgba(0,0,0,.5),
+    inset 0 1px 0 rgba(255,255,255,.14),
+    0 3px 0 rgba(0,0,0,.55),
+    0 6px 0 rgba(0,0,0,.35);
+}
+.ledger-page::after{
+  background: linear-gradient(200deg, transparent 30%, rgba(255,255,255,.4) 48%, transparent 62%) !important;
+  background-size: 100% 260% !important;
+  background-position: 0 160% !important;
+  transition: background-position 1.5s ease !important;
+}
+.ledger-page.is-reflecting::after{ background-position: 0 -60% !important; }
+
+/* ===== Ledger card — v10: -15% size, cover-shadow, opaque embossed metallic text ===== */
+#ledgerCard.ledger-folder{ min-height: 184px !important; }
+.folder-card-slot{
+  height: clamp(114px, 29vw, 145px) !important;
+  max-width: 68% !important;
+  transform: translateY(40px);
+  position: relative;
+}
+.ledger-folder.is-peek .folder-card-slot{ transform: translateY(7px) scale(1.015); }
+.ledger-folder.is-open .folder-card-slot{ transform: translateY(-48px) scale(1.12); }
+
+/* shadow cast onto the card by the folder covering it, fades once fully out */
+.folder-card-slot::after{
+  content:"";
+  position:absolute; top:0; left:0; right:0; height:38%;
+  background: linear-gradient(180deg, rgba(0,0,0,.62), rgba(0,0,0,0));
+  border-radius: 14px 14px 0 0;
+  z-index: 40;
+  pointer-events: none;
+  transition: opacity .8s ease;
+}
+.ledger-folder.is-open .folder-card-slot::after{ opacity: 0; }
+
+/* fully opaque, dimmed (not transparent) background cards */
+.ledger-page{ opacity: 1 !important; }
+
+/* embossed metallic gold/silver text, consistent across all card tints */
+.ledger-page .ledger-value,
+.ledger-page .ledger-card-mask,
+.ledger-page .ledger-card-brand{
+  background: linear-gradient(180deg, #fff 0%, #ece6d2 40%, #b8ad8c 58%, #fff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 1px 0 rgba(0,0,0,.65);
+  filter: drop-shadow(0 1px 0 rgba(255,255,255,.2));
+}
+.ledger-page .ledger-eyebrow{ color: rgba(255,255,255,.7); }
+
+/* ===== Ledger card — v11: bigger cards inside a tighter folder, fix mobile height ===== */
+#ledgerCard.ledger-folder{ min-height: 230px !important; }
+.folder-card-slot{
+  height: clamp(170px, 46vw, 220px) !important;
+  max-width: 92% !important;
+  transform: translateY(34px);
+}
+.ledger-folder.is-peek .folder-card-slot{ transform: translateY(6px) scale(1.015); }
+.ledger-folder.is-open .folder-card-slot{ transform: translateY(-70px) scale(1.1); }
+
+@media (max-width: 640px){
+  #ledgerCard.ledger-folder{ min-height: 250px !important; }
+  .folder-card-slot{ height: clamp(185px, 54vw, 225px) !important; }
+}
+
+/* ===== Ledger card — v12: remove top cover-shadow, restore real thickness ===== */
+.folder-card-slot::after{ content: none !important; }
+
+.ledger-page{
+  box-shadow:
+    0 18px 30px -8px rgba(0,0,0,.5),
+    inset 0 1px 0 rgba(255,255,255,.22),
+    0 2px 0 rgba(255,255,255,.06),
+    0 4px 0 rgba(0,0,0,.55),
+    0 7px 0 rgba(0,0,0,.45),
+    0 10px 14px -4px rgba(0,0,0,.5) !important;
+}
+
+/* ===== Mobile-only crypto-wallet hero (replaces folder card under 641px) ===== */
+.mobile-wallet-hero{ display: none; }
+@media (max-width: 640px){
+  #ledgerCard.ledger-folder{ display: none !important; }
+  .mobile-wallet-hero{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: .4rem;
+    min-height: 58vh;
+    padding: 2rem 1.4rem 1.6rem;
+    border-radius: 2.25rem;
+    background: linear-gradient(145deg, #1e1e22 0%, #0c0c0e 100%);
+    box-shadow:
+      14px 14px 30px rgba(0,0,0,.55),
+      -8px -8px 22px rgba(255,255,255,.04),
+      inset 0 1px 0 rgba(255,255,255,.06);
+    color: #fff;
+    margin-bottom: 1.5rem;
+  }
+  .mwh-top{ margin-bottom: .5rem; }
+  .mwh-wallet-select{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:.85rem; color: rgba(255,255,255,.75);
+  }
+  .mwh-amount{
+    font-family:'Unbounded',sans-serif;
+    font-size: 2.4rem; font-weight: 700; letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .mwh-sub{ font-size:.8rem; color: rgba(255,255,255,.55); margin-bottom: .75rem; }
+  .mwh-actions{ display:flex; align-items:center; gap: .9rem; margin-bottom: 1.2rem; }
+  .mwh-pill{
+    display:flex; align-items:center; gap:6px;
+    padding: .6rem 1rem; border-radius: 999px;
+    background: linear-gradient(145deg, #242428, #131316);
+    box-shadow: 5px 5px 10px rgba(0,0,0,.5), -3px -3px 8px rgba(255,255,255,.04);
+    color:#fff; font-size:.78rem; font-weight:600;
+    text-decoration:none;
+  }
+  .mwh-plus{
+    display:flex; align-items:center; justify-content:center;
+    width: 48px; height:48px; border-radius:50%;
+    background: linear-gradient(145deg, #fdfdfd, #dcdcdc);
+    color:#111;
+    box-shadow: 5px 5px 12px rgba(0,0,0,.45), -3px -3px 8px rgba(255,255,255,.5);
+    flex-shrink:0;
+  }
+  .mwh-sync{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:.72rem; color: rgba(255,255,255,.6);
+    background: rgba(255,255,255,.06);
+    padding:.35rem .8rem; border-radius:999px;
+  }
+  .mwh-sync .live-dot{ width:6px; height:6px; }
+}
+
+/* ===== Ledger folder — desktop-only -25% size ===== */
+@media (min-width: 641px){
+  #ledgerCard.ledger-folder{ min-height: 173px !important; }
+  .folder-card-slot{
+    height: clamp(128px, 34.5vw, 165px) !important;
+    transform: translateY(26px);
+  }
+  .ledger-folder.is-peek .folder-card-slot{ transform: translateY(5px) scale(1.015); }
+  .ledger-folder.is-open .folder-card-slot{ transform: translateY(-53px) scale(1.1); }
+}
+
+/* dashboard-only: strip the mobile topbar pill down to just burger + avatar */
+@media (max-width: 640px){
+  body[data-page="dashboard"] .mobile-auth-topbar-pill{
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    justify-content: space-between;
+  }
+  body[data-page="dashboard"] .pill-brand{ display: none !important; }
+}
+
+/* mobile hero auto-cycle: label + dots */
+.mwh-cycle{ display:flex; flex-direction:column; align-items:center; gap:.2rem; }
+.mwh-label{ font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; opacity:.6; }
+.mwh-dots{ display:flex; gap:6px; margin-bottom:1rem; }
+.mwh-dots span{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.2); transition:background .25s; }
+.mwh-dots span.active{ background:#fff; }
+
+/* ===== v-final: topbar truly gone (kill the backdrop blur too), stylish welcome text ===== */
+@media (max-width: 640px){
+  body[data-page="dashboard"] .mobile-auth-topbar-pill{
+    background: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+  }
+  body[data-page="dashboard"] .pill-brand{ display: none !important; }
+
+  body[data-page="dashboard"] main > div:first-child{ margin-top: 54px; }
+  body[data-page="dashboard"] main > div:first-child h1{
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 600;
+    font-style: italic;
+    letter-spacing: -.01em;
+  }
+
+  /* hide desktop-position streak pill + sponsored ad; mobile-only copies show below hero instead */
+  .desktop-streak-pill{ display: none !important; }
+  #dashAdSlot{ display: none !important; }
+  .mobile-only-block{ display: block; margin-bottom: 1rem; }
+
+  /* more neumorphic hero + buttons */
+  .mobile-wallet-hero{
+    background: #18181b !important;
+    box-shadow:
+      10px 10px 22px rgba(0,0,0,.6),
+      -8px -8px 20px rgba(255,255,255,.05),
+      inset 0 0 0 1px rgba(255,255,255,.03) !important;
+  }
+  .mwh-plus{
+    box-shadow: 6px 6px 14px rgba(0,0,0,.5), -5px -5px 12px rgba(255,255,255,.55) !important;
+  }
+  .mwh-pill{
+    box-shadow: 5px 5px 12px rgba(0,0,0,.55), -4px -4px 10px rgba(255,255,255,.05) !important;
+  }
+}
+.mobile-only-block{ display: none; }
+
+/* hide the desktop-position plan pill on mobile (its duplicate now sits below the card) */
+@media (max-width: 640px){
+  .desktop-plan-pill{ display: none !important; }
+}
+
+/* ===== v-final3: reliable hide via id, tight top spacing, theme-proof card ===== */
+@media (max-width: 640px){
+  #dashboardWelcomeHeader{ display: none !important; }
+  body[data-page="dashboard"] main{ padding-top: 8px !important; }
+
+  .mwh-welcome{
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 600;
+    font-style: italic;
+    font-size: .95rem;
+    letter-spacing: -.01em;
+    margin-bottom: .3rem;
+    color: #fff !important;
+  }
+}
+
+/* card stays the same dark/metallic look regardless of site light/dark theme */
+.mobile-wallet-hero,
+[data-theme="dark"] .mobile-wallet-hero,
+[data-theme="light"] .mobile-wallet-hero{
+  background: #18181b !important;
+  color: #fff !important;
+}
+.mwh-welcome,
+.mwh-wallet-select,
+.mwh-label,
+.mwh-amount,
+.mwh-sub,
+.mwh-sync,
+[data-theme="dark"] .mwh-welcome,
+[data-theme="dark"] .mwh-wallet-select,
+[data-theme="dark"] .mwh-label,
+[data-theme="dark"] .mwh-amount,
+[data-theme="dark"] .mwh-sub,
+[data-theme="dark"] .mwh-sync{
+  color: #fff !important;
+}
+.mwh-plus{ background: linear-gradient(145deg, #fdfdfd, #dcdcdc) !important; color: #111 !important; }
+.mwh-pill{ background: linear-gradient(145deg, #242428, #131316) !important; color: #fff !important; }

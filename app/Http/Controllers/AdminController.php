@@ -1,0 +1,190 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use App\Models\Transaction;
+use App\Models\Gig;
+use App\Models\Listing;
+use App\Models\Subscription;
+use App\Models\News;
+use App\Models\Blog;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+
+class AdminController extends Controller
+{
+    private function guard()
+    {
+        abort_unless(Auth::user()->is_admin, 403);
+    }
+
+    public function index()
+    {
+        $this->guard();
+        $subStatusCounts = Subscription::selectRaw('status, COUNT(*) as total')->groupBy('status')->pluck('total', 'status');
+        $subMethodRevenue = Subscription::where('status', 'active')
+            ->selectRaw('payment_method, SUM(amount) as total')
+            ->groupBy('payment_method')
+            ->pluck('total', 'payment_method');
+
+        return view('admin.index', [
+            'userCount' => User::count(),
+            'bannedCount' => User::where('is_banned', true)->count(),
+            'tierCounts' => User::selectRaw('tier, COUNT(*) as total')->groupBy('tier')->pluck('total', 'tier'),
+            'totalWalletBalance' => User::sum('wallet_balance'),
+            'gigCount' => Gig::count(),
+            'openGigCount' => Gig::where('status', 'open')->count(),
+            'listingCount' => Listing::count(),
+            'newsCount' => News::count(),
+            'blogCount' => Blog::count(),
+            'recentUsers' => User::latest()->take(8)->get(),
+            'recentTx' => Transaction::latest()->take(10)->get(),
+            'totalRevenue' => Transaction::whereIn('type', ['tier_upgrade'])->sum('amount') * -1,
+            'subActive' => $subStatusCounts['active'] ?? 0,
+            'subPending' => $subStatusCounts['pending_payment'] ?? 0,
+            'subExpired' => $subStatusCounts['expired'] ?? 0,
+            'subCancelled' => $subStatusCounts['cancelled'] ?? 0,
+            'subWalletRevenue' => $subMethodRevenue['wallet'] ?? 0,
+            'subFlutterwaveRevenue' => $subMethodRevenue['flutterwave'] ?? 0,
+            'expiringSoon' => Subscription::active()
+                ->whereBetween('expires_at', [now(), now()->addDays(14)])
+                ->with('user')->orderBy('expires_at')->take(10)->get(),
+            'stuckPending' => Subscription::where('status', 'pending_payment')
+                ->where('created_at', '<', now()->subHours(2))
+                ->with('user')->latest()->take(10)->get(),
+        ]);
+    }
+
+    // ===== USERS =====
+    public function users(Request $r)
+    {
+        $this->guard();
+        $q = User::query();
+        if ($r->filled('search')) {
+            $q->where(fn($w) => $w->where('name', 'like', "%{$r->search}%")->orWhere('email', 'like', "%{$r->search}%"));
+        }
+        if ($r->filled('tier')) $q->where('tier', $r->tier);
+        if ($r->filled('banned')) $q->where('is_banned', $r->banned === '1');
+
+        return view('admin.users', ['users' => $q->latest()->paginate(25)->withQueryString()]);
+    }
+
+    public function toggleAdmin(User $user)
+    {
+        $this->guard();
+        abort_if($user->id === Auth::id(), 403, 'You cannot remove your own admin access.');
+        $user->update(['is_admin' => !$user->is_admin]);
+        return back()->with('status', $user->name . ' admin status updated.');
+    }
+
+    public function toggleBan(User $user)
+    {
+        $this->guard();
+        abort_if($user->id === Auth::id(), 403, 'You cannot ban yourself.');
+        $user->update(['is_banned' => !$user->is_banned]);
+        return back()->with('status', $user->name . ($user->is_banned ? ' banned.' : ' unbanned.'));
+    }
+
+    public function adjustBalance(Request $r, User $user)
+    {
+        $this->guard();
+        $data = $r->validate(['amount' => 'required|numeric', 'note' => 'nullable|string|max:255']);
+        $user->increment('wallet_balance', $data['amount']);
+        Transaction::create([
+            'user_id' => $user->id,
+            'type' => 'admin_adjustment',
+            'amount' => $data['amount'],
+            'description' => $data['note'] ?? 'Admin balance adjustment',
+        ]);
+        return back()->with('status', 'Balance adjusted for ' . $user->name);
+    }
+
+    // ===== GIGS =====
+    public function gigs(Request $r)
+    {
+        $this->guard();
+        $q = Gig::with('user')->latest();
+        if ($r->filled('status')) $q->where('status', $r->status);
+        return view('admin.gigs', ['gigs' => $q->paginate(25)->withQueryString()]);
+    }
+
+    public function deleteGig(Gig $gig)
+    {
+        $this->guard();
+        $gig->delete();
+        return back()->with('status', 'Gig removed.');
+    }
+
+    // ===== LISTINGS =====
+    public function listings(Request $r)
+    {
+        $this->guard();
+        $q = Listing::with('user')->latest();
+        if ($r->filled('status')) $q->where('status', $r->status);
+        return view('admin.listings', ['listings' => $q->paginate(25)->withQueryString()]);
+    }
+
+    public function deleteListing(Listing $listing)
+    {
+        $this->guard();
+        $listing->delete();
+        return back()->with('status', 'Listing removed.');
+    }
+
+    // ===== TRANSACTIONS =====
+    public function transactions(Request $r)
+    {
+        $this->guard();
+        $q = Transaction::with('user')->latest();
+        if ($r->filled('type')) $q->where('type', $r->type);
+        if ($r->filled('search')) {
+            $q->whereHas('user', fn($w) => $w->where('name', 'like', "%{$r->search}%"));
+        }
+        return view('admin.transactions', ['transactions' => $q->paginate(30)->withQueryString()]);
+    }
+
+    // ===== SUBSCRIPTIONS =====
+    public function subscriptions(Request $r)
+    {
+        $this->guard();
+        $q = Subscription::with('user')->latest();
+        if ($r->filled('status')) $q->where('status', $r->status);
+        return view('admin.subscriptions', ['subscriptions' => $q->paginate(25)->withQueryString()]);
+    }
+
+    public function cancelSubscription(Subscription $subscription)
+    {
+        $this->guard();
+        $subscription->update(['status' => 'cancelled']);
+        return back()->with('status', 'Subscription cancelled.');
+    }
+
+    // ===== NEWS =====
+    public function news()
+    {
+        $this->guard();
+        return view('admin.news', ['posts' => News::latest('published_at')->paginate(25)]);
+    }
+
+    public function deleteNews(News $news)
+    {
+        $this->guard();
+        $news->delete();
+        return back()->with('status', 'Post removed.');
+    }
+
+    // ===== BLOG =====
+    public function blog()
+    {
+        $this->guard();
+        return view('admin.blog', ['posts' => Blog::with('user')->latest()->paginate(25)]);
+    }
+
+    public function deleteBlog(Blog $blog)
+    {
+        $this->guard();
+        $blog->delete();
+        return back()->with('status', 'Blog post removed.');
+    }
+}

@@ -1,0 +1,90 @@
+.sn-bar{
+  position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border-bottom: 1px solid rgba(255,255,255,0.6);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+[data-theme="dark"] .sn-bar{ background: rgba(20,20,26,0.92); border-bottom-color: rgba(255,255,255,0.08); }
+
+.sn-push-content{ padding-top: 62px; }
+
+.sn-logo{ display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit; font-weight:700; font-size:15px; }
+
+.sn-links-desktop{ display:none; gap:26px; align-items:center; font-size:14px; }
+.sn-links-desktop a{ color: var(--color-text,#1c1c1e); text-decoration:none; opacity:0.75; }
+.sn-links-desktop a:hover{ opacity:1; }
+@media (min-width:768px){ .sn-links-desktop{ display:flex; } }
+
+.sn-cta-pill{
+  background: linear-gradient(145deg, var(--color-accent-light,#d4af37), var(--color-accent,#b8860b)) !important;
+  color:#fff !important; opacity:1 !important; padding:9px 20px; border-radius:9999px; font-weight:600;
+}
+
+.sn-burger{
+  position: relative; z-index: 1001;
+  display:flex; width:40px; height:40px; border-radius:12px;
+  background: var(--color-card,#FAFAF8); align-items:center; justify-content:center; flex-direction:column; gap:5px;
+  cursor:pointer; padding:0; border:none;
+  box-shadow: 6px 6px 14px rgba(0,0,0,0.08), -4px -4px 10px rgba(255,255,255,0.9);
+}
+[data-theme="dark"] .sn-burger{ background: rgba(255,255,255,0.06); }
+@media (min-width:768px){ .sn-burger{ display:none; } }
+.sn-burger span{ width:18px; height:2px; background: var(--color-text,#1c1c1e); border-radius:2px; transition:transform .25s ease, opacity .2s ease; pointer-events:none; }
+.sn-burger.sn-open span:nth-child(1){ transform:translateY(7px) rotate(45deg); }
+.sn-burger.sn-open span:nth-child(2){ opacity:0; }
+.sn-burger.sn-open span:nth-child(3){ transform:translateY(-7px) rotate(-45deg); }
+
+/* ---------- Dim backdrop behind the floating card ---------- */
+.sn-backdrop{
+  position: fixed; inset: 0; z-index: 900;
+  background: rgba(10,10,15,0.5);
+  opacity: 0; pointer-events: none;
+  transition: opacity .35s ease;
+}
+.sn-backdrop.sn-open{ opacity: 1; pointer-events: auto; }
+
+/* ---------- Floating rounded card, inset from screen edges ---------- */
+.sn-drawer{
+  position: fixed;
+  top: 6%; bottom: 6%; right: 4%;
+  width: min(78vw, 320px);
+  z-index: 950;
+  background: linear-gradient(165deg, #6a5acd 0%, #4b3aa8 100%);
+  border-radius: 32px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+  padding: 28px 22px;
+  display: flex; flex-direction: column; gap: 2px;
+  overflow-y: auto;
+  box-sizing: border-box;
+  transform: translateX(120%);
+  opacity: 0;
+  transition: transform .45s cubic-bezier(.22,1,.36,1), opacity .35s ease;
+}
+[data-theme="dark"] .sn-drawer{ background: linear-gradient(165deg, #4b3aa8 0%, #2a2270 100%); }
+.sn-drawer.sn-open{ transform: translateX(0); opacity: 1; }
+
+.sn-drawer-brand{ display:flex; align-items:center; gap:12px; margin-bottom:22px; }
+.sn-drawer-brand .logo-badge{ width:2.2rem; height:2.2rem; background:#fff; border-radius:11px; }
+.sn-drawer-brand span{ color:#fff; font-weight:700; font-size:16px; }
+
+.sn-reveal-heading{ color: rgba(255,255,255,0.5); font-size:11px; text-transform:uppercase; letter-spacing:.08em; padding:4px 4px 12px; }
+
+.sn-item-list{ display:flex; flex-direction:column; gap:2px; }
+.sn-item{
+  display:flex; align-items:center; justify-content:flex-start; gap:13px; color:#fff; text-decoration:none;
+  font-size:14.5px; font-weight:500; padding:11px 8px; border-radius:12px; background:none; border:none; font-family:inherit; width:100%;
+}
+.sn-item:hover{ background: rgba(255,255,255,0.1); }
+.sn-item-icon{
+  width:32px; height:32px; border-radius:9px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  background: rgba(255,255,255,0.14); color:#fff;
+}
+.sn-divider{ height:1px; background: rgba(255,255,255,0.15); margin:10px 4px; }
+.sn-cta{
+  margin-top:8px; background:#fff; color:#4b3aa8; text-align:center; border-radius:9999px; padding:12px; font-weight:600; text-decoration:none;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+
+body.sn-lock{ overflow:hidden; }

@@ -1,0 +1,418 @@
+/* ============================================================
+   Auth pages: split layout, forest scene, reactive mascots.
+   All in one file — layout is in layouts/auth.blade.php.
+   ============================================================ */
+
+.auth-body { margin: 0; min-height: 100vh; overflow-x: hidden; }
+
+.auth-theme-toggle {
+  position: fixed; top: 1rem; right: 1rem; z-index: 50;
+  width: 2.75rem; height: 2.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--color-card);
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.auth-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: 100vh;
+}
+@media (min-width: 900px) {
+  .auth-split { grid-template-columns: 1.1fr 1fr; }
+}
+
+.auth-scene-side {
+  position: relative;
+  display: none;
+  overflow: hidden;
+  background: linear-gradient(180deg, #cfe8f7 0%, #eaf6ea 60%, #d8ecd2 100%);
+}
+@media (min-width: 900px) {
+  .auth-scene-side { display: block; }
+}
+[data-theme="dark"] .auth-scene-side {
+  background: linear-gradient(180deg, #0a0e1f 0%, #0f1a2b 55%, #0c1710 100%);
+}
+
+.forest-sky { position: absolute; inset: 0; }
+.celestial {
+  position: absolute;
+  top: 12%; right: 18%;
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff6c9, #ffd93d 60%, #f5a623 100%);
+  box-shadow: 0 0 60px 10px rgba(255, 217, 61, 0.5);
+  transition: all 0.4s ease;
+}
+[data-theme="dark"] .celestial {
+  background: radial-gradient(circle at 35% 30%, #f4f6ff, #cfd6e6 55%, #9aa4bd 100%);
+  box-shadow: 0 0 40px 6px rgba(200, 210, 230, 0.35);
+}
+[data-theme="dark"] .celestial::before,
+[data-theme="dark"] .celestial::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(150, 158, 180, 0.4);
+}
+[data-theme="dark"] .celestial::before { width: 18px; height: 18px; top: 20px; left: 15px; }
+[data-theme="dark"] .celestial::after { width: 12px; height: 12px; top: 45px; left: 50px; }
+
+.star {
+  position: absolute;
+  width: 3px; height: 3px;
+  background: #fff;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+[data-theme="dark"] .star { opacity: 0.9; }
+
+.forest-layer {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 45%;
+}
+.forest-back {
+  height: 55%;
+  background:
+    radial-gradient(circle at 10% 100%, transparent 60px, #a9c9a0 61px),
+    radial-gradient(circle at 30% 100%, transparent 80px, #a9c9a0 81px),
+    radial-gradient(circle at 55% 100%, transparent 70px, #a9c9a0 71px),
+    radial-gradient(circle at 80% 100%, transparent 90px, #a9c9a0 91px),
+    radial-gradient(circle at 100% 100%, transparent 60px, #a9c9a0 61px);
+  opacity: 0.55;
+}
+.forest-mid {
+  height: 40%;
+  background:
+    radial-gradient(circle at 5% 100%, transparent 55px, #7fa876 56px),
+    radial-gradient(circle at 25% 100%, transparent 70px, #7fa876 71px),
+    radial-gradient(circle at 48% 100%, transparent 60px, #7fa876 61px),
+    radial-gradient(circle at 70% 100%, transparent 75px, #7fa876 76px),
+    radial-gradient(circle at 92% 100%, transparent 55px, #7fa876 56px);
+  opacity: 0.75;
+}
+.forest-front {
+  height: 30%;
+  background:
+    radial-gradient(circle at 0% 100%, transparent 45px, #4d7a48 46px),
+    radial-gradient(circle at 20% 100%, transparent 55px, #4d7a48 56px),
+    radial-gradient(circle at 42% 100%, transparent 48px, #4d7a48 49px),
+    radial-gradient(circle at 65% 100%, transparent 58px, #4d7a48 59px),
+    radial-gradient(circle at 88% 100%, transparent 50px, #4d7a48 51px);
+}
+[data-theme="dark"] .forest-back { background-color: transparent; filter: brightness(0.35) saturate(0.8); }
+[data-theme="dark"] .forest-mid { filter: brightness(0.3) saturate(0.8); }
+[data-theme="dark"] .forest-front { filter: brightness(0.22) saturate(0.8); }
+
+.mascot-group {
+  position: absolute;
+  bottom: 6%; left: 8%;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  z-index: 2;
+}
+.mascot {
+  position: relative;
+  width: 70px; height: 100px;
+  border-radius: 14px 14px 6px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 22px;
+  transition: transform 0.3s ease;
+}
+.mascot-a { background: #6d5dfc; height: 110px; }
+.mascot-b { background: #23252b; height: 90px; width: 60px; }
+.mascot-c { background: #f2994a; height: 65px; border-radius: 60px 60px 6px 6px; }
+
+.mascot-eyes { display: flex; gap: 10px; }
+.eye {
+  width: 14px; height: 14px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.pupil {
+  width: 6px; height: 6px;
+  background: #16181d;
+  border-radius: 50%;
+  transition: transform 0.08s ease-out;
+}
+.mascot-mouth {
+  width: 16px; height: 8px;
+  margin-top: 8px;
+  border-bottom: 3px solid #16181d;
+  border-radius: 0 0 12px 12px;
+  transition: all 0.25s ease;
+}
+.mascot-b .mascot-mouth { border-color: #fff; }
+
+.mascot-group.state-lookaway .pupil { transform: translate(3px, -4px) !important; }
+.mascot-group.state-lookaway .mascot-mouth { height: 3px; border-radius: 6px; }
+
+.mascot-group.state-frown .mascot-mouth {
+  border-bottom: none;
+  border-top: 3px solid #16181d;
+  border-radius: 12px 12px 0 0;
+  transform: translateY(5px);
+}
+.mascot-group.state-frown .mascot-b .mascot-mouth { border-top-color: #fff; }
+.mascot-group.state-frown .pupil { transform: scaleY(0.7); }
+
+.mascot-group.state-smile .mascot-mouth { height: 11px; border-bottom-width: 4px; }
+.mascot-group.state-smile .eye { transform: scaleY(0.6); }
+
+@keyframes mascotShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-5px) rotate(-2deg); }
+  40% { transform: translateX(5px) rotate(2deg); }
+  60% { transform: translateX(-4px) rotate(-1deg); }
+  80% { transform: translateX(4px) rotate(1deg); }
+}
+.mascot-group.is-shaking .mascot { animation: mascotShake 0.5s ease; }
+
+.auth-form-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.25rem;
+  background: var(--color-bg);
+}
+.auth-form-wrap { width: 100%; max-width: 420px; }
+
+/* ============================================================
+   Fixes: (1) bound the scene to a landscape hero-sized box
+   instead of stretching to full device height, (2) restore
+   contrast for glass-input/glass-btn now that they no longer
+   sit over the old colorful auth-scene background.
+   ============================================================ */
+
+@media (min-width: 900px) {
+  .auth-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: var(--color-bg);
+    padding: 2rem;
+  }
+  .auth-split {
+    width: 100%;
+    max-width: 1200px;
+    aspect-ratio: 16 / 9;
+    min-height: unset;
+    max-height: 700px;
+    border-radius: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.25);
+  }
+}
+
+/* Solid, opaque inputs/buttons — real contrast, no glass/blur */
+.auth-form-wrap .glass-input {
+  background: var(--color-surface) !important;
+  border: 1px solid var(--border-color) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  color: var(--color-text) !important;
+}
+.auth-form-wrap .glass-input::placeholder { color: var(--color-muted) !important; }
+.auth-form-wrap .glass-input:focus {
+  background: var(--color-card) !important;
+  border-color: var(--color-accent) !important;
+}
+
+.auth-form-wrap .glass-btn {
+  background: var(--color-accent) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  color: #fff !important;
+}
+.auth-form-wrap .glass-btn:hover { background: var(--color-accent-light) !important; }
+
+.auth-form-wrap .auth-logo-badge,
+.auth-form-wrap .logo-badge {
+  background: var(--color-accent) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+.auth-form-wrap p,
+.auth-form-wrap label,
+.auth-form-wrap h1 {
+  color: var(--color-text) !important;
+}
+.auth-form-wrap .auth-footnote,
+.auth-form-wrap p[style*="opacity"] {
+  color: var(--color-muted) !important;
+  opacity: 1 !important;
+}
+
+/* ============================================================
+   Mobile hero panel: "Welcome Back!" over a gold gradient blob
+   scene, form slides/fades in below it and stays. Desktop split
+   scene stays as-is; this only applies under 900px.
+   ============================================================ */
+
+.mobile-hero-panel {
+  display: none;
+  position: relative;
+  overflow: hidden;
+  padding: 3rem 1.5rem 3.5rem;
+  background: linear-gradient(160deg, #8a6d1d 0%, #b8860b 45%, #d4af37 100%);
+  color: #fff;
+  border-radius: 0 0 2.5rem 2.5rem;
+}
+@media (max-width: 899px) {
+  .mobile-hero-panel { display: block; }
+  .auth-scene-side { display: none !important; }
+  .auth-split { grid-template-columns: 1fr; min-height: 0; }
+  .auth-form-side { padding-top: 0; }
+}
+
+.mh-blob {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.14);
+}
+.mh-blob-1 { width: 180px; height: 180px; top: -60px; right: -40px; }
+.mh-blob-2 { width: 120px; height: 120px; bottom: -30px; left: -20px; background: rgba(255,255,255,0.1); }
+.mh-blob-3 { width: 60px; height: 60px; top: 40%; right: 15%; background: rgba(255,255,255,0.18); }
+
+.mh-title {
+  position: relative; z-index: 1;
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 0.4rem;
+}
+.mh-sub {
+  position: relative; z-index: 1;
+  font-size: 0.9rem;
+  opacity: 0.9;
+  max-width: 26ch;
+}
+
+/* Form entrance: hidden until JS adds .form-revealed, then animates in and stays */
+@media (max-width: 899px) {
+  .auth-form-wrap {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(.22,1,.36,1);
+  }
+  .auth-form-wrap.form-revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .auth-form-side { margin-top: -1.5rem; position: relative; z-index: 2; }
+}
+
+/* On desktop, the form is just always visible (no entrance needed —
+   the split-screen scene already provides the visual interest) */
+@media (min-width: 900px) {
+  .auth-form-wrap { opacity: 1 !important; transform: none !important; }
+}
+
+/* Peeking mascot — visible on ALL screen sizes, tucked into a
+   bottom corner peeking up over the edge, same reactive states
+   as the desktop trio (shares .mascot-group / .mascot classes). */
+.peek-mascot {
+  position: fixed;
+  bottom: 0; right: 1rem;
+  z-index: 40;
+  transform: translateY(45%);
+  pointer-events: none;
+}
+.peek-mascot .mascot-a {
+  background: #6d5dfc;
+  width: 64px; height: 90px;
+}
+@media (min-width: 900px) {
+  /* Desktop already has the full trio in the scene — hide the
+     peeking one there so we don't show mascots twice */
+  .peek-mascot { display: none; }
+}
+
+/* ============================================================
+   Glossy / oily-body mascot upgrade — gradient fill, moving
+   sheen reflection, smoother rounded shape, deeper soft shadow.
+   Overrides the flat-color versions defined earlier.
+   ============================================================ */
+
+.mascot {
+  border-radius: 26px 26px 10px 10px !important;
+  box-shadow:
+    inset -8px -10px 18px rgba(0,0,0,0.22),
+    inset 6px 8px 14px rgba(255,255,255,0.35),
+    0 14px 26px rgba(0,0,0,0.25);
+  overflow: hidden;
+}
+
+.mascot-a {
+  background: radial-gradient(circle at 30% 20%, #a79bff 0%, #6d5dfc 45%, #4a3ad1 100%) !important;
+}
+.mascot-b {
+  background: radial-gradient(circle at 30% 20%, #4a4c55 0%, #23252b 50%, #101116 100%) !important;
+}
+.mascot-c {
+  background: radial-gradient(circle at 30% 20%, #ffc98a 0%, #f2994a 50%, #d1741f 100%) !important;
+  border-radius: 60px 60px 10px 10px !important;
+}
+.peek-mascot .mascot-a {
+  background: radial-gradient(circle at 30% 20%, #a79bff 0%, #6d5dfc 45%, #4a3ad1 100%) !important;
+}
+
+/* Moving glossy sheen — a soft diagonal highlight that drifts
+   slowly, like light catching an oiled/glass surface */
+.mascot::before {
+  content: "";
+  position: absolute;
+  top: -30%; left: -50%;
+  width: 60%; height: 220%;
+  background: linear-gradient(75deg, transparent 0%, rgba(255,255,255,0.35) 45%, rgba(255,255,255,0.05) 60%, transparent 100%);
+  transform: rotate(12deg);
+  animation: mascotSheen 5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+@keyframes mascotSheen {
+  0%, 100% { transform: translateX(-20%) rotate(12deg); opacity: 0.6; }
+  50%      { transform: translateX(140%) rotate(12deg); opacity: 1; }
+}
+
+/* Small fixed highlight dot near the top, like a light source
+   reflecting off a rounded glossy surface */
+.mascot::after {
+  content: "";
+  position: absolute;
+  top: 14%; left: 18%;
+  width: 22%; height: 14%;
+  background: rgba(255,255,255,0.55);
+  border-radius: 50%;
+  filter: blur(3px);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Keep eyes/mouth above the sheen/highlight layers */
+.mascot-eyes, .mascot-mouth { position: relative; z-index: 2; }
+
+/* Subtle idle bob so the glossy body catches light as it moves,
+   feels alive rather than static */
+@keyframes mascotBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+.mascot-group .mascot { animation: mascotBob 3.2s ease-in-out infinite; }
+.mascot-a { animation-delay: 0s !important; }
+.mascot-b { animation-delay: 0.4s !important; }
+.mascot-c { animation-delay: 0.8s !important; }

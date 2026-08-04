@@ -1,0 +1,126 @@
+/* ===================================================
+   CAMPULSY SHOWCASE — Section 2 (Pillars) + Section 3 (Pinned Story)
+   Extends the th- hero design language. Loaded only on welcome page.
+=================================================== */
+
+.cp-section{ position:relative; background:var(--color-bg,#F5F5F2); }
+.cp-eyebrow{
+  font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--color-accent,#b8860b); margin-bottom:10px;
+}
+
+/* ---------- Section 2: Platform Pillars (bento) ---------- */
+.cp-pillars{ padding:96px 24px 80px; max-width:1180px; margin:0 auto; }
+.cp-pillars-head{ text-align:center; max-width:560px; margin:0 auto 48px; }
+.cp-pillars-head h2{
+  font-size:clamp(1.8rem,4vw,2.6rem); font-weight:700; letter-spacing:-0.02em;
+  color:var(--color-text,#16181d); line-height:1.15;
+}
+.cp-pillars-head p{ margin-top:10px; color:var(--color-muted,#6b7280); font-size:15px; }
+
+.cp-pillars-grid{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:18px;
+}
+@media (max-width:960px){ .cp-pillars-grid{ grid-template-columns:repeat(2,1fr); } }
+@media (max-width:560px){ .cp-pillars-grid{ grid-template-columns:1fr; } }
+
+.cp-pillar-card{
+  background:var(--color-card,#FAFAF8);
+  border:1px solid rgba(0,0,0,0.06);
+  border-radius:22px; padding:28px 24px;
+  display:flex; flex-direction:column; gap:14px;
+  box-shadow:0 1px 2px rgba(0,0,0,0.03);
+  transition:transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s ease, border-color .35s ease;
+  opacity:0; transform:translateY(24px);
+}
+.cp-pillar-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 24px 48px -18px rgba(0,0,0,0.18);
+  border-color:rgba(184,134,11,0.3);
+}
+[data-theme="dark"] .cp-pillar-card{ background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.08); }
+[data-theme="dark"] .cp-pillars-head h2{ color:#f5f3ee; }
+
+.cp-pillar-icon{
+  width:44px; height:44px; border-radius:13px;
+  background:linear-gradient(150deg, rgba(184,134,11,0.14), rgba(184,134,11,0.04));
+  display:flex; align-items:center; justify-content:center; color:var(--color-accent,#b8860b);
+}
+.cp-pillar-value{
+  font-family:'IBM Plex Mono',monospace; font-size:1.9rem; font-weight:700;
+  color:var(--color-text,#16181d); letter-spacing:-0.01em;
+}
+[data-theme="dark"] .cp-pillar-value{ color:#f5f3ee; }
+.cp-pillar-label{ font-size:13px; font-weight:600; color:var(--color-text,#16181d); }
+[data-theme="dark"] .cp-pillar-label{ color:#f5f3ee; }
+.cp-pillar-desc{ font-size:12.5px; color:var(--color-muted,#6b7280); line-height:1.5; }
+.cp-pillar-link{
+  margin-top:auto; display:inline-flex; align-items:center; gap:4px;
+  font-size:12.5px; font-weight:600; color:var(--color-accent,#b8860b); text-decoration:none;
+}
+.cp-pillar-link svg{ width:13px; height:13px; transition:transform .25s ease; }
+.cp-pillar-card:hover .cp-pillar-link svg{ transform:translateX(3px); }
+
+/* ---------- Section 3: Pinned Horizontal Storytelling (desktop) ---------- */
+.cp-story-pin{ position:relative; height:220vh; background:#0a0a0f; }
+.cp-story-viewport{
+  position:sticky; top:0; height:100vh; height:100svh; overflow:hidden;
+  display:flex; align-items:center;
+}
+.cp-story-bg-video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0.35; }
+.cp-story-overlay{
+  position:absolute; inset:0;
+  background:linear-gradient(115deg, rgba(10,10,15,0.92) 30%, rgba(10,10,15,0.55));
+}
+.cp-story-head{
+  position:absolute; top:64px; left:44px; z-index:3; max-width:420px;
+}
+.cp-story-head .cp-eyebrow{ color:#d4af37; }
+.cp-story-head h2{ font-size:clamp(1.8rem,3.4vw,2.6rem); font-weight:700; color:#f5f3ee; letter-spacing:-0.02em; line-height:1.15; }
+
+.cp-story-track{
+  position:relative; z-index:2; display:flex; gap:28px; padding-left:6vw; will-change:transform;
+}
+.cp-story-card{
+  width:min(46vw,420px); flex-shrink:0; padding:36px;
+  background:rgba(255,255,255,0.05); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,0.12); border-radius:24px; color:#f5f3ee;
+}
+.cp-story-num{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:#d4af37; letter-spacing:.1em; margin-bottom:14px; }
+.cp-story-icon{ width:48px; height:48px; border-radius:14px; background:rgba(212,175,55,0.14); display:flex; align-items:center; justify-content:center; color:#d4af37; margin-bottom:18px; }
+.cp-story-card h3{ font-size:1.4rem; font-weight:700; margin-bottom:10px; }
+.cp-story-card ul{ list-style:none; display:flex; flex-direction:column; gap:7px; font-size:13.5px; color:rgba(245,243,238,0.72); }
+.cp-story-card ul li{ display:flex; align-items:center; gap:8px; }
+.cp-story-card ul li::before{ content:''; width:4px; height:4px; border-radius:50%; background:#d4af37; flex-shrink:0; }
+
+.cp-story-dots{ position:absolute; bottom:36px; left:50%; transform:translateX(-50%); z-index:3; display:flex; gap:8px; }
+.cp-story-dots span{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.25); transition:background .3s ease, width .3s ease; }
+.cp-story-dots span.active{ background:#d4af37; width:20px; border-radius:4px; }
+
+/* Pinned section now active on all screen sizes */
+.cp-story-mobile{ display:none; }
+.cp-story-mobile-head{ padding:0 24px 24px; }
+.cp-story-mobile-head .cp-eyebrow{ color:#d4af37; }
+.cp-story-mobile-head h2{ font-size:1.7rem; font-weight:700; color:#f5f3ee; letter-spacing:-0.02em; }
+.cp-story-mobile-scroll{
+  display:flex; gap:16px; overflow-x:auto; scroll-snap-type:x mandatory;
+  padding:0 24px 8px; -webkit-overflow-scrolling:touch;
+}
+.cp-story-mobile-scroll::-webkit-scrollbar{ display:none; }
+.cp-story-mobile-card{
+  scroll-snap-align:start; flex-shrink:0; width:82vw; max-width:340px; padding:28px;
+  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:20px; color:#f5f3ee;
+}
+.cp-story-mobile-card .cp-story-num{ margin-bottom:12px; }
+.cp-story-mobile-card .cp-story-icon{ width:42px; height:42px; margin-bottom:14px; }
+.cp-story-mobile-card h3{ font-size:1.15rem; font-weight:700; margin-bottom:8px; }
+.cp-story-mobile-card ul{ list-style:none; display:flex; flex-direction:column; gap:6px; font-size:13px; color:rgba(245,243,238,0.72); }
+.cp-story-mobile-card ul li{ display:flex; align-items:center; gap:8px; }
+.cp-story-mobile-card ul li::before{ content:''; width:4px; height:4px; border-radius:50%; background:#d4af37; flex-shrink:0; }
+
+/* ---------- Mobile tuning for the now-active pinned section ---------- */
+@media (max-width:760px){
+  .cp-story-card{ width: 80vw; max-width:320px; padding:26px; }
+  .cp-story-head{ top:44px; left:24px; max-width:280px; }
+  .cp-story-head h2{ font-size:1.5rem; }
+}

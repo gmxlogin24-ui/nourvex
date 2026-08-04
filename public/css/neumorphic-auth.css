@@ -1,0 +1,1062 @@
+:root{
+  --neu-bg: #f7fafd;
+  --neu-surface: #e4edf7;
+  --neu-shadow-dark: #bcccdf;
+  --neu-shadow-light: #ffffff;
+  --neu-radius: 22px;
+  --neu-text: #2b2d33;
+  --neu-text-muted: #6b6f78;
+}
+[data-theme="dark"]{
+  --neu-bg: #2c2e34;
+  --neu-surface: #2e3036;
+  --neu-shadow-dark: #202226;
+  --neu-shadow-light: #3a3c43;
+  --neu-text: #eceef1;
+  --neu-text-muted: #9a9da5;
+}
+
+body[data-page]{ background: var(--neu-bg); }
+
+.neu-flat{
+  background: var(--neu-surface);
+  border-radius: var(--neu-radius);
+  box-shadow: 8px 8px 16px var(--neu-shadow-dark), -8px -8px 16px var(--neu-shadow-light);
+  border: none;
+}
+.neu-pressed{
+  background: var(--neu-surface);
+  border-radius: var(--neu-radius);
+  box-shadow: inset 5px 5px 10px var(--neu-shadow-dark), inset -5px -5px 10px var(--neu-shadow-light);
+  border: none;
+}
+.neu-raised-sm{
+  border-radius: 14px;
+  box-shadow: 4px 4px 8px var(--neu-shadow-dark), -4px -4px 8px var(--neu-shadow-light);
+}
+
+/* ---------- Neumorphic floating sidebar shell ---------- */
+.app-shell-flex{
+  display: flex;
+  align-items: flex-start;
+  min-height: 100vh;
+}
+.neu-sidebar{
+  position: sticky;
+  top: 20px;
+  align-self: flex-start;
+  height: calc(100vh - 40px);
+  width: 250px;
+  flex-shrink: 0;
+  margin: 20px 0 20px 20px;
+  background: var(--neu-surface);
+  border-radius: 28px;
+  padding: 20px 14px;
+  display: flex; flex-direction: column; gap: 18px;
+  box-shadow: 10px 10px 22px var(--neu-shadow-dark), -8px -8px 18px var(--neu-shadow-light);
+  transition: width 0.3s ease, padding 0.3s ease;
+  z-index: 10;
+}
+html[data-sidebar="collapsed"] .neu-sidebar{ width: 84px; padding: 20px 10px; }
+html[data-sidebar="collapsed"] .neu-sidebar .sidebar-brand-label,
+html[data-sidebar="collapsed"] .neu-sidebar .sidebar-link-label,
+html[data-sidebar="collapsed"] .neu-sidebar .sidebar-user-meta{ display: none; }
+html[data-sidebar="collapsed"] .neu-user-card,
+html[data-sidebar="collapsed"] .neu-sidebar-nav a,
+html[data-sidebar="collapsed"] .neu-sidebar-nav button{ justify-content: center; }
+
+.neu-sidebar .sidebar-logo-row{ display:flex; align-items:center; gap:10px; padding:4px 6px; }
+.neu-sidebar .sidebar-collapse-btn{
+  width: 30px; height: 30px; border-radius: 10px; margin-left: auto;
+  display:flex; align-items:center; justify-content:center;
+  background: var(--neu-surface);
+  box-shadow: 3px 3px 6px var(--neu-shadow-dark), -3px -3px 6px var(--neu-shadow-light);
+  color: var(--neu-text); cursor:pointer; flex-shrink: 0;
+}
+.neu-sidebar .sidebar-collapse-btn:active{
+  box-shadow: inset 3px 3px 6px var(--neu-shadow-dark), inset -3px -3px 6px var(--neu-shadow-light);
+}
+
+.neu-user-card{
+  display:flex; align-items:center; gap:10px;
+  padding: 10px; border-radius: 18px;
+  background: var(--neu-surface);
+  box-shadow: inset 3px 3px 6px var(--neu-shadow-dark), inset -3px -3px 6px var(--neu-shadow-light);
+}
+.neu-user-card .sidebar-avatar{
+  width: 38px; height: 38px; border-radius: 50%; overflow:hidden; flex-shrink:0;
+  background: var(--color-accent, #4f7bff); color:#fff; position: relative;
+  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;
+}
+.neu-user-card .sidebar-avatar::after{
+  content:''; position:absolute; bottom:-1px; right:-1px; width:10px; height:10px;
+  background:#4ade80; border-radius:50%; border:2px solid var(--neu-surface);
+}
+.neu-user-card img{ width:100%; height:100%; object-fit:cover; }
+.sidebar-user-greeting{ font-size:11px; color:var(--neu-text-muted); }
+.sidebar-user-name{ font-size:13px; font-weight:600; color:var(--neu-text); }
+
+.neu-sidebar-nav{ display:flex; flex-direction:column; gap:6px; margin-top:2px; }
+.neu-sidebar-nav a, .neu-sidebar-nav button{
+  display:flex; align-items:center; gap:12px;
+  padding: 10px 12px; border-radius: 14px;
+  color: var(--neu-text-muted); text-decoration:none;
+  font-size: 14px; font-weight: 500;
+  background: transparent; border:none; cursor:pointer; width:100%;
+  transition: box-shadow .2s ease, background .2s ease, color .2s ease, transform .15s ease;
+}
+.neu-sidebar-nav a:hover, .neu-sidebar-nav button:hover{
+  background: var(--neu-surface);
+  box-shadow: 3px 3px 6px var(--neu-shadow-dark), -3px -3px 6px var(--neu-shadow-light);
+  color: var(--neu-text);
+}
+.neu-sidebar-nav a.active{
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-accent,#4f7bff) 70%, white), var(--color-accent, #4f7bff)) !important;
+  color: #fff !important;
+  box-shadow: 4px 4px 10px var(--neu-shadow-dark), -2px -2px 6px var(--neu-shadow-light) !important;
+}
+.neu-sidebar-nav .sidebar-link-icon{ width:20px; display:flex; justify-content:center; flex-shrink:0; }
+.neu-sidebar-bottom{ margin-top:auto; display:flex; flex-direction:column; gap:6px; }
+
+.app-shell-with-sidebar{ flex: 1 1 auto; min-width: 0; }
+@media (max-width: 900px){
+  .app-shell-flex{ display: block; }
+  .neu-sidebar{ display:none; }
+  .app-shell-with-sidebar{ width: 100%; }
+}
+
+/* ---------- Page-load choreography: shell first, content animates in after ---------- */
+.auth-page-shell{ opacity: 1; }
+.auth-reveal-content{ opacity: 0; }
+.auth-reveal-content.is-ready{ opacity: 1; }
+
+/* ---------- Headline hover-hide (desktop) ---------- */
+.hoverfade-text .hf-char{ display:inline-block; transition: opacity .15s ease; }
+@media (max-width: 900px){ .hoverfade-text .hf-char{ opacity:1 !important; } }
+
+/* ===================================================
+   Neumorphic dashboard components
+=================================================== */
+.glass-card, .stat-card, .kpi-tile, .analytics-card, .gauge-panel,
+.mini-stat-card, .gig-box, .listing-card {
+  background: var(--neu-surface) !important;
+  border-radius: 20px !important;
+  box-shadow: 8px 8px 16px var(--neu-shadow-dark), -8px -8px 16px var(--neu-shadow-light) !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.glass-card::before, .stat-card::before, .kpi-tile::before, .analytics-card::before,
+.gauge-panel::before, .glass-card::after, .stat-card::after, .kpi-tile::after,
+.analytics-card::after, .gauge-panel::after { display: none !important; }
+
+.kpi-tile.featured.ledger-card {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.trust-pill {
+  background: var(--neu-surface) !important;
+  box-shadow: 5px 5px 10px var(--neu-shadow-dark), -5px -5px 10px var(--neu-shadow-light) !important;
+  border: none !important;
+  border-radius: 999px !important;
+}
+
+.quick-icon-circle {
+  background: var(--neu-surface) !important;
+  box-shadow: 5px 5px 10px var(--neu-shadow-dark), -5px -5px 10px var(--neu-shadow-light) !important;
+  border-radius: 16px !important;
+  transition: box-shadow .2s ease, transform .2s ease;
+}
+.quick-icon-btn:hover .quick-icon-circle {
+  box-shadow: inset 3px 3px 6px var(--neu-shadow-dark), inset -3px -3px 6px var(--neu-shadow-light) !important;
+  transform: translateY(1px);
+}
+
+.dash-tabs { background: transparent !important; }
+.dash-tab {
+  border-radius: 12px !important;
+  padding: 6px 12px !important;
+  box-shadow: none !important;
+  color: var(--neu-text-muted) !important;
+}
+.dash-tab.active {
+  background: var(--neu-surface) !important;
+  box-shadow: inset 3px 3px 6px var(--neu-shadow-dark), inset -3px -3px 6px var(--neu-shadow-light) !important;
+  color: var(--neu-text) !important;
+}
+
+.analytics-tabs { background: var(--neu-surface) !important; border-radius: 999px !important; box-shadow: inset 3px 3px 6px var(--neu-shadow-dark), inset -3px -3px 6px var(--neu-shadow-light) !important; padding: 4px !important; }
+.analytics-tab-indicator { background: var(--neu-bg) !important; box-shadow: 3px 3px 6px var(--neu-shadow-dark), -3px -3px 6px var(--neu-shadow-light) !important; border-radius: 999px !important; }
+.analytics-tab { background: transparent !important; border: none !important; box-shadow: none !important; }
+
+.tx-table-row {
+  background: transparent !important;
+  border-radius: 14px !important;
+  transition: box-shadow .2s ease, transform .15s ease;
+}
+.tx-table-row:hover {
+  box-shadow: 4px 4px 8px var(--neu-shadow-dark), -4px -4px 8px var(--neu-shadow-light) !important;
+  transform: translateY(-1px);
+}
+
+.icon-badge {
+  background: var(--neu-surface) !important;
+  box-shadow: 4px 4px 8px var(--neu-shadow-dark), -4px -4px 8px var(--neu-shadow-light) !important;
+  border-radius: 12px !important;
+}
+
+.quick-action, .btn-secondary {
+  background: var(--neu-surface) !important;
+  box-shadow: 5px 5px 10px var(--neu-shadow-dark), -5px -5px 10px var(--neu-shadow-light) !important;
+  border: none !important;
+  color: var(--neu-text) !important;
+}
+.quick-action:active, .btn-secondary:active {
+  box-shadow: inset 3px 3px 6px var(--neu-shadow-dark), inset -3px -3px 6px var(--neu-shadow-light) !important;
+}
+
+.btn-primary {
+  background: linear-gradient(150deg, var(--color-accent-light, #d4a94a), var(--color-accent, #b8860b)) !important;
+  box-shadow: 5px 5px 12px var(--neu-shadow-dark), -3px -3px 8px var(--neu-shadow-light) !important;
+  border: none !important;
+}
+
+.modal-overlay .glass-card {
+  box-shadow: 12px 12px 28px var(--neu-shadow-dark), -12px -12px 28px var(--neu-shadow-light) !important;
+}
+
+.input-field {
+  background: var(--neu-surface) !important;
+  box-shadow: inset 4px 4px 8px var(--neu-shadow-dark), inset -4px -4px 8px var(--neu-shadow-light) !important;
+  border: none !important;
+  color: var(--neu-text) !important;
+}
+
+/* ---------- Parallax background layer (authenticated pages) ---------- */
+.auth-parallax-bg{
+  position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+}
+.auth-parallax-blob{
+  position: absolute; border-radius: 50%; filter: blur(60px); opacity: .35;
+  background: radial-gradient(circle, var(--color-accent, #b8860b), transparent 70%);
+}
+.auth-parallax-blob.b1{ width: 420px; height: 420px; top: -80px; left: -100px; }
+.auth-parallax-blob.b2{ width: 360px; height: 360px; bottom: -100px; right: -80px; opacity: .22; }
+.app-shell-with-sidebar, .neu-sidebar{ position: relative; z-index: 1; }
+
+/* ---------- Storytelling section reveal ---------- */
+.story-section{ opacity: 0; transform: translateY(36px); }
+.story-section.story-in{ opacity: 1; transform: translateY(0); }
+
+/* ---------- Slowed, eased story reveal transition ---------- */
+.story-section{
+  transition: opacity 1.1s cubic-bezier(0.16,1,0.3,1), transform 1.1s cubic-bezier(0.16,1,0.3,1);
+}
+
+/* ---------- Text-hides-behind-element scroll effect ---------- */
+.scroll-hide-under{ position: relative; z-index: 1; }
+.scroll-hide-over{ position: relative; z-index: 3; background: var(--neu-surface) !important; }
+
+/* ---------- Quick actions: 4x4 grid on phone ---------- */
+@media (max-width: 640px){
+  .quick-icon-row{
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 14px !important;
+    overflow: visible !important;
+  }
+  .quick-icon-btn{ flex-direction: column !important; }
+}
+
+/* ---------- Color pass: kill the "everything gray" flatness ---------- */
+.quick-icon-btn[data-color="orange"] .quick-icon-circle{ background: linear-gradient(145deg,#ffb56b,#f4a261) !important; color:#fff !important; box-shadow: 5px 5px 10px var(--neu-shadow-dark), -3px -3px 8px var(--neu-shadow-light) !important; }
+.quick-icon-btn[data-color="green"] .quick-icon-circle{ background: linear-gradient(145deg,#6ee7a0,#22c55e) !important; color:#fff !important; box-shadow: 5px 5px 10px var(--neu-shadow-dark), -3px -3px 8px var(--neu-shadow-light) !important; }
+.quick-icon-btn[data-color="yellow"] .quick-icon-circle{ background: linear-gradient(145deg,#ffe27a,#f5c518) !important; color:#4a3600 !important; box-shadow: 5px 5px 10px var(--neu-shadow-dark), -3px -3px 8px var(--neu-shadow-light) !important; }
+.quick-icon-btn[data-color="cyan"] .quick-icon-circle{ background: linear-gradient(145deg,#7fe3ee,#38D9E8) !important; color:#083b40 !important; box-shadow: 5px 5px 10px var(--neu-shadow-dark), -3px -3px 8px var(--neu-shadow-light) !important; }
+.quick-icon-btn[data-color="purple"] .quick-icon-circle{ background: linear-gradient(145deg,#c4b5fd,#8b5cf6) !important; color:#fff !important; box-shadow: 5px 5px 10px var(--neu-shadow-dark), -3px -3px 8px var(--neu-shadow-light) !important; }
+.quick-icon-btn[data-color="pink"] .quick-icon-circle{ background: linear-gradient(145deg,#fbc4dd,#f472b6) !important; color:#fff !important; box-shadow: 5px 5px 10px var(--neu-shadow-dark), -3px -3px 8px var(--neu-shadow-light) !important; }
+.quick-icon-btn[data-color="blue"] .quick-icon-circle{ background: linear-gradient(145deg,#93c5fd,#4f7bff) !important; color:#fff !important; box-shadow: 5px 5px 10px var(--neu-shadow-dark), -3px -3px 8px var(--neu-shadow-light) !important; }
+
+.icon-badge-gigs{ background: linear-gradient(145deg,#93c5fd,#4f7bff) !important; color:#fff !important; }
+.icon-badge-market{ background: linear-gradient(145deg,#c4b5fd,#8b5cf6) !important; color:#fff !important; }
+
+.analytics-tab.active{ color: var(--color-accent, #b8860b) !important; font-weight: 700 !important; }
+.dash-tab.active{ color: var(--color-accent, #b8860b) !important; }
+
+.gauge-panel{ border-top: 3px solid var(--color-accent, #b8860b) !important; }
+
+/* ---------- Mobile topbar: sticky, blended, always visible ---------- */
+@media (max-width: 900px){
+  .mobile-auth-topbar{
+    position: fixed !important;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--neu-bg) 82%, transparent) !important;
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    border: none !important;
+  }
+  .app-shell-with-sidebar{ padding-top: 66px; }
+}
+[data-theme="dark"] .mobile-auth-topbar{
+  background: color-mix(in srgb, var(--neu-bg) 72%, transparent) !important;
+}
+
+/* ---------- Vibrancy pass: real color across sections, not just icons ---------- */
+.stat-card{ border-top: 3px solid #4f7bff !important; }
+.stat-card:nth-of-type(2){ border-top-color: #8b5cf6 !important; }
+.analytics-card{ border-top: 3px solid #22c55e !important; }
+
+.dash-tab.active{
+  background: linear-gradient(135deg, #ffe27a, #f5c518) !important;
+  color: #4a3600 !important;
+  box-shadow: 3px 3px 8px var(--neu-shadow-dark), -2px -2px 6px var(--neu-shadow-light) !important;
+}
+.analytics-tab-indicator{
+  background: linear-gradient(135deg, #6ee7a0, #22c55e) !important;
+  box-shadow: 3px 3px 8px var(--neu-shadow-dark) !important;
+}
+.analytics-tab.active{ color: #fff !important; }
+
+.tab-btn.active{
+  background: linear-gradient(135deg, #c4b5fd, #8b5cf6) !important;
+  color: #fff !important;
+}
+
+.kpi-tile:not(.featured) .kpi-tile-icon{
+  background: linear-gradient(145deg, #93c5fd, #4f7bff) !important;
+  color: #fff !important;
+}
+.kpi-tile:nth-of-type(3) .kpi-tile-icon{
+  background: linear-gradient(145deg, #ffb56b, #f4a261) !important;
+}
+
+.trust-pill{ border-left: 3px solid #f5c518 !important; }
+
+.quick-action{ border-bottom: 3px solid #4f7bff !important; }
+.quick-action:nth-of-type(2){ border-bottom-color: #8b5cf6 !important; }
+.quick-action:nth-of-type(3){ border-bottom-color: #f472b6 !important; }
+.quick-action:nth-of-type(4){ border-bottom-color: #22c55e !important; }
+
+/* ---------- Fix legacy 100vw override breaking the new flex sidebar layout ---------- */
+.app-shell-with-sidebar main{
+  max-width: 100% !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+}
+.app-push-content{
+  width: 100% !important;
+  margin-left: 0 !important;
+  max-width: 100% !important;
+}
+.app-shell-with-sidebar{
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* ---------- Widen the featured balance/ledger card slightly ---------- */
+.kpi-row{ align-items: stretch; }
+.kpi-tile.featured.ledger-card{
+  flex: 1.5 1 0 !important;
+  min-width: 280px;
+}
+.kpi-row .kpi-tile:not(.featured){
+  flex: 1 1 0;
+  min-width: 140px;
+}
+
+/* ---------- Font smoothing / clarity fix ---------- */
+body{
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+.neu-flat, .neu-pressed, .glass-card, .stat-card, .kpi-tile, .analytics-card, .gauge-panel{
+  box-shadow: 6px 6px 12px var(--neu-shadow-dark), -6px -6px 12px var(--neu-shadow-light) !important;
+}
+
+/* ---------- KPI row: balance card + stacked compact tiles beside it ---------- */
+@media (min-width: 641px){
+  .kpi-row{
+    display: grid !important;
+    grid-template-columns: 1.6fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 12px;
+    align-items: stretch;
+  }
+  .kpi-row > .kpi-tile.featured.ledger-card{
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    flex: none !important;
+    min-width: 0 !important;
+  }
+  .kpi-row > .kpi-tile:nth-child(2){ grid-column: 2; grid-row: 1; }
+  .kpi-row > .kpi-tile:nth-child(3){ grid-column: 2; grid-row: 2; }
+  .kpi-row > .kpi-tile:not(.featured){
+    padding: 12px 14px !important;
+    display: flex !important;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .kpi-row > .kpi-tile:not(.featured) .kpi-tile-value{ font-size: 1.15rem !important; margin: 2px 0 !important; }
+  .kpi-row > .kpi-tile:not(.featured) .kpi-tile-label{ font-size: 0.62rem !important; }
+  .kpi-row > .kpi-tile:not(.featured) .kpi-tile-icon{ width: 26px !important; height: 26px !important; }
+}
+
+/* ===================================================
+   GIGS PAGE — neumorphic cards + pills
+=================================================== */
+.gig-card-v2{
+  background: var(--neu-surface) !important;
+  border-radius: 18px !important;
+  box-shadow: 6px 6px 14px var(--neu-shadow-dark), -6px -6px 14px var(--neu-shadow-light) !important;
+  border: none !important;
+  transition: box-shadow .25s ease, transform .25s ease;
+  padding: 14px !important;
+}
+.gig-card-v2:hover{
+  transform: translateY(-3px);
+  box-shadow: 9px 9px 18px var(--neu-shadow-dark), -9px -9px 18px var(--neu-shadow-light) !important;
+}
+.gig-card-status.open{ background: linear-gradient(135deg,#6ee7a0,#22c55e) !important; color:#fff !important; }
+.gig-card-status.taken{ background: linear-gradient(135deg,#fca5a5,#ef4444) !important; color:#fff !important; }
+.gig-card-price{ color: #4f7bff !important; font-weight: 700 !important; }
+
+.gig-filter-chip, .cat-pill{
+  background: var(--neu-surface) !important;
+  box-shadow: 3px 3px 7px var(--neu-shadow-dark), -3px -3px 7px var(--neu-shadow-light) !important;
+  border: none !important;
+  border-radius: 999px !important;
+  transition: box-shadow .2s ease, color .2s ease;
+}
+.gig-filter-chip.active, .cat-pill.active{
+  background: linear-gradient(135deg, #93c5fd, #4f7bff) !important;
+  color: #fff !important;
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.15) !important;
+}
+
+/* ===================================================
+   MARKETPLACE — listing image badges
+=================================================== */
+.type-badge{ box-shadow: 2px 2px 5px rgba(0,0,0,0.2) !important; }
+.type-item{ background: linear-gradient(135deg,#93c5fd,#4f7bff) !important; }
+.type-service{ background: linear-gradient(135deg,#c4b5fd,#8b5cf6) !important; }
+.type-rent{ background: linear-gradient(135deg,#ffb56b,#f4a261) !important; }
+.type-store{ background: linear-gradient(135deg,#6ee7a0,#22c55e) !important; }
+.verified-badge{ background: linear-gradient(135deg,#93c5fd,#4f7bff) !important; color:#fff !important; }
+
+/* ===================================================
+   PROFILE — quick links grid buttons
+=================================================== */
+#quickLinksCard a{
+  background: var(--neu-surface) !important;
+  box-shadow: 4px 4px 9px var(--neu-shadow-dark), -4px -4px 9px var(--neu-shadow-light) !important;
+  transition: box-shadow .2s ease, transform .15s ease, color .2s ease;
+  text-decoration: none !important;
+}
+#quickLinksCard a:hover{
+  box-shadow: inset 3px 3px 7px var(--neu-shadow-dark), inset -3px -3px 7px var(--neu-shadow-light) !important;
+  color: var(--color-accent, #4f7bff) !important;
+}
+#repCard .trust-pill{ border-left: 3px solid #fbbf24 !important; }
+
+/* ===================================================
+   FIX: marketplace-neu.css forcing black bg + white text
+   regardless of actual theme — force it back to neu light/dark
+=================================================== */
+body[data-page="marketplace"] main,
+body[data-page="marketplace"] .app-push-content{
+  background: transparent !important;
+  color: var(--neu-text) !important;
+}
+body[data-page="marketplace"]:not([data-theme="dark"]) *{
+  color: inherit;
+}
+body[data-page="marketplace"] h1,
+body[data-page="marketplace"] p,
+body[data-page="marketplace"] .text-muted{
+  color: var(--neu-text-muted) !important;
+}
+body[data-page="marketplace"] h1{
+  color: var(--neu-text) !important;
+}
+html:not([data-theme="dark"]) body[data-page="marketplace"] .cat-pill:not(.active),
+html:not([data-theme="dark"]) body[data-page="marketplace"] .listing-card,
+html:not([data-theme="dark"]) body[data-page="marketplace"] #marketAdSlot{
+  color: var(--neu-text) !important;
+}
+
+/* ===================================================
+   MARKETPLACE — full page override, hard-coded colors
+   (bypasses conflicting --color-bg definitions elsewhere)
+=================================================== */
+body[data-page="marketplace"]{
+  background-color: #f7fafd !important;
+}
+body[data-page="marketplace"] main,
+body[data-page="marketplace"] .app-push-content,
+body[data-page="marketplace"] .auth-page-shell{
+  background: transparent !important;
+}
+body[data-page="marketplace"] h1{ color: #1c2733 !important; }
+body[data-page="marketplace"] p,
+body[data-page="marketplace"] .text-muted{ color: #5c6b7a !important; }
+
+body[data-page="marketplace"] .listing-card{
+  background: #f0f5fb !important;
+  box-shadow: 8px 8px 18px #cdd9e8, -8px -8px 18px #ffffff !important;
+}
+body[data-page="marketplace"] .listing-card p,
+body[data-page="marketplace"] .listing-card .text-muted{ color: #3a4550 !important; }
+body[data-page="marketplace"] .listing-card p.font-semibold.text-accent{ color: #4f7bff !important; }
+
+body[data-page="marketplace"] .cat-pill{
+  background: #f0f5fb !important;
+  color: #3a4550 !important;
+  box-shadow: 4px 4px 10px #cdd9e8, -4px -4px 10px #ffffff !important;
+}
+body[data-page="marketplace"] .cat-pill.active{
+  background: linear-gradient(135deg, #93c5fd, #4f7bff) !important;
+  color: #fff !important;
+}
+
+body[data-page="marketplace"] #marketAdSlot{
+  background: #f0f5fb !important;
+  color: #3a4550 !important;
+}
+body[data-page="marketplace"] .listing-placeholder{
+  background: #e4edf7 !important;
+  color: #7c8b9a !important;
+}
+
+/* dark theme variant — only applies if user actually toggles dark on */
+[data-theme="dark"] body[data-page="marketplace"]{ background-color: #1c1e24 !important; }
+[data-theme="dark"] body[data-page="marketplace"] h1{ color: #eceef1 !important; }
+[data-theme="dark"] body[data-page="marketplace"] p,
+[data-theme="dark"] body[data-page="marketplace"] .text-muted{ color: #9a9da5 !important; }
+[data-theme="dark"] body[data-page="marketplace"] .listing-card,
+[data-theme="dark"] body[data-page="marketplace"] .cat-pill,
+[data-theme="dark"] body[data-page="marketplace"] #marketAdSlot{
+  background: #26282f !important;
+  color: #eceef1 !important;
+}
+
+/* ---------- Fix: featured KPI tile grid rule was too narrow, only matched dashboard's ledger-card ---------- */
+@media (min-width: 641px){
+  .kpi-row > .kpi-tile.featured{
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    flex: none !important;
+    min-width: 0 !important;
+  }
+}
+.kpi-tile.featured:not(.ledger-card){
+  background: var(--neu-surface) !important;
+  box-shadow: 8px 8px 16px var(--neu-shadow-dark), -8px -8px 16px var(--neu-shadow-light) !important;
+  border-top: 3px solid var(--color-accent, #4f7bff) !important;
+  opacity: 1 !important;
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* ===================================================
+   SIDEBAR — full interactive redesign
+=================================================== */
+.neu-sidebar-nav{ position: relative; }
+.sidebar-active-pill{
+  position: absolute;
+  left: 0; width: 100%;
+  border-radius: 14px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-accent,#4f7bff) 75%, white), var(--color-accent, #4f7bff));
+  box-shadow: 4px 4px 10px var(--neu-shadow-dark), -2px -2px 6px var(--neu-shadow-light);
+  z-index: 0;
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+.neu-sidebar-nav a{ position: relative; z-index: 1; transition: color .2s ease, transform .15s ease; }
+.neu-sidebar-nav a.active{ background: transparent !important; color: #fff !important; box-shadow: none !important; }
+
+.neu-sidebar-nav a:hover .sidebar-link-icon{ transform: scale(1.15) translateY(-1px); }
+.neu-sidebar-nav .sidebar-link-icon{ transition: transform .25s cubic-bezier(.34,1.56,.64,1); }
+
+.neu-sidebar .sidebar-collapse-btn{ transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease; }
+.neu-sidebar .sidebar-collapse-btn:hover{ transform: scale(1.08); }
+
+/* Tooltips when collapsed */
+html[data-sidebar="collapsed"] .neu-sidebar-nav a,
+html[data-sidebar="collapsed"] .neu-sidebar-nav button{ position: relative; }
+.sidebar-tooltip{
+  position: absolute; left: calc(100% + 12px); top: 50%;
+  transform: translateY(-50%) translateX(-6px);
+  background: #1c1e24; color: #fff; font-size: 12px; font-weight: 600;
+  padding: 6px 12px; border-radius: 8px; white-space: nowrap;
+  opacity: 0; pointer-events: none; z-index: 60;
+  transition: opacity .18s ease, transform .18s ease;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+}
+html[data-sidebar="collapsed"] .sidebar-link:hover .sidebar-tooltip,
+html[data-sidebar="collapsed"] .neu-sidebar-nav a:hover .sidebar-tooltip,
+html[data-sidebar="collapsed"] .neu-sidebar-nav button:hover .sidebar-tooltip{
+  opacity: 1; transform: translateY(-50%) translateX(0);
+}
+
+/* Entrance stagger */
+.neu-sidebar > *{ opacity: 0; transform: translateX(-14px); }
+.neu-sidebar.sb-ready > *{ opacity: 1; transform: translateX(0); transition: opacity .5s ease, transform .5s ease; }
+.neu-sidebar.sb-ready > *:nth-child(1){ transition-delay: .05s; }
+.neu-sidebar.sb-ready > *:nth-child(2){ transition-delay: .12s; }
+.neu-sidebar.sb-ready > *:nth-child(3){ transition-delay: .19s; }
+.neu-sidebar.sb-ready > *:nth-child(4){ transition-delay: .26s; }
+
+/* Avatar pulse ring on hover */
+.neu-user-card .sidebar-avatar{ transition: box-shadow .3s ease; }
+.neu-user-card:hover .sidebar-avatar{ box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent,#4f7bff) 30%, transparent); }
+
+/* ===================================================
+   SIDEBAR — full structural rebuild (grouped-card layout)
+=================================================== */
+.sidebar-window-dots{ display:flex; align-items:center; gap:6px; padding: 2px 4px 6px; }
+.sidebar-window-dots .dot{ width:10px; height:10px; border-radius:50%; }
+.dot.red{ background:#ff5f57; } .dot.yellow{ background:#febc2e; } .dot.green{ background:#28c840; }
+.sidebar-window-dots .sidebar-collapse-btn{ margin-left:auto; width:26px; height:26px; }
+html[data-sidebar="collapsed"] .sidebar-window-dots .dot{ display:none; }
+
+.sidebar-group{ display:flex; flex-direction:column; gap:6px; }
+.sidebar-group-label{
+  font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+  color: var(--neu-text-muted); padding: 0 6px;
+}
+html[data-sidebar="collapsed"] .sidebar-group-label{ display:none; }
+
+.sidebar-divider{ height:1px; background: var(--neu-shadow-dark); opacity:.5; margin: 4px 2px; }
+
+.sidebar-settings-row{ display:flex; gap:8px; padding: 0 2px; }
+.sidebar-mini-btn{
+  flex:1; display:flex; align-items:center; justify-content:center;
+  padding: 9px; border-radius: 12px; border:none; cursor:pointer;
+  background: var(--neu-surface); color: var(--neu-text-muted);
+  box-shadow: 3px 3px 7px var(--neu-shadow-dark), -3px -3px 7px var(--neu-shadow-light);
+  transition: box-shadow .2s ease, color .2s ease;
+}
+.sidebar-mini-btn:hover{ color: var(--color-accent, #4f7bff); }
+.sidebar-mini-btn:active{ box-shadow: inset 2px 2px 5px var(--neu-shadow-dark), inset -2px -2px 5px var(--neu-shadow-light); }
+
+.sidebar-fab{
+  margin-top: auto;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  padding: 13px; border-radius: 18px; text-decoration:none;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-accent,#4f7bff) 75%, white), var(--color-accent,#4f7bff));
+  color:#fff; font-weight:600; font-size:14px;
+  box-shadow: 5px 5px 14px var(--neu-shadow-dark), -3px -3px 10px var(--neu-shadow-light);
+  transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease;
+}
+.sidebar-fab:hover{ transform: translateY(-2px); }
+html[data-sidebar="collapsed"] .sidebar-fab .sidebar-fab-label{ display:none; }
+html[data-sidebar="collapsed"] .sidebar-fab{ padding: 13px 0; }
+
+/* ===================================================
+   SIDEBAR — proper card-panel grouping (matches reference)
+=================================================== */
+.sidebar-group{
+  background: var(--neu-surface);
+  border-radius: 18px;
+  padding: 12px 10px;
+  box-shadow: 4px 4px 10px var(--neu-shadow-dark), -4px -4px 10px var(--neu-shadow-light);
+}
+.sidebar-group-label{ padding: 0 4px 6px; }
+.sidebar-divider{ display: none; } /* card panels replace the divider visually */
+
+.neu-sidebar{ justify-content: flex-start; gap: 14px; }
+.sidebar-fab{ margin-top: 4px !important; } /* no longer relies on auto push */
+
+html[data-sidebar="collapsed"] .sidebar-group{ padding: 10px 6px; }
+
+/* ===================================================
+   SIDEBAR — split into icon rail + connected content panel
+=================================================== */
+.neu-sidebar{ flex-direction: row !important; padding: 20px 14px !important; gap: 0 !important; }
+
+.sidebar-icon-rail{
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding-right: 12px; margin-right: 12px;
+  border-right: 1px solid var(--neu-shadow-dark);
+  flex-shrink: 0;
+}
+.sidebar-avatar-mini{ width: 32px; height: 32px; margin-bottom: 6px; }
+.rail-icon-btn{
+  width: 38px; height: 38px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; position: relative;
+  color: var(--neu-text-muted); background: transparent; border: none; cursor: pointer;
+  text-decoration: none; transition: background .2s ease, box-shadow .2s ease, color .2s ease, transform .2s ease;
+}
+.rail-icon-btn:hover{ transform: scale(1.1); color: var(--neu-text); }
+.rail-icon-btn.active{
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-accent,#4f7bff) 75%, white), var(--color-accent,#4f7bff)) !important;
+  color: #fff !important;
+  box-shadow: 3px 3px 8px var(--neu-shadow-dark), -2px -2px 6px var(--neu-shadow-light) !important;
+}
+.rail-spacer{ flex: 1; }
+
+.sidebar-content-panel{ flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+
+html[data-sidebar="collapsed"] .sidebar-content-panel{ display: none; }
+html[data-sidebar="collapsed"] .neu-sidebar{ width: 76px; padding: 20px 8px !important; }
+html[data-sidebar="collapsed"] .sidebar-icon-rail{ border-right: none; margin-right: 0; padding-right: 0; }
+
+/* ===================================================
+   SIDEBAR — separate the rail and panel into two distinct cards
+=================================================== */
+.neu-sidebar{
+  flex-direction: row !important;
+  gap: 10px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 20px 0 20px 20px !important;
+}
+.sidebar-icon-rail{
+  background: var(--neu-surface);
+  border-radius: 22px;
+  box-shadow: 6px 6px 14px var(--neu-shadow-dark), -6px -6px 14px var(--neu-shadow-light);
+  border-right: none !important;
+  margin-right: 0 !important;
+  padding: 16px 10px !important;
+}
+.sidebar-content-panel{
+  background: var(--neu-surface);
+  border-radius: 22px;
+  box-shadow: 6px 6px 14px var(--neu-shadow-dark), -6px -6px 14px var(--neu-shadow-light);
+  padding: 16px 14px;
+}
+html[data-sidebar="collapsed"] .sidebar-content-panel{ display: none; }
+html[data-sidebar="collapsed"] .neu-sidebar{ width: auto; }
+
+/* ===================================================
+   SIDEBAR — tighter rail, wider panel, horizontal alignment
+=================================================== */
+.sidebar-icon-rail{
+  padding: 16px 8px !important;
+  gap: 8px;
+}
+.rail-icon-btn{ width: 34px; height: 34px; }
+.sidebar-avatar-mini{ width: 30px; height: 30px; }
+
+.sidebar-content-panel{ min-width: 168px; padding: 16px 12px !important; }
+.neu-sidebar-nav a{ padding: 10px 10px !important; }
+.sidebar-fab{ padding: 11px !important; }
+
+/* ---------- FIX: real dark mode — restore page-level background,
+   properly scoped so it can't wash out light theme again ---------- */
+html[data-theme="dark"] body[data-page],
+html:not([data-theme="dark"]) body[data-page]{
+  background: var(--neu-bg) !important;
+}
+html[data-theme="dark"] body[data-page="marketplace"]{
+  background: #26282f !important;
+}
+
+/* ---------- Rail/label alignment: account for MENU heading height ---------- */
+.rail-label-spacer{ height: 18px; }
+
+/* ---------- Dark mode contrast pass: real separation, not near-black flatness ---------- */
+[data-theme="dark"]{
+  --neu-bg: #23262d;
+  --neu-surface: #2b2e36;
+  --neu-shadow-dark: #181a1f;
+  --neu-shadow-light: #363a43;
+}
+[data-theme="dark"] .gig-filter-chip:not(.active),
+[data-theme="dark"] .cat-pill:not(.active){
+  background: #323640 !important;
+  color: #c3c8d1 !important;
+  box-shadow: 3px 3px 7px #181a1f, -3px -3px 7px #3a3e48 !important;
+}
+[data-theme="dark"] #marketAdSlot,
+[data-theme="dark"] .listing-card{
+  background: #2b2e36 !important;
+  box-shadow: 6px 6px 14px #181a1f, -6px -6px 14px #363a43 !important;
+}
+[data-theme="dark"] .sidebar-icon-rail,
+[data-theme="dark"] .sidebar-content-panel{
+  box-shadow: 6px 6px 14px #14161a, -6px -6px 14px #34373f !important;
+}
+[data-theme="dark"] .auth-parallax-blob{ opacity: .18 !important; }
+
+/* ---------- Labeled theme button in content panel ---------- */
+.theme-label-btn{
+  display:flex; align-items:center; gap:12px;
+  padding: 10px 10px; border-radius: 14px;
+  color: var(--neu-text-muted); background: transparent; border:none; cursor:pointer;
+  font-size: 14px; font-weight: 500; width: 100%;
+  transition: box-shadow .2s ease, color .2s ease;
+}
+.theme-label-btn:hover{
+  background: var(--neu-surface);
+  box-shadow: 3px 3px 6px var(--neu-shadow-dark), -3px -3px 6px var(--neu-shadow-light);
+  color: var(--neu-text);
+}
+
+/* ---------- Force real grey (not near-black) at the root level ---------- */
+html[data-theme="dark"]{ background: #23262d !important; }
+html[data-theme="dark"] body{ background: #23262d !important; }
+html[data-theme="dark"] body[data-page="marketplace"],
+html[data-theme="dark"] body[data-page="marketplace"] main,
+html[data-theme="dark"] body[data-page="marketplace"] .app-push-content,
+html[data-theme="dark"] body[data-page="marketplace"] .auth-page-shell{
+  background: #23262d !important;
+}
+
+/* ---------- Clamp horizontal overflow so nothing pushes the page right ---------- */
+html, body{ max-width: 100%; overflow-x: hidden !important; }
+.app-shell-flex{ max-width: 100vw; overflow-x: hidden; }
+
+/* ===================================================
+   SIDEBAR — dark rail (fixed dark regardless of theme), all actions flattened into panel
+=================================================== */
+.sidebar-icon-rail{
+  background: #1a1c22 !important;
+  box-shadow: 6px 6px 14px rgba(0,0,0,0.25), -4px -4px 10px rgba(255,255,255,0.03) !important;
+}
+.rail-icon-btn{ color: #8a8f9a; }
+.rail-icon-btn:hover{ color: #fff; }
+.rail-icon-btn.active{
+  background: linear-gradient(135deg, #6ee7a0, #22c55e) !important;
+  color: #0a0e08 !important;
+}
+.sidebar-avatar-mini{ box-shadow: 0 0 0 2px #1a1c22, 0 0 0 3px #3a3d45; }
+
+.sidebar-theme-btn-inline, .sidebar-logout-item{
+  display:flex; align-items:center; padding: 10px 12px; border-radius: 14px;
+  color: var(--neu-text-muted); background: transparent; border:none; cursor:pointer;
+  font-size: 14px; font-weight: 500; width: 100%; text-align:left;
+  transition: box-shadow .2s ease, color .2s ease;
+}
+.sidebar-theme-btn-inline:hover, .sidebar-logout-item:hover{
+  background: var(--neu-surface);
+  box-shadow: 3px 3px 6px var(--neu-shadow-dark), -3px -3px 6px var(--neu-shadow-light);
+  color: var(--neu-text);
+}
+.sidebar-logout-item:hover{ color: #ef4444; }
+
+/* ===================================================
+   MOBILE — floating pill topbar
+=================================================== */
+.mobile-auth-topbar-pill{
+  position: fixed; top: 14px; left: 14px; right: 14px; z-index: 50;
+  display: none;
+  align-items: center; justify-content: space-between;
+  padding: 10px 14px; border-radius: 999px;
+  background: color-mix(in srgb, var(--neu-bg) 85%, transparent);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 1px 0 rgba(255,255,255,0.4) inset;
+}
+@media (max-width: 900px){
+  .mobile-auth-topbar-pill{ display: flex; }
+  .app-shell-with-sidebar{ padding-top: 70px; }
+}
+.pill-burger{
+  width: 34px; height: 34px; border-radius: 50%; border:none; cursor:pointer;
+  background: var(--neu-surface);
+  box-shadow: 3px 3px 7px var(--neu-shadow-dark), -3px -3px 7px var(--neu-shadow-light);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+}
+.pill-burger span{ width:14px; height:2px; background: var(--neu-text); border-radius:2px; }
+.pill-brand{ display:flex; align-items:center; gap:8px; text-decoration:none; color: var(--neu-text); font-weight:600; font-size:14px; }
+.pill-avatar{
+  width: 32px; height: 32px; border-radius: 50%; overflow:hidden;
+  background: var(--color-accent,#4f7bff); color:#fff; display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:12px;
+}
+.pill-avatar img{ width:100%; height:100%; object-fit:cover; }
+
+/* ===================================================
+   MOBILE — "reveal" menu: page shrinks/rounds/slides aside,
+   menu panel sits fixed behind it at all times
+=================================================== */
+@media (max-width: 900px){
+  #mobileNavDrawer{
+    position: fixed; inset: 0; z-index: 1;
+    background: linear-gradient(160deg, color-mix(in srgb, var(--color-accent,#4f7bff) 80%, black), var(--color-accent,#4f7bff));
+    color: #fff;
+    padding: 70px 22px 24px;
+    display: flex; flex-direction: column; gap: 8px;
+    transform: none !important;
+  }
+  #mobileNavDrawer .gn-profile-card{ background: rgba(255,255,255,0.12); }
+  #mobileNavDrawer .gn-profile-name, #mobileNavDrawer .gn-item, #mobileNavDrawer .gn-cta{ color: #fff !important; }
+  #mobileNavDrawer .gn-profile-link{ color: rgba(255,255,255,0.75) !important; }
+  #mobileNavDrawer .gn-item:hover{ background: rgba(255,255,255,0.1); }
+  #mobileNavDrawer .gn-divider{ background: rgba(255,255,255,0.2); }
+
+  .app-shell-with-sidebar{
+    position: relative; z-index: 2;
+    background: var(--neu-bg);
+    min-height: 100vh;
+    transition: transform .45s cubic-bezier(.25,1,.4,1), border-radius .45s ease, box-shadow .45s ease;
+  }
+  .app-push-content.gn-content-open ~ *,
+  .app-shell-with-sidebar:has(.app-push-content.gn-content-open){
+    transform: translateX(78%) scale(0.86);
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: -14px 0 40px rgba(0,0,0,0.3);
+  }
+  body.gn-lock{ overflow: hidden; }
+
+  .pill-burger span{ transition: transform .3s ease, opacity .3s ease; }
+  .pill-burger.gn-open span:nth-child(1){ transform: translateY(5px) rotate(45deg); }
+  .pill-burger.gn-open span:nth-child(2){ opacity: 0; }
+  .pill-burger.gn-open span:nth-child(3){ transform: translateY(-5px) rotate(-45deg); }
+}
+
+/* ---------- Reveal menu fix: direct class toggle instead of :has() (unsupported on older mobile browsers) ---------- */
+@media (max-width: 900px){
+  .app-shell-with-sidebar.gn-content-open{
+    transform: translateX(78%) scale(0.86) !important;
+    border-radius: 28px !important;
+    overflow: hidden !important;
+    box-shadow: -14px 0 40px rgba(0,0,0,0.3) !important;
+  }
+}
+
+/* ---------- Menu open: hide topbar pill entirely, force solid readable drawer bg ---------- */
+@media (max-width: 900px){
+  .mobile-auth-topbar-pill.pill-hidden{
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity .25s ease;
+  }
+  #mobileNavDrawer{
+    background: linear-gradient(160deg, #1b1e3a, #2e2470, #4c3fd9) !important;
+  }
+  #mobileNavDrawer .gn-profile-name,
+  #mobileNavDrawer .gn-item span:not(.gn-item-icon),
+  #mobileNavDrawer .gn-item-icon{
+    color: #fff !important;
+  }
+}
+
+/* ---------- Menu redesign per feedback: flat color, plain icons, internal scroll ---------- */
+@media (max-width: 900px){
+  #mobileNavDrawer{
+    background: var(--color-accent, #4f7bff) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    height: 100vh !important;
+  }
+  #mobileNavDrawer .gn-item-icon{
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    width: auto !important;
+    height: auto !important;
+  }
+  #mobileNavDrawer .gn-item,
+  #mobileNavDrawer .gn-cta,
+  #mobileNavDrawer .gn-theme-btn-inline{
+    color: #fff !important;
+  }
+  #mobileNavDrawer .gn-item-icon i{ color: #fff !important; }
+  #mobileNavDrawer .gn-profile-card{ background: rgba(255,255,255,0.15) !important; }
+  #mobileNavDrawer .gn-profile-link{ color: rgba(255,255,255,0.8) !important; }
+  #mobileNavDrawer .gn-divider{ background: rgba(255,255,255,0.25) !important; }
+  #mobileNavDrawer .gn-avatar-ring{ background: rgba(255,255,255,0.2) !important; color: #fff !important; }
+}
+
+/* ---------- Fix: pin the shrunk card itself, only its content scrolls; full-bleed accent behind it; tighter shadow ---------- */
+@media (max-width: 900px){
+  body.gn-lock{
+    background: var(--color-accent, #4f7bff) !important;
+  }
+  .app-shell-with-sidebar.gn-content-open{
+    position: fixed !important;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    box-shadow: 3px 3px 10px rgba(0,0,0,0.15) !important;
+  }
+}
+
+/* ===================================================
+   FINAL FIX — remove conflicting fixed+transform (was causing the
+   white sliver/background gap), go fully flat per reference image
+=================================================== */
+@media (max-width: 900px){
+  .app-shell-with-sidebar.gn-content-open{
+    position: static !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    box-shadow: none !important;
+  }
+
+  #mobileNavDrawer{
+    padding: 70px 30px 24px !important;
+  }
+  #mobileNavDrawer .gn-profile-card{
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 0 20px 0 !important;
+  }
+  #mobileNavDrawer .gn-avatar-ring{
+    background: transparent !important;
+    border: 2px solid rgba(255,255,255,0.6) !important;
+    box-shadow: none !important;
+  }
+  #mobileNavDrawer .gn-item,
+  #mobileNavDrawer .gn-theme-btn-inline,
+  #mobileNavDrawer .gn-cta{
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  #mobileNavDrawer .gn-item:hover,
+  #mobileNavDrawer .gn-theme-btn-inline:hover{
+    background: rgba(255,255,255,0.08) !important;
+  }
+}
+
+/* ---------- Guarantee purple is the backdrop at the true root level, no gaps ---------- */
+html.gn-lock-html{
+  background: var(--color-accent, #4f7bff) !important;
+}
+
+/* ===================================================
+   CONSOLIDATED FINAL — mobile reveal menu, single source of truth
+=================================================== */
+@media (max-width: 900px){
+  .app-shell-with-sidebar.gn-content-open{
+    position: static !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    transform: translateX(20vw) scale(0.86) !important;
+    transform-origin: right center !important;
+    border-radius: 28px !important;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.3) !important;
+  }
+}
+
+/* ===================================================
+   TRUE FINAL — margin-based positioning (guaranteed on-screen),
+   simple scale for the rounded-corner shrink effect
+=================================================== */
+@media (max-width: 900px){
+  .app-shell-with-sidebar.gn-content-open{
+    margin-left: 22vw !important;
+    width: 78vw !important;
+    position: static !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    transform: scale(0.94) !important;
+    transform-origin: center !important;
+    border-radius: 28px !important;
+    box-shadow: -8px 0 24px rgba(0,0,0,0.25) !important;
+    transition: margin-left .4s ease, transform .4s ease, border-radius .4s ease;
+  }
+}
