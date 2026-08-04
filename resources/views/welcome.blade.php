@@ -2,8 +2,8 @@
 @section('content')
 
 {{-- ===== HERO with roll-up reveal ===== --}}
-<section class="max-w-6xl mx-auto px-4 pt-10 pb-4">
-    <div class="relative w-full h-[420px] md:h-[600px] rounded-3xl overflow-hidden bg-white shadow-xl" id="heroReveal">
+<section class="w-full">
+    <div class="relative w-full h-[480px] md:h-[750px] lg:h-[850px] overflow-hidden bg-white" id="heroReveal">
 
         <video autoplay muted loop playsinline
             class="absolute inset-0 w-full h-full object-cover"
@@ -11,21 +11,31 @@
         </video>
 
         <div id="heroCover" class="absolute inset-x-0 top-0 bg-white z-30 flex flex-col items-center justify-center text-center px-6" style="height:100%;">
-            <p class="text-gray-400 text-xs tracking-widest mb-2" id="heroEyebrow">CAMPULSY</p>
-            <h1 class="text-gray-900 text-2xl md:text-4xl font-bold leading-tight max-w-lg" id="heroHeadline">Work, sell, get paid.<br>All in one place.</h1>
+            <div id="heroWindow" class="rounded-full overflow-hidden shadow-lg mb-4" style="width:70px; height:70px;">
+                <video autoplay muted loop playsinline
+                    class="w-full h-full object-cover"
+                    src="{{ asset('videos/hero.mp4') }}">
+                </video>
+            </div>
+            <p class="text-gray-400 text-xs tracking-widest mb-2">CAMPULSY</p>
+            <h1 class="text-gray-900 text-2xl md:text-4xl font-bold leading-tight max-w-lg">Work, sell, get paid.<br>All in one place.</h1>
         </div>
 
-        <div id="heroCard1" class="hero-anim-card absolute bg-white/95 backdrop-blur shadow-xl rounded-2xl p-4 text-sm z-20" style="top:22%; left:8%;">
-            <p class="text-gray-400 text-xs">Active gigs</p>
-            <p class="font-semibold text-indigo-600 text-lg">128+</p>
-        </div>
-        <div id="heroCard2" class="hero-anim-card absolute bg-white/95 backdrop-blur shadow-xl rounded-2xl p-4 text-sm z-20" style="top:55%; right:8%;">
-            <p class="text-gray-400 text-xs">This month</p>
-            <p class="font-semibold text-lg">+₦8,400</p>
-        </div>
-        <div id="heroCard3" class="hero-anim-card absolute bg-white/95 backdrop-blur shadow-xl rounded-2xl p-4 text-sm z-20" style="bottom:10%; left:10%;">
-            <p class="text-gray-400 text-xs">Wallet</p>
-            <a href="{{ route('register') }}" class="font-semibold text-gray-900">Get Started →</a>
+        <div id="heroCardWrap" class="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 pointer-events-none">
+            <div class="flex gap-3">
+                <div id="heroCard1" class="hero-anim-card bg-white/95 backdrop-blur shadow-xl rounded-2xl p-4 text-sm">
+                    <p class="text-gray-400 text-xs">Active gigs</p>
+                    <p class="font-semibold text-indigo-600 text-lg">128+</p>
+                </div>
+                <div id="heroCard2" class="hero-anim-card bg-white/95 backdrop-blur shadow-xl rounded-2xl p-4 text-sm">
+                    <p class="text-gray-400 text-xs">This month</p>
+                    <p class="font-semibold text-lg">+₦8,400</p>
+                </div>
+            </div>
+            <div id="heroCard3" class="hero-anim-card bg-white/95 backdrop-blur shadow-xl rounded-2xl p-4 text-sm pointer-events-auto">
+                <p class="text-gray-400 text-xs">Wallet</p>
+                <a href="{{ route('register') }}" class="font-semibold text-gray-900">Get Started →</a>
+            </div>
         </div>
 
     </div>
@@ -34,9 +44,6 @@
 <style>
 #heroCover {
     transition: height 1.3s cubic-bezier(0.65, 0, 0.35, 1);
-}
-#heroHeadline {
-    transition: font-size 1.3s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.6s ease;
 }
 .hero-anim-card {
     opacity: 0;
@@ -52,19 +59,17 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const cover = document.getElementById('heroCover');
-    const headline = document.getElementById('heroHeadline');
     const card1 = document.getElementById('heroCard1');
     const card2 = document.getElementById('heroCard2');
     const card3 = document.getElementById('heroCard3');
 
     setTimeout(function () {
         cover.style.height = '20%';
-        headline.style.fontSize = '';
     }, 400);
 
     setTimeout(function () { card1.classList.add('show'); }, 1600);
-    setTimeout(function () { card2.classList.add('show'); }, 1900);
-    setTimeout(function () { card3.classList.add('show'); }, 2200);
+    setTimeout(function () { card2.classList.add('show'); }, 1800);
+    setTimeout(function () { card3.classList.add('show'); }, 2000);
 });
 </script>
 
