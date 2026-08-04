@@ -1,33 +1,31 @@
 @extends('layouts.landing')
 @section('content')
 
-{{-- ===== HERO with reveal cover over video ===== --}}
-<section class="relative w-full h-[180vh] bg-white" id="heroSection">
-
-    <div class="sticky top-0 w-full h-screen overflow-hidden">
+{{-- ===== HERO with roll-up reveal ===== --}}
+<section class="max-w-6xl mx-auto px-4 pt-10 pb-4">
+    <div class="relative w-full h-[420px] md:h-[600px] rounded-3xl overflow-hidden bg-white shadow-xl" id="heroReveal">
 
         <video autoplay muted loop playsinline
             class="absolute inset-0 w-full h-full object-cover"
             src="{{ asset('videos/hero.mp4') }}">
         </video>
 
-        <div class="absolute inset-0 bg-black/40"></div>
+        <div id="heroCover" class="absolute inset-x-0 top-0 bg-white z-30 flex flex-col items-center justify-center text-center px-6" style="height:100%;">
+            <p class="text-gray-400 text-xs tracking-widest mb-2" id="heroEyebrow">CAMPULSY</p>
+            <h1 class="text-gray-900 text-2xl md:text-4xl font-bold leading-tight max-w-lg" id="heroHeadline">Work, sell, get paid.<br>All in one place.</h1>
+        </div>
 
-        <div id="heroCover" class="absolute inset-x-0 top-0 bg-white z-30" style="height:80%;">
-            <div class="absolute inset-0 flex flex-col items-start justify-center text-left px-8 md:px-16">
-                <p class="text-gray-500 text-sm tracking-widest mb-3">CAMPULSY</p>
-                <h1 class="text-gray-900 text-3xl md:text-5xl font-bold leading-tight max-w-md">Work, sell, get paid.<br>All in one place.</h1>
-                <a href="{{ route('register') }}" class="mt-8 px-8 py-3 rounded-full bg-gray-900 text-white font-semibold w-max">Get Started</a>
-
-                <div id="heroCard1" class="hero-anim-card absolute bg-white shadow-xl rounded-2xl p-4 text-sm" style="top:20%; right:10%;">
-                    <p class="text-gray-400 text-xs">This Month</p>
-                    <p class="font-semibold text-indigo-600">+₦8,400</p>
-                </div>
-                <div id="heroCard2" class="hero-anim-card absolute bg-white shadow-xl rounded-2xl p-4 text-sm" style="top:55%; right:20%;">
-                    <p class="text-gray-400 text-xs">Referrals</p>
-                    <p class="font-semibold">14 active</p>
-                </div>
-            </div>
+        <div id="heroCard1" class="hero-anim-card absolute bg-white/95 backdrop-blur shadow-xl rounded-2xl p-4 text-sm z-20" style="top:22%; left:8%;">
+            <p class="text-gray-400 text-xs">Active gigs</p>
+            <p class="font-semibold text-indigo-600 text-lg">128+</p>
+        </div>
+        <div id="heroCard2" class="hero-anim-card absolute bg-white/95 backdrop-blur shadow-xl rounded-2xl p-4 text-sm z-20" style="top:55%; right:8%;">
+            <p class="text-gray-400 text-xs">This month</p>
+            <p class="font-semibold text-lg">+₦8,400</p>
+        </div>
+        <div id="heroCard3" class="hero-anim-card absolute bg-white/95 backdrop-blur shadow-xl rounded-2xl p-4 text-sm z-20" style="bottom:10%; left:10%;">
+            <p class="text-gray-400 text-xs">Wallet</p>
+            <a href="{{ route('register') }}" class="font-semibold text-gray-900">Get Started →</a>
         </div>
 
     </div>
@@ -35,12 +33,15 @@
 
 <style>
 #heroCover {
-    transition: height 0.1s linear, opacity 0.2s linear;
+    transition: height 1.3s cubic-bezier(0.65, 0, 0.35, 1);
+}
+#heroHeadline {
+    transition: font-size 1.3s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.6s ease;
 }
 .hero-anim-card {
     opacity: 0;
     transform: translateY(20px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
+    transition: opacity 0.6s ease, transform 0.6s ease;
 }
 .hero-anim-card.show {
     opacity: 1;
@@ -50,35 +51,20 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const heroSection = document.getElementById('heroSection');
-    const heroCover = document.getElementById('heroCover');
+    const cover = document.getElementById('heroCover');
+    const headline = document.getElementById('heroHeadline');
     const card1 = document.getElementById('heroCard1');
     const card2 = document.getElementById('heroCard2');
+    const card3 = document.getElementById('heroCard3');
 
-    function onScroll() {
-        const rect = heroSection.getBoundingClientRect();
-        const total = heroSection.offsetHeight - window.innerHeight;
-        const scrolled = Math.min(Math.max(-rect.top, 0), total);
-        const progress = total > 0 ? scrolled / total : 0;
+    setTimeout(function () {
+        cover.style.height = '20%';
+        headline.style.fontSize = '';
+    }, 400);
 
-        const coverHeight = Math.max(80 - progress * 80, 0);
-        heroCover.style.height = coverHeight + '%';
-        heroCover.style.opacity = progress > 0.85 ? (1 - (progress - 0.85) / 0.15) : 1;
-
-        if (progress > 0.3) {
-            card1.classList.add('show');
-        } else {
-            card1.classList.remove('show');
-        }
-        if (progress > 0.5) {
-            card2.classList.add('show');
-        } else {
-            card2.classList.remove('show');
-        }
-    }
-
-    window.addEventListener('scroll', onScroll);
-    onScroll();
+    setTimeout(function () { card1.classList.add('show'); }, 1600);
+    setTimeout(function () { card2.classList.add('show'); }, 1900);
+    setTimeout(function () { card3.classList.add('show'); }, 2200);
 });
 </script>
 
