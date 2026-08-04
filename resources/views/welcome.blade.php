@@ -2,39 +2,57 @@
 @section('content')
 
 {{-- ===== HERO with roll-up reveal ===== --}}
-<section class="w-full">
-    <div class="relative w-full h-[480px] md:h-[750px] lg:h-[850px] overflow-hidden bg-white" id="heroReveal">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<section class="w-full px-0 pt-0">
+    <div class="relative w-full h-[520px] sm:h-[600px] lg:h-[760px] xl:h-[860px] overflow-hidden bg-white" id="heroReveal">
 
         <video autoplay muted loop playsinline
             class="absolute inset-0 w-full h-full object-cover"
             src="{{ asset('videos/hero.mp4') }}">
         </video>
 
-        <div id="heroCover" class="absolute inset-x-0 top-0 bg-white z-30 flex flex-col items-center justify-center text-center px-6" style="height:100%;">
-            <div id="heroWindow" class="rounded-full overflow-hidden shadow-lg mb-4" style="width:70px; height:70px;">
-                <video autoplay muted loop playsinline
-                    class="w-full h-full object-cover"
-                    src="{{ asset('videos/hero.mp4') }}">
-                </video>
-            </div>
-            <p class="text-gray-400 text-xs tracking-widest mb-2">CAMPULSY</p>
-            <h1 class="text-gray-900 text-2xl md:text-4xl font-bold leading-tight max-w-lg">Work, sell, get paid.<br>All in one place.</h1>
+        <div class="absolute inset-x-0 top-6 flex items-center justify-between px-6 md:px-12 z-40">
+            <span class="text-white text-sm font-semibold tracking-wide font-hero">CAMPULSY</span>
+            <a href="{{ route('login') }}" class="text-white/80 text-xs px-4 py-2 rounded-full border border-white/30">Login / Sign up</a>
         </div>
 
-        <div id="heroCardWrap" class="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 pointer-events-none">
-            <div class="flex gap-3">
-                <div id="heroCard1" class="hero-anim-card bg-white/95 backdrop-blur shadow-xl rounded-2xl p-4 text-sm">
-                    <p class="text-gray-400 text-xs">Active gigs</p>
-                    <p class="font-semibold text-indigo-600 text-lg">128+</p>
+        <div id="heroCenterCard" class="hero-anim-card absolute z-30 bg-black/35 backdrop-blur-md border border-white/15 rounded-2xl p-5 text-white" style="top:50%; left:50%; width:min(90%,420px); transform:translate(-50%,-50%) translateY(20px);">
+            <p class="text-sm font-semibold mb-3 font-hero">Campus Snapshot</p>
+            <div class="grid grid-cols-2 gap-2 mb-2">
+                <div class="bg-white/10 rounded-xl p-3">
+                    <p class="text-[11px] text-white/60 mb-1">Active Gigs</p>
+                    <p class="text-2xl font-bold font-hero">128+</p>
                 </div>
-                <div id="heroCard2" class="hero-anim-card bg-white/95 backdrop-blur shadow-xl rounded-2xl p-4 text-sm">
-                    <p class="text-gray-400 text-xs">This month</p>
-                    <p class="font-semibold text-lg">+₦8,400</p>
+                <div class="bg-white/10 rounded-xl p-3">
+                    <p class="text-[11px] text-white/60 mb-1">Listings</p>
+                    <p class="text-2xl font-bold font-hero">340+</p>
                 </div>
             </div>
-            <div id="heroCard3" class="hero-anim-card bg-white/95 backdrop-blur shadow-xl rounded-2xl p-4 text-sm pointer-events-auto">
-                <p class="text-gray-400 text-xs">Wallet</p>
-                <a href="{{ route('register') }}" class="font-semibold text-gray-900">Get Started →</a>
+            <div class="bg-white/10 rounded-xl p-3">
+                <p class="text-[11px] text-white/60 mb-1">Wallet Payout</p>
+                <p class="text-lg font-bold font-hero">₦20,000.50 <span class="text-xs text-white/50 font-normal">available now</span></p>
+            </div>
+        </div>
+
+        <div id="heroSideLeft" class="hero-anim-card absolute z-30 text-white/50 text-sm max-w-[160px] leading-snug" style="top:38%; left:6%; transform:translateY(20px);">
+            Built for students hustling on campus, not idle browsing.
+        </div>
+
+        <div id="heroSideRight" class="hero-anim-card absolute z-30 text-white/50 text-sm max-w-[160px] leading-snug text-right" style="top:58%; right:6%; transform:translateY(20px);">
+            Every gig, sale, and payout tracked in real time.
+        </div>
+
+        <div id="heroBottomText" class="hero-anim-card absolute z-30 left-6 md:left-12 bottom-10 md:bottom-14 text-white" style="transform:translateY(20px);">
+            <h2 class="text-2xl md:text-4xl font-bold leading-tight font-hero">Real gigs. Real money.<br>All in one place.</h2>
+        </div>
+
+        <div id="heroCover" class="absolute inset-x-0 top-0 bg-white z-50 flex items-center justify-center text-center px-6" style="height:100%;">
+            <div id="heroHeadlineWrap" style="opacity:0;">
+                <p class="text-gray-400 text-xs tracking-widest mb-2 font-hero">CAMPULSY</p>
+                <h1 class="text-gray-900 text-2xl md:text-4xl font-bold leading-tight max-w-lg font-hero">Work, sell, get paid.<br>All in one place.</h1>
             </div>
         </div>
 
@@ -42,34 +60,64 @@
 </section>
 
 <style>
+.font-hero { font-family: 'Sora', sans-serif; }
+
 #heroCover {
-    transition: height 1.3s cubic-bezier(0.65, 0, 0.35, 1);
+    transition: height 1.6s cubic-bezier(0.65, 0, 0.35, 1);
+}
+#heroHeadlineWrap {
+    transition: opacity 0.8s ease;
 }
 .hero-anim-card {
     opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
+    transition: opacity 0.9s ease, transform 0.9s ease;
 }
 .hero-anim-card.show {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate(-50%,-50%) translateY(0) !important;
+}
+#heroSideLeft.show, #heroSideRight.show, #heroBottomText.show {
+    opacity: 0.85;
+    transform: translateY(0) !important;
 }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const cover = document.getElementById('heroCover');
-    const card1 = document.getElementById('heroCard1');
-    const card2 = document.getElementById('heroCard2');
-    const card3 = document.getElementById('heroCard3');
+    const headlineWrap = document.getElementById('heroHeadlineWrap');
+    const centerCard = document.getElementById('heroCenterCard');
+    const sideLeft = document.getElementById('heroSideLeft');
+    const sideRight = document.getElementById('heroSideRight');
+    const bottomText = document.getElementById('heroBottomText');
+    const heroReveal = document.getElementById('heroReveal');
+
+    let scrollTakeover = false;
 
     setTimeout(function () {
         cover.style.height = '20%';
-    }, 400);
+    }, 500);
 
-    setTimeout(function () { card1.classList.add('show'); }, 1600);
-    setTimeout(function () { card2.classList.add('show'); }, 1800);
-    setTimeout(function () { card3.classList.add('show'); }, 2000);
+    cover.addEventListener('transitionend', function (e) {
+        if (e.propertyName === 'height' && !scrollTakeover) {
+            headlineWrap.style.opacity = '1';
+            setTimeout(function () { centerCard.classList.add('show'); }, 500);
+            setTimeout(function () { sideLeft.classList.add('show'); }, 1300);
+            setTimeout(function () { sideRight.classList.add('show'); }, 2000);
+            setTimeout(function () { bottomText.classList.add('show'); }, 2700);
+        }
+    });
+
+    window.addEventListener('scroll', function () {
+        const rect = heroReveal.getBoundingClientRect();
+        const scrolled = Math.min(Math.max(-rect.top, 0), 300);
+        if (scrolled > 0) {
+            scrollTakeover = true;
+            const pct = 20 - (scrolled / 300) * 20;
+            cover.style.transition = 'none';
+            cover.style.height = Math.max(pct, 0) + '%';
+        }
+    });
 });
 </script>
 
