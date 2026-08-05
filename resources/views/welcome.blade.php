@@ -108,6 +108,7 @@ document.addEventListener('DOMContentLoaded', function () {
             unlocked = true;
             locked = false;
             document.body.style.overflow = '';
+            document.body.classList.add('sn-over-video');
         }
     }
 

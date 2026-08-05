@@ -4,7 +4,7 @@
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 35%, var(--color-surface)) 0%, color-mix(in srgb, var(--color-accent) 12%, var(--color-surface)) 100%);
-  padding: 3rem 1.5rem 5rem;
+  padding: 3.6rem 1.5rem 6rem;
   margin-bottom: -2.5rem;
 }
 .gigs-hero-curve {
@@ -90,7 +90,7 @@
 
 @media (max-width: 768px) {
   .gigs-hero-inner { grid-template-columns: 1fr; }
-  .gigs-hero-band { padding: 2rem 1rem; }
+  .gigs-hero-band { padding: 2.4rem 1rem; }
 }
 
 /* === Search by Category section === */
