@@ -11,7 +11,7 @@
             <a href="{{ route('marketplace.index') }}">Marketplace</a>
             <a href="{{ route('pulse.index') }}">Pulse</a>
             <a href="{{ route('features') }}">Features</a>
-            <a href="{{ route('login') }}">Log In</a>
+            <a href="{{ route('login') }}" class="sn-login-btn">Log In</a>
             <a href="{{ route('register') }}" class="sn-cta-pill">Get Started</a>
         </div>
 
@@ -42,3 +42,18 @@
 </aside>
 
 <script src="{{ asset('js/site-nav.js') }}?v={{ time() }}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const bar = document.getElementById('snBar');
+    function onScroll() {
+        if (window.scrollY > 80) {
+            bar.classList.add('sn-scrolled');
+        } else {
+            bar.classList.remove('sn-scrolled');
+        }
+    }
+    window.addEventListener('scroll', onScroll);
+    onScroll();
+});
+</script>
