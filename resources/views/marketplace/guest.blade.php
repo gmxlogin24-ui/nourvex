@@ -95,7 +95,7 @@ body[data-page="marketplace"] {
 }
 
 /* Full-bleed hero slider */
-.mg-hero { position: relative; width: 100vw; left: 50%; margin-left: -50vw; min-height: 384px; overflow: hidden; margin-bottom: 2rem; }
+.mg-hero { position: relative; width: 100vw; left: 50%; margin-left: -50vw; min-height: 448px; overflow: hidden; margin-bottom: 2rem; }
 .mg-slide { position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: opacity .6s ease; text-decoration: none; color: #fff; }
 .mg-slide.active { opacity: 1; visibility: visible; z-index: 1; }
 .mg-slide img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
