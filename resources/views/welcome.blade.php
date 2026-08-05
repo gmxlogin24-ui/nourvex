@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 {{-- NOTE: pt-16 assumes a ~64px top navbar. Adjust this value if your nav is taller/shorter or not fixed. --}}
-<section class="w-full pt-16">
+<section class="w-full">
     <div class="relative w-full h-screen sm:h-[600px] lg:h-[760px] xl:h-[860px] overflow-hidden bg-white" id="heroReveal">
 
         <video autoplay muted loop playsinline
