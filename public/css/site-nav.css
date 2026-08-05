@@ -143,3 +143,20 @@ body.sn-lock{ overflow:hidden; }
     border-bottom-color: rgba(255,255,255,0.08) !important;
   }
 }
+
+@media (min-width:768px){
+  .sn-bar:not(.sn-scrolled) .sn-links-desktop a,
+  [data-theme="dark"] .sn-bar:not(.sn-scrolled) .sn-links-desktop a{
+    color: var(--color-text,#1c1c1e) !important;
+    opacity: 0.8 !important;
+  }
+  .sn-bar:not(.sn-scrolled) .sn-logo,
+  [data-theme="dark"] .sn-bar:not(.sn-scrolled) .sn-logo{
+    color: var(--color-text,#1c1c1e) !important;
+  }
+  .sn-bar:not(.sn-scrolled) .sn-login-btn,
+  [data-theme="dark"] .sn-bar:not(.sn-scrolled) .sn-login-btn{
+    border: 1px solid rgba(0,0,0,0.2) !important;
+    color: var(--color-text,#1c1c1e) !important;
+  }
+}
