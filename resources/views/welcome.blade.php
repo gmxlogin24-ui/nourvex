@@ -6,8 +6,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<section class="w-full px-0 pt-0">
-    <div class="relative w-full h-[520px] sm:h-[600px] lg:h-[760px] xl:h-[860px] overflow-hidden bg-white" id="heroReveal">
+{{-- NOTE: pt-16 assumes a ~64px top navbar. Adjust this value if your nav is taller/shorter or not fixed. --}}
+<section class="w-full pt-16">
+    <div class="relative w-full h-screen sm:h-[600px] lg:h-[760px] xl:h-[860px] overflow-hidden bg-white" id="heroReveal">
 
         <video autoplay muted loop playsinline
             class="absolute inset-0 w-full h-full object-cover"
@@ -19,38 +20,11 @@
             <a href="{{ route('login') }}" class="text-white/80 text-xs px-4 py-2 rounded-full border border-white/30">Login / Sign up</a>
         </div>
 
-        <div id="heroCenterCard" class="hero-anim-card absolute z-30 bg-black/35 backdrop-blur-md border border-white/15 rounded-2xl p-5 text-white" style="top:50%; left:50%; width:min(90%,420px); transform:translate(-50%,-50%) translateY(20px);">
-            <p class="text-sm font-semibold mb-3 font-hero">Campus Snapshot</p>
-            <div class="grid grid-cols-2 gap-2 mb-2">
-                <div class="bg-white/10 rounded-xl p-3">
-                    <p class="text-[11px] text-white/60 mb-1">Active Gigs</p>
-                    <p class="text-2xl font-bold font-hero">128+</p>
-                </div>
-                <div class="bg-white/10 rounded-xl p-3">
-                    <p class="text-[11px] text-white/60 mb-1">Listings</p>
-                    <p class="text-2xl font-bold font-hero">340+</p>
-                </div>
-            </div>
-            <div class="bg-white/10 rounded-xl p-3">
-                <p class="text-[11px] text-white/60 mb-1">Wallet Payout</p>
-                <p class="text-lg font-bold font-hero">₦20,000.50 <span class="text-xs text-white/50 font-normal">available now</span></p>
-            </div>
-        </div>
-
-        <div id="heroSideLeft" class="hero-anim-card absolute z-30 text-white/50 text-sm max-w-[160px] leading-snug" style="top:38%; left:6%; transform:translateY(20px);">
-            Built for students hustling on campus, not idle browsing.
-        </div>
-
-        <div id="heroSideRight" class="hero-anim-card absolute z-30 text-white/50 text-sm max-w-[160px] leading-snug text-right" style="top:58%; right:6%; transform:translateY(20px);">
-            Every gig, sale, and payout tracked in real time.
-        </div>
-
-        <div id="heroBottomText" class="hero-anim-card absolute z-30 left-6 md:left-12 bottom-10 md:bottom-14 text-white" style="transform:translateY(20px);">
-            <h2 class="text-2xl md:text-4xl font-bold leading-tight font-hero">Real gigs. Real money.<br>All in one place.</h2>
+        <div id="heroSlot" class="absolute z-30 left-1/2 bottom-16 md:bottom-20 -translate-x-1/2 w-[88%] max-w-sm text-center" style="opacity:0; transition: opacity 0.7s ease;">
         </div>
 
         <div id="heroCover" class="absolute inset-x-0 top-0 bg-white z-50 flex items-center justify-center text-center px-6" style="height:100%;">
-            <div id="heroHeadlineWrap" style="opacity:0;">
+            <div id="heroHeadlineWrap" style="opacity:0; transition: opacity 0.8s ease;">
                 <p class="text-gray-400 text-xs tracking-widest mb-2 font-hero">CAMPULSY</p>
                 <h1 class="text-gray-900 text-2xl md:text-4xl font-bold leading-tight max-w-lg font-hero">Work, sell, get paid.<br>All in one place.</h1>
             </div>
@@ -61,24 +35,14 @@
 
 <style>
 .font-hero { font-family: 'Sora', sans-serif; }
-
-#heroCover {
-    transition: height 1.6s cubic-bezier(0.65, 0, 0.35, 1);
-}
-#heroHeadlineWrap {
-    transition: opacity 0.8s ease;
-}
-.hero-anim-card {
-    opacity: 0;
-    transition: opacity 0.9s ease, transform 0.9s ease;
-}
-.hero-anim-card.show {
-    opacity: 1;
-    transform: translate(-50%,-50%) translateY(0) !important;
-}
-#heroSideLeft.show, #heroSideRight.show, #heroBottomText.show {
-    opacity: 0.85;
-    transform: translateY(0) !important;
+#heroCover { transition: height 1.6s cubic-bezier(0.65, 0, 0.35, 1); }
+#heroSlot .slot-card {
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 1rem;
+    padding: 1.1rem;
+    color: #fff;
 }
 </style>
 
@@ -86,38 +50,96 @@
 document.addEventListener('DOMContentLoaded', function () {
     const cover = document.getElementById('heroCover');
     const headlineWrap = document.getElementById('heroHeadlineWrap');
-    const centerCard = document.getElementById('heroCenterCard');
-    const sideLeft = document.getElementById('heroSideLeft');
-    const sideRight = document.getElementById('heroSideRight');
-    const bottomText = document.getElementById('heroBottomText');
     const heroReveal = document.getElementById('heroReveal');
+    const slot = document.getElementById('heroSlot');
 
-    let scrollTakeover = false;
+    const COVER_STOP = 30; // percent
+    let coverPercent = 100;
+    let locked = false;
+    let unlocked = false;
+    let touchStartY = null;
+
+    const slides = [
+        '<div class="slot-card font-hero"><p class="text-[11px] text-white/60 mb-2">Campus Snapshot</p><div class="grid grid-cols-2 gap-2"><div class="bg-white/10 rounded-xl p-2"><p class="text-[10px] text-white/60">Active Gigs</p><p class="text-xl font-bold">128+</p></div><div class="bg-white/10 rounded-xl p-2"><p class="text-[10px] text-white/60">Listings</p><p class="text-xl font-bold">340+</p></div></div></div>',
+        '<div class="font-hero"><h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">Real gigs.<br>Real money.</h2></div>',
+        '<div class="slot-card font-hero"><p class="text-[11px] text-white/60 mb-1">Wallet Payout</p><p class="text-lg font-bold">₦20,000.50 <span class="text-xs text-white/50 font-normal">available now</span></p></div>',
+        '<div class="font-hero"><h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">All in one place.</h2></div>'
+    ];
+    let slideIndex = 0;
+
+    function showSlide(i) {
+        slot.style.opacity = '0';
+        setTimeout(function () {
+            slot.innerHTML = slides[i];
+            slot.style.opacity = '1';
+        }, 400);
+    }
+
+    function startCycle() {
+        showSlide(slideIndex);
+        setInterval(function () {
+            slideIndex = (slideIndex + 1) % slides.length;
+            showSlide(slideIndex);
+        }, 3200);
+    }
+
+    function setCover(pct) {
+        coverPercent = Math.max(0, Math.min(100, pct));
+        cover.style.transition = 'none';
+        cover.style.height = coverPercent + '%';
+    }
+
+    function finishInitialRollUp() {
+        headlineWrap.style.opacity = '1';
+        setTimeout(startCycle, 800);
+        locked = true;
+        document.body.style.overflow = 'hidden';
+    }
 
     setTimeout(function () {
-        cover.style.height = '20%';
+        cover.style.transition = 'height 1.6s cubic-bezier(0.65,0,0.35,1)';
+        cover.style.height = COVER_STOP + '%';
+        coverPercent = COVER_STOP;
+        setTimeout(finishInitialRollUp, 1650);
     }, 500);
 
-    cover.addEventListener('transitionend', function (e) {
-        if (e.propertyName === 'height' && !scrollTakeover) {
-            headlineWrap.style.opacity = '1';
-            setTimeout(function () { centerCard.classList.add('show'); }, 500);
-            setTimeout(function () { sideLeft.classList.add('show'); }, 1300);
-            setTimeout(function () { sideRight.classList.add('show'); }, 2000);
-            setTimeout(function () { bottomText.classList.add('show'); }, 2700);
+    function releaseLock() {
+        if (!unlocked) {
+            unlocked = true;
+            locked = false;
+            document.body.style.overflow = '';
         }
-    });
+    }
 
-    window.addEventListener('scroll', function () {
-        const rect = heroReveal.getBoundingClientRect();
-        const scrolled = Math.min(Math.max(-rect.top, 0), 300);
-        if (scrolled > 0) {
-            scrollTakeover = true;
-            const pct = 20 - (scrolled / 300) * 20;
-            cover.style.transition = 'none';
-            cover.style.height = Math.max(pct, 0) + '%';
+    function shrinkFromLock(delta) {
+        if (!locked) return;
+        const pct = coverPercent - delta;
+        setCover(pct);
+        if (coverPercent <= 0) {
+            releaseLock();
         }
-    });
+    }
+
+    window.addEventListener('wheel', function (e) {
+        if (locked) {
+            e.preventDefault();
+            shrinkFromLock(e.deltaY * 0.08);
+        }
+    }, { passive: false });
+
+    window.addEventListener('touchstart', function (e) {
+        touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    window.addEventListener('touchmove', function (e) {
+        if (locked) {
+            e.preventDefault();
+            const currentY = e.touches[0].clientY;
+            const delta = (touchStartY - currentY) * 0.3;
+            touchStartY = currentY;
+            shrinkFromLock(delta);
+        }
+    }, { passive: false });
 });
 </script>
 
