@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Campulsy - @yield('title', 'Account')</title>
+    <title>Qelvo - @yield('title', 'Account')</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ asset('css/app-v2.css') }}?v={{ time() }}">
 </head>

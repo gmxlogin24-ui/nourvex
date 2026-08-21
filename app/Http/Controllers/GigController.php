@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Gig;
 use App\Models\GigView;
 use App\Models\Review;
+use App\Services\GigPayoutService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\GigMessage;
@@ -14,6 +16,10 @@ use Illuminate\Support\Str;
 
 class GigController extends Controller
 {
+    public function __construct(private GigPayoutService $payoutService)
+    {
+    }
+
     public function index(Request $request)
     {
         $userId = Auth::id();
@@ -27,7 +33,8 @@ class GigController extends Controller
             ->orderByRaw("CASE WHEN gigs.status = 'open' THEN 0 ELSE 1 END")
             ->orderByRaw("CASE WHEN users.tier IN ('tier2', 'tier3') THEN 0 ELSE 1 END")
             ->orderByDesc('gig_views.views_count')
-            ->orderByDesc('gigs.created_at');
+            ->orderByDesc('gigs.created_at')
+            ->with(['poster', 'worker', 'reviews']);
 
         if ($request->filled('search')) {
             $query->where('gigs.title', 'like', '%' . $request->search . '%');
@@ -42,16 +49,15 @@ class GigController extends Controller
         }
 
         $gigs = $query->get()->map(function ($gig) {
-            $poster = $gig->user_id ? User::find($gig->user_id) : null;
-            $acceptedBy = $gig->accepted_by ? User::find($gig->accepted_by) : null;
-            $reviews = Review::where('reviewable_type', Gig::class)
-                ->where('reviewable_id', $gig->id)
-                ->get();
+            $poster = $gig->poster;
+            $acceptedBy = $gig->worker;
+            $reviews = $gig->reviews;
+
             $gig->poster_name = $poster->name ?? 'Unknown';
             $gig->poster_verified = $poster->is_verified_seller ?? false;
             $gig->poster_level = $poster ? $poster->workerLevel() : null;
             $gig->poster_badge_tier = $poster->badge_tier ?? null;
-            $gig->poster_completed_count = $poster ? Gig::where('user_id', $poster->id)->where('status', 'completed')->count() : 0;
+            $gig->poster_completed_count = $poster ? $poster->completedGigsCount() : 0;
             $gig->avg_rating = $reviews->count() ? round($reviews->avg('rating'), 1) : null;
             $gig->review_count = $reviews->count();
             $gig->accepted_by_name = $acceptedBy->name ?? null;
@@ -70,12 +76,12 @@ class GigController extends Controller
             []
         )->increment('views_count');
 
-        $poster = $gig->user_id ? User::find($gig->user_id) : null;
-        $acceptedByUser = $gig->accepted_by ? User::find($gig->accepted_by) : null;
-        $posterCompletedCount = $poster ? Gig::where('user_id', $poster->id)->where('status', 'completed')->count() : 0;
-        $workerCompletedCount = $acceptedByUser ? Gig::where('accepted_by', $acceptedByUser->id)->where('status', 'completed')->count() : 0;
+        $poster = $gig->poster;
+        $acceptedByUser = $gig->worker;
+        $posterCompletedCount = $poster ? $poster->completedGigsCount() : 0;
+        $workerCompletedCount = $acceptedByUser ? $acceptedByUser->completedGigsCount() : 0;
 
-        $guestToken = $request->cookie('campulsy_guest_token');
+        $guestToken = $request->cookie('qelvo_guest_token');
         $isGuestWorker = !Auth::check() && $gig->guest_token && $gig->guest_token === $guestToken;
         $guestGigsUsed = (!Auth::check() && $guestToken) ? Gig::where('guest_token', $guestToken)->count() : 0;
 
@@ -110,6 +116,7 @@ class GigController extends Controller
             'isGuestWorker' => $isGuestWorker,
             'guestGigsUsed' => $guestGigsUsed,
             'messages' => $messages,
+            'dispute' => $gig->dispute,
         ]);
     }
 
@@ -117,7 +124,7 @@ class GigController extends Controller
     {
         $validated = $request->validate(['body' => 'required|string|max:1000']);
 
-        $poster = $gig->user_id ? User::find($gig->user_id) : null;
+        $poster = $gig->poster;
         if (!$poster) {
             return back()->withErrors(['message' => 'This gig has no poster to message.']);
         }
@@ -141,7 +148,7 @@ class GigController extends Controller
     private function gigPostCap(string $tier): ?int
     {
         return match ($tier) {
-            'tier2', 'tier3' => null, // null = unlimited
+            'tier2', 'tier3' => null,
             'tier1' => 10,
             default => 4,
         };
@@ -155,7 +162,6 @@ class GigController extends Controller
         $openCount = Gig::where('user_id', $user->id)->where('status', 'open')->count();
         $remaining = $cap === null ? null : max(0, $cap - $openCount);
         $canPost = $cap === null || $remaining > 0;
-
         if (!$canPost) {
             return redirect()->route('subscriptions.index')->withErrors([
                 'tier' => 'You\'ve reached your open gig limit (' . $cap . '). Upgrade for a higher limit.'
@@ -172,6 +178,9 @@ class GigController extends Controller
         return view('gigs.edit', ['gig' => $gig]);
     }
 
+    // Editing only happens while status === 'open', i.e. before a deposit was
+    // ever split from a full escrow — so the deposit ratio (50%) is kept in
+    // sync with the new price here, not the raw price difference.
     public function update(Request $request, Gig $gig)
     {
         abort_unless($gig->user_id === Auth::id(), 403, 'You can only edit your own gigs.');
@@ -186,24 +195,48 @@ class GigController extends Controller
             'phone' => 'nullable|string|max:20',
         ]);
 
-        $poster = Auth::user();
-        $diff = $validated['amount'] - $gig->amount;
+        $posterId = Auth::id();
 
-        if ($diff > 0) {
-            if ($poster->wallet_balance < $diff) {
-                return back()->withErrors(['amount' => 'Insufficient wallet balance to raise the price by ₦' . number_format($diff) . '.'])->withInput();
+        $result = DB::transaction(function () use ($gig, $validated, $posterId) {
+            $lockedGig = Gig::where('id', $gig->id)->lockForUpdate()->first();
+
+            if ($lockedGig->user_id !== $posterId || $lockedGig->status !== 'open') {
+                return ['ok' => false];
             }
-            $poster->decrement('wallet_balance', $diff);
-            Transaction::create(['user_id' => $poster->id, 'type' => 'gig_escrow', 'amount' => -$diff, 'description' => 'Increased escrow for gig: ' . $gig->title]);
-        } elseif ($diff < 0) {
-            $poster->increment('wallet_balance', abs($diff));
-            Transaction::create(['user_id' => $poster->id, 'type' => 'gig_escrow_refund', 'amount' => abs($diff), 'description' => 'Reduced escrow for gig: ' . $gig->title]);
+
+            $newDeposit = round($validated['amount'] * 0.5, 2);
+            $diff = $newDeposit - $lockedGig->escrowed_amount;
+
+            $poster = User::where('id', $posterId)->lockForUpdate()->first();
+
+            if ($diff > 0) {
+                if ($poster->wallet_balance < $diff) {
+                    return ['ok' => false, 'insufficient' => true, 'diff' => $diff];
+                }
+                $poster->decrement('wallet_balance', $diff);
+                Transaction::create(['user_id' => $poster->id, 'type' => 'gig_escrow', 'amount' => -$diff, 'description' => 'Increased deposit for gig: ' . $gig->title]);
+            } elseif ($diff < 0) {
+                $poster->increment('wallet_balance', abs($diff));
+                Transaction::create(['user_id' => $poster->id, 'type' => 'gig_escrow_refund', 'amount' => abs($diff), 'description' => 'Reduced deposit for gig: ' . $gig->title]);
+            }
+
+            $lockedGig->update([...$validated, 'escrowed_amount' => $newDeposit]);
+            return ['ok' => true];
+        });
+
+        if (!$result['ok']) {
+            if (!empty($result['insufficient'])) {
+                return back()->withErrors(['amount' => 'Insufficient wallet balance to raise the deposit by ₦' . number_format($result['diff']) . '.'])->withInput();
+            }
+            return back()->withErrors(['gig' => 'This gig can no longer be edited.']);
         }
 
-        $gig->update($validated);
         return redirect()->route('gigs.show', $gig->id)->with('status', 'Gig updated.');
     }
 
+    // Posting now only charges a 50% deposit, not the full amount — the rest
+    // is charged from the poster at complete() time, once they confirm the
+    // work. escrowed_amount tracks exactly how much has been taken so far.
     public function store(Request $request)
     {
         $poster = Auth::user();
@@ -227,78 +260,116 @@ class GigController extends Controller
             'phone' => 'nullable|string|max:20',
         ]);
 
-        if ($poster->wallet_balance < $validated['amount']) {
-            return back()->withErrors(['amount' => 'Insufficient wallet balance to fund this gig. Top up first.'])->withInput();
+        $posterId = $poster->id;
+        $deposit = round($validated['amount'] * 0.5, 2);
+
+        $gig = DB::transaction(function () use ($posterId, $validated, $deposit) {
+            $lockedPoster = User::where('id', $posterId)->lockForUpdate()->first();
+
+            if ($lockedPoster->wallet_restricted) {
+                return null;
+            }
+            if ($lockedPoster->wallet_balance < $deposit) {
+                return null;
+            }
+
+            $lockedPoster->decrement('wallet_balance', $deposit);
+            Transaction::create([
+                'user_id' => $lockedPoster->id,
+                'type' => 'gig_escrow',
+                'amount' => -$deposit,
+                'description' => '50% deposit for gig: ' . $validated['title'],
+            ]);
+
+            return Gig::create([
+                'title' => $validated['title'],
+                'category' => $validated['category'],
+                'description' => $validated['description'] ?? '',
+                'amount' => $validated['amount'],
+                'escrowed_amount' => $deposit,
+                'whatsapp' => $validated['whatsapp'] ?? null,
+                'phone' => $validated['phone'] ?? null,
+                'user_id' => $lockedPoster->id,
+                'status' => 'open',
+            ]);
+        });
+
+        if (!$gig) {
+            $poster->refresh();
+            if ($poster->wallet_restricted) {
+                return back()->withErrors(['amount' => 'Your wallet is restricted due to an unresolved payment issue. Clear your balance to post new gigs.'])->withInput();
+            }
+            return back()->withErrors(['amount' => 'Insufficient wallet balance to fund the deposit. Top up first.'])->withInput();
         }
-
-        $poster->decrement('wallet_balance', $validated['amount']);
-        Transaction::create([
-            'user_id' => $poster->id,
-            'type' => 'gig_escrow',
-            'amount' => -$validated['amount'],
-            'description' => 'Posted gig: ' . $validated['title'],
-        ]);
-
-        Gig::create([
-            'title' => $validated['title'],
-            'category' => $validated['category'],
-            'description' => $validated['description'] ?? '',
-            'amount' => $validated['amount'],
-            'whatsapp' => $validated['whatsapp'] ?? null,
-            'phone' => $validated['phone'] ?? null,
-            'user_id' => $poster->id,
-            'status' => 'open',
-        ]);
 
         return redirect()->route('gigs.index')->with('status', 'Gig posted!');
     }
 
-    // STEP 1: worker claims the gig. No money moves yet.
-    // Logged-in users claim normally. A visitor with no account can claim up to 2 gigs
-    // lifetime by dropping their name - tracked via a long-lived guest_token cookie.
     public function accept(Request $request, Gig $gig)
     {
-        if ($gig->status !== 'open') {
-            return back()->withErrors(['gig' => 'This gig is no longer available.']);
-        }
+        $guestName = null;
+        $token = null;
 
-        if (Auth::check()) {
-            $user = Auth::user();
-            if ($gig->user_id === $user->id) {
-                return back()->withErrors(['gig' => 'You cannot claim your own gig.']);
+        if (!Auth::check()) {
+            $validated = $request->validate(['guest_name' => 'required|string|max:255']);
+            $guestName = $validated['guest_name'];
+            $token = $request->cookie('qelvo_guest_token') ?: Str::random(40);
+
+            $usedCount = Gig::where('guest_token', $token)->count();
+            if ($usedCount >= 2) {
+                return redirect()->route('register')
+                    ->withErrors(['gig' => 'You\'ve used your 2 free gigs. Create an account to keep taking gigs.'])
+                    ->cookie('qelvo_guest_token', $token, 60 * 24 * 365 * 2);
             }
-            $gig->update(['status' => 'in_progress', 'accepted_by' => $user->id, 'guest_name' => null, 'guest_token' => null]);
-            return redirect()->route('gigs.show', $gig->id)->with('status', 'Gig claimed — message the poster, then mark it delivered once you\'re done.');
         }
 
-        $validated = $request->validate(['guest_name' => 'required|string|max:255']);
+        $userId = Auth::id();
 
-        $token = $request->cookie('campulsy_guest_token') ?: Str::random(40);
-        $usedCount = Gig::where('guest_token', $token)->count();
+        $result = DB::transaction(function () use ($gig, $token, $guestName, $userId) {
+            $locked = Gig::where('id', $gig->id)->lockForUpdate()->first();
 
-        if ($usedCount >= 2) {
-            return redirect()->route('register')
-                ->withErrors(['gig' => 'You\'ve used your 2 free gigs. Create an account to keep taking gigs.'])
-                ->cookie('campulsy_guest_token', $token, 60 * 24 * 365 * 2);
+            if ($locked->status !== 'open') {
+                return ['ok' => false, 'reason' => 'unavailable'];
+            }
+
+            if ($userId) {
+                if ($locked->user_id === $userId) {
+                    return ['ok' => false, 'reason' => 'own_gig'];
+                }
+                $locked->update(['status' => 'in_progress', 'accepted_by' => $userId, 'guest_name' => null, 'guest_token' => null]);
+            } else {
+                $locked->update([
+                    'status' => 'in_progress',
+                    'accepted_by' => null,
+                    'guest_name' => $guestName,
+                    'guest_token' => $token,
+                ]);
+            }
+
+            return ['ok' => true];
+        });
+
+        if (!$result['ok']) {
+            $message = $result['reason'] === 'own_gig'
+                ? 'You cannot claim your own gig.'
+                : 'This gig is no longer available.';
+            return back()->withErrors(['gig' => $message]);
         }
 
-        $gig->update([
-            'status' => 'in_progress',
-            'accepted_by' => null,
-            'guest_name' => $validated['guest_name'],
-            'guest_token' => $token,
-        ]);
+        if (!$userId) {
+            $usedCount = Gig::where('guest_token', $token)->count();
+            return redirect()->route('gigs.show', $gig->id)
+                ->with('status', 'Gig claimed as ' . $guestName . ' — free gig ' . $usedCount . ' of 2. Message the poster, then mark it delivered. You\'ll need to create an account to receive payment.')
+                ->cookie('qelvo_guest_token', $token, 60 * 24 * 365 * 2);
+        }
 
-        return redirect()->route('gigs.show', $gig->id)
-            ->with('status', 'Gig claimed as ' . $validated['guest_name'] . ' — free gig ' . ($usedCount + 1) . ' of 2. Message the poster, then mark it delivered. You\'ll need to create an account to receive payment.')
-            ->cookie('campulsy_guest_token', $token, 60 * 24 * 365 * 2);
+        return redirect()->route('gigs.show', $gig->id)->with('status', 'Gig claimed — message the poster, then mark it delivered once you\'re done.');
     }
 
-    // STEP 2: worker marks the work as delivered. Still no money moves — poster must confirm.
     public function deliver(Request $request, Gig $gig)
     {
         $isOwnerWorker = Auth::check() && $gig->accepted_by === Auth::id();
-        $isGuestWorker = !Auth::check() && $gig->guest_token && $gig->guest_token === $request->cookie('campulsy_guest_token');
+        $isGuestWorker = !Auth::check() && $gig->guest_token && $gig->guest_token === $request->cookie('qelvo_guest_token');
 
         abort_unless($isOwnerWorker || $isGuestWorker, 403, 'Only the person who claimed this gig can mark it delivered.');
         if ($gig->status !== 'in_progress') {
@@ -311,76 +382,91 @@ class GigController extends Controller
             'status' => 'delivered',
             'delivery_note' => $validated['delivery_note'] ?? null,
             'delivered_at' => now(),
+            'payment_reminder_sent_at' => null,
         ]);
 
         return redirect()->route('gigs.show', $gig->id)->with('status', 'Marked as delivered — waiting for the poster to confirm and release payment.');
     }
 
-    // STEP 3: poster confirms the delivered work is good. Only now does escrow release, minus platform commission.
-    // If a guest (no account) did the work, the gig is held as 'awaiting_worker_signup' instead of paid out -
-    // settleGuestGigs() below releases it once they register + pay the signup fee.
+    // STEP 3: poster confirms the delivered work is good.
+    // The remaining balance (amount - escrowed_amount, i.e. the second 50%)
+    // is charged from the poster right here, in the same locked transaction,
+    // before anything is paid out. If the poster can't cover it, the gig
+    // simply stays 'delivered' so they can retry after topping up — the
+    // worker can also file a complaint via GigDisputeController in the
+    // meantime.
+    // If a guest (no account) did the work, the gig is held as
+    // 'awaiting_worker_signup' instead of paid out, but the poster's money
+    // (now the full amount) has already left their wallet at this point —
+    // settleGuestGigs() below only pays the worker, it doesn't charge the
+    // poster again.
     public function complete(Gig $gig)
     {
-        $user = Auth::user();
+        $userId = Auth::id();
 
-        abort_unless($gig->user_id === $user->id, 403, 'Only the poster can confirm completion.');
-        if ($gig->status !== 'delivered') {
-            return back()->withErrors(['gig' => 'This gig has not been marked delivered yet.']);
-        }
+        $result = DB::transaction(function () use ($gig, $userId) {
+            $locked = Gig::where('id', $gig->id)->lockForUpdate()->first();
 
-        if ($gig->accepted_by) {
-            $worker = User::find($gig->accepted_by);
-            $this->payoutGig($gig, $worker);
-            $gig->update(['status' => 'completed']);
-            return redirect()->route('gigs.show', $gig->id)->with('status', 'Payment released to ' . $worker->name . '.');
-        }
-
-        if ($gig->guest_token) {
-            $gig->update(['status' => 'awaiting_worker_signup']);
-            return redirect()->route('gigs.show', $gig->id)->with('status', 'Marked complete — payment is held until ' . $gig->guest_name . ' creates an account to receive it.');
-        }
-
-        return back()->withErrors(['gig' => 'This gig has no worker to pay.']);
-    }
-
-    private function payoutGig(Gig $gig, User $worker)
-    {
-        $rate = match ($worker->tier) {
-            'tier2', 'tier3' => 0,
-            'tier1' => 0.03,
-            default => 0.05,
-        };
-        $commission = round($gig->amount * $rate, 2);
-        $payout = $gig->amount - $commission;
-
-        $worker->increment('wallet_balance', $payout);
-        Transaction::create([
-            'user_id' => $worker->id,
-            'type' => 'gig_earning',
-            'amount' => $payout,
-            'description' => 'Completed gig: ' . $gig->title . ($commission > 0 ? ' (after ₦' . number_format($commission) . ' platform fee)' : ''),
-        ]);
-
-        if ($worker->referred_by) {
-            $referrer = User::find($worker->referred_by);
-            if ($referrer) {
-                $pct = in_array($referrer->tier, ['tier2', 'tier3'], true) ? 0.15 : 0;
-                $bonus = $payout * $pct;
-                if ($bonus > 0) {
-                    $referrer->increment('wallet_balance', $bonus);
-                    Transaction::create([
-                        'user_id' => $referrer->id,
-                        'type' => 'referral_bonus',
-                        'amount' => $bonus,
-                        'description' => 'Referral bonus from ' . $worker->name . ' completing a gig',
-                    ]);
-                }
+            if ($locked->user_id !== $userId) {
+                return ['ok' => false, 'reason' => 'forbidden'];
             }
+            if ($locked->status !== 'delivered') {
+                return ['ok' => false, 'reason' => 'not_delivered'];
+            }
+            if (!$locked->accepted_by && !$locked->guest_token) {
+                return ['ok' => false, 'reason' => 'no_worker'];
+            }
+
+            $remaining = round($locked->amount - $locked->escrowed_amount, 2);
+            $poster = User::where('id', $userId)->lockForUpdate()->first();
+
+            if ($remaining > 0) {
+                if ($poster->wallet_balance < $remaining) {
+                    return ['ok' => false, 'reason' => 'insufficient_funds', 'remaining' => $remaining];
+                }
+                $poster->decrement('wallet_balance', $remaining);
+                Transaction::create([
+                    'user_id' => $poster->id,
+                    'type' => 'gig_escrow',
+                    'amount' => -$remaining,
+                    'description' => 'Final payment for gig: ' . $locked->title,
+                ]);
+            }
+
+            $locked->update(['escrowed_amount' => $locked->amount]);
+
+            if ($locked->accepted_by) {
+                $worker = User::where('id', $locked->accepted_by)->lockForUpdate()->first();
+                $this->payoutService->payout($locked, $worker);
+                $locked->update(['status' => 'completed']);
+                return ['ok' => true, 'mode' => 'paid', 'worker_name' => $worker->name];
+            }
+
+            $locked->update(['status' => 'awaiting_worker_signup']);
+            return ['ok' => true, 'mode' => 'held', 'guest_name' => $locked->guest_name];
+        });
+
+        if (!$result['ok']) {
+            if ($result['reason'] === 'forbidden') {
+                abort(403, 'Only the poster can confirm completion.');
+            }
+            if ($result['reason'] === 'insufficient_funds') {
+                return back()->withErrors(['gig' => 'Insufficient wallet balance to release the remaining ₦' . number_format($result['remaining']) . '. Top up and try again.']);
+            }
+            $messages = [
+                'not_delivered' => 'This gig has not been marked delivered yet.',
+                'no_worker' => 'This gig has no worker to pay.',
+            ];
+            return back()->withErrors(['gig' => $messages[$result['reason']]]);
         }
+
+        if ($result['mode'] === 'paid') {
+            return redirect()->route('gigs.show', $gig->id)->with('status', 'Payment released to ' . $result['worker_name'] . '.');
+        }
+
+        return redirect()->route('gigs.show', $gig->id)->with('status', 'Marked complete — payment is held until ' . $result['guest_name'] . ' creates an account to receive it.');
     }
 
-    // Poster declines delivered work and sends it back for revision instead of paying out.
-    // No money moves. Works whether the worker is a real account or a guest.
     public function rejectDelivery(Request $request, Gig $gig)
     {
         $user = Auth::user();
@@ -396,24 +482,37 @@ class GigController extends Controller
             'delivery_note' => null,
             'delivered_at' => null,
             'rejection_note' => $validated['rejection_note'],
+            'payment_reminder_sent_at' => null,
         ]);
 
         return redirect()->route('gigs.show', $gig->id)->with('status', 'Sent back for revisions.');
     }
-    // Called from FlutterwaveController once a former guest pays the ₦1,000 signup fee -
-    // releases every gig they completed as a guest that was waiting on their account to exist.
+
+    // Called from FlutterwaveController once a former guest pays the signup fee.
+    // The poster already paid the full amount at complete() time, so this only
+    // pays the worker — it never touches the poster's wallet.
     public function settleGuestGigs(User $user, string $guestToken): int
     {
-        $gigs = Gig::where('guest_token', $guestToken)
-            ->where('status', 'awaiting_worker_signup')
-            ->get();
+        return DB::transaction(function () use ($user, $guestToken) {
+            $gigs = Gig::where('guest_token', $guestToken)
+                ->where('status', 'awaiting_worker_signup')
+                ->lockForUpdate()
+                ->get();
 
-        foreach ($gigs as $gig) {
-            $gig->update(['accepted_by' => $user->id]);
-            $this->payoutGig($gig, $user->fresh());
-            $gig->update(['status' => 'completed']);
-        }
+            if ($gigs->isEmpty()) {
+                return 0;
+            }
 
-        return $gigs->count();
+            $lockedUser = User::where('id', $user->id)->lockForUpdate()->first();
+
+            foreach ($gigs as $gig) {
+                $gig->update(['accepted_by' => $lockedUser->id]);
+                $this->payoutService->payout($gig, $lockedUser);
+                $gig->update(['status' => 'completed']);
+                $lockedUser->refresh();
+            }
+
+            return $gigs->count();
+        });
     }
 }

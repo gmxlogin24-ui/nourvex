@@ -4,11 +4,11 @@
 
 <main class="max-w-xl mx-auto p-6">
     <a href="{{ route('marketplace.index') }}" class="text-muted text-sm flex items-center gap-1 mb-4">
-        <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Marketplace
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Campus Market
     </a>
 
     <div class="glass-card p-6">
-        <h1 class="text-xl font-semibold mb-1">Post to Marketplace</h1>
+        <h1 class="text-xl font-semibold mb-1">Post to Campus Market</h1>
         <p class="text-muted text-sm mb-6">Sell an item, offer a service, list a rental, or run your store</p>
 
         @if ($errors->any())
@@ -31,8 +31,8 @@
                 <input type="text" name="store_name" placeholder="e.g. Mama Blessing Provisions" class="input-field !mt-1">
             </div>
             <div>
-                <label class="text-sm text-muted">Photo</label>
-                <input type="file" name="image" accept="image/*" class="input-field !mt-1">
+                <label class="text-sm text-muted">Photos (up to 6)</label>
+                <input type="file" name="images[]" accept="image/*" multiple class="input-field !mt-1">
             </div>
             <div>
                 <label class="text-sm text-muted">Title</label>
@@ -61,6 +61,12 @@
                     </select>
                 </div>
             </div>
+            @if(in_array(auth()->user()->tier, ['tier2', 'tier3'], true))
+            <div>
+                <label class="text-sm text-muted">Stock Quantity (optional — leave blank for a single one-off item)</label>
+                <input type="number" name="stock_quantity" min="1" value="{{ old('stock_quantity') }}" placeholder="e.g. 10" class="input-field !mt-1">
+            </div>
+            @endif
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="text-sm text-muted">Price (₦)</label>
@@ -84,6 +90,13 @@
             <div>
                 <label class="text-sm text-muted">Description</label>
                 <textarea name="description" rows="3" class="input-field !mt-1"></textarea>
+            </div>
+            <div>
+                <label class="text-sm text-muted">Delivery Method</label>
+                <select name="delivery_method" required class="input-field !mt-1">
+                    <option value="meetup">Meet on campus</option>
+                    <option value="ship">I'll ship it (buyer may not be nearby)</option>
+                </select>
             </div>
             <button type="submit" class="btn-primary w-full justify-center">Post</button>
         </form>

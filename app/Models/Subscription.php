@@ -10,8 +10,8 @@ class Subscription extends Model
     use HasFactory;
 
     const PLANS = [
-        'tier1' => ['label' => 'Pro', 'price' => 5000],
-        'tier2' => ['label' => 'Gold', 'price' => 10000],
+        'tier1' => ['label' => 'Basic',   'price' => 5000],
+        'tier2' => ['label' => 'Pro',     'price' => 8000],
         'tier3' => ['label' => 'Premium', 'price' => 15000],
     ];
 

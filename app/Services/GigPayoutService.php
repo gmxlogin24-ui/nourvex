@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Gig;
+use App\Models\Transaction;
+use App\Models\User;
+
+class GigPayoutService
+{
+    /**
+     * Pays a worker (and their referrer's bonus, if any) for a gig.
+     * Must always be called from inside a DB::transaction() with $worker
+     * already locked (lockForUpdate) by the caller — this method does not
+     * open its own transaction or lock.
+     */
+    public function payout(Gig $gig, User $worker): void
+    {
+        $rate = match ($worker->tier) {
+            'tier2', 'tier3' => 0,
+            'tier1' => 0.03,
+            default => 0.05,
+        };
+        $commission = round($gig->amount * $rate, 2);
+        $payout = $gig->amount - $commission;
+
+        $worker->increment('wallet_balance', $payout);
+        Transaction::create([
+            'user_id' => $worker->id,
+            'type' => 'gig_earning',
+            'amount' => $payout,
+            'description' => 'Completed gig: ' . $gig->title . ($commission > 0 ? ' (after ₦' . number_format($commission) . ' platform fee)' : ''),
+        ]);
+        \App\Models\PlatformRevenue::record('gigs', $commission, 'Commission: ' . $gig->title, 'gig', $gig->id);
+
+        if ($worker->referred_by) {
+            $referrer = User::where('id', $worker->referred_by)->lockForUpdate()->first();
+            if ($referrer) {
+                $pct = in_array($referrer->tier, ['tier2', 'tier3'], true) ? 0.15 : 0;
+                $bonus = $payout * $pct;
+                if ($bonus > 0) {
+                    $referrer->increment('wallet_balance', $bonus);
+                    Transaction::create([
+                        'user_id' => $referrer->id,
+                        'type' => 'referral_bonus',
+                        'amount' => $bonus,
+                        'description' => 'Referral bonus from ' . $worker->name . ' completing a gig',
+                    ]);
+                }
+            }
+        }
+    }
+}

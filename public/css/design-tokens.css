@@ -1,0 +1,24 @@
+/* =====================================================================
+   DESIGN TOKENS — one shared scale for radius, spacing, and shadow
+   depth. Goal: stop every card/component picking its own one-off
+   values (grep found 70+ different border-radius values and a dozen
+   inconsistent shadow recipes across the CSS). Everything new, and
+   anything refactored going forward, pulls from these instead.
+   ===================================================================== */
+:root{
+  --radius-sm: 10px;   /* small chips, badges, tight controls */
+  --radius-md: 16px;   /* inputs, small buttons */
+  --radius-lg: 22px;   /* standard cards */
+  --radius-xl: 28px;   /* hero/featured cards (wallet, analytics) */
+  --radius-pill: 999px;
+
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  --shadow-soft:   0 4px 16px rgba(16,24,40,0.06);
+  --shadow-medium: 0 8px 24px rgba(16,24,40,0.08);
+  --shadow-strong: 0 16px 40px rgba(16,24,40,0.14);
+}

@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-authenticated')
 @section('content')
 
 
@@ -35,7 +35,7 @@
         </form>
     </div>
     @empty
-    <p class="text-muted text-sm">Your cart is empty. <a href="{{ route('marketplace.index') }}" class="text-accent">Browse the marketplace</a>.</p>
+    <p class="text-muted text-sm">Your cart is empty. <a href="{{ route('marketplace.index') }}" class="text-accent">Browse Campus Market</a>.</p>
     @endforelse
 
     @if($listings->isNotEmpty())

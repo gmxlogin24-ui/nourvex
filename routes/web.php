@@ -19,6 +19,8 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\ServicesController;
+use App\Http\Controllers\TransactionPinController;
+use App\Http\Controllers\SavedNumberController;
 use App\Http\Controllers\FeaturesController;
 use App\Http\Controllers\PulseController;
 use App\Http\Controllers\PlanGateController;
@@ -54,6 +56,12 @@ Route::post('/register/vendor', [AuthController::class, 'registerVendor'])->name
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+Route::get('/auth/google', [App\Http\Controllers\SocialAuthController::class, 'redirect'])->name('auth.google');
+Route::get('/auth/google/callback', [App\Http\Controllers\SocialAuthController::class, 'callback'])->name('auth.google.callback');
+
+Route::get('/auth/google', [App\Http\Controllers\SocialAuthController::class, 'redirect'])->name('auth.google');
+Route::get('/auth/google/callback', [App\Http\Controllers\SocialAuthController::class, 'callback'])->name('auth.google.callback');
+
 Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
 Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
@@ -74,12 +82,12 @@ Route::get('/buzz', function () {
 })->name('news.index');
 Route::get('/pulse', [PulseController::class, 'index'])->name('pulse.index');
 Route::get('/gigs', [GigController::class, 'index'])->name('gigs.index');
-Route::get('/gigs/{gig}', [GigController::class, 'show'])->name('gigs.show');
+Route::get('/gigs/{gig}', [GigController::class, 'show'])->name('gigs.show')->where('gig', '[0-9]+');
 Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
-Route::get('/marketplace/{listing}', [MarketplaceController::class, 'show'])->name('marketplace.show');
+Route::get('/marketplace/{listing}', [MarketplaceController::class, 'show'])->name('marketplace.show')->where('listing', '[0-9]+');
 
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'signup.paid'])->group(function () {
     Route::get('/dashboard', function () {
         $gigs = \App\Models\Gig::leftJoin('gig_views', function ($join) {
                 $join->on('gigs.id', '=', 'gig_views.gig_id')
@@ -123,6 +131,35 @@ Route::middleware('auth')->group(function () {
         $feedListings = \App\Models\Listing::where('status', 'available')->latest()->take(3)->get()->map(fn($l) => ['type' => 'listing', 'title' => $l->title, 'meta' => '₦' . number_format($l->amount), 'url' => route('marketplace.show', $l->id), 'time' => $l->created_at]);
         $todayFeed = $feedGigs->concat($feedNews)->concat($feedListings)->sortByDesc('time')->take(8)->values();
 
+        $myReviews = \App\Models\Review::with(['reviewer', 'reviewable'])->where('reviewed_user_id', $userId)->latest()->take(5)->get();
+        $avgRating = \App\Models\Review::where('reviewed_user_id', $userId)->avg('rating');
+        $reviewCount = \App\Models\Review::where('reviewed_user_id', $userId)->count();
+
+        // Streak milestones
+        $streakMilestones = [7, 30, 100, 365];
+        $nextStreakMilestone = collect($streakMilestones)->first(fn($m) => $m > (auth()->user()->streak_days ?? 0));
+
+        // Referral earnings (tier2/3) or upsell (tier1/free)
+        $referralEarnings = \App\Models\Transaction::where('user_id', $userId)->where('type', 'referral_bonus')->sum('amount');
+        $canEarnReferralBonus = in_array(auth()->user()->tier, ['tier2', 'tier3'], true);
+
+        // Leaderboard rank this week
+        $leaderboardRank = null;
+        if (auth()->user()->leaderboard_opt_in) {
+            $rankedUsers = \App\Models\Transaction::where('transactions.created_at', '>=', $weekStart)
+                ->where('amount', '>', 0)
+                ->whereIn('type', ['gig_earning', 'marketplace_sale', 'referral_bonus'])
+                ->join('users', 'transactions.user_id', '=', 'users.id')
+                ->where('users.leaderboard_opt_in', true)
+                ->selectRaw('users.id, SUM(transactions.amount) as total')
+                ->groupBy('users.id')
+                ->orderByDesc('total')
+                ->pluck('users.id')
+                ->values();
+            $rankIndex = $rankedUsers->search($userId);
+            $leaderboardRank = $rankIndex === false ? null : $rankIndex + 1;
+        }
+
         $currentSubscription = \App\Models\Subscription::currentFor(auth()->user());
 
         return view('dashboard', [
@@ -151,11 +188,19 @@ Route::middleware('auth')->group(function () {
             'topListings' => \App\Models\Listing::latest()->take(3)->get(),
             'trend' => [4000, 6500, 5200, 8100, 7300, 9200],
             'breakdown' => [55, 30, 15],
+            'myReviews' => $myReviews,
+            'avgRating' => $avgRating,
+            'reviewCount' => $reviewCount,
+            'nextStreakMilestone' => $nextStreakMilestone,
+            'referralEarnings' => $referralEarnings,
+            'canEarnReferralBonus' => $canEarnReferralBonus,
+            'leaderboardRank' => $leaderboardRank,
         ]);
     })->name('dashboard');
 
     Route::post('/gigs/{gig}/complete', [GigController::class, 'complete'])->name('gigs.complete');
     Route::post('/gigs/{gig}/reject', [GigController::class, 'rejectDelivery'])->name('gigs.reject');
+    Route::post('/gigs/{gig}/dispute', [App\Http\Controllers\GigDisputeController::class, 'store'])->name('gigs.dispute.store');
     Route::post('/gigs/{gig}/message', [GigController::class, 'sendMessage'])->name('gigs.message');
     Route::post('/gigs/{gig}/review', [ReviewController::class, 'storeForGig'])->name('gigs.review');
 
@@ -169,30 +214,54 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/marketplace/{listing}/purchase', [MarketplaceController::class, 'purchase'])->name('marketplace.purchase');
     Route::post('/marketplace/{listing}/confirm', [MarketplaceController::class, 'confirmDelivery'])->name('marketplace.confirm');
+    Route::post('/marketplace/{listing}/dispute', [App\Http\Controllers\ListingDisputeController::class, 'store'])->name('marketplace.dispute');
+    Route::post('/marketplace/{listing}/ship', [MarketplaceController::class, 'markShipped'])->name('marketplace.ship');
+    Route::post('/marketplace/orders/{order}/confirm', [MarketplaceController::class, 'confirmOrderDelivery'])->name('marketplace.order.confirm');
 
     Route::get('/cart', [App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add/{listing}', [App\Http\Controllers\CartController::class, 'add'])->name('cart.add');
     Route::post('/cart/remove/{listing}', [App\Http\Controllers\CartController::class, 'remove'])->name('cart.remove');
     Route::post('/cart/checkout', [App\Http\Controllers\CartController::class, 'checkout'])->name('cart.checkout');
     Route::post('/marketplace/{listing}/review', [ReviewController::class, 'storeForListing'])->name('marketplace.review');
+    Route::post('/marketplace/{listing}/message', [MarketplaceController::class, 'sendMessage'])->name('marketplace.message');
+    Route::get('/marketplace/{listing}/messages', [MarketplaceController::class, 'messages'])->name('marketplace.messages');
+    Route::post('/marketplace/{listing}/meetup-propose', [MarketplaceController::class, 'proposeMeetup'])->name('marketplace.meetup.propose');
+    Route::post('/marketplace/{listing}/meetup-respond/{message}', [MarketplaceController::class, 'respondMeetup'])->name('marketplace.meetup.respond');
+    Route::post('/marketplace/{listing}/favorite', [MarketplaceController::class, 'toggleFavorite'])->name('marketplace.favorite');
+    Route::get('/marketplace/favorites', [MarketplaceController::class, 'favorites'])->name('marketplace.favorites');
+    Route::get('/marketplace/orders', [MarketplaceController::class, 'myOrders'])->name('marketplace.orders');
 
     // Marketplace - posting requires Tier 1+
     Route::middleware('tier')->group(function () {
         Route::get('/marketplace/create', [MarketplaceController::class, 'create'])->name('marketplace.create');
         Route::post('/marketplace', [MarketplaceController::class, 'store'])->name('marketplace.store');
+        Route::get('/marketplace/{listing}/edit', [MarketplaceController::class, 'edit'])->name('marketplace.edit');
+        Route::put('/marketplace/{listing}', [MarketplaceController::class, 'update'])->name('marketplace.update');
     });
 
     Route::get('/my-posts', [MyPostsController::class, 'index'])->name('posts.index');
     Route::delete('/my-posts/gigs/{gig}', [MyPostsController::class, 'deleteGig'])->name('posts.gigs.delete');
     Route::delete('/my-posts/listings/{listing}', [MyPostsController::class, 'deleteListing'])->name('posts.listings.delete');
 
-    Route::prefix('admin')->name('admin.')->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
+        Route::get('/disputes', [App\Http\Controllers\GigDisputeController::class, 'index'])->name('disputes.index');
+        Route::post('/disputes/{dispute}/pay', [App\Http\Controllers\GigDisputeController::class, 'resolvePaid'])->name('disputes.pay');
+        Route::post('/disputes/{dispute}/dismiss', [App\Http\Controllers\GigDisputeController::class, 'dismiss'])->name('disputes.dismiss');
+
+        Route::get('/marketplace-disputes', [App\Http\Controllers\ListingDisputeController::class, 'index'])->name('marketplace-disputes.index');
+        Route::post('/marketplace-disputes/{dispute}/pay', [App\Http\Controllers\ListingDisputeController::class, 'resolvePaid'])->name('marketplace-disputes.pay');
+        Route::post('/marketplace-disputes/{dispute}/refund', [App\Http\Controllers\ListingDisputeController::class, 'resolveRefunded'])->name('marketplace-disputes.refund');
+        Route::post('/marketplace-disputes/{dispute}/dismiss', [App\Http\Controllers\ListingDisputeController::class, 'dismiss'])->name('marketplace-disputes.dismiss');
+
         Route::get('/', [AdminController::class, 'index'])->name('index');
 
         Route::get('/users', [AdminController::class, 'users'])->name('users');
         Route::post('/users/{user}/toggle-admin', [AdminController::class, 'toggleAdmin'])->name('toggle-admin');
         Route::post('/users/{user}/toggle-ban', [AdminController::class, 'toggleBan'])->name('toggle-ban');
         Route::post('/users/{user}/adjust-balance', [AdminController::class, 'adjustBalance'])->name('adjust-balance');
+
+        Route::get('/grant-access', [AdminController::class, 'grantAccess'])->name('grant-access');
+        Route::post('/grant-access', [AdminController::class, 'grantAccessStore'])->name('grant-access.store');
 
         Route::get('/gigs', [AdminController::class, 'gigs'])->name('gigs');
         Route::delete('/gigs/{gig}', [AdminController::class, 'deleteGig'])->name('gigs.delete');
@@ -201,6 +270,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/listings/{listing}', [AdminController::class, 'deleteListing'])->name('listings.delete');
 
         Route::get('/transactions', [AdminController::class, 'transactions'])->name('transactions');
+        Route::get('/revenue', [AdminController::class, 'revenue'])->name('revenue');
 
         Route::get('/subscriptions', [AdminController::class, 'subscriptions'])->name('subscriptions');
         Route::post('/subscriptions/{subscription}/cancel', [AdminController::class, 'cancelSubscription'])->name('subscriptions.cancel');
@@ -230,6 +300,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/services/data-plans', [ServicesController::class, 'dataPlans'])->name('services.data-plans');
     Route::post('/services/airtime', [ServicesController::class, 'buyAirtime'])->name('services.airtime');
     Route::post('/services/data', [ServicesController::class, 'buyData'])->name('services.data');
+    Route::get('/services/cable-plans', [ServicesController::class, 'cablePlans'])->name('services.cable-plans');
+    Route::post('/services/cable', [ServicesController::class, 'buyCable'])->name('services.cable');
+    Route::get('/services/receipt/{purchase}', [ServicesController::class, 'receipt'])->name('services.receipt');
+    Route::get('/wallet/pin', [TransactionPinController::class, 'edit'])->name('wallet.pin.edit');
+    Route::post('/wallet/pin', [TransactionPinController::class, 'update'])->name('wallet.pin.update');
+    Route::post('/saved-numbers', [SavedNumberController::class, 'store'])->name('saved-numbers.store');
+    Route::delete('/saved-numbers/{savedNumber}', [SavedNumberController::class, 'destroy'])->name('saved-numbers.destroy');
 
     Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
     Route::post('/subscriptions/subscribe', [SubscriptionController::class, 'subscribe'])->name('subscriptions.subscribe');
@@ -241,11 +318,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/referrals', [ReferralController::class, 'index'])->name('referrals.index');
     Route::get('/money-tracker', [WalletController::class, 'moneyTracker'])->name('money-tracker.index');
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
+    Route::post('/wallet/send', [WalletController::class, 'sendMoney'])->name('wallet.send');
     Route::post('/wallet/flutterwave/initiate', [FlutterwaveController::class, 'initiate'])->name('flutterwave.initiate');
     Route::get('/wallet/flutterwave/callback', [FlutterwaveController::class, 'callback'])->name('flutterwave.callback');
     Route::get('/wallet/virtual-account', [VirtualAccountController::class, 'create'])->name('wallet.virtual-account');
     Route::post('/wallet/virtual-account', [VirtualAccountController::class, 'store'])->name('wallet.virtual-account.store');
-    Route::post('/wallet/topup', [App\Http\Controllers\WalletActionController::class, 'topup'])->name('wallet.topup');
+    Route::post('/wallet/topup', [App\Http\Controllers\WalletActionController::class, 'initiateTopup'])->name('wallet.topup');
     Route::post('/wallet/withdraw', [App\Http\Controllers\WalletActionController::class, 'withdraw'])->name('wallet.withdraw');
 
     Route::post('/news', [NewsController::class, 'store'])->name('news.store');
@@ -261,13 +339,21 @@ Route::middleware('auth')->group(function () {
     Route::get('/search', [SearchController::class, 'search'])->name('search');
 });
 
-// Gig accept/deliver: work for both logged-in users and guests (guest identity via campulsy_guest_token cookie, checked inside the controller)
-Route::post('/gigs/{gig}/accept', [App\Http\Controllers\GigController::class, 'accept'])->name('gigs.accept');
-Route::post('/gigs/{gig}/deliver', [App\Http\Controllers\GigController::class, 'deliver'])->name('gigs.deliver');
+// Gig accept/deliver: work for both logged-in users and guests (guest identity via qelvo_guest_token cookie, checked inside the controller)
+Route::post('/gigs/{gig}/accept', [App\Http\Controllers\GigController::class, 'accept'])->name('gigs.accept')->middleware(['auth', 'signup.paid']);
+Route::post('/gigs/{gig}/deliver', [App\Http\Controllers\GigController::class, 'deliver'])->name('gigs.deliver')->middleware(['auth', 'signup.paid']);
 
 // Signup fee (₦1,000 account activation) - requires login (user exists) but not signup_fee_paid
 Route::middleware('auth')->group(function () {
     Route::get('/activate', function () { return view('auth.signup-fee-activate'); })->name('signup-fee.activate');
     Route::get('/signup-fee', [App\Http\Controllers\FlutterwaveController::class, 'initiateSignupFee'])->name('signup-fee.initiate');
     Route::get('/signup-fee/callback', [App\Http\Controllers\FlutterwaveController::class, 'signupFeeCallback'])->name('signup-fee.callback');
+});
+
+use App\Http\Controllers\AppearanceController;
+Route::middleware('auth')->group(function () {
+    Route::post('/settings/appearance', [AppearanceController::class, 'update'])->name('appearance.update');
+    Route::get('/settings/appearance', function () {
+        return view('settings.appearance');
+    })->name('appearance.edit');
 });

@@ -33,6 +33,13 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        $registerThrottleKey = 'register|' . $request->ip();
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($registerThrottleKey, 10)) {
+            $seconds = \Illuminate\Support\Facades\RateLimiter::availableIn($registerThrottleKey);
+            return back()->withErrors(['email' => 'Too many signup attempts from this network. Please try again in ' . ceil($seconds / 60) . ' minute(s).'])->withInput();
+        }
+        \Illuminate\Support\Facades\RateLimiter::hit($registerThrottleKey, 3600);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -92,7 +99,7 @@ class AuthController extends Controller
                     'is_permanent' => true,
                     'firstname' => $firstname,
                     'lastname' => $lastname,
-                    'narration' => 'Campulsy - ' . $user->name,
+                    'narration' => 'Qelvo - ' . $user->name,
                     'bvn' => $bvn,
                 ]);
             // $bvn goes out of scope here and is never stored - only Flutterwave's response is saved
@@ -113,6 +120,13 @@ class AuthController extends Controller
 
     public function registerVendor(Request $request)
     {
+        $registerThrottleKey = 'register|' . $request->ip();
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($registerThrottleKey, 10)) {
+            $seconds = \Illuminate\Support\Facades\RateLimiter::availableIn($registerThrottleKey);
+            return back()->withErrors(['email' => 'Too many signup attempts from this network. Please try again in ' . ceil($seconds / 60) . ' minute(s).'])->withInput();
+        }
+        \Illuminate\Support\Facades\RateLimiter::hit($registerThrottleKey, 3600);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -158,10 +172,20 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
+        $throttleKey = \Illuminate\Support\Str::lower($credentials['email']) . '|' . $request->ip();
+
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = \Illuminate\Support\Facades\RateLimiter::availableIn($throttleKey);
+            return back()->withErrors(['email' => 'Too many login attempts. Please try again in ' . ceil($seconds / 60) . ' minute(s).']);
+        }
+
         if (Auth::attempt($credentials)) {
+            \Illuminate\Support\Facades\RateLimiter::clear($throttleKey);
             $request->session()->regenerate();
             return redirect()->route('dashboard');
         }
+
+        \Illuminate\Support\Facades\RateLimiter::hit($throttleKey, 300);
 
         return back()->withErrors(['email' => 'Invalid credentials.']);
     }

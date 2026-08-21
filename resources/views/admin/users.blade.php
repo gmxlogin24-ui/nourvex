@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-admin')
 @section('content')
 <div class="max-w-6xl mx-auto px-4 py-6">
     <div class="flex justify-between items-center mb-6">
@@ -14,7 +14,6 @@
         <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name or email" class="balance-chip" style="background:var(--color-card);border:1px solid var(--border-color);">
         <select name="tier" class="balance-chip" style="background:var(--color-card);border:1px solid var(--border-color);">
             <option value="">All tiers</option>
-            <option value="free" @selected(request('tier')==='free')>Free</option>
             <option value="tier1" @selected(request('tier')==='tier1')>Tier 1</option>
         </select>
         <button class="balance-chip primary">Filter</button>

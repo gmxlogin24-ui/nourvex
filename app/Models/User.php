@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 
 #[Fillable([
     'name', 'email', 'password', 'gender', 'spoken_language', 'avatar_url', 'background_url', 'accent_color',
@@ -16,7 +17,8 @@ use Illuminate\Notifications\Notifiable;
     'tier', 'tier_upgraded_at', 'is_verified_seller',
     'virtual_account_number', 'virtual_account_bank', 'virtual_account_ref',
     'account_type', 'business_name', 'business_logo', 'business_whatsapp', 'is_vendor_active', 'interests',
-    'streak_days', 'last_active_date', 'leaderboard_opt_in',
+    'streak_days', 'last_active_date', 'leaderboard_opt_in', 'wallet_restricted', 'google_id', 'transaction_pin', 'theme_style',
+    'is_admin',
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
@@ -32,6 +34,11 @@ class User extends Authenticatable
     public function completedGigsCount(): int
     {
         return \App\Models\Gig::where('accepted_by', $this->id)->where('status', 'completed')->count();
+    }
+
+    public function favoriteListings()
+    {
+        return $this->belongsToMany(Listing::class, 'listing_favorites')->withTimestamps();
     }
 
     public function averageRatingReceived(): ?float
@@ -64,11 +71,25 @@ class User extends Authenticatable
         return ['key' => 'new', 'label' => 'New', 'icon' => 'sprout'];
     }
 
+    // Transaction PIN gates real-money purchases (VTU, cable, withdrawals).
+    // Hashed via the cast below, same treatment as password - never compared
+    // or stored in plaintext.
+    public function hasTransactionPin(): bool
+    {
+        return !is_null($this->transaction_pin);
+    }
+
+    public function verifyTransactionPin(string $pin): bool
+    {
+        return $this->hasTransactionPin() && Hash::check($pin, $this->transaction_pin);
+    }
+
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'transaction_pin' => 'hashed',
             'interests' => 'array',
         ];
     }

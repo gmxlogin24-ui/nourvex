@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Listing;
 use App\Models\Transaction;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 
 class CartController extends Controller
@@ -51,39 +53,49 @@ class CartController extends Controller
     }
 
     // Buys every item in the cart via escrow, same as a single Buy Now — just batched.
+    // Locked to close a race where a double-click/duplicate submit could double-charge the buyer.
     public function checkout()
     {
         $buyer = Auth::user();
-        $ids = Session::get('cart', []);
-        $listings = Listing::whereIn('id', $ids)->where('status', 'available')->get();
 
-        if ($listings->isEmpty()) {
-            return redirect()->route('cart.index')->withErrors(['cart' => 'Your cart is empty.']);
-        }
+        return DB::transaction(function () use ($buyer) {
+            $lockedBuyer = User::where('id', $buyer->id)->lockForUpdate()->first();
 
-        $total = $listings->sum('amount');
-        if ($buyer->wallet_balance < $total) {
-            return back()->withErrors(['cart' => 'Insufficient wallet balance for all items in your cart. Top up first, or remove some items.']);
-        }
-
-        foreach ($listings as $listing) {
-            if ($listing->user_id === $buyer->id) {
-                continue; // skip own listing defensively
+            if ($lockedBuyer->wallet_restricted) {
+                return back()->withErrors(['cart' => 'Your wallet is restricted due to an unresolved payment issue.']);
             }
 
-            $buyer->decrement('wallet_balance', $listing->amount);
-            Transaction::create([
-                'user_id' => $buyer->id,
-                'type' => 'marketplace_escrow',
-                'amount' => -$listing->amount,
-                'description' => 'Paid (held in escrow): ' . $listing->title,
-            ]);
+            $ids = Session::get('cart', []);
+            $listings = Listing::whereIn('id', $ids)->where('status', 'available')->lockForUpdate()->get();
 
-            $listing->update(['status' => 'sold', 'buyer_id' => $buyer->id]);
-        }
+            if ($listings->isEmpty()) {
+                return redirect()->route('cart.index')->withErrors(['cart' => 'Your cart is empty.']);
+            }
 
-        Session::forget('cart');
+            $total = $listings->sum('amount');
+            if ($lockedBuyer->wallet_balance < $total) {
+                return back()->withErrors(['cart' => 'Insufficient wallet balance for all items in your cart. Top up first, or remove some items.']);
+            }
 
-        return redirect()->route('marketplace.index')->with('status', 'Checkout complete — funds held in escrow per item until you confirm delivery.');
+            foreach ($listings as $listing) {
+                if ($listing->user_id === $lockedBuyer->id) {
+                    continue; // skip own listing defensively
+                }
+
+                $lockedBuyer->decrement('wallet_balance', $listing->amount);
+                Transaction::create([
+                    'user_id' => $lockedBuyer->id,
+                    'type' => 'marketplace_escrow',
+                    'amount' => -$listing->amount,
+                    'description' => 'Paid (held in escrow): ' . $listing->title,
+                ]);
+
+                $listing->update(['status' => 'sold', 'buyer_id' => $lockedBuyer->id]);
+            }
+
+            Session::forget('cart');
+
+            return redirect()->route('marketplace.index')->with('status', 'Checkout complete — funds held in escrow per item until you confirm delivery.');
+        });
     }
 }

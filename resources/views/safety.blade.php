@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.landing')
 @section('content')
 <div class="max-w-6xl mx-auto px-3 pt-3">
 <div class="hero-poster reveal-on-scroll" style="min-height:auto;">
@@ -8,7 +8,7 @@
     <nav class="flex justify-between items-center px-2 md:px-4 py-2 relative" style="z-index:5;">
         <a href="{{ route('welcome') }}" class="flex items-center space-x-3" style="text-decoration:none;color:inherit;">
             <div class="logo-badge-ring"><div class="logo-badge"></div></div>
-            <span class="text-lg font-semibold">Campulsy</span>
+            <span class="text-lg font-semibold">Qelvo</span>
         </a>
         <div class="hidden md:flex space-x-8 text-sm hero-poster-muted">
             <a href="{{ route('welcome') }}">Home</a>

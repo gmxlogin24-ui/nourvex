@@ -168,7 +168,20 @@
                 </form>
             </div>
             @elseif($gig->accepted_by === auth()->id())
+            @if($dispute && $dispute->status === 'open')
+            <div class="glass-card p-5 mt-6 text-center reveal-on-scroll" style="border:1px solid #f59e0b;">
+                <p class="text-sm">Complaint submitted — admin is reviewing it.</p>
+            </div>
+            @else
             <p class="text-muted text-sm mt-6 text-center">Delivered — waiting for the poster to confirm and release payment.</p>
+            <button type="button" onclick="document.getElementById('disputeBox').classList.toggle('hidden')" class="btn-secondary mt-2 w-full justify-center text-sm">Poster Not Responding? File a Complaint</button>
+            <div id="disputeBox" class="hidden glass-card p-5 mt-2 reveal-on-scroll">
+                <form method="POST" action="{{ route('gigs.dispute.store', $gig->id) }}">
+                    @csrf
+                    <button type="submit" class="btn-secondary mt-3 w-full justify-center">Submit Complaint</button>
+                </form>
+            </div>
+            @endif
             @endif
         @else
             @if($isGuestWorker)

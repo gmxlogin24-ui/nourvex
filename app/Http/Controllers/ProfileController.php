@@ -11,7 +11,15 @@ class ProfileController extends Controller
 {
     public function index()
     {
-        return view('profile.index', ['user' => Auth::user()]);
+        $user = Auth::user();
+
+        return view('profile.index', [
+            'user' => $user,
+            'workerLevel' => $user->workerLevel(),
+            'completedGigsCount' => $user->completedGigsCount(),
+            'averageRating' => $user->averageRatingReceived(),
+            'reviewsReceivedCount' => $user->reviewsReceivedCount(),
+        ]);
     }
 
     public function update(Request $request)
@@ -22,6 +30,7 @@ class ProfileController extends Controller
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'accent_color' => 'nullable|string|max:7',
+            'theme_style' => 'nullable|string|in:glass,neumorphic,plain',
             'avatar' => 'nullable|image|max:4096',
             'background' => 'nullable|image|max:8192',
         ]);

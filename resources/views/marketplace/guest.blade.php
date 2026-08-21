@@ -5,9 +5,9 @@
     $categoryIcons = ['Fashion'=>'shirt','Electronics'=>'cpu','Books'=>'book','Food'=>'utensils','Services'=>'wrench','Rentals'=>'key','Other'=>'grid'];
 
     $heroSlides = [
-        ['eyebrow' => 'Promoted', 'title' => 'Campus Tech Deals', 'highlight' => 'Save up to 20%', 'sub' => 'Laptops, earbuds, and gadgets from students near you.', 'cta' => 'Shop Now', 'seed' => 'campulsyhero1'],
-        ['eyebrow' => 'Promoted', 'title' => 'Fresh Fashion Drops', 'highlight' => 'New arrivals daily', 'sub' => 'Thrifted and new pieces, styled by students for students.', 'cta' => 'Browse Now', 'seed' => 'campulsyhero2'],
-        ['eyebrow' => 'Promoted', 'title' => 'Study Essentials', 'highlight' => 'Everything for less', 'sub' => 'Textbooks, stationery, and dorm gear at student prices.', 'cta' => 'Shop Now', 'seed' => 'campulsyhero3'],
+        ['eyebrow' => 'Promoted', 'title' => 'Campus Tech Deals', 'highlight' => 'Save up to 20%', 'sub' => 'Laptops, earbuds, and gadgets from students near you.', 'cta' => 'Shop Now', 'seed' => 'qelvohero1'],
+        ['eyebrow' => 'Promoted', 'title' => 'Fresh Fashion Drops', 'highlight' => 'New arrivals daily', 'sub' => 'Thrifted and new pieces, styled by students for students.', 'cta' => 'Browse Now', 'seed' => 'qelvohero2'],
+        ['eyebrow' => 'Promoted', 'title' => 'Study Essentials', 'highlight' => 'Everything for less', 'sub' => 'Textbooks, stationery, and dorm gear at student prices.', 'cta' => 'Shop Now', 'seed' => 'qelvohero3'],
     ];
 
     // TODO: replace all placeholder collections below with real controller data.
@@ -48,8 +48,10 @@
     ]);
 
     $displayListings = $listings->isNotEmpty() ? $listings : $placeholderPool;
-    $justArrived = $displayListings->take(4);
-    $secondFeatured = $displayListings->skip(4)->take(4)->count() ? $displayListings->skip(4)->take(4) : $displayListings->take(4);
+    $justArrived = ($justArrived ?? collect())->isNotEmpty() ? $justArrived : $displayListings->take(4);
+    $secondFeatured = ($secondFeatured ?? collect())->isNotEmpty() ? $secondFeatured : $displayListings->take(4);
+    $featuredPool = !empty($realFeaturedPool) ? $realFeaturedPool : $featuredPool;
+    $catTiles = !empty($realCatTiles) ? $realCatTiles : $catTiles;
 @endphp
 
 <style>
@@ -294,7 +296,7 @@ body[data-page="marketplace"] {
             <a href="{{ route('register') }}" class="mg-promo-tile">
                 <div>
                     <p class="mg-promo-eyebrow">Featured</p>
-                    <p class="mg-promo-title">Sign up to sell on Campulsy</p>
+                    <p class="mg-promo-title">Sign up to sell on Qelvo</p>
                 </div>
                 <span class="mg-promo-cta">Get Started</span>
             </a>
@@ -304,7 +306,7 @@ body[data-page="marketplace"] {
         <div class="mg-section-head">
             <div>
                 <p class="mg-section-title">Just Arrived</p>
-                <p class="mg-section-sub">New on the marketplace this week</p>
+                <p class="mg-section-sub">New on Campus Market this week</p>
             </div>
         </div>
         <div class="mg-grid-4">
@@ -362,7 +364,7 @@ body[data-page="marketplace"] {
         <div class="mg-section-head" id="mgListings">
             <div>
                 <p class="mg-section-title">All Listings</p>
-                <p class="mg-section-sub">Browse everything on the marketplace</p>
+                <p class="mg-section-sub">Browse everything on Campus Market</p>
             </div>
         </div>
         <div class="mg-grid-4">

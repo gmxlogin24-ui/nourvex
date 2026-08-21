@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-authenticated')
 @section('content')
 
 
@@ -24,7 +24,7 @@
                     <div class="w-8 h-8 rounded-full bg-card"></div>
                     <span>{{ $r->name }}</span>
                 </div>
-                <span class="text-xs text-muted">{{ $r->tier === 'free' ? 'Free account' : strtoupper($r->tier) }}</span>
+                <span class="text-xs text-muted">{{ strtoupper($r->tier) }}</span>
             </div>
             @endforeach
         </div>

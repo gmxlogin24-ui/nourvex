@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-authenticated')
 @section('content')
 
 
@@ -11,6 +11,7 @@
         <div class="balance-actions">
             <button onclick="document.getElementById('withdrawModal').classList.add('open')" class="balance-chip primary"><i data-lucide="arrow-down-to-line" class="w-4 h-4"></i> Withdraw</button>
             <button onclick="document.getElementById('topupModal').classList.add('open')" class="balance-chip"><i data-lucide="plus" class="w-4 h-4"></i> Top Up</button>
+            <button onclick="document.getElementById('sendModal').classList.add('open')" class="balance-chip"><i data-lucide="send" class="w-4 h-4"></i> Send</button>
         </div>
     </div>
 
@@ -62,6 +63,20 @@
             <button type="submit" class="btn-primary w-full justify-center">Continue to Payment</button>
         </form>
         <button onclick="document.getElementById('topupModal').classList.remove('open')" class="text-muted text-sm mt-3 w-full text-center">Cancel</button>
+    </div>
+</div>
+
+<div id="sendModal" class="modal-overlay">
+    <div class="glass-card p-6 max-w-sm mx-auto mt-24">
+        <h3 class="font-semibold mb-3">Send Money</h3>
+        <form method="POST" action="{{ route('wallet.send') }}">
+            @csrf
+            <input type="text" name="recipient_identifier" placeholder="Recipient email" required class="input-field !mt-0 mb-3">
+            <input type="number" name="amount" min="1" placeholder="Amount (₦)" required class="input-field !mt-0 mb-3">
+            <input type="text" name="note" placeholder="Note (optional)" class="input-field !mt-0 mb-3">
+            <button type="submit" class="btn-primary w-full justify-center">Send Money</button>
+        </form>
+        <button onclick="document.getElementById('sendModal').classList.remove('open')" class="text-muted text-sm mt-3 w-full text-center">Cancel</button>
     </div>
 </div>
 

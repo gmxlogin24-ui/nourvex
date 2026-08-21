@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-authenticated')
 @section('content')
 <main class="max-w-lg mx-auto p-6">
     <a href="{{ route('news.index') }}" class="text-muted text-sm flex items-center gap-1 mb-4">

@@ -2,13 +2,13 @@
     <div class="max-w-6xl mx-auto flex justify-between items-center px-4 py-3">
         <a href="{{ route('welcome') }}" class="sn-logo">
             <div class="logo-badge" style="width:2rem;height:2rem;"></div>
-            <span>Campulsy</span>
+            <span>Qelvo</span>
         </a>
 
         <div class="sn-links-desktop">
             <a href="{{ route('welcome') }}">Home</a>
-            <a href="{{ route('gigs.index') }}">Gigs</a>
-            <a href="{{ route('marketplace.index') }}">Marketplace</a>
+            <a href="{{ route('gigs.index') }}">Hustles</a>
+            <a href="{{ route('marketplace.index') }}">Campus Market</a>
             <a href="{{ route('pulse.index') }}">Pulse</a>
             <a href="{{ route('features') }}">Features</a>
             <a href="{{ route('login') }}" class="sn-login-btn">Log In</a>
@@ -25,13 +25,13 @@
 <aside class="sn-drawer" id="snDrawer">
     <div class="sn-drawer-brand">
         <div class="logo-badge"></div>
-        <span>Campulsy</span>
+        <span>Qelvo</span>
     </div>
     <div class="sn-reveal-heading">Menu</div>
     <nav class="sn-item-list">
         <a href="{{ route('welcome') }}" class="sn-item"><span class="sn-item-icon"><i data-lucide="home" class="w-4 h-4"></i></span><span>Home</span></a>
-        <a href="{{ route('gigs.index') }}" class="sn-item"><span class="sn-item-icon"><i data-lucide="briefcase" class="w-4 h-4"></i></span><span>Gigs</span></a>
-        <a href="{{ route('marketplace.index') }}" class="sn-item"><span class="sn-item-icon"><i data-lucide="shopping-bag" class="w-4 h-4"></i></span><span>Marketplace</span></a>
+        <a href="{{ route('gigs.index') }}" class="sn-item"><span class="sn-item-icon"><i data-lucide="briefcase" class="w-4 h-4"></i></span><span>Hustles</span></a>
+        <a href="{{ route('marketplace.index') }}" class="sn-item"><span class="sn-item-icon"><i data-lucide="shopping-bag" class="w-4 h-4"></i></span><span>Campus Market</span></a>
         <a href="{{ route('pulse.index') }}" class="sn-item"><span class="sn-item-icon"><i data-lucide="activity" class="w-4 h-4"></i></span><span>Pulse</span></a>
         <a href="{{ route('features') }}" class="sn-item"><span class="sn-item-icon"><i data-lucide="sparkles" class="w-4 h-4"></i></span><span>Features</span></a>
     </nav>

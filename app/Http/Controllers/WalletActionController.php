@@ -3,43 +3,70 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transaction;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class WalletActionController extends Controller
 {
-    public function topup(Request $request)
+    // Was: topup() directly credited wallet_balance from a user-submitted
+    // amount with no payment behind it - anyone could give themselves
+    // unlimited money. Replaced with a real Flutterwave charge; the wallet
+    // is only credited once FlutterwaveWebhookController verifies the
+    // 'TOPUP-' tx_ref via webhook.
+    public function initiateTopup(Request $request)
     {
         $validated = $request->validate(['amount' => 'required|numeric|min:100']);
         $user = Auth::user();
+        $txRef = 'TOPUP-' . $user->id . '-' . time();
 
-        $user->increment('wallet_balance', $validated['amount']);
-        Transaction::create([
-            'user_id' => $user->id,
-            'type' => 'topup',
-            'amount' => $validated['amount'],
-            'description' => 'Wallet top-up',
-        ]);
+        $response = Http::withToken(config('services.flutterwave.secret'))
+            ->post('https://api.flutterwave.com/v3/payments', [
+                'tx_ref' => $txRef,
+                'amount' => $validated['amount'],
+                'currency' => 'NGN',
+                'redirect_url' => route('wallet.index'),
+                'customer' => ['email' => $user->email, 'name' => $user->name],
+                'customizations' => ['title' => 'Qelvo Wallet Top-up'],
+            ]);
 
-        return redirect()->route('wallet.index')->with('status', 'Top-up successful.');
+        $data = $response->json();
+
+        if (($data['status'] ?? null) === 'success') {
+            return redirect($data['data']['link']);
+        }
+
+        return back()->withErrors(['amount' => 'Could not start payment. Please try again.']);
     }
 
     public function withdraw(Request $request)
     {
         $validated = $request->validate(['amount' => 'required|numeric|min:100']);
-        $user = Auth::user();
+        $userId = Auth::id();
 
-        if ($user->wallet_balance < $validated['amount']) {
+        $result = DB::transaction(function () use ($userId, $validated) {
+            $lockedUser = User::where('id', $userId)->lockForUpdate()->first();
+
+            if ($lockedUser->wallet_balance < $validated['amount']) {
+                return ['ok' => false];
+            }
+
+            $lockedUser->decrement('wallet_balance', $validated['amount']);
+            Transaction::create([
+                'user_id' => $lockedUser->id,
+                'type' => 'withdrawal',
+                'amount' => -$validated['amount'],
+                'description' => 'Withdrawal',
+            ]);
+
+            return ['ok' => true];
+        });
+
+        if (!$result['ok']) {
             return back()->withErrors(['amount' => 'Insufficient balance.']);
         }
-
-        $user->decrement('wallet_balance', $validated['amount']);
-        Transaction::create([
-            'user_id' => $user->id,
-            'type' => 'withdrawal',
-            'amount' => -$validated['amount'],
-            'description' => 'Withdrawal',
-        ]);
 
         return redirect()->route('wallet.index')->with('status', 'Withdrawal requested.');
     }

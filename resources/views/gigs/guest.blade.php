@@ -34,10 +34,10 @@
 <section class="gigs-hero-band">
     <div class="max-w-6xl mx-auto gigs-hero-inner">
         <div>
-            <h1 class="gigs-hero-title">Find gigs that pay,<br>posted by students like you</h1>
-            <p class="gigs-hero-sub">{{ $openCount }} open gigs right now — sign up to apply or post your own.</p>
+            <h1 class="gigs-hero-title">Find hustles that pay,<br>posted by students like you</h1>
+            <p class="gigs-hero-sub">{{ $openCount }} open hustles right now — sign up to apply or post your own.</p>
             <form method="GET" class="gigs-hero-search">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search gigs...">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search hustles...">
                 <button type="submit"><i data-lucide="search" class="w-4 h-4"></i></button>
             </form>
             <div class="gigs-hero-tags">
@@ -59,7 +59,7 @@
     <div class="gigs-section-head">
         <div>
             <p class="gigs-section-title">Search by Category</p>
-            <p class="gigs-section-sub">Find gigs by what you're good at</p>
+            <p class="gigs-section-sub">Find hustles by what you're good at</p>
         </div>
         <a href="{{ route('gigs.index') }}" class="gigs-section-link">All Categories <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></a>
     </div>

@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.landing')
 @section('content')
 <div class="max-w-sm mx-auto mt-24 p-6">
     <div class="glass-card p-6">

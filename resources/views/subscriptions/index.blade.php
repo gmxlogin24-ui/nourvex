@@ -1,10 +1,10 @@
-@extends('layouts.app')
+@extends('layouts.app-authenticated')
 @section('content')
 
 
 <main class="max-w-2xl mx-auto p-6">
     <h1 class="text-2xl font-semibold mb-1">Subscriptions</h1>
-    <p class="text-muted text-sm mb-6">Post gigs and marketplace listings, earn bigger referral bonuses — billed yearly</p>
+    <p class="text-muted text-sm mb-6">Post hustles and campus market listings, earn bigger referral bonuses — billed yearly</p>
 
     @if ($errors->any())
     <div class="bg-red-500/10 text-red-500 text-sm rounded-lg p-3 mb-6">{{ $errors->first() }}</div>
@@ -26,30 +26,16 @@
     </div>
     @endif
 
-    <div class="grid md:grid-cols-3 gap-4">
+    <div class="grid md:grid-cols-2 gap-4">
         <div class="glass-card p-5 reveal-on-scroll">
             <p class="text-sm text-muted">Starter</p>
-            <h2 class="text-xl font-semibold mt-1">Free</h2>
-            <p class="text-2xl font-bold text-accent mt-2">₦0</p>
-            <ul class="text-sm text-muted mt-4 space-y-2">
-                <li>✓ Browse gigs & marketplace</li>
-                <li>✓ Buy items & accept gigs</li>
-                <li>✓ Wallet & earnings tracking</li>
-                <li class="opacity-40">✗ Post gigs or listings</li>
-                <li class="opacity-40">✗ Referral bonuses</li>
-            </ul>
-            @if ($user->tier === 'free')
-            <p class="text-xs text-accent mt-5">✓ Current plan</p>
-            @endif
-        </div>
-
-        <div class="glass-card p-5 reveal-on-scroll">
-            <p class="text-sm text-muted">For active sellers</p>
             <h2 class="text-xl font-semibold mt-1">Plus</h2>
             <p class="text-2xl font-bold text-accent mt-2">₦{{ number_format($plans['tier1']['price']) }} <span class="text-xs text-muted font-normal">/ year</span></p>
             <ul class="text-sm text-muted mt-4 space-y-2">
-                <li>✓ Everything in Free</li>
-                <li>✓ Post gigs & marketplace listings</li>
+                <li>✓ Browse hustles & campus market</li>
+                <li>✓ Buy items & accept gigs</li>
+                <li>✓ Wallet & earnings tracking</li>
+                <li>✓ Post hustles & campus market listings</li>
                 <li>✓ Earn 10% referral bonus</li>
                 <li>✓ Up to 5 active posts</li>
             </ul>

@@ -46,7 +46,7 @@
    SITE LOGO — applied globally to every .logo-badge
 =================================================== */
 .logo-badge {
-  background-image: url('/images/logo.svg') !important;
+  background-image: url('/images/qelvo-mark.png') !important;
   background-size: cover !important;
   background-position: center !important;
   background-color: transparent !important;
@@ -119,7 +119,7 @@
 
 /* Logo — always visible, correct shape, works in both panels */
 .logo-badge {
-  background-image: url('/images/logo.svg') !important;
+  background-image: url('/images/qelvo-mark.png') !important;
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;

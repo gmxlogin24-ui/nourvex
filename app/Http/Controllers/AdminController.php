@@ -9,14 +9,42 @@ use App\Models\Listing;
 use App\Models\Subscription;
 use App\Models\News;
 use App\Models\Blog;
+use App\Models\PlatformRevenue;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
+    public function revenue()
+    {
+        $this->guard();
+
+        $totalAllTime = PlatformRevenue::sum('amount');
+        $totalThisMonth = PlatformRevenue::where('created_at', '>=', now()->startOfMonth())->sum('amount');
+        $totalThisWeek = PlatformRevenue::where('created_at', '>=', now()->startOfWeek())->sum('amount');
+        $totalToday = PlatformRevenue::where('created_at', '>=', now()->startOfDay())->sum('amount');
+
+        $bySource = PlatformRevenue::selectRaw('source, SUM(amount) as total, COUNT(*) as count')
+            ->groupBy('source')
+            ->orderByDesc('total')
+            ->get();
+
+        $recent = PlatformRevenue::latest()->take(50)->get();
+
+        return view('admin.revenue', [
+            'totalAllTime' => $totalAllTime,
+            'totalThisMonth' => $totalThisMonth,
+            'totalThisWeek' => $totalThisWeek,
+            'totalToday' => $totalToday,
+            'bySource' => $bySource,
+            'recent' => $recent,
+        ]);
+    }
+
     private function guard()
     {
-        abort_unless(Auth::user()->is_admin, 403);
+        abort_unless(Auth::check() && Auth::user()->is_admin, 403);
     }
 
     public function index()
@@ -70,6 +98,36 @@ class AdminController extends Controller
         return view('admin.users', ['users' => $q->latest()->paginate(25)->withQueryString()]);
     }
 
+    public function grantAccess(Request $r)
+    {
+        $this->guard();
+        $users = collect();
+        if ($r->filled('search')) {
+            $users = User::where(fn($w) => $w->where('name', 'like', "%{$r->search}%")->orWhere('email', 'like', "%{$r->search}%"))
+                ->limit(20)->get();
+        }
+        return view('admin.grant-access', ['users' => $users, 'search' => $r->search]);
+    }
+
+    public function grantAccessStore(Request $r)
+    {
+        $this->guard();
+        $validated = $r->validate([
+            'user_id' => 'required|exists:users,id',
+            'tier' => 'required|in:tier1,tier2,tier3',
+        ]);
+
+        $user = User::findOrFail($validated['user_id']);
+        $user->update([
+            'signup_fee_paid' => true,
+            'badge_tier' => 'bronze',
+            'tier' => $validated['tier'],
+            'tier_upgraded_at' => now(),
+        ]);
+
+        return back()->with('status', "Granted {$validated['tier']} access to {$user->name}.");
+    }
+
     public function toggleAdmin(User $user)
     {
         $this->guard();
@@ -86,17 +144,24 @@ class AdminController extends Controller
         return back()->with('status', $user->name . ($user->is_banned ? ' banned.' : ' unbanned.'));
     }
 
+    // Locked to prevent this admin write from racing with a concurrent user-side wallet
+    // operation (topup, purchase, gig payout) on the same account and losing an update.
     public function adjustBalance(Request $r, User $user)
     {
         $this->guard();
         $data = $r->validate(['amount' => 'required|numeric', 'note' => 'nullable|string|max:255']);
-        $user->increment('wallet_balance', $data['amount']);
-        Transaction::create([
-            'user_id' => $user->id,
-            'type' => 'admin_adjustment',
-            'amount' => $data['amount'],
-            'description' => $data['note'] ?? 'Admin balance adjustment',
-        ]);
+
+        DB::transaction(function () use ($data, $user) {
+            $lockedUser = User::where('id', $user->id)->lockForUpdate()->first();
+            $lockedUser->increment('wallet_balance', $data['amount']);
+            Transaction::create([
+                'user_id' => $lockedUser->id,
+                'type' => 'admin_adjustment',
+                'amount' => $data['amount'],
+                'description' => $data['note'] ?? 'Admin balance adjustment',
+            ]);
+        });
+
         return back()->with('status', 'Balance adjusted for ' . $user->name);
     }
 

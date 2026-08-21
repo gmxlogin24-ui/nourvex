@@ -11,14 +11,14 @@
 
     <div class="flex justify-between items-center mb-4 flex-wrap gap-3 reveal-on-scroll">
         <div>
-            <h1 class="text-2xl font-bold hoverfade-text">Available Gigs</h1>
-            <p class="text-muted text-sm">Sorted for you — gigs you open most stay near the top</p>
+            <h1 class="text-2xl font-bold hoverfade-text">Available Hustles</h1>
+            <p class="text-muted text-sm">Sorted for you — hustles you open most stay near the top</p>
         </div>
-        @auth<a href="{{ route('gigs.create') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Post a Gig</a>@else<a href="{{ route('register') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Sign Up to Post</a>@endauth
+        @auth<a href="{{ route('gigs.create') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Post a Hustle</a>@else<a href="{{ route('register') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Sign Up to Post</a>@endauth
     </div>
 
     <form method="GET" class="reveal-on-scroll" style="margin-bottom:0.75rem;">
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search gigs..." class="input-field" style="max-width:320px;">
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search hustles..." class="input-field" style="max-width:320px;">
     </form>
 
     <div class="flex flex-wrap items-center justify-between gap-3 reveal-on-scroll" style="margin-bottom:0.75rem;">
@@ -39,7 +39,7 @@
         <div class="kpi-tile featured">
             <div class="kpi-tile-top"><div class="kpi-tile-icon" data-face-cursor><i data-lucide="briefcase" class="w-4 h-4"></i></div></div>
             <p class="kpi-tile-value">{{ $openCount }}</p>
-            <p class="kpi-tile-label">Open Gigs</p>
+            <p class="kpi-tile-label">Open Hustles</p>
         </div>
         <div class="kpi-tile">
             <div class="kpi-tile-top"><div class="kpi-tile-icon" data-face-cursor><i data-lucide="banknote" class="w-4 h-4"></i></div></div>
@@ -95,7 +95,7 @@
             </div>
         </a>
         @empty
-        <p class="text-muted text-sm col-span-full">No gigs match — try a different search or category.</p>
+        <p class="text-muted text-sm col-span-full">No hustles match — try a different search or category.</p>
         @endforelse
     </div>
 </main>

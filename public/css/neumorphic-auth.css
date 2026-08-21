@@ -57,13 +57,7 @@ body[data-page]{ background: var(--neu-bg); }
   transition: width 0.3s ease, padding 0.3s ease;
   z-index: 10;
 }
-html[data-sidebar="collapsed"] .neu-sidebar{ width: 84px; padding: 20px 10px; }
-html[data-sidebar="collapsed"] .neu-sidebar .sidebar-brand-label,
-html[data-sidebar="collapsed"] .neu-sidebar .sidebar-link-label,
-html[data-sidebar="collapsed"] .neu-sidebar .sidebar-user-meta{ display: none; }
-html[data-sidebar="collapsed"] .neu-user-card,
-html[data-sidebar="collapsed"] .neu-sidebar-nav a,
-html[data-sidebar="collapsed"] .neu-sidebar-nav button{ justify-content: center; }
+
 
 .neu-sidebar .sidebar-logo-row{ display:flex; align-items:center; gap:10px; padding:4px 6px; }
 .neu-sidebar .sidebar-collapse-btn{
@@ -260,13 +254,7 @@ html[data-sidebar="collapsed"] .neu-sidebar-nav button{ justify-content: center;
 
 /* ---------- Quick actions: 4x4 grid on phone ---------- */
 @media (max-width: 640px){
-  .quick-icon-row{
-    display: grid !important;
-    grid-template-columns: repeat(4, 1fr) !important;
-    gap: 14px !important;
-    overflow: visible !important;
-  }
-  .quick-icon-btn{ flex-direction: column !important; }
+  /* REMOVED: hardcoded 4-col grid, replaced by auto-fill rule in theme-presets.css */
 }
 
 /* ---------- Color pass: kill the "everything gray" flatness ---------- */
@@ -298,7 +286,7 @@ html[data-sidebar="collapsed"] .neu-sidebar-nav button{ justify-content: center;
     box-shadow: 0 4px 16px rgba(0,0,0,0.08);
     border: none !important;
   }
-  .app-shell-with-sidebar{ padding-top: 66px; }
+  .app-shell-with-sidebar{ padding-top: 0; }
 }
 [data-theme="dark"] .mobile-auth-topbar{
   background: color-mix(in srgb, var(--neu-bg) 72%, transparent) !important;
@@ -356,16 +344,7 @@ html[data-sidebar="collapsed"] .neu-sidebar-nav button{ justify-content: center;
   max-width: 100%;
 }
 
-/* ---------- Widen the featured balance/ledger card slightly ---------- */
-.kpi-row{ align-items: stretch; }
-.kpi-tile.featured.ledger-card{
-  flex: 1.5 1 0 !important;
-  min-width: 280px;
-}
-.kpi-row .kpi-tile:not(.featured){
-  flex: 1 1 0;
-  min-width: 140px;
-}
+
 
 /* ---------- Font smoothing / clarity fix ---------- */
 body{
@@ -377,33 +356,7 @@ body{
   box-shadow: 6px 6px 12px var(--neu-shadow-dark), -6px -6px 12px var(--neu-shadow-light) !important;
 }
 
-/* ---------- KPI row: balance card + stacked compact tiles beside it ---------- */
-@media (min-width: 641px){
-  .kpi-row{
-    display: grid !important;
-    grid-template-columns: 1.6fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 12px;
-    align-items: stretch;
-  }
-  .kpi-row > .kpi-tile.featured.ledger-card{
-    grid-column: 1;
-    grid-row: 1 / span 2;
-    flex: none !important;
-    min-width: 0 !important;
-  }
-  .kpi-row > .kpi-tile:nth-child(2){ grid-column: 2; grid-row: 1; }
-  .kpi-row > .kpi-tile:nth-child(3){ grid-column: 2; grid-row: 2; }
-  .kpi-row > .kpi-tile:not(.featured){
-    padding: 12px 14px !important;
-    display: flex !important;
-    flex-direction: column;
-    justify-content: center;
-  }
-  .kpi-row > .kpi-tile:not(.featured) .kpi-tile-value{ font-size: 1.15rem !important; margin: 2px 0 !important; }
-  .kpi-row > .kpi-tile:not(.featured) .kpi-tile-label{ font-size: 0.62rem !important; }
-  .kpi-row > .kpi-tile:not(.featured) .kpi-tile-icon{ width: 26px !important; height: 26px !important; }
-}
+
 
 /* ===================================================
    GIGS PAGE — neumorphic cards + pills
@@ -543,15 +496,7 @@ body[data-page="marketplace"] .listing-placeholder{
   color: #eceef1 !important;
 }
 
-/* ---------- Fix: featured KPI tile grid rule was too narrow, only matched dashboard's ledger-card ---------- */
-@media (min-width: 641px){
-  .kpi-row > .kpi-tile.featured{
-    grid-column: 1;
-    grid-row: 1 / span 2;
-    flex: none !important;
-    min-width: 0 !important;
-  }
-}
+
 .kpi-tile.featured:not(.ledger-card){
   background: var(--neu-surface) !important;
   box-shadow: 8px 8px 16px var(--neu-shadow-dark), -8px -8px 16px var(--neu-shadow-light) !important;
@@ -702,9 +647,7 @@ html[data-sidebar="collapsed"] .sidebar-group{ padding: 10px 6px; }
 
 .sidebar-content-panel{ flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
 
-html[data-sidebar="collapsed"] .sidebar-content-panel{ display: none; }
-html[data-sidebar="collapsed"] .neu-sidebar{ width: 76px; padding: 20px 8px !important; }
-html[data-sidebar="collapsed"] .sidebar-icon-rail{ border-right: none; margin-right: 0; padding-right: 0; }
+
 
 /* ===================================================
    SIDEBAR — separate the rail and panel into two distinct cards
@@ -730,8 +673,7 @@ html[data-sidebar="collapsed"] .sidebar-icon-rail{ border-right: none; margin-ri
   box-shadow: 6px 6px 14px var(--neu-shadow-dark), -6px -6px 14px var(--neu-shadow-light);
   padding: 16px 14px;
 }
-html[data-sidebar="collapsed"] .sidebar-content-panel{ display: none; }
-html[data-sidebar="collapsed"] .neu-sidebar{ width: auto; }
+
 
 /* ===================================================
    SIDEBAR — tighter rail, wider panel, horizontal alignment
@@ -854,8 +796,8 @@ html, body{ max-width: 100%; overflow-x: hidden !important; }
   box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 1px 0 rgba(255,255,255,0.4) inset;
 }
 @media (max-width: 900px){
-  .mobile-auth-topbar-pill{ display: flex; }
-  .app-shell-with-sidebar{ padding-top: 70px; }
+  .mobile-auth-topbar-pill{ display: none; }
+  .app-shell-with-sidebar{ padding-top: 0; }
 }
 .pill-burger{
   width: 34px; height: 34px; border-radius: 50%; border:none; cursor:pointer;

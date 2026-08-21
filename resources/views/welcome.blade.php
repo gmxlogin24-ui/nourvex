@@ -16,7 +16,10 @@
         </video>
 
         <div class="absolute inset-x-0 top-6 flex items-center justify-between px-6 md:px-12 z-40">
-            <span class="text-white text-sm font-semibold tracking-wide font-hero">CAMPULSY</span>
+            <div class="flex flex-col">
+                <span class="text-white text-sm font-semibold tracking-wide font-hero">QELVO</span>
+                <span class="text-white/60 text-[10px] tracking-widest font-hero">CONNECT &middot; CREATE &middot; EARN</span>
+            </div>
             <a href="{{ route('login') }}" class="text-white/80 text-xs px-4 py-2 rounded-full border border-white/30">Login / Sign up</a>
         </div>
 
@@ -25,7 +28,7 @@
 
         <div id="heroCover" class="absolute inset-x-0 top-0 bg-white z-50 flex items-center justify-center text-center px-6" style="height:100%;">
             <div id="heroHeadlineWrap" style="opacity:0; transition: opacity 0.8s ease;">
-                <p class="text-gray-400 text-xs tracking-widest mb-2 font-hero">CAMPULSY</p>
+                <p class="text-gray-400 text-xs tracking-widest mb-2 font-hero">QELVO</p>
                 <h1 class="text-gray-900 text-2xl md:text-4xl font-bold leading-tight max-w-lg font-hero">Work, sell, get paid.<br>All in one place.</h1>
             </div>
         </div>
@@ -60,8 +63,8 @@ document.addEventListener('DOMContentLoaded', function () {
     let touchStartY = null;
 
     const slides = [
-        '<div class="slot-card font-hero"><p class="text-[11px] text-white/60 mb-2">Campus Snapshot</p><div class="grid grid-cols-2 gap-2"><div class="bg-white/10 rounded-xl p-2"><p class="text-[10px] text-white/60">Active Gigs</p><p class="text-xl font-bold">128+</p></div><div class="bg-white/10 rounded-xl p-2"><p class="text-[10px] text-white/60">Listings</p><p class="text-xl font-bold">340+</p></div></div></div>',
-        '<div class="font-hero"><h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">Real gigs.<br>Real money.</h2></div>',
+        '<div class="slot-card font-hero"><p class="text-[11px] text-white/60 mb-2">Campus Snapshot</p><div class="grid grid-cols-2 gap-2"><div class="bg-white/10 rounded-xl p-2"><p class="text-[10px] text-white/60">Active Hustles</p><p class="text-xl font-bold">128+</p></div><div class="bg-white/10 rounded-xl p-2"><p class="text-[10px] text-white/60">Listings</p><p class="text-xl font-bold">340+</p></div></div></div>',
+        '<div class="font-hero"><h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">Real hustles.<br>Real money.</h2></div>',
         '<div class="slot-card font-hero"><p class="text-[11px] text-white/60 mb-1">Wallet Payout</p><p class="text-lg font-bold">₦20,000.50 <span class="text-xs text-white/50 font-normal">available now</span></p></div>',
         '<div class="font-hero"><h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">All in one place.</h2></div>'
     ];
@@ -156,16 +159,16 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="border rounded-2xl p-6">
             <i data-lucide="shopping-bag" class="w-6 h-6 text-indigo-600 mb-3"></i>
             <p class="text-2xl font-bold">{{ $listingCount ?? 340 }}+</p>
-            <p class="font-semibold mb-1">Marketplace</p>
+            <p class="font-semibold mb-1">Campus Market</p>
             <p class="text-sm text-gray-500 mb-3">Sell items, services, and rentals directly to other students.</p>
             <a href="{{ route('marketplace.index') }}" class="text-indigo-600 text-sm font-medium">Browse listings →</a>
         </div>
         <div class="border rounded-2xl p-6">
             <i data-lucide="briefcase" class="w-6 h-6 text-indigo-600 mb-3"></i>
             <p class="text-2xl font-bold">{{ $gigCount ?? 128 }}+</p>
-            <p class="font-semibold mb-1">Gigs</p>
+            <p class="font-semibold mb-1">Hustles</p>
             <p class="text-sm text-gray-500 mb-3">Post a task or pick one up — funds are held safely until it's done.</p>
-            <a href="{{ route('gigs.index') }}" class="text-indigo-600 text-sm font-medium">See open gigs →</a>
+            <a href="{{ route('gigs.index') }}" class="text-indigo-600 text-sm font-medium">See open hustles →</a>
         </div>
         <div class="border rounded-2xl p-6">
             <i data-lucide="activity" class="w-6 h-6 text-indigo-600 mb-3"></i>
@@ -198,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <p class="text-3xl font-bold mb-4">&#8358;5,000 <span class="text-sm font-normal text-gray-500">/ year</span></p>
             <ul class="text-sm space-y-2 mb-6 text-gray-600">
                 <li>✓ Everything in Free</li>
-                <li>✓ Post gigs & listings</li>
+                <li>✓ Post hustles & listings</li>
                 <li>✓ 10% referral bonus</li>
             </ul>
             <a href="{{ route('register') }}" class="block text-center py-3 rounded-full border font-semibold">Get Started</a>

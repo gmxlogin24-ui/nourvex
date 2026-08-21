@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-authenticated')
 @section('content')
 <div class="max-w-lg mx-auto mt-16 p-6 reveal-on-scroll">
     <div class="glass-card p-8">

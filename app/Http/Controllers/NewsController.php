@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\News;
 use App\Models\Transaction;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class NewsController extends Controller
 {
-    // Duration options in days => price in naira. free tier cannot post at all.
+    // Duration options in days => price in naira. tier1 (Plus) cannot post ads — requires tier2+.
     const AD_PRICING = [3 => 1500, 7 => 3000, 14 => 5000];
 
     public function index()
@@ -29,14 +31,14 @@ class NewsController extends Controller
 
     public function createAd()
     {
-        abort_if(Auth::user()->tier === 'free', 403, 'Ads aren\'t available on the Base plan — upgrade to post one.');
+        abort_if(Auth::user()->tier === 'tier1', 403, 'Ads aren\'t available on the Plus plan — upgrade to Pro to post one.');
         return view('news.create-ad', ['pricing' => self::AD_PRICING]);
     }
 
     public function storeAd(Request $request)
     {
         $user = Auth::user();
-        abort_if($user->tier === 'free', 403, 'Ads aren\'t available on the Base plan — upgrade to post one.');
+        abort_if($user->tier === 'tier1', 403, 'Ads aren\'t available on the Plus plan — upgrade to Pro to post one.');
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -48,34 +50,53 @@ class NewsController extends Controller
 
         $cost = self::AD_PRICING[(int) $validated['duration']];
 
-        if ($user->wallet_balance < $cost) {
-            return back()->withErrors(['balance' => 'Insufficient wallet balance. This ad costs ₦' . number_format($cost) . '. Top up your wallet first.'])->withInput();
-        }
-
         $imageUrl = null;
         if ($request->hasFile('image')) {
             $imageUrl = '/storage/' . $request->file('image')->store('news', 'public');
         }
 
-        $user->decrement('wallet_balance', $cost);
-        Transaction::create([
-            'user_id' => $user->id,
-            'type' => 'ad_post',
-            'amount' => -$cost,
-            'description' => $validated['duration'] . '-day ad: ' . $validated['title'],
-        ]);
+        // Balance check + decrement + ad creation must be one atomic unit,
+        // otherwise concurrent submissions can both pass the balance check
+        // before either decrements (race condition -> negative balance).
+        $news = DB::transaction(function () use ($user, $validated, $cost, $imageUrl) {
+            $lockedUser = User::where('id', $user->id)->lockForUpdate()->first();
 
-        News::create([
-            'title' => $validated['title'],
-            'category' => $validated['category'],
-            'body' => $validated['body'],
-            'image_url' => $imageUrl,
-            'type' => 'ad',
-            'created_by' => $user->id,
-            'published_at' => now(),
-            'expires_at' => now()->addDays((int) $validated['duration']),
-            'is_featured' => $user->tier === 'tier3',
-        ]);
+            if ($lockedUser->wallet_restricted) {
+                return null;
+            }
+            if ($lockedUser->wallet_balance < $cost) {
+                return null;
+            }
+
+            $lockedUser->decrement('wallet_balance', $cost);
+
+            Transaction::create([
+                'user_id' => $lockedUser->id,
+                'type' => 'ad_post',
+                'amount' => -$cost,
+                'description' => $validated['duration'] . '-day ad: ' . $validated['title'],
+            ]);
+
+            return News::create([
+                'title' => $validated['title'],
+                'category' => $validated['category'],
+                'body' => $validated['body'],
+                'image_url' => $imageUrl,
+                'type' => 'ad',
+                'created_by' => $lockedUser->id,
+                'published_at' => now(),
+                'expires_at' => now()->addDays((int) $validated['duration']),
+                'is_featured' => $lockedUser->tier === 'tier3',
+            ]);
+        });
+
+        if (!$news) {
+            $user->refresh();
+            if ($user->wallet_restricted) {
+                return back()->withErrors(['balance' => 'Your wallet is restricted due to an unresolved payment issue. Clear your balance to post ads.'])->withInput();
+            }
+            return back()->withErrors(['balance' => 'Insufficient wallet balance. This ad costs ₦' . number_format($cost) . '. Top up your wallet first.'])->withInput();
+        }
 
         return redirect()->route('news.index')->with('status', 'Ad is live for ' . $validated['duration'] . ' days.');
     }

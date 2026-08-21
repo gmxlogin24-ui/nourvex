@@ -1,0 +1,520 @@
+/*
+ * Theme presets, scoped entirely by [data-theme-style] on <body> so this
+ * file can never clash with existing app-v2.css rules — it only fires
+ * when a preset is explicitly selected, and stacks with the existing
+ * [data-theme="dark"] light/dark toggle rather than replacing it.
+ */
+
+/* ===== GLASS (default) — reinforces true glassmorphism ===== */
+body[data-theme-style="glass"] .glass-card,
+body[data-theme-style="glass"] .stat-card {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.12);
+    border-radius: 1.25rem;
+}
+body[data-theme-style="glass"][data-theme="dark"] .glass-card,
+body[data-theme-style="glass"][data-theme="dark"] .stat-card {
+    background: rgba(24, 24, 27, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+body[data-theme-style="glass"] .btn-primary {
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+/* ===== NEUMORPHIC — soft UI, dual shadows, flat matching background ===== */
+body[data-theme-style="neumorphic"] {
+    background: #e6e9ef !important;
+}
+body[data-theme-style="neumorphic"][data-theme="dark"] {
+    background: #2b2f38 !important;
+}
+body[data-theme-style="neumorphic"] .glass-card,
+body[data-theme-style="neumorphic"] .stat-card {
+    background: #e6e9ef;
+    border: none;
+    border-radius: 1.5rem;
+    box-shadow: 8px 8px 16px rgba(163, 177, 198, 0.55), -8px -8px 16px rgba(255, 255, 255, 0.85);
+    backdrop-filter: none;
+}
+body[data-theme-style="neumorphic"][data-theme="dark"] .glass-card,
+body[data-theme-style="neumorphic"][data-theme="dark"] .stat-card {
+    background: #2b2f38;
+    box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.45), -8px -8px 16px rgba(255, 255, 255, 0.04);
+}
+body[data-theme-style="neumorphic"] .btn-primary,
+body[data-theme-style="neumorphic"] .btn-secondary {
+    background: #e6e9ef;
+    color: var(--color-text, #333);
+    border: none;
+    border-radius: 0.9rem;
+    box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.5), -4px -4px 8px rgba(255, 255, 255, 0.8);
+}
+body[data-theme-style="neumorphic"][data-theme="dark"] .btn-primary,
+body[data-theme-style="neumorphic"][data-theme="dark"] .btn-secondary {
+    background: #2b2f38;
+    color: #eee;
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4), -4px -4px 8px rgba(255, 255, 255, 0.03);
+}
+body[data-theme-style="neumorphic"] .btn-primary:active,
+body[data-theme-style="neumorphic"] .btn-secondary:active {
+    box-shadow: inset 3px 3px 6px rgba(163, 177, 198, 0.5), inset -3px -3px 6px rgba(255, 255, 255, 0.8);
+}
+body[data-theme-style="neumorphic"] .input-field {
+    background: #e6e9ef;
+    border: none;
+    border-radius: 0.9rem;
+    box-shadow: inset 3px 3px 6px rgba(163, 177, 198, 0.4), inset -3px -3px 6px rgba(255, 255, 255, 0.8);
+}
+body[data-theme-style="neumorphic"][data-theme="dark"] .input-field {
+    background: #2b2f38;
+    box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.35), inset -3px -3px 6px rgba(255, 255, 255, 0.03);
+}
+
+/* ===== PLAIN — flat, minimal, no blur, no glow ===== */
+body[data-theme-style="plain"] .glass-card,
+body[data-theme-style="plain"] .stat-card {
+    background: var(--color-card, #ffffff);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 1px solid var(--border-color, #e2e2e2);
+    box-shadow: none;
+    border-radius: 0.5rem;
+}
+body[data-theme-style="plain"][data-theme="dark"] .glass-card,
+body[data-theme-style="plain"][data-theme="dark"] .stat-card {
+    background: #18181b;
+    border: 1px solid #2a2a2e;
+}
+body[data-theme-style="plain"] .btn-primary,
+body[data-theme-style="plain"] .btn-secondary {
+    border-radius: 0.4rem;
+    box-shadow: none;
+}
+body[data-theme-style="plain"] .input-field {
+    border-radius: 0.4rem;
+    box-shadow: none;
+}
+
+/* ===== PER-SECTION OVERRIDES — layered on top of the base presets above ===== */
+/* Sidebar */
+body[data-sidebar-style="glass"] .app-sidebar-single { background: rgba(255,255,255,0.15) !important; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-right: 1px solid rgba(255,255,255,0.25) !important; }
+body[data-sidebar-style="neumorphic"] .app-sidebar-single { background: #e6e9ef !important; box-shadow: 8px 0 16px rgba(163,177,198,0.4); border: none !important; }
+body[data-sidebar-style="plain"] .app-sidebar-single { background: var(--color-card, #fff) !important; box-shadow: none; border-right: 1px solid var(--border-color, #e2e2e2) !important; }
+
+/* Notifications / toasts */
+body[data-notif-style="glass"] .news-toast { background: rgba(255,255,255,0.55) !important; backdrop-filter: blur(14px); }
+body[data-notif-style="neumorphic"] .news-toast { background: #e6e9ef !important; box-shadow: 6px 6px 12px rgba(163,177,198,0.5), -6px -6px 12px rgba(255,255,255,0.8); backdrop-filter: none; }
+body[data-notif-style="plain"] .news-toast { background: var(--color-card, #fff) !important; box-shadow: none; backdrop-filter: none; border: 1px solid var(--border-color, #e2e2e2); }
+
+/* Navbar / topbar — using <nav> and header selectors as a starting point.
+   Tell me the actual wrapper class in nav.blade.php and I'll swap these to match exactly. */
+body[data-navbar-style="glass"] nav { background: rgba(255,255,255,0.15) !important; backdrop-filter: blur(14px); }
+body[data-navbar-style="neumorphic"] nav { background: #e6e9ef !important; box-shadow: 4px 4px 8px rgba(163,177,198,0.4); }
+body[data-navbar-style="plain"] nav { background: var(--color-card, #fff) !important; box-shadow: none; }
+
+/* =====================================================================
+   DASHBOARD LAYOUT — single source of truth for kpi-row grid.
+   Old nth-child pins assumed a featured card in column 1; that card is
+   permanently hidden (#ledgerCard.ledger-folder{display:none}), so those
+   pins left column 1 empty. Removed above. This is layout only —
+   morphism-independent, applies regardless of theme style.
+   ===================================================================== */
+.kpi-row{
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 200px)) !important;
+  grid-auto-rows: minmax(90px, auto) !important;
+  grid-auto-flow: dense !important;
+  gap: 12px !important;
+  align-items: stretch !important;
+  justify-content: start !important;
+}
+.kpi-row > .kpi-tile{
+  grid-column: auto !important;
+  grid-row: auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* =====================================================================
+   WALLET CARD — theme-aware, single glass surface (not stacked cards).
+   All 3 stats shown at once: Total Balance (primary) + Hustle Income +
+   Referral Reach (secondary row). No rotation.
+   ===================================================================== */
+body[data-theme-style="glass"] .mobile-wallet-hero{
+  background: linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04)) !important;
+  backdrop-filter: blur(22px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(180%) !important;
+  border: 1px solid rgba(255,255,255,0.22) !important;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.16) !important;
+}
+body[data-theme-style="glass"][data-theme="dark"] .mobile-wallet-hero{
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)) !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08) !important;
+}
+body[data-theme-style="neumorphic"] .mobile-wallet-hero{
+  background: #24262c !important;
+  backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: 8px 8px 16px rgba(0,0,0,0.5), -8px -8px 16px rgba(255,255,255,0.03) !important;
+}
+body[data-theme-style="plain"] .mobile-wallet-hero{
+  background: #111114 !important;
+  backdrop-filter: none !important;
+  border: 1px solid #2a2a2e !important;
+  box-shadow: none !important;
+}
+
+.mwh-stats-row{
+  display: flex !important;
+  width: 100% !important;
+  gap: .6rem !important;
+  margin-bottom: .8rem !important;
+}
+.mwh-stat{
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: .15rem !important;
+  padding: .5rem .4rem !important;
+  border-radius: .9rem !important;
+  background: rgba(255,255,255,0.06) !important;
+}
+.mwh-stat-label{ font-size: .62rem !important; letter-spacing:.04em; text-transform: uppercase; opacity:.6; }
+.mwh-stat-value{ font-size: .92rem !important; font-weight: 700 !important; font-variant-numeric: tabular-nums; }
+
+/* =====================================================================
+   KPI tiles / quick-icon circles — theme-aware surfaces
+   ===================================================================== */
+body[data-theme-style="glass"] .kpi-tile{
+  background: rgba(255,255,255,0.10) !important;
+  backdrop-filter: blur(14px) saturate(160%) !important;
+  border: 1px solid rgba(255,255,255,0.18) !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.10) !important;
+}
+body[data-theme-style="plain"] .kpi-tile{
+  background: var(--color-card, #fff) !important;
+  border: 1px solid var(--border-color, #e2e2e2) !important;
+  box-shadow: none !important;
+  border-radius: .5rem !important;
+}
+
+/* =====================================================================
+   FIX: glass wallet card was near-white-on-white (text is white, assumes
+   dark card). Keep it a dark frosted glass so existing white text stays
+   readable, instead of a light glass tint.
+   ===================================================================== */
+body[data-theme-style="glass"] .mobile-wallet-hero{
+  background: linear-gradient(135deg, rgba(20,20,26,0.62), rgba(10,10,14,0.42)) !important;
+  backdrop-filter: blur(22px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(180%) !important;
+  border: 1px solid rgba(255,255,255,0.14) !important;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.10) !important;
+}
+
+/* =====================================================================
+   Wallet card sizing across breakpoints — never a full-width banner.
+   Mobile: full width (as designed). Tablet/desktop: capped, centered
+   left within the content column, not stretched.
+   ===================================================================== */
+@media (min-width: 641px){
+  .mobile-wallet-hero{
+    max-width: 380px !important;
+    min-height: 200px !important;
+  }
+}
+@media (min-width: 1024px){
+  .mobile-wallet-hero{
+    max-width: 420px !important;
+  }
+}
+
+/* =====================================================================
+   FINAL: .kpi-row sizes to its own content, does not stretch to fill
+   the parent's full width. Leftover space is normal page whitespace,
+   not a gap to be filled by unrelated sections below.
+   ===================================================================== */
+.kpi-row{
+  width: fit-content !important;
+  max-width: 100% !important;
+}
+
+/* =====================================================================
+   FIX: main was a flex child of .app-shell-flex with no grow value, so
+   it shrank to max-w-6xl (1152px) content width and left all remaining
+   flex-row space unclaimed on the right — this was the actual cause of
+   the large empty right-side gap on desktop, unrelated to any sidebar
+   margin rule (those were dead — targeted .app-sidebar-single, which
+   doesn't exist in current markup).
+   ===================================================================== */
+main{
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+}
+
+/* =====================================================================
+   DESKTOP LAYOUT: main content flows into 2 balanced columns instead of
+   one long stacked column. Cards fill available width by flowing into
+   the next column, not by stretching. Header/banner elements span both
+   columns full-width. This finally uses the reclaimed flex-row width
+   from the earlier main{flex:1} fix.
+   ===================================================================== */
+@media (min-width: 900px){
+  main.max-w-6xl{ max-width: 1400px !important; }
+  #dashboardMasonryWrap, #dashboardMasonryWrap *{
+    min-width: 0 !important;
+  }
+  #dashboardMasonryWrap{
+    gap: 1.25rem !important;
+  }
+  .dashboard-masonry-col{
+    gap: 1.25rem !important;
+  }
+}
+
+/* =====================================================================
+   SIDEBAR COLLAPSE — single source of truth. Replaces 4 previously
+   conflicting rule blocks across neumorphic-auth.css and
+   nav-authenticated-green.css (one of which was permanently forcing
+   the panel visible via an ID selector, silently blocking collapse).
+   Outer sidebar width and inner content-panel visibility now move
+   together in one rule, so they can never fall out of sync again.
+   ===================================================================== */
+html[data-sidebar="collapsed"] .neu-sidebar{
+  width: 84px !important;
+  padding: 20px 10px !important;
+}
+html[data-sidebar="collapsed"] .sidebar-content-panel,
+html[data-sidebar="collapsed"] .sidebar-brand-label,
+html[data-sidebar="collapsed"] .sidebar-link-label,
+html[data-sidebar="collapsed"] .sidebar-user-meta,
+html[data-sidebar="collapsed"] .sidebar-group-label{
+  display: none !important;
+}
+html[data-sidebar="collapsed"] .sidebar-icon-rail{
+  border-right: none !important;
+  margin-right: 0 !important;
+  padding-right: 0 !important;
+}
+html[data-sidebar="collapsed"] .neu-user-card,
+html[data-sidebar="collapsed"] .neu-sidebar-nav a,
+html[data-sidebar="collapsed"] .neu-sidebar-nav button{
+  justify-content: center !important;
+}
+
+/* =====================================================================
+   QUICK ACTIONS ICON ROW — self-arranging grid. Replaces 3 previously
+   conflicting rules (flex-wrap in app-v2.css, hardcoded 3/8-col grid in
+   app-v2.css, hardcoded 4-col grid in neumorphic-auth.css) which were
+   fighting for control depending on load order/breakpoint. Icons now
+   size themselves to a natural minimum width and the grid decides how
+   many fit per row automatically — 3-4 across on a phone, more on
+   desktop, no manual column count anywhere.
+   ===================================================================== */
+.quick-icon-row{
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)) !important;
+  gap: 1rem !important;
+  overflow: visible !important;
+}
+.quick-icon-btn{
+  flex-direction: column !important;
+}
+
+/* ============================================================
+   3-WAY MORPHISM — FULL CARD + BUTTON + ICON COVERAGE
+   Extends existing .glass-card/.stat-card/.btn-primary coverage to:
+   .analytics-card, .quick-icon-circle, .analytics-tab, .tab-btn,
+   .balance-chip, .quick-action, .icon-badge family, .kpi-tile-icon.
+   Loads after app-v2.css/neumorphic-auth.css so these rules win.
+   NOTE: .mobile-wallet-hero intentionally left untouched — already
+   has its own dedicated per-style treatment from earlier work.
+============================================================ */
+
+/* ---- NEUMORPHIC ---- */
+body[data-theme-style="neumorphic"] .analytics-card {
+  background: var(--neu-surface) !important;
+  border-radius: 22px !important;
+  box-shadow: 6px 6px 14px var(--neu-shadow-dark), -6px -6px 14px var(--neu-shadow-light) !important;
+  border: none !important;
+}
+body[data-theme-style="neumorphic"] .quick-icon-btn[data-color] .quick-icon-circle {
+  box-shadow: 5px 5px 10px var(--neu-shadow-dark), -3px -3px 8px var(--neu-shadow-light) !important;
+  border: none !important;
+}
+body[data-theme-style="neumorphic"] .analytics-tab,
+body[data-theme-style="neumorphic"] .tab-btn,
+body[data-theme-style="neumorphic"] .balance-chip,
+body[data-theme-style="neumorphic"] .quick-action {
+  background: var(--neu-surface) !important;
+  color: var(--neu-text) !important;
+  border: none !important;
+  box-shadow: 4px 4px 9px var(--neu-shadow-dark), -3px -3px 7px var(--neu-shadow-light) !important;
+}
+body[data-theme-style="neumorphic"] .analytics-tab.active,
+body[data-theme-style="neumorphic"] .tab-btn.active,
+body[data-theme-style="neumorphic"] .balance-chip.primary {
+  background: var(--color-accent) !important;
+  color: #fff !important;
+  box-shadow: inset 3px 3px 6px rgba(0,0,0,.2), inset -2px -2px 5px rgba(255,255,255,.15) !important;
+}
+body[data-theme-style="neumorphic"] .icon-badge,
+body[data-theme-style="neumorphic"] .kpi-tile-icon {
+  background: var(--neu-surface) !important;
+  box-shadow: 4px 4px 8px var(--neu-shadow-dark), -3px -3px 7px var(--neu-shadow-light) !important;
+  border: none !important;
+}
+body[data-theme-style="neumorphic"] .icon-badge-gigs,
+body[data-theme-style="neumorphic"] .icon-badge-market,
+body[data-theme-style="neumorphic"] .icon-badge-earnings,
+body[data-theme-style="neumorphic"] .icon-badge-referral {
+  box-shadow: 4px 4px 8px var(--neu-shadow-dark), -3px -3px 7px var(--neu-shadow-light) !important;
+  border: none !important;
+}
+
+/* ---- GLASSMORPHISM ---- */
+body[data-theme-style="glass"] .analytics-card {
+  background: color-mix(in srgb, var(--color-card) 55%, transparent) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255,255,255,.25) !important;
+  box-shadow: 0 8px 28px rgba(0,0,0,.12) !important;
+}
+body[data-theme-style="glass"] .quick-icon-btn[data-color] .quick-icon-circle {
+  border: 1px solid rgba(255,255,255,.3) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  box-shadow: none !important;
+}
+body[data-theme-style="glass"] .analytics-tab,
+body[data-theme-style="glass"] .tab-btn,
+body[data-theme-style="glass"] .balance-chip,
+body[data-theme-style="glass"] .quick-action {
+  background: color-mix(in srgb, var(--color-card) 45%, transparent) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255,255,255,.25) !important;
+  color: var(--color-text) !important;
+  box-shadow: none !important;
+}
+body[data-theme-style="glass"] .analytics-tab.active,
+body[data-theme-style="glass"] .tab-btn.active,
+body[data-theme-style="glass"] .balance-chip.primary {
+  background: var(--color-accent) !important;
+  color: #fff !important;
+  border: 1px solid transparent !important;
+}
+body[data-theme-style="glass"] .icon-badge,
+body[data-theme-style="glass"] .kpi-tile-icon {
+  background: color-mix(in srgb, var(--color-card) 45%, transparent) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255,255,255,.25) !important;
+  box-shadow: none !important;
+}
+body[data-theme-style="glass"] .icon-badge-gigs,
+body[data-theme-style="glass"] .icon-badge-market,
+body[data-theme-style="glass"] .icon-badge-earnings,
+body[data-theme-style="glass"] .icon-badge-referral {
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255,255,255,.25) !important;
+  box-shadow: none !important;
+}
+
+/* ---- PLAIN (flat black & white) ---- */
+body[data-theme-style="plain"] .analytics-card {
+  background: var(--color-card) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body[data-theme-style="plain"] .quick-icon-btn[data-color] .quick-icon-circle {
+  border: 1px solid var(--border-color) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+body[data-theme-style="plain"] .analytics-tab,
+body[data-theme-style="plain"] .tab-btn,
+body[data-theme-style="plain"] .balance-chip,
+body[data-theme-style="plain"] .quick-action {
+  background: var(--color-card) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--color-text) !important;
+  box-shadow: none !important;
+}
+body[data-theme-style="plain"] .analytics-tab.active,
+body[data-theme-style="plain"] .tab-btn.active,
+body[data-theme-style="plain"] .balance-chip.primary {
+  background: #000 !important;
+  color: #fff !important;
+  border: 1px solid #000 !important;
+}
+body[data-theme-style="plain"][data-theme="dark"] .analytics-tab.active,
+body[data-theme-style="plain"][data-theme="dark"] .tab-btn.active,
+body[data-theme-style="plain"][data-theme="dark"] .balance-chip.primary {
+  background: #fff !important;
+  color: #000 !important;
+  border: 1px solid #fff !important;
+}
+body[data-theme-style="plain"] .icon-badge,
+body[data-theme-style="plain"] .kpi-tile-icon {
+  background: var(--color-card) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: none !important;
+}
+body[data-theme-style="plain"] .icon-badge-gigs,
+body[data-theme-style="plain"] .icon-badge-market,
+body[data-theme-style="plain"] .icon-badge-earnings,
+body[data-theme-style="plain"] .icon-badge-referral {
+  border: 1px solid var(--border-color) !important;
+  box-shadow: none !important;
+}
+
+/* ===== Quick-reply chat chips (Section F) ===== */
+.chat-chip {
+  background: var(--color-card);
+  border: 1px solid var(--border-color);
+  color: var(--color-text);
+  font-size: 0.78rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.chat-chip:hover { background: var(--color-accent); color: #fff; border-color: transparent; }
+
+/* ===== Dedicated admin layout nav (separate from shopping/hustle nav) ===== */
+.admin-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.25rem; background: var(--color-card); border-bottom: 1px solid var(--border-color);
+}
+.admin-exit-link {
+  display: flex; align-items: center; gap: 0.4rem;
+  color: var(--color-text); font-size: 0.85rem; text-decoration: none;
+}
+.admin-topbar-title {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-weight: 700; color: var(--color-accent);
+}
+.admin-section-nav {
+  display: flex; gap: 0.5rem; overflow-x: auto; padding: 0.75rem 1.25rem;
+  background: var(--color-bg); border-bottom: 1px solid var(--border-color);
+  -webkit-overflow-scrolling: touch;
+}
+.admin-section-nav a {
+  flex-shrink: 0; padding: 0.4rem 0.85rem; border-radius: 999px; font-size: 0.8rem;
+  color: var(--color-text); background: var(--color-card); border: 1px solid var(--border-color);
+  text-decoration: none; white-space: nowrap;
+}
+.admin-section-nav a.active { background: var(--color-accent); color: #fff; border-color: transparent; }
+.admin-page-body { min-height: 100vh; max-width: 100vw; overflow-x: hidden; }

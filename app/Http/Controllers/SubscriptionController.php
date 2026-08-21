@@ -44,16 +44,12 @@ class SubscriptionController extends Controller
         $cost = Subscription::PLANS[$target]['price'];
 
         if ($method === 'flutterwave') {
-            return $this->initiateFlutterwave($user, $target, $cost, $current);
+            return $this->initiateFlutterwave($user, $target, $cost);
         }
 
-        // Wallet payment path — locked + atomic so two simultaneous requests
-        // (double-tap, two tabs) can never both pass the balance check and
-        // double-debit the wallet.
         $result = DB::transaction(function () use ($user, $target, $cost) {
             $lockedUser = User::where('id', $user->id)->lockForUpdate()->first();
 
-            // Re-check inside the lock: a concurrent request may have just subscribed this user.
             $current = Subscription::currentFor($lockedUser);
             if ($current && $current->plan === $target) {
                 return ['error' => 'You already have an active ' . strtoupper($target) . ' subscription until ' . $current->expires_at->format('M j, Y') . '.'];
@@ -72,12 +68,9 @@ class SubscriptionController extends Controller
                 'payment_method' => 'wallet',
                 'status' => 'pending_payment',
                 'starts_at' => now(),
-                'expires_at' => now(), // placeholder, set for real by activate()
+                'expires_at' => now(),
             ]);
 
-            // Single source of truth for activation, tier update, transaction
-            // log, and referral bonus — shared with the Flutterwave callback
-            // so wallet and card payments can never drift out of sync again.
             $subscription->activate();
             $subscription->refresh();
 
@@ -92,7 +85,7 @@ class SubscriptionController extends Controller
         return redirect()->route('dashboard')->with('status', 'Subscribed to ' . Subscription::PLANS[$sub->plan]['label'] . '! Renews ' . $sub->expires_at->format('M j, Y') . '.');
     }
 
-    private function initiateFlutterwave($user, $target, $cost, $current)
+    private function initiateFlutterwave($user, $target, $cost)
     {
         $txRef = 'SUBSCRIBE-' . $target . '-' . $user->id . '-' . time();
 
@@ -104,17 +97,17 @@ class SubscriptionController extends Controller
             'flutterwave_tx_ref' => $txRef,
             'status' => 'pending_payment',
             'starts_at' => now(),
-            'expires_at' => now(), // placeholder, set for real on successful callback
+            'expires_at' => now(),
         ]);
 
-        $response = Http::withToken(env('FLW_SECRET_KEY'))
+        $response = Http::withToken(config('services.flutterwave.secret'))
             ->post('https://api.flutterwave.com/v3/payments', [
                 'tx_ref' => $txRef,
                 'amount' => $cost,
                 'currency' => 'NGN',
                 'redirect_url' => route('subscriptions.callback'),
                 'customer' => ['email' => $user->email, 'name' => $user->name],
-                'customizations' => ['title' => 'Campulsy ' . Subscription::PLANS[$target]['label'] . ' Subscription'],
+                'customizations' => ['title' => 'Qelvo ' . Subscription::PLANS[$target]['label'] . ' Subscription'],
             ]);
 
         $data = $response->json();
@@ -137,18 +130,18 @@ class SubscriptionController extends Controller
             return redirect()->route('subscriptions.index')->withErrors(['tier' => 'Subscription record not found.']);
         }
 
-        if ($sub->status === 'active') {
-            return redirect()->route('dashboard')->with('status', 'Payment already processed.');
-        }
-
         if ($status !== 'successful') {
-            $sub->update(['status' => 'cancelled']);
+            DB::transaction(function () use ($sub) {
+                $locked = Subscription::where('id', $sub->id)->lockForUpdate()->first();
+                if ($locked->status === 'pending_payment') {
+                    $locked->update(['status' => 'cancelled']);
+                }
+            });
             return redirect()->route('subscriptions.index')->withErrors(['tier' => 'Payment was not completed.']);
         }
 
-        // Always verify server-side against Flutterwave before activating - never trust the redirect alone
         $transactionId = $request->query('transaction_id');
-        $verify = Http::withToken(env('FLW_SECRET_KEY'))
+        $verify = Http::withToken(config('services.flutterwave.secret'))
             ->get("https://api.flutterwave.com/v3/transactions/{$transactionId}/verify");
         $verifyData = $verify->json();
 
@@ -158,14 +151,32 @@ class SubscriptionController extends Controller
             && (float) ($verifyData['data']['amount'] ?? 0) >= (float) $sub->amount
             && ($verifyData['data']['currency'] ?? null) === 'NGN';
 
-        if (!$verified) {
-            $sub->update(['status' => 'cancelled']);
+        $result = DB::transaction(function () use ($sub, $verified) {
+            $locked = Subscription::where('id', $sub->id)->lockForUpdate()->first();
+
+            if ($locked->status === 'active') {
+                return ['already' => true, 'sub' => $locked];
+            }
+
+            if (!$verified) {
+                $locked->update(['status' => 'cancelled']);
+                return ['error' => true];
+            }
+
+            $locked->activate();
+            $locked->refresh();
+            return ['sub' => $locked];
+        });
+
+        if (!empty($result['error'])) {
             return redirect()->route('subscriptions.index')->withErrors(['tier' => 'Payment verification failed.']);
         }
 
-        $sub->activate();
-        $sub->refresh();
+        $sub = $result['sub'];
+        $msg = !empty($result['already'])
+            ? 'Payment already processed.'
+            : 'Subscribed to ' . Subscription::PLANS[$sub->plan]['label'] . '! Renews ' . $sub->expires_at->format('M j, Y') . '.';
 
-        return redirect()->route('dashboard')->with('status', 'Subscribed to ' . Subscription::PLANS[$sub->plan]['label'] . '! Renews ' . $sub->expires_at->format('M j, Y') . '.');
+        return redirect()->route('dashboard')->with('status', $msg);
     }
 }

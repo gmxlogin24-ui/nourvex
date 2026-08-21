@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-authenticated')
 @section('content')
 <main class="max-w-2xl mx-auto p-6">
     <h1 class="text-2xl font-semibold mb-1">This Week's Top Earners</h1>

@@ -1,0 +1,54 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Socialite\Facades\Socialite;
+
+class SocialAuthController extends Controller
+{
+    public function redirect()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    public function callback()
+    {
+        $googleUser = Socialite::driver('google')->stateless()->user();
+
+        $user = User::where('google_id', $googleUser->getId())
+            ->orWhere('email', $googleUser->getEmail())
+            ->first();
+
+        $isNewUser = false;
+
+        if ($user) {
+            if (!$user->google_id) {
+                $user->update(['google_id' => $googleUser->getId()]);
+            }
+        } else {
+            $isNewUser = true;
+            $user = User::create([
+                'name' => $googleUser->getName() ?: $googleUser->getNickname() ?: 'Student',
+                'email' => $googleUser->getEmail(),
+                'google_id' => $googleUser->getId(),
+                'password' => null,
+                'avatar_url' => $googleUser->getAvatar(),
+                'account_type' => 'guest',
+            ]);
+        }
+
+        Auth::login($user, true);
+
+        // New Google signups haven't paid the signup fee yet - send them to the same
+        // activation step normal signups hit, instead of straight to dashboard.
+        // Existing unpaid users get caught by the signup.paid middleware automatically.
+        if ($isNewUser) {
+            return redirect()->route('signup-fee.activate')
+                ->with('status', 'Welcome! One last step to activate your account.');
+        }
+
+        return redirect()->route('dashboard');
+    }
+}

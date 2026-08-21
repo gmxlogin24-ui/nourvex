@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.app-admin')
 @section('content')
 <div class="max-w-6xl mx-auto px-4 py-6">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Gigs</h1>
+        <h1 class="text-2xl font-bold">Hustles</h1>
         <a href="{{ route('admin.index') }}" class="text-accent text-sm">← Back</a>
     </div>
 

@@ -4,12 +4,26 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use App\Models\WalletTopup;
 use App\Models\Transaction;
+use App\Models\User;
 
 class FlutterwaveController extends Controller
 {
+    private function flwSecret(): string
+    {
+        return config('services.flutterwave.secret');
+    }
+
+    private function verifyTransaction(string $transactionId): array
+    {
+        return Http::withToken($this->flwSecret())
+            ->get("https://api.flutterwave.com/v3/transactions/{$transactionId}/verify")
+            ->json();
+    }
+
     public function initiateVendor(Request $request)
     {
         $user = Auth::user();
@@ -23,14 +37,14 @@ class FlutterwaveController extends Controller
             'status' => 'pending',
         ]);
 
-        $response = Http::withToken(env('FLW_SECRET_KEY'))
+        $response = Http::withToken($this->flwSecret())
             ->post('https://api.flutterwave.com/v3/payments', [
                 'tx_ref' => $txRef,
                 'amount' => $amount,
                 'currency' => 'NGN',
                 'redirect_url' => route('vendor.callback'),
                 'customer' => ['email' => $user->email, 'name' => $user->name],
-                'customizations' => ['title' => 'Campulsy Vendor Registration'],
+                'customizations' => ['title' => 'Qelvo Vendor Registration'],
             ]);
 
         $data = $response->json();
@@ -46,7 +60,6 @@ class FlutterwaveController extends Controller
     {
         $txRef = $request->query('tx_ref');
         $status = $request->query('status');
-        $user = Auth::user();
 
         $topup = WalletTopup::where('tx_ref', $txRef)->first();
 
@@ -60,44 +73,54 @@ class FlutterwaveController extends Controller
         }
 
         $transactionId = $request->query('transaction_id');
-        $verify = Http::withToken(env('FLW_SECRET_KEY'))
-            ->get("https://api.flutterwave.com/v3/transactions/{$transactionId}/verify");
-        $verifyData = $verify->json();
+        $verifyData = $this->verifyTransaction($transactionId);
 
         $verified = ($verifyData['status'] ?? null) === 'success'
             && ($verifyData['data']['status'] ?? null) === 'successful'
             && ($verifyData['data']['tx_ref'] ?? null) === $txRef
-            && (float) ($verifyData['data']['amount'] ?? 0) >= (float) $topup->amount;
+            && (float) ($verifyData['data']['amount'] ?? 0) >= (float) $topup->amount
+            && ($verifyData['data']['currency'] ?? null) === 'NGN';
 
         if (!$verified) {
             $topup->update(['status' => 'failed']);
             return redirect()->route('vendor.activate')->withErrors(['payment' => 'Payment verification failed.']);
         }
 
-        $topup->update(['status' => 'successful']);
-        $user->update(['tier' => 'tier1', 'tier_upgraded_at' => now(), 'is_vendor_active' => true]);
-
-        Transaction::create([
-            'user_id' => $user->id,
-            'type' => 'vendor_registration',
-            'amount' => -5000,
-            'description' => 'Vendor registration fee',
-        ]);
-
-        if ($user->referred_by) {
-            $referrer = \App\Models\User::find($user->referred_by);
-            if ($referrer) {
-                $pct = $referrer->tier === 'tier2' ? 0.15 : 0;
-                $bonus = 5000 * $pct;
-                $referrer->increment('wallet_balance', $bonus);
-                Transaction::create([
-                    'user_id' => $referrer->id,
-                    'type' => 'referral_bonus',
-                    'amount' => $bonus,
-                    'description' => 'Referral bonus from ' . $user->name . ' vendor registration',
-                ]);
+        DB::transaction(function () use ($topup) {
+            $topup = WalletTopup::where('id', $topup->id)->lockForUpdate()->first();
+            if ($topup->status === 'successful') {
+                return; // already processed by a concurrent request
             }
-        }
+
+            $user = User::where('id', $topup->user_id)->lockForUpdate()->first();
+
+            $topup->update(['status' => 'successful']);
+            $user->update(['tier' => 'tier1', 'tier_upgraded_at' => now(), 'is_vendor_active' => true]);
+
+            Transaction::create([
+                'user_id' => $user->id,
+                'type' => 'vendor_registration',
+                'amount' => -5000,
+                'description' => 'Vendor registration fee',
+            ]);
+
+            if ($user->referred_by) {
+                $referrer = User::where('id', $user->referred_by)->lockForUpdate()->first();
+                if ($referrer) {
+                    $pct = $referrer->tier === 'tier2' ? 0.15 : 0;
+                    $bonus = 5000 * $pct;
+                    if ($bonus > 0) {
+                        $referrer->increment('wallet_balance', $bonus);
+                        Transaction::create([
+                            'user_id' => $referrer->id,
+                            'type' => 'referral_bonus',
+                            'amount' => $bonus,
+                            'description' => 'Referral bonus from ' . $user->name . ' vendor registration',
+                        ]);
+                    }
+                }
+            }
+        });
 
         return redirect()->route('onboarding.interests')->with('status', 'Vendor account activated!');
     }
@@ -110,7 +133,7 @@ class FlutterwaveController extends Controller
             return redirect()->route('dashboard');
         }
 
-        $amount = 1000;
+        $amount = 2000; // Starter tier — corrected from old ₦1,000 base fee
         $txRef = 'SIGNUPFEE-' . $user->id . '-' . time();
 
         WalletTopup::create([
@@ -120,14 +143,14 @@ class FlutterwaveController extends Controller
             'status' => 'pending',
         ]);
 
-        $response = Http::withToken(env('FLW_SECRET_KEY'))
+        $response = Http::withToken($this->flwSecret())
             ->post('https://api.flutterwave.com/v3/payments', [
                 'tx_ref' => $txRef,
                 'amount' => $amount,
                 'currency' => 'NGN',
                 'redirect_url' => route('signup-fee.callback'),
                 'customer' => ['email' => $user->email, 'name' => $user->name],
-                'customizations' => ['title' => 'Campulsy Account Activation'],
+                'customizations' => ['title' => 'Qelvo Account Activation'],
             ]);
 
         $data = $response->json();
@@ -143,7 +166,6 @@ class FlutterwaveController extends Controller
     {
         $txRef = $request->query('tx_ref');
         $status = $request->query('status');
-        $user = Auth::user();
 
         $topup = WalletTopup::where('tx_ref', $txRef)->first();
 
@@ -157,9 +179,7 @@ class FlutterwaveController extends Controller
         }
 
         $transactionId = $request->query('transaction_id');
-        $verify = Http::withToken(env('FLW_SECRET_KEY'))
-            ->get("https://api.flutterwave.com/v3/transactions/{$transactionId}/verify");
-        $verifyData = $verify->json();
+        $verifyData = $this->verifyTransaction($transactionId);
 
         $verified = ($verifyData['status'] ?? null) === 'success'
             && ($verifyData['data']['status'] ?? null) === 'successful'
@@ -172,21 +192,46 @@ class FlutterwaveController extends Controller
             return redirect()->route('signup-fee.initiate')->withErrors(['payment' => 'Payment verification failed.']);
         }
 
-        $topup->update(['status' => 'successful']);
-        $user->update(['signup_fee_paid' => true, 'badge_tier' => 'bronze']);
-
-        Transaction::create([
-            'user_id' => $user->id,
-            'type' => 'signup_fee',
-            'amount' => -1000,
-            'description' => 'Account activation fee',
-        ]);
-
         $settledCount = 0;
-        $guestToken = $request->cookie('campulsy_guest_token');
-        if ($guestToken) {
-            $settledCount = app(\App\Http\Controllers\GigController::class)->settleGuestGigs($user, $guestToken);
-        }
+
+        DB::transaction(function () use ($topup, &$settledCount) {
+            $topup = WalletTopup::where('id', $topup->id)->lockForUpdate()->first();
+            if ($topup->status === 'successful') {
+                return;
+            }
+
+            $user = User::where('id', $topup->user_id)->lockForUpdate()->first();
+
+            $topup->update(['status' => 'successful']);
+
+            $cardUpdate = [
+                'signup_fee_paid' => true,
+                'badge_tier' => 'bronze',
+            ];
+            if ($user->tier === 'free') {
+                $cardUpdate['tier'] = 'tier1';
+                $cardUpdate['tier_upgraded_at'] = now();
+            }
+            $card = $verifyData['data']['card'] ?? null;
+            if ($card && !empty($card['token'])) {
+                $cardUpdate['card_token'] = $card['token'];
+                $cardUpdate['card_last4'] = $card['last_4digits'] ?? null;
+                $cardUpdate['card_type'] = $card['type'] ?? null;
+            }
+            $user->update($cardUpdate);
+
+            Transaction::create([
+                'user_id' => $user->id,
+                'type' => 'signup_fee',
+                'amount' => -2000,
+                'description' => 'Account activation fee',
+            ]);
+
+            $guestToken = request()->cookie('qelvo_guest_token');
+            if ($guestToken) {
+                $settledCount = app(\App\Http\Controllers\GigController::class)->settleGuestGigs($user, $guestToken);
+            }
+        });
 
         $msg = 'Account activated!' . ($settledCount > 0 ? ' ' . $settledCount . ' held gig payment(s) released to your wallet.' : '');
         return redirect()->route('onboarding.interests')->with('status', $msg);
@@ -199,7 +244,7 @@ class FlutterwaveController extends Controller
         ]);
 
         $user = Auth::user();
-        $txRef = 'CAMPULSY-' . $user->id . '-' . time();
+        $txRef = 'QELVO-' . $user->id . '-' . time();
 
         WalletTopup::create([
             'user_id' => $user->id,
@@ -208,7 +253,7 @@ class FlutterwaveController extends Controller
             'status' => 'pending',
         ]);
 
-        $response = Http::withToken(env('FLW_SECRET_KEY'))
+        $response = Http::withToken($this->flwSecret())
             ->post('https://api.flutterwave.com/v3/payments', [
                 'tx_ref' => $txRef,
                 'amount' => $validated['amount'],
@@ -219,7 +264,7 @@ class FlutterwaveController extends Controller
                     'name' => $user->name,
                 ],
                 'customizations' => [
-                    'title' => 'Campulsy Wallet Top Up',
+                    'title' => 'Qelvo Wallet Top Up',
                 ],
             ]);
 
@@ -254,10 +299,7 @@ class FlutterwaveController extends Controller
 
         // Always verify server-side against Flutterwave before crediting - never trust the redirect alone
         $transactionId = $request->query('transaction_id');
-        $verify = Http::withToken(env('FLW_SECRET_KEY'))
-            ->get("https://api.flutterwave.com/v3/transactions/{$transactionId}/verify");
-
-        $verifyData = $verify->json();
+        $verifyData = $this->verifyTransaction($transactionId);
 
         $verified = ($verifyData['status'] ?? null) === 'success'
             && ($verifyData['data']['status'] ?? null) === 'successful'
@@ -270,15 +312,24 @@ class FlutterwaveController extends Controller
             return redirect()->route('wallet.index')->withErrors(['topup' => 'Payment verification failed.']);
         }
 
-        $topup->update(['status' => 'successful']);
-        $topup->user->increment('wallet_balance', $topup->amount);
+        DB::transaction(function () use ($topup) {
+            $topup = WalletTopup::where('id', $topup->id)->lockForUpdate()->first();
+            if ($topup->status === 'successful') {
+                return;
+            }
 
-        Transaction::create([
-            'user_id' => $topup->user_id,
-            'type' => 'wallet_topup',
-            'amount' => $topup->amount,
-            'description' => 'Wallet top up via Flutterwave',
-        ]);
+            $user = User::where('id', $topup->user_id)->lockForUpdate()->first();
+
+            $topup->update(['status' => 'successful']);
+            $user->increment('wallet_balance', $topup->amount);
+
+            Transaction::create([
+                'user_id' => $topup->user_id,
+                'type' => 'wallet_topup',
+                'amount' => $topup->amount,
+                'description' => 'Wallet top up via Flutterwave',
+            ]);
+        });
 
         return redirect()->route('wallet.index')->with('status', 'Wallet topped up successfully!');
     }

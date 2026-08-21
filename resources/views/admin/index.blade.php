@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-admin')
 @section('content')
 <div class="max-w-6xl mx-auto px-4 py-6">
 
@@ -6,7 +6,7 @@
         <h1 class="text-2xl font-bold">Admin Overview</h1>
         <div class="flex gap-2 flex-wrap text-sm">
             <a href="{{ route('admin.users') }}" class="balance-chip">Users</a>
-            <a href="{{ route('admin.gigs') }}" class="balance-chip">Gigs</a>
+            <a href="{{ route('admin.gigs') }}" class="balance-chip">Hustles</a>
             <a href="{{ route('admin.listings') }}" class="balance-chip">Listings</a>
             <a href="{{ route('admin.transactions') }}" class="balance-chip">Transactions</a>
             <a href="{{ route('admin.subscriptions') }}" class="balance-chip">Subscriptions</a>

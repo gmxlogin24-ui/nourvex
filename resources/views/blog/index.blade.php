@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-authenticated')
 @section('content')
 
 
@@ -6,7 +6,7 @@
     <div class="flex justify-between items-center mb-6">
         <div>
             <h1 class="text-2xl font-semibold">Blog</h1>
-            <p class="text-muted text-sm">Stories and guides from the Campulsy community</p>
+            <p class="text-muted text-sm">Stories and guides from the Qelvo community</p>
         </div>
         @auth
         <a href="{{ route('blog.create') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Write</a>

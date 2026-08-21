@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-authenticated')
 @section('content')
 <main class="max-w-6xl mx-auto p-6">
     <div class="mb-6 reveal-on-scroll">

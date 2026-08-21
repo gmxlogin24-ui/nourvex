@@ -201,9 +201,7 @@
 
 /* ===== Ledger card — v6: taller wrapper + distinct per-card gradients ===== */
 #ledgerCard.ledger-folder{ min-height: 260px; }
-@media (min-width: 641px){
-  .kpi-row{ grid-template-rows: minmax(150px,1fr) minmax(150px,1fr) !important; }
-}
+
 .ledger-page{ background: linear-gradient(160deg, #ff8145 0%, #7a2c0a 45%, #050506 100%) !important; }
 .ledger-page[data-tint="blue"]{ background: linear-gradient(160deg, #3c7bff 0%, #0d1f5c 45%, #050506 100%) !important; }
 .ledger-page[data-tint="green"]{ background: linear-gradient(160deg, #34d17a 0%, #0a3d1f 45%, #050506 100%) !important; }
@@ -549,3 +547,84 @@
 }
 .mwh-plus{ background: linear-gradient(145deg, #fdfdfd, #dcdcdc) !important; color: #111 !important; }
 .mwh-pill{ background: linear-gradient(145deg, #242428, #131316) !important; color: #fff !important; }
+
+/* ===== DASHBOARD REDESIGN: mobile-style wallet hero everywhere, folder card retired ===== */
+#ledgerCard.ledger-folder{ display: none !important; }
+.mobile-wallet-hero{ display: flex !important; }
+
+/* KPI tiles: compact, no longer stretching to fill the old folder-card's space */
+
+
+/* Quick Actions: force one full line on desktop, horizontal scroll if needed rather than wrap */
+
+
+/* Analytics + stat cards: tighten padding, reduce oversized feel */
+.analytics-card, .stat-card{ padding: 18px !important; }
+.gauge-panel{ padding: 16px !important; }
+
+/* ===== FINAL: wallet-hero styled correctly at ALL screen sizes, not just mobile ===== */
+.mobile-wallet-hero{
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  gap: .4rem !important;
+  min-height: 220px !important;
+  padding: 1.8rem 1.4rem 1.4rem !important;
+  border-radius: 1.75rem !important;
+  background: linear-gradient(145deg, #1e1e22 0%, #0c0c0e 100%) !important;
+  box-shadow: 14px 14px 30px rgba(0,0,0,.55), -8px -8px 22px rgba(255,255,255,.04), inset 0 1px 0 rgba(255,255,255,.06) !important;
+  color: #fff !important;
+  margin-bottom: 1.5rem !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+.mobile-wallet-hero .mwh-top{
+  display: flex !important; align-items: center !important; justify-content: space-between !important;
+  width: 100% !important; margin-bottom: .5rem !important;
+}
+.mwh-welcome{ font-size: .95rem !important; font-weight: 600 !important; color: #fff !important; }
+.mwh-wallet-select{ display:inline-flex !important; align-items:center !important; gap:6px !important; font-size:.85rem !important; color: rgba(255,255,255,.75) !important; }
+.mwh-cycle{ display:flex !important; flex-direction:column !important; align-items:center !important; gap:.2rem !important; }
+.mwh-label{ font-size:.7rem !important; letter-spacing:.1em !important; text-transform:uppercase !important; opacity:.6 !important; }
+.mwh-amount{ font-size: 2rem !important; font-weight: 700 !important; letter-spacing: -.02em !important; font-variant-numeric: tabular-nums !important; }
+.mwh-sub{ font-size:.78rem !important; color: rgba(255,255,255,.55) !important; margin-bottom: .5rem !important; }
+.mwh-dots{ display:flex !important; gap:6px !important; margin-bottom:.8rem !important; }
+.mwh-dots span{ width:6px !important; height:6px !important; border-radius:50% !important; background:rgba(255,255,255,.2) !important; }
+.mwh-dots span.active{ background:#fff !important; }
+.mobile-wallet-hero .mwh-actions{ display:flex !important; align-items:center !important; gap: .8rem !important; margin-bottom: .8rem !important; }
+.mwh-pill{
+  display:flex !important; align-items:center !important; gap:6px !important;
+  padding: .55rem .9rem !important; border-radius: 999px !important;
+  background: linear-gradient(145deg, #242428, #131316) !important;
+  box-shadow: 5px 5px 10px rgba(0,0,0,.5), -3px -3px 8px rgba(255,255,255,.04) !important;
+  color:#fff !important; font-size:.75rem !important; font-weight:600 !important; text-decoration:none !important;
+}
+.mwh-plus{
+  display:flex !important; align-items:center !important; justify-content:center !important;
+  width: 44px !important; height:44px !important; border-radius:50% !important;
+  background: linear-gradient(145deg, #fdfdfd, #dcdcdc) !important; color:#111 !important;
+  box-shadow: 5px 5px 12px rgba(0,0,0,.45), -3px -3px 8px rgba(255,255,255,.5) !important;
+  flex-shrink:0 !important;
+}
+.mwh-sync{
+  display:inline-flex !important; align-items:center !important; gap:6px !important;
+  font-size:.7rem !important; color: rgba(255,255,255,.6) !important;
+  background: rgba(255,255,255,.06) !important; padding:.3rem .7rem !important; border-radius:999px !important;
+}
+
+/* ===== Overall page arrangement: real grid, no overlap ===== */
+main{ display: block !important; }
+main > *{ position: relative !important; }
+#dashboardWelcomeHeader, .desktop-plan-pill, #dashAdSlot,
+.mobile-wallet-hero, .kpi-row, .mb-6{ z-index: auto !important; }
+.dash-header-row{ margin-top: 1.5rem !important; }
+
+/* ===== Compact oversized cards further ===== */
+.stat-card, .analytics-card, .gauge-panel{ padding: 16px !important; border-radius: 1.25rem !important; }
+.stat-card h2, .analytics-card h3{ font-size: .95rem !important; }
+.kpi-tile{ padding: 12px !important; min-height: auto !important; }
+.kpi-tile-value{ font-size: 1rem !important; margin: 4px 0 !important; }
+.kpi-tile-label{ font-size: .72rem !important; }
+.gauge-wrap{ max-width: 140px !important; margin: 0 auto !important; }

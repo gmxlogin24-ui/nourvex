@@ -28,8 +28,8 @@
                 </label>
             </div>
             <div>
-                <p class="font-semibold">{{ $user->name }} @if($user->tier !== 'free')<span class="merchant-badge">Merchant</span>@endif</p>
-                <p class="text-muted text-sm">{{ $user->tier === 'free' ? 'Free account' : ($user->tier === 'tier1' ? 'Plus' : ($user->tier === 'tier2' ? 'Pro' : strtoupper($user->tier))) }}
+                <p class="font-semibold">{{ $user->name }} <span class="merchant-badge">Merchant</span></p>
+                <p class="text-muted text-sm">{{ $user->tier === 'tier1' ? 'Plus' : ($user->tier === 'tier2' ? 'Pro' : strtoupper($user->tier)) }}
                     @if($user->is_verified_seller) · <span class="text-accent">Verified</span> @endif
                 </p>
                 <p class="text-muted text-xs mt-1">Referral code: {{ $user->referral_code }}</p>
@@ -95,6 +95,11 @@
             <a href="{{ route('pulse.index') }}" class="flex flex-col items-center gap-2 p-3 rounded-xl text-center text-sm" style="background:var(--color-card);">
                 <i data-lucide="zap" class="w-5 h-5"></i> Pulse
             </a>
+            @if($user->is_admin ?? false)
+            <a href="{{ route('admin.index') }}" class="flex flex-col items-center gap-2 p-3 rounded-xl text-center text-sm" style="background:var(--color-card);">
+                <i data-lucide="shield" class="w-5 h-5"></i> Admin
+            </a>
+            @endif
         </div>
     </div>
     <div class="glass-card p-6 mb-6 reveal-on-scroll">
@@ -136,6 +141,26 @@
             </div>
 
             <div>
+                <p class="text-sm font-medium mb-2">Theme Style</p>
+                <p class="text-muted text-xs mb-3">Changes how every card and button looks across the whole app.</p>
+                <div class="grid grid-cols-3 gap-3">
+                    @foreach([
+                        'glass' => ['label' => 'Glass', 'desc' => 'Frosted, translucent'],
+                        'neumorphic' => ['label' => 'Neumorphic', 'desc' => 'Soft, embossed'],
+                        'plain' => ['label' => 'Minimal', 'desc' => 'Flat, no shadows'],
+                    ] as $style => $meta)
+                    <label class="theme-style-option" style="cursor:pointer;">
+                        <input type="radio" name="theme_style" value="{{ $style }}" {{ ($user->theme_style ?? 'glass') === $style ? 'checked' : '' }} class="theme-style-radio" style="display:none;" onchange="previewThemeStyle('{{ $style }}')">
+                        <div class="theme-style-swatch theme-style-swatch-{{ $style }}" data-style-swatch="{{ $style }}" style="border-radius:0.75rem;padding:0.75rem;text-align:center;border:2px solid var(--border-color);transition:border-color 0.2s;">
+                            <p class="text-sm font-medium">{{ $meta['label'] }}</p>
+                            <p class="text-muted text-xs mt-1">{{ $meta['desc'] }}</p>
+                        </div>
+                    </label>
+                    @endforeach
+                </div>
+            </div>
+
+            <div>
                 <p class="text-sm font-medium mb-2">Accent Color</p>
                 <div class="flex items-center gap-3 flex-wrap">
                     <input type="color" name="accent_color" id="accentColorInput" value="{{ $user->accent_color ?? '#38D9E8' }}" style="width:3rem;height:2.6rem;border-radius:0.75rem;border:1px solid var(--border-color);background:none;cursor:pointer;">
@@ -173,6 +198,21 @@
     }
     document.getElementById('accentColorInput')?.addEventListener('input', function () {
         document.body.style.setProperty('--user-accent', this.value);
+    });
+
+    // Live-preview a theme style immediately on selection, before saving -
+    // sets the same [data-theme-style] attribute the CSS presets key off of,
+    // and highlights the chosen swatch. Reverts to the saved value if the
+    // form isn't submitted (next page load re-renders from the DB anyway).
+    function previewThemeStyle(style) {
+        document.body.setAttribute('data-theme-style', style);
+        document.querySelectorAll('[data-style-swatch]').forEach(el => {
+            el.style.borderColor = el.dataset.styleSwatch === style ? 'var(--color-accent)' : 'var(--border-color)';
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        const checked = document.querySelector('.theme-style-radio:checked');
+        if (checked) previewThemeStyle(checked.value);
     });
     </script>
 

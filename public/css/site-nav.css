@@ -66,7 +66,7 @@
 .sn-drawer.sn-open{ transform: translateX(0); opacity: 1; }
 
 .sn-drawer-brand{ display:flex; align-items:center; gap:12px; margin-bottom:22px; }
-.sn-drawer-brand .logo-badge{ width:2.2rem; height:2.2rem; background:#fff; border-radius:11px; }
+.sn-drawer-brand .logo-badge{ width:2.2rem; height:2.2rem; background:#fff url('/images/qelvo-mark.png') center/70% no-repeat; border-radius:11px; }
 .sn-drawer-brand span{ color:#fff; font-weight:700; font-size:16px; }
 
 .sn-reveal-heading{ color: rgba(255,255,255,0.5); font-size:11px; text-transform:uppercase; letter-spacing:.08em; padding:4px 4px 12px; }

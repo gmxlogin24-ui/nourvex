@@ -36,31 +36,31 @@
     <a href="{{ route('subscriptions.index') }}" class="trust-pill mb-6 reveal-on-scroll" style="width:fit-content;text-decoration:none;">
         <i class="ph-fill ph-crown" style="font-size:1rem;"></i>
         <span class="text-muted">Free plan — </span>
-        <span class="text-accent font-medium">Upgrade to post gigs & listings</span>
+        <span class="text-accent font-medium">Upgrade to post hustles & listings</span>
     </a>
     @endif
     </div>
 
-    <div class="glass-card p-4 mb-6 flex items-center gap-3 scroll-hide-over" id="dashAdSlot" style="border:1px dashed var(--border-color);">
-        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:var(--color-card);">
-            <i data-lucide="megaphone" class="w-5 h-5 text-muted"></i>
-        </div>
-        <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium">Sponsored</p>
-            <p class="text-muted text-xs">Ad space — nothing running here yet</p>
-        </div>
-    </div>
     <div class="mobile-wallet-hero reveal-on-scroll" id="mobileWalletHero">
         <div class="mwh-top">
             <p class="mwh-welcome">Welcome, {{ $user->name ?? 'Student' }}</p>
             <span class="mwh-wallet-select">Wallet 1 <i data-lucide="chevron-down" class="w-3 h-3"></i></span>
         </div>
         <div class="mwh-cycle" id="mwhCycle">
-            <p class="mwh-label" id="mwhLabel">Total Balance</p>
+            <p class="mwh-label">Total Balance</p>
             <p class="mwh-amount" id="mwhAmount">₦0</p>
-            <p class="mwh-sub" id="mwhSub">{{ ($myOpenGigs ?? 0) + ($myListings ?? 0) }} active posts</p>
+            <p class="mwh-sub">{{ ($myOpenGigs ?? 0) + ($myListings ?? 0) }} active posts</p>
         </div>
-        <div class="mwh-dots" id="mwhDots"><span class="active"></span><span></span><span></span></div>
+        <div class="mwh-stats-row">
+            <div class="mwh-stat">
+                <span class="mwh-stat-label">Hustle Income</span>
+                <span class="mwh-stat-value" id="mwhHustle">₦0</span>
+            </div>
+            <div class="mwh-stat">
+                <span class="mwh-stat-label">Referral Reach</span>
+                <span class="mwh-stat-value" id="mwhReferral">0</span>
+            </div>
+        </div>
         <div class="mwh-actions">
             <a href="{{ route('wallet.index') }}" class="mwh-pill"><i data-lucide="arrow-down-left" class="w-4 h-4"></i> Top Up</a>
             <a href="{{ route('wallet.index') }}" class="mwh-plus"><i data-lucide="plus" class="w-5 h-5"></i></a>
@@ -70,27 +70,18 @@
     </div>
     <script>
     (function(){
-        var labelEl = document.getElementById('mwhLabel');
         var amountEl = document.getElementById('mwhAmount');
-        var subEl = document.getElementById('mwhSub');
-        var cycleEl = document.getElementById('mwhCycle');
-        var dots = document.querySelectorAll('#mwhDots span');
+        var hustleEl = document.getElementById('mwhHustle');
+        var referralEl = document.getElementById('mwhReferral');
         if (!amountEl) return;
 
-        var slides = [
-            { label: 'Total Balance', target: {{ (float) ($balance ?? 0) }}, format: 'currency', caption: '{{ ($myOpenGigs ?? 0) + ($myListings ?? 0) }} active posts' },
-            { label: 'Gig Income', target: {{ (float) ($earnings ?? 0) }}, format: 'currency', caption: '{{ $myCompletedGigs ?? 0 }} gigs completed' },
-            { label: 'Referral Reach', target: {{ (float) ($referralCount ?? 0) }}, format: 'int', caption: 'active referrals right now' }
-        ];
-        var idx = 0;
-
-        function countUp(target, isInt){
+        function countUp(el, target, isInt){
             var start = performance.now(), dur = 1100;
             function tick(now){
                 var p = Math.min(1, (now - start) / dur);
                 var eased = 1 - Math.pow(1 - p, 3);
                 var val = target * eased;
-                amountEl.textContent = isInt
+                el.textContent = isInt
                     ? Math.floor(val).toLocaleString()
                     : '\u20a6' + val.toLocaleString(undefined, {maximumFractionDigits: 2});
                 if (p < 1) requestAnimationFrame(tick);
@@ -98,35 +89,9 @@
             requestAnimationFrame(tick);
         }
 
-        function render(i, animate){
-            var s = slides[i];
-            if (animate) {
-                cycleEl.style.transition = 'opacity .4s ease, transform .4s ease';
-                cycleEl.style.opacity = '0';
-                cycleEl.style.transform = 'translateY(-10px)';
-                setTimeout(function(){
-                    labelEl.textContent = s.label;
-                    subEl.textContent = s.caption;
-                    countUp(s.target, s.format === 'int');
-                    cycleEl.style.transform = 'translateY(10px)';
-                    requestAnimationFrame(function(){
-                        cycleEl.style.opacity = '1';
-                        cycleEl.style.transform = 'translateY(0)';
-                    });
-                }, 400);
-            } else {
-                labelEl.textContent = s.label;
-                subEl.textContent = s.caption;
-                countUp(s.target, s.format === 'int');
-            }
-            dots.forEach(function(d, di){ d.classList.toggle('active', di === i); });
-        }
-
-        render(idx, false);
-        setInterval(function(){
-            idx = (idx + 1) % slides.length;
-            render(idx, true);
-        }, 3800);
+        countUp(amountEl, {{ (float) ($balance ?? 0) }}, false);
+        countUp(hustleEl, {{ (float) ($earnings ?? 0) }}, false);
+        countUp(referralEl, {{ (float) ($referralCount ?? 0) }}, true);
     })();
     </script>
 
@@ -145,11 +110,11 @@
     <a href="{{ route('subscriptions.index') }}" class="trust-pill mb-6 reveal-on-scroll" style="width:fit-content;text-decoration:none;">
         <i class="ph-fill ph-crown" style="font-size:1rem;"></i>
         <span class="text-muted">Free plan — </span>
-        <span class="text-accent font-medium">Upgrade to post gigs & listings</span>
+        <span class="text-accent font-medium">Upgrade to post hustles & listings</span>
     </a>
     @endif
         </div>
-        <div class="glass-card p-4 mb-4 flex items-center gap-3" id="dashAdSlotMobile" style="border:1px dashed var(--border-color);">
+        <div class="glass-card p-4 mb-4 flex items-center gap-3" id="dashAdSlotMobile" style="border:1px dashed var(--border-color);display:none;">
             <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:var(--color-card);">
                 <i data-lucide="megaphone" class="w-5 h-5 text-muted"></i>
             </div>
@@ -167,6 +132,52 @@
         @endif
     </div>
 
+    <!-- Quick actions: compact icon buttons -->
+    <div class="mb-6 reveal-on-scroll">
+        <h2 class="font-semibold mb-3">Quick Actions</h2>
+        <div class="quick-icon-row">
+            <a href="{{ route('services.index') }}" class="quick-icon-btn" data-color="orange">
+                <span class="quick-icon-circle" data-face-cursor><i data-lucide="zap" class="w-5 h-5"></i></span>
+                <span>Airtime</span>
+            </a>
+            <a href="{{ route('services.index') }}" class="quick-icon-btn" data-color="green">
+                <span class="quick-icon-circle" data-face-cursor><i data-lucide="wifi" class="w-5 h-5"></i></span>
+                <span>Data</span>
+            </a>
+            <a href="{{ route('services.index') }}" class="quick-icon-btn" data-color="orange">
+                <span class="quick-icon-circle" data-face-cursor><i data-lucide="tv" class="w-5 h-5"></i></span>
+                <span>Cable TV</span>
+            </a>
+            <a href="{{ route('services.index') }}" class="quick-icon-btn" data-color="yellow">
+                <span class="quick-icon-circle" data-face-cursor><i data-lucide="plug-zap" class="w-5 h-5"></i></span>
+                <span>Electricity</span>
+            </a>
+            <a href="{{ route('gigs.index') }}" class="quick-icon-btn" data-color="cyan">
+                <span class="quick-icon-circle" data-face-cursor><i data-lucide="briefcase" class="w-5 h-5"></i></span>
+                <span>Hustles</span>
+            </a>
+            <a href="{{ route('marketplace.index') }}" class="quick-icon-btn" data-color="purple">
+                <span class="quick-icon-circle" data-face-cursor><i data-lucide="shopping-bag" class="w-5 h-5"></i></span>
+                <span>Market</span>
+            </a>
+            <a href="{{ route('referrals.index') }}" class="quick-icon-btn" data-color="pink">
+                <span class="quick-icon-circle" data-face-cursor><i data-lucide="users" class="w-5 h-5"></i></span>
+                <span>Referral</span>
+            </a>
+            <a href="{{ route('subscriptions.index') }}" class="quick-icon-btn" data-color="pink">
+                <span class="quick-icon-circle" data-face-cursor><i data-lucide="crown" class="w-5 h-5"></i></span>
+                <span>Upgrade</span>
+            </a>
+            <a href="{{ route('news.index') }}" class="quick-icon-btn" data-color="blue">
+                <span class="quick-icon-circle" data-face-cursor><i data-lucide="newspaper" class="w-5 h-5"></i></span>
+                <span>News</span>
+            </a>
+            <a href="{{ route('money-tracker.index') }}" class="quick-icon-btn" data-color="green">
+                <span class="quick-icon-circle" data-face-cursor><i data-lucide="wallet" class="w-5 h-5"></i></span>
+                <span>Money Tracker</span>
+            </a>
+        </div>
+    </div>
     <div class="dash-header-row reveal-on-scroll">
         <h2 class="text-xl font-bold">Account statistics</h2>
         <div class="dash-tabs">
@@ -207,11 +218,11 @@
                         <span class="ledger-chip"></span>
                         <i data-lucide="wifi" class="w-4 h-4 ledger-contactless"></i>
                     </div>
-                    <div class="ledger-top"><span class="ledger-pulse" style="background:#6ea8ff;"></span><span class="ledger-eyebrow">Gig Income</span></div>
+                    <div class="ledger-top"><span class="ledger-pulse" style="background:#6ea8ff;"></span><span class="ledger-eyebrow">Hustle Income</span></div>
                     <p class="ledger-value" data-target="{{ $earnings ?? 0 }}">₦0</p>
                     <div class="ledger-bottom-row">
-                        <span class="ledger-card-mask">GIGS</span>
-                        <p class="ledger-caption">{{ $myCompletedGigs ?? 0 }} gigs completed</p>
+                        <span class="ledger-card-mask">HUSTLES</span>
+                        <p class="ledger-caption">{{ $myCompletedGigs ?? 0 }} hustles completed</p>
                     </div>
                 </div>
                 <div class="ledger-page" data-tint="green">
@@ -238,6 +249,11 @@
             </div>
             <p class="kpi-tile-value">{{ $referralCount ?? 0 }}</p>
             <p class="kpi-tile-label">Active Referrals</p>
+            @if($canEarnReferralBonus ?? false)
+            <p class="text-xs text-muted mt-1">₦{{ number_format($referralEarnings ?? 0) }} earned from referrals</p>
+            @else
+            <p class="text-xs mt-1" style="color:var(--color-accent);">Upgrade to Tier 2 to earn 15% on referrals</p>
+            @endif
         </div>
         <div class="kpi-tile">
             <div class="kpi-tile-top">
@@ -245,51 +261,42 @@
             </div>
             <p class="kpi-tile-value">{{ $streakDays ?? 0 }}</p>
             <p class="kpi-tile-label">Day Streak</p>
+            @if($nextStreakMilestone ?? null)
+            <p class="text-xs text-muted mt-1">{{ $nextStreakMilestone - ($streakDays ?? 0) }} days to {{ $nextStreakMilestone }}-day badge</p>
+            @endif
         </div>
     </div>
 
-    <!-- Quick actions: compact icon buttons -->
-    <div class="mb-6 reveal-on-scroll">
-        <h2 class="font-semibold mb-3">Quick Actions</h2>
-        <div class="quick-icon-row">
-            <a href="{{ route('services.index') }}" class="quick-icon-btn" data-color="orange">
-                <span class="quick-icon-circle" data-face-cursor><i data-lucide="zap" class="w-5 h-5"></i></span>
-                <span>Airtime</span>
-            </a>
-            <a href="{{ route('services.index') }}" class="quick-icon-btn" data-color="green">
-                <span class="quick-icon-circle" data-face-cursor><i data-lucide="wifi" class="w-5 h-5"></i></span>
-                <span>Data</span>
-            </a>
-            <a href="{{ route('services.index') }}" class="quick-icon-btn" data-color="orange">
-                <span class="quick-icon-circle" data-face-cursor><i data-lucide="tv" class="w-5 h-5"></i></span>
-                <span>Cable TV</span>
-            </a>
-            <a href="{{ route('services.index') }}" class="quick-icon-btn" data-color="yellow">
-                <span class="quick-icon-circle" data-face-cursor><i data-lucide="plug-zap" class="w-5 h-5"></i></span>
-                <span>Electricity</span>
-            </a>
-            <a href="{{ route('gigs.index') }}" class="quick-icon-btn" data-color="cyan">
-                <span class="quick-icon-circle" data-face-cursor><i data-lucide="briefcase" class="w-5 h-5"></i></span>
-                <span>Gigs</span>
-            </a>
-            <a href="{{ route('marketplace.index') }}" class="quick-icon-btn" data-color="purple">
-                <span class="quick-icon-circle" data-face-cursor><i data-lucide="shopping-bag" class="w-5 h-5"></i></span>
-                <span>Market</span>
-            </a>
-            <a href="{{ route('referrals.index') }}" class="quick-icon-btn" data-color="pink">
-                <span class="quick-icon-circle" data-face-cursor><i data-lucide="users" class="w-5 h-5"></i></span>
-                <span>Referral</span>
-            </a>
-            <a href="{{ route('subscriptions.index') }}" class="quick-icon-btn" data-color="pink">
-                <span class="quick-icon-circle" data-face-cursor><i data-lucide="crown" class="w-5 h-5"></i></span>
-                <span>Upgrade</span>
-            </a>
-            <a href="{{ route('news.index') }}" class="quick-icon-btn" data-color="blue">
-                <span class="quick-icon-circle" data-face-cursor><i data-lucide="newspaper" class="w-5 h-5"></i></span>
-                <span>News</span>
-            </a>
+    <div class="glass-card p-5 mb-6 reveal-on-scroll" id="dashReviewsCard">
+        <div class="mb-4">
+            <h3 class="font-semibold text-sm text-muted">Your Reviews</h3>
+            <div class="flex items-center gap-2 mt-1">
+                <span class="text-2xl font-bold">{{ $avgRating ? number_format($avgRating, 1) : '—' }}</span>
+                <div class="flex items-center" style="gap:2px;">
+                    @for ($i = 1; $i <= 5; $i++)
+                    <i data-lucide="star" class="w-4 h-4" style="{{ $avgRating && $i <= round($avgRating) ? 'color:#f4a261;fill:#f4a261;' : 'color:var(--border-color);' }}"></i>
+                    @endfor
+                </div>
+                <span class="text-muted text-xs">{{ $reviewCount ?? 0 }} review{{ ($reviewCount ?? 0) == 1 ? '' : 's' }}</span>
+            </div>
         </div>
+
+        @forelse($myReviews ?? [] as $review)
+        <div class="ring-legend-row" style="align-items:flex-start;">
+            <span style="flex:1;min-width:0;">
+                <span class="font-medium">{{ $review->reviewer->name ?? 'A student' }}</span>
+                <span class="text-muted text-xs"> · {{ class_basename($review->reviewable_type) }}{{ $review->reviewable?->title ? ' · '.$review->reviewable->title : '' }}</span>
+                @if($review->comment)
+                <p class="text-xs text-muted mt-1">{{ \Illuminate\Support\Str::limit($review->comment, 90) }}</p>
+                @endif
+            </span>
+            <strong style="flex-shrink:0;">{{ $review->rating }}★</strong>
+        </div>
+        @empty
+        <p class="text-sm text-muted py-3 text-center">No reviews yet — complete a hustle or sale to start building your rating.</p>
+        @endforelse
     </div>
+
     <div class="analytics-card reveal-on-scroll">
         <div class="analytics-header">
             <div>
@@ -337,9 +344,9 @@
                     <div class="ring-chart-center"><strong>{{ ($myOpenGigs ?? 0) + ($myListings ?? 0) }}</strong><span>total posts</span></div>
                 </div>
                 <div class="ring-legend">
-                    <div class="ring-legend-row"><span><span class="ring-legend-dot" style="background:#6ea8ff;"></span>Open Gigs</span><strong>{{ $myOpenGigs ?? 0 }}</strong></div>
+                    <div class="ring-legend-row"><span><span class="ring-legend-dot" style="background:#6ea8ff;"></span>Open Hustles</span><strong>{{ $myOpenGigs ?? 0 }}</strong></div>
                     <div class="ring-legend-row"><span><span class="ring-legend-dot" style="background:#f4a261;"></span>Listings</span><strong>{{ $myListings ?? 0 }}</strong></div>
-                    <div class="ring-legend-row"><span><span class="ring-legend-dot" style="background:#4ade80;"></span>Completed Gigs</span><strong>{{ $myCompletedGigs ?? 0 }}</strong></div>
+                    <div class="ring-legend-row"><span><span class="ring-legend-dot" style="background:#4ade80;"></span>Completed Hustles</span><strong>{{ $myCompletedGigs ?? 0 }}</strong></div>
                 </div>
             </div>
         </div>
@@ -358,6 +365,11 @@
         @endphp
         <div id="analyticsPane-leaderboard" style="display:none;">
             <p class="text-xs text-muted mb-3">This week's top earners · resets Monday</p>
+            @if($leaderboardRank ?? null)
+            <p class="text-xs mb-3" style="color:var(--color-accent);">You're #{{ $leaderboardRank }} this week{{ $leaderboardRank > 5 ? ' — keep earning to crack the top 5' : '' }}</p>
+            @elseif(!(auth()->user()->leaderboard_opt_in ?? false))
+            <p class="text-xs text-muted mb-3">Not on the leaderboard yet — opt in from the <a href="{{ route('leaderboard.index') }}" class="text-accent">leaderboard page</a></p>
+            @endif
             @forelse($weeklyTopEarners as $i => $entry)
             <div class="ring-legend-row">
                 <span><span class="ring-legend-dot" style="background:{{ ['#fbbf24','#94a3b8','#ea580c','#6ea8ff','#a78bfa'][$i] ?? '#6ea8ff' }};"></span>{{ $i + 1 }}. {{ explode(' ', $entry->name)[0] }}</span>
@@ -461,7 +473,7 @@
             new Chart(postsCtx, {
                 type: 'radar',
                 data: {
-                    labels: ['Open Gigs', 'Listings', 'Completed'],
+                    labels: ['Open Hustles', 'Listings', 'Completed'],
                     datasets: [{
                         data: [{{ $myOpenGigs ?? 0 }}, {{ $myListings ?? 0 }}, {{ $myCompletedGigs ?? 0 }}],
                         backgroundColor: 'rgba(79,123,255,0.2)',
@@ -477,7 +489,7 @@
     </script>
 
     <div class="flex gap-3 mb-6 flex-wrap reveal-on-scroll">
-        <a href="{{ route('gigs.index') }}" class="quick-action"><i data-lucide="briefcase" class="w-4 h-4"></i> Find a Gig</a>
+        <a href="{{ route('gigs.index') }}" class="quick-action"><i data-lucide="briefcase" class="w-4 h-4"></i> Find a Hustle</a>
         <a href="{{ route('marketplace.create') }}" class="quick-action"><i data-lucide="plus" class="w-4 h-4"></i> Sell an Item</a>
         <a href="{{ route('referrals.index') }}" class="quick-action"><i data-lucide="users" class="w-4 h-4"></i> Invite Friends</a>
         <a href="{{ route('news.index') }}" class="quick-action"><i data-lucide="newspaper" class="w-4 h-4"></i> Campus News</a>
@@ -505,8 +517,8 @@
     <div class="grid md:grid-cols-3 gap-6 mb-6">
         <div class="stat-card md:col-span-2 reveal-on-scroll">
             <div class="tab-row">
-                <span class="tab-btn active">Available Gigs</span>
-                <span class="tab-btn">Marketplace</span>
+                <span class="tab-btn active">Available Hustles</span>
+                <span class="tab-btn">Campus Market</span>
             </div>
             @forelse(($topGigs ?? []) as $gig)
             <a href="{{ route('gigs.show', $gig->id) }}" class="tx-table-row" style="text-decoration:none;color:inherit;">
@@ -518,7 +530,7 @@
                 <span class="text-right font-medium">₦{{ number_format($gig->amount) }}</span>
             </a>
             @empty
-            <p class="text-muted text-sm py-4">No gigs available right now.</p>
+            <p class="text-muted text-sm py-4">No hustles available right now.</p>
             @endforelse
             @foreach(($topListings ?? []) as $item)
             <a href="{{ route('marketplace.show', $item->id) }}" class="tx-table-row" style="text-decoration:none;color:inherit;">
@@ -601,7 +613,16 @@
         <p class="text-muted text-sm">No activity yet.</p>
         @endforelse
     </div>
-</main>
+<div class="glass-card p-4 mb-6 flex items-center gap-3 scroll-hide-over" id="dashAdSlot" style="border:1px dashed var(--border-color);">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:var(--color-card);">
+            <i data-lucide="megaphone" class="w-5 h-5 text-muted"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium">Sponsored</p>
+            <p class="text-muted text-xs">Ad space — nothing running here yet</p>
+        </div>
+    </div>
+    </main>
 
 @endsection
 

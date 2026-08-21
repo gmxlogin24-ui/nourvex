@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.landing')
 @section('content')
 <div class="auth-scene-clean">
     <div class="max-w-4xl mx-auto px-4" style="width:100%;">
@@ -13,7 +13,7 @@
                 <p class="text-xs text-muted uppercase mb-1">{{ $plans['tier1']['label'] }}</p>
                 <p class="text-2xl font-bold mb-3">₦{{ number_format($plans['tier1']['price']) }}<span class="text-xs font-normal">/yr</span></p>
                 <ul class="text-sm space-y-2 mb-6" style="opacity:0.8;">
-                    <li>Browse gigs & marketplace</li>
+                    <li>Browse hustles & campus market</li>
                     <li>Wallet & referrals</li>
                     <li>Post up to 5 gigs/listings</li>
                 </ul>

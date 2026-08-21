@@ -39,7 +39,7 @@ class VirtualAccountController extends Controller
                 'is_permanent' => true,
                 'firstname' => $firstname,
                 'lastname' => $lastname,
-                'narration' => 'Campulsy - ' . $user->name,
+                'narration' => 'Qelvo - ' . $user->name,
                 'bvn' => $validated['bvn'],
             ]);
 

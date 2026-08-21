@@ -6,11 +6,21 @@
 <main class="max-w-6xl mx-auto p-6">
     <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
         <div>
-            <h1 class="text-2xl font-semibold hoverfade-text">Marketplace</h1>
+            <h1 class="text-2xl font-semibold hoverfade-text">Campus Market</h1>
             <p class="text-muted text-sm">Buy, sell, rent, or hire other students</p>
         </div>
-        @auth<a href="{{ route('marketplace.create') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Post to Marketplace</a>@else<a href="{{ route('register') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Sign Up to Sell</a>@endauth
+        @auth<a href="{{ route('marketplace.create') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Post to Campus Market</a>@else<a href="{{ route('register') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Sign Up to Sell</a>@endauth
     </div>
+
+    <!-- Search -->
+    <form method="GET" action="{{ route('marketplace.index') }}" class="mb-4 reveal-on-scroll">
+        @if($activeType)<input type="hidden" name="type" value="{{ $activeType }}">@endif
+        @if($activeCategory)<input type="hidden" name="category" value="{{ $activeCategory }}">@endif
+        <div class="flex items-center gap-2">
+            <input type="text" name="q" value="{{ $searchQuery ?? '' }}" placeholder="Search listings..." class="input-field !mt-0 flex-1">
+            <button type="submit" class="btn-primary" style="padding:0.6rem 1rem;"><i data-lucide="search" class="w-4 h-4"></i></button>
+        </div>
+    </form>
 
     <!-- Type filter pills -->
     <div class="cat-scroll mb-3 reveal-on-scroll">
@@ -37,6 +47,33 @@
             <p class="text-muted text-xs">Ad space — nothing running here yet</p>
         </div>
     </div>
+    @if(($recommended ?? collect())->isNotEmpty())
+    <div class="mb-6">
+        <h2 class="font-semibold mb-3">Recommended for You</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            @foreach($recommended as $item)
+            <a href="{{ route('marketplace.show', $item->id) }}" class="listing-card reveal-on-scroll">
+                <div class="listing-img">
+                    @if($item->image_url)
+                    <img src="{{ $item->image_url }}" alt="{{ $item->title }}">
+                    @else
+                    <div class="listing-placeholder"><i data-lucide="image" class="w-8 h-8"></i></div>
+                    @endif
+                    <span class="type-badge type-{{ $item->listing_type }}">{{ ucfirst($item->listing_type) }}</span>
+                </div>
+                <div class="p-3">
+                    <p class="font-semibold text-accent">₦{{ number_format($item->amount) }}</p>
+                    <p class="text-sm mt-1 line-clamp-1">{{ $item->title }}</p>
+                    <p class="text-muted text-xs mt-1 flex items-center gap-1">
+                        <i data-lucide="map-pin" class="w-3 h-3"></i> {{ $item->location }}
+                    </p>
+                </div>
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         @foreach($listings as $item)
         <a href="{{ route('marketplace.show', $item->id) }}" class="listing-card reveal-on-scroll">

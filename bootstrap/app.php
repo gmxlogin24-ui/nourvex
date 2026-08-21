@@ -14,9 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'tier' => \App\Http\Middleware\RequireTier::class,
+            'admin' => \App\Http\Middleware\IsAdmin::class,
+            'signup.paid' => \App\Http\Middleware\EnsureSignupFeePaid::class,
         ]);
         $middleware->appendToGroup('web', \App\Http\Middleware\TrackStreak::class);
-        $middleware->alias(['signup.paid' => \App\Http\Middleware\EnsureSignupFeePaid::class]);
         $middleware->validateCsrfTokens(except: [
             'webhooks/flutterwave',
         ]);

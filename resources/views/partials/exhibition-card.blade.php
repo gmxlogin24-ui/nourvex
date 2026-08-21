@@ -2,13 +2,13 @@
     $item = $item ?? [];
     $imageUrl = $item['image_url'] ?? null;
     $videoUrl = $item['video_url'] ?? null;
-    $title = $item['title'] ?? 'Featured on Campulsy';
+    $title = $item['title'] ?? 'Featured on Qelvo';
     $subtitle = $item['subtitle'] ?? null;
     $ctaText = $item['cta_text'] ?? 'Shop Now';
     $ctaUrl = $item['cta_url'] ?? route('register');
     $sizeClass = $size ?? '';
     // Placeholder image until real vendor ad content is wired in via the controller.
-    $placeholderSeed = $item['placeholder_seed'] ?? 'campulsyad';
+    $placeholderSeed = $item['placeholder_seed'] ?? 'qelvoad';
 @endphp
 <a href="{{ $ctaUrl }}" class="exhibition-card {{ $sizeClass }}">
     @if($videoUrl)
