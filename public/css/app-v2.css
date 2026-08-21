@@ -99,7 +99,11 @@ body {
 .logo-badge {
   width: 2.25rem; height: 2.25rem;
   border-radius: 0.65rem;
-  background: linear-gradient(to bottom right, var(--color-accent), var(--color-accent-light));
+  background-image: url('/images/qelvo-mark.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-color: transparent !important;
 }
 
 .hero-blob {
@@ -1412,7 +1416,7 @@ h1, h2, .balance-amount {
   overflow-y: auto;
 }
 .sidebar-logo { display: flex; align-items: center; gap: 0.6rem; padding: 0 0.35rem; }
-.sidebar-logo .logo-badge { background: linear-gradient(135deg, var(--color-accent-light), var(--color-accent)) !important; }
+.sidebar-logo .logo-badge { background-image: url('/images/qelvo-mark.png') !important; background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important; background-color: transparent !important; }
 .sidebar-search { position: relative; }
 .sidebar-links { display: flex; flex-direction: column; gap: 0.3rem; flex: 1; }
 .sidebar-links a {
@@ -3452,14 +3456,7 @@ html, body { overflow-x: hidden; }
 .analytics-canvas-wrap.ring-mode { height: 220px; display: flex; align-items: center; gap: 1.5rem; }
 
 /* Quick Actions responsive override */
-.quick-icon-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-}
-@media (min-width: 768px) {
-  .quick-icon-row { grid-template-columns: repeat(8, 1fr); }
-}
+/* REMOVED: hardcoded 3/8-col grid, replaced by auto-fill rule in theme-presets.css */
 
 /* ===== Campus News toast notifications ===== */
 .news-toast-stack {
