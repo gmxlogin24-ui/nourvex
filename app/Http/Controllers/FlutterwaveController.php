@@ -14,7 +14,10 @@ class FlutterwaveController extends Controller
 {
     private function flwSecret(): string
     {
-        return config('services.flutterwave.secret');
+        // Falls back to '' instead of crashing when the key isn't set yet (local dev).
+        // Once FLW_SECRET_KEY is set in .env, this returns the real key as normal -
+        // no behavior change once the key exists.
+        return config('services.flutterwave.secret') ?? '';
     }
 
     private function verifyTransaction(string $transactionId): array
@@ -106,7 +109,7 @@ class FlutterwaveController extends Controller
 
             if ($user->referred_by) {
                 $referrer = User::where('id', $user->referred_by)->lockForUpdate()->first();
-                if ($referrer) {
+                if ($referrer && !$referrer->wallet_restricted) {
                     $pct = $referrer->tier === 'tier2' ? 0.15 : 0;
                     $bonus = 5000 * $pct;
                     if ($bonus > 0) {
@@ -143,20 +146,24 @@ class FlutterwaveController extends Controller
             'status' => 'pending',
         ]);
 
-        $response = Http::withToken($this->flwSecret())
-            ->post('https://api.flutterwave.com/v3/payments', [
-                'tx_ref' => $txRef,
-                'amount' => $amount,
-                'currency' => 'NGN',
-                'redirect_url' => route('signup-fee.callback'),
-                'customer' => ['email' => $user->email, 'name' => $user->name],
-                'customizations' => ['title' => 'Qelvo Account Activation'],
-            ]);
+        try {
+            $response = Http::withToken($this->flwSecret())
+                ->post('https://api.flutterwave.com/v3/payments', [
+                    'tx_ref' => $txRef,
+                    'amount' => $amount,
+                    'currency' => 'NGN',
+                    'redirect_url' => route('signup-fee.callback'),
+                    'customer' => ['email' => $user->email, 'name' => $user->name],
+                    'customizations' => ['title' => 'Qelvo Account Activation'],
+                ]);
 
-        $data = $response->json();
+            $data = $response->json();
 
-        if (($data['status'] ?? null) === 'success') {
-            return redirect($data['data']['link']);
+            if (($data['status'] ?? null) === 'success') {
+                return redirect($data['data']['link']);
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Signup fee payment init failed: ' . $e->getMessage());
         }
 
         return back()->withErrors(['payment' => 'Could not start payment. Please try again.']);

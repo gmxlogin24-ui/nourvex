@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'tier' => \App\Http\Middleware\RequireTier::class,
             'admin' => \App\Http\Middleware\IsAdmin::class,
             'signup.paid' => \App\Http\Middleware\EnsureSignupFeePaid::class,
+            'customer_care' => \App\Http\Middleware\IsCustomerCareOrAdmin::class,
         ]);
         $middleware->appendToGroup('web', \App\Http\Middleware\TrackStreak::class);
         $middleware->validateCsrfTokens(except: [

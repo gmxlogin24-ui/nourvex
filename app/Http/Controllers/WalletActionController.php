@@ -20,6 +20,12 @@ class WalletActionController extends Controller
     {
         $validated = $request->validate(['amount' => 'required|numeric|min:100']);
         $user = Auth::user();
+
+        if ($user->wouldExceedNoBvnCap($validated['amount'])) {
+            $remaining = max(0, \App\Models\User::NO_BVN_WALLET_CAP - $user->wallet_balance);
+            return back()->withErrors(['amount' => 'Unverified wallets are capped at ₦' . number_format(\App\Models\User::NO_BVN_WALLET_CAP) . '. You can add up to ₦' . number_format($remaining) . ' more, or verify your BVN to remove this limit.']);
+        }
+
         $txRef = 'TOPUP-' . $user->id . '-' . time();
 
         $response = Http::withToken(config('services.flutterwave.secret'))
@@ -43,7 +49,19 @@ class WalletActionController extends Controller
 
     public function withdraw(Request $request)
     {
-        $validated = $request->validate(['amount' => 'required|numeric|min:100']);
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:100',
+            'pin' => 'required|string',
+        ]);
+        $user = Auth::user();
+
+        if (!$user->hasTransactionPin()) {
+            return back()->withErrors(['pin' => 'Set a transaction PIN before withdrawing.']);
+        }
+        if (!$user->verifyTransactionPin($validated['pin'])) {
+            return back()->withErrors(['pin' => 'Incorrect transaction PIN.']);
+        }
+
         $userId = Auth::id();
 
         $result = DB::transaction(function () use ($userId, $validated) {

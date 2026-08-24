@@ -4,6 +4,7 @@
     $userName = auth()->user()?->name ?? 'Guest';
     $initial = strtoupper(substr($userName, 0, 1));
     $isAdmin = auth()->user()?->is_admin ?? false;
+    $isCustomerCare = auth()->user()?->role === 'customer_care';
 @endphp
 <aside class="neu-sidebar" id="appSidebar">
     <div class="rail-col">
@@ -22,6 +23,9 @@
                 <a href="{{ route('profile.index') }}" class="rail-icon-btn rail-nav-icon {{ ($active ?? '') == 'profile' ? 'active' : '' }}" title="Profile"><i data-lucide="user-circle" class="w-4 h-4"></i></a>
                 @if($isAdmin)
                 <a href="{{ route('admin.index') }}" class="rail-icon-btn rail-nav-icon {{ ($active ?? '') == 'admin' ? 'active' : '' }}" title="Admin"><i data-lucide="shield" class="w-4 h-4"></i></a>
+                @endif
+                @if($isCustomerCare)
+                <a href="{{ route('customer-care.index') }}" class="rail-icon-btn rail-nav-icon {{ ($active ?? '') == 'customer-care' ? 'active' : '' }}" title="Customer Care"><i data-lucide="headset" class="w-4 h-4"></i></a>
                 @endif
             </div>
         </div>
@@ -62,6 +66,9 @@
             @if($isAdmin)
             <a href="{{ route('admin.index') }}" class="{{ ($active ?? '') == 'admin' ? 'active' : '' }}"><span class="sidebar-link-icon"><i data-lucide="shield" class="w-4 h-4"></i></span><span class="sidebar-link-label">Admin</span></a>
             @endif
+            @if($isCustomerCare)
+            <a href="{{ route('customer-care.index') }}" class="{{ ($active ?? '') == 'customer-care' ? 'active' : '' }}"><span class="sidebar-link-icon"><i data-lucide="headset" class="w-4 h-4"></i></span><span class="sidebar-link-label">Customer Care</span></a>
+            @endif
         </nav>
 
         <p class="sidebar-group-label">General</p>
@@ -94,7 +101,7 @@
         <span class="mnav-label">Hustles</span>
     </a>
     <a href="{{ route('gigs.create') }}" class="mnav-fab" aria-label="Post a Hustle">
-        <i data-lucide="plus" class="w-5 h-5"></i>
+        <i data-lucide="sparkles" class="w-5 h-5"></i>
     </a>
     <a href="{{ route('marketplace.index') }}" class="mnav-item {{ ($active ?? '') == 'marketplace' ? 'active' : '' }}">
         <i data-lucide="shopping-bag" class="w-5 h-5"></i>

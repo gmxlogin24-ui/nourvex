@@ -13,30 +13,24 @@
     <div class="stat-card mb-4" style="border-color:#ef4444;"><p>{{ $errors->first() }}</p></div>
     @endif
 
-    <div class="stat-card overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead>
-                <tr class="text-left text-muted border-b" style="border-color:var(--border-color);">
-                    <th class="py-2 pr-4">Listing</th>
-                    <th class="py-2 pr-4">Filed By</th>
-                    <th class="py-2 pr-4">Amount in Escrow</th>
-                    <th class="py-2 pr-4">Description</th>
-                    <th class="py-2 pr-4">Filed</th>
-                    <th class="py-2 pr-4">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            @forelse($disputes as $dispute)
-                <tr class="border-b" style="border-color:var(--border-color);">
-                    <td class="py-2 pr-4">
-                        <a href="{{ route('marketplace.show', $dispute->listing_id) }}" class="text-accent">{{ $dispute->listing->title }}</a>
-                        <p class="text-muted text-xs">{{ ucfirst($dispute->listing->delivery_method) }}</p>
-                    </td>
-                    <td class="py-2 pr-4">{{ $dispute->raisedBy->name ?? 'Unknown' }}</td>
-                    <td class="py-2 pr-4">₦{{ number_format($dispute->listing->amount, 2) }}</td>
-                    <td class="py-2 pr-4 text-muted" style="max-width:280px;">{{ $dispute->description }}</td>
-                    <td class="py-2 pr-4 text-muted">{{ $dispute->created_at->diffForHumans() }}</td>
-                    <td class="py-2 pr-4 flex gap-2 flex-wrap">
+    @if($disputes->count())
+    <div class="flex flex-col gap-3">
+        @foreach($disputes as $dispute)
+            <div class="stat-card">
+                <div class="flex justify-between items-start gap-3 mb-3">
+                    <div>
+                        <a href="{{ route('marketplace.show', $dispute->listing_id) }}" class="text-accent font-semibold">{{ $dispute->listing->title }}</a>
+                        <p class="text-muted text-xs">{{ ucfirst($dispute->listing->delivery_method) }} · filed by {{ $dispute->raisedBy->name ?? 'Unknown' }}</p>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <p class="font-semibold">₦{{ number_format($dispute->listing->amount, 2) }}</p>
+                        <p class="text-xs text-muted">in escrow</p>
+                    </div>
+                </div>
+                <p class="text-sm text-muted mb-3">{{ $dispute->description }}</p>
+                <div class="flex justify-between items-center flex-wrap gap-2">
+                    <p class="text-xs text-muted">{{ $dispute->created_at->diffForHumans() }}</p>
+                    <div class="flex gap-2 flex-wrap">
                         <form method="POST" action="{{ route('admin.marketplace-disputes.pay', $dispute) }}" onsubmit="return confirm('Release ₦{{ number_format($dispute->listing->amount, 2) }} to the seller?');">
                             @csrf
                             <button class="balance-chip primary" style="font-size:0.75rem;">Pay Seller</button>
@@ -49,13 +43,13 @@
                             @csrf
                             <button class="balance-chip" style="font-size:0.75rem;">Dismiss</button>
                         </form>
-                    </td>
-                </tr>
-            @empty
-                <tr><td colspan="6" class="py-4 text-center text-muted">No open disputes.</td></tr>
-            @endforelse
-            </tbody>
-        </table>
+                    </div>
+                </div>
+            </div>
+        @endforeach
     </div>
+    @else
+    <div class="stat-card text-center text-muted py-8">No open disputes.</div>
+    @endif
 </div>
 @endsection

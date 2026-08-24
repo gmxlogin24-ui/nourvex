@@ -233,6 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function refresh(){
     teardown();
+    if (document.body.dataset.page === 'dashboard2') return;
     if (window.innerWidth >= 900) build();
   }
 

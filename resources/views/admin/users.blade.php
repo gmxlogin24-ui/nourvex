@@ -39,7 +39,7 @@
                     <td class="py-2 pr-4">{{ $u->tier }}</td>
                     <td class="py-2 pr-4">₦{{ number_format($u->wallet_balance, 2) }}</td>
                     <td class="py-2 pr-4">
-                        {{ $u->is_admin ? 'Admin' : 'User' }}{{ $u->is_banned ? ' · Banned' : '' }}
+                        {{ $u->is_admin ? 'Admin' : ($u->role === 'customer_care' ? 'Customer Care' : 'User') }}{{ $u->is_banned ? ' · Banned' : '' }}
                     </td>
                     <td class="py-2 pr-4 flex gap-2 flex-wrap">
                         <form method="POST" action="{{ route('admin.toggle-admin', $u) }}">
@@ -50,6 +50,12 @@
                             @csrf
                             <button class="balance-chip" style="font-size:0.75rem;">{{ $u->is_banned ? 'Unban' : 'Ban' }}</button>
                         </form>
+                        @if(!$u->is_admin)
+                        <form method="POST" action="{{ route('admin.toggle-customer-care', $u) }}">
+                            @csrf
+                            <button class="balance-chip" style="font-size:0.75rem;">{{ $u->role === 'customer_care' ? 'Remove Customer Care' : 'Make Customer Care' }}</button>
+                        </form>
+                        @endif
                         <form method="POST" action="{{ route('admin.adjust-balance', $u) }}" class="flex gap-1">
                             @csrf
                             <input type="number" step="0.01" name="amount" placeholder="+/- amt" style="width:90px;background:var(--color-card);border:1px solid var(--border-color);border-radius:0.5rem;padding:0 0.4rem;font-size:0.75rem;">

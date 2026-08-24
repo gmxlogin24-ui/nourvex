@@ -31,6 +31,48 @@ class AuthController extends Controller
         return view('auth.register-vendor');
     }
 
+    public function showInviteRegister(string $code)
+    {
+        $invite = \App\Models\Invite::where('code', $code)->first();
+        if (!$invite || !$invite->isValid()) {
+            abort(404, 'This invite link is invalid or has expired.');
+        }
+        return view('auth.register-invite', ['code' => $code]);
+    }
+
+    public function registerInvite(Request $request, string $code)
+    {
+        $invite = \App\Models\Invite::where('code', $code)->first();
+        if (!$invite || !$invite->isValid()) {
+            abort(404, 'This invite link is invalid or has expired.');
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6',
+            'gender' => 'required|in:male,female,other',
+            'spoken_language' => 'required|string|max:100',
+        ]);
+
+        $user = \App\Models\User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'gender' => $validated['gender'],
+            'spoken_language' => $validated['spoken_language'],
+            'referral_code' => strtoupper(Str::random(6)),
+            'account_type' => 'guest',
+            'role' => $invite->role,
+        ]);
+
+        $invite->update(['used_at' => now(), 'used_by' => $user->id]);
+
+        Auth::login($user);
+
+        return redirect()->route('dashboard')->with('status', 'Welcome to the team!');
+    }
+
     public function register(Request $request)
     {
         $registerThrottleKey = 'register|' . $request->ip();
@@ -182,6 +224,9 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             \Illuminate\Support\Facades\RateLimiter::clear($throttleKey);
             $request->session()->regenerate();
+            if (Auth::user()->role === 'customer_care') {
+                return redirect()->route('customer-care.index');
+            }
             return redirect()->route('dashboard');
         }
 

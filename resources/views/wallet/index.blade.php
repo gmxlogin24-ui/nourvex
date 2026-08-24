@@ -26,6 +26,13 @@
         <i data-lucide="chevron-right" class="w-4 h-4 text-muted"></i>
     </a>
 
+    @if(!($isVerified ?? true))
+    <div class="glass-card p-4 mb-6" style="border:1px solid var(--color-accent);">
+        <p class="text-sm font-medium">Unverified wallet limit</p>
+        <p class="text-muted text-xs mt-1">You can hold up to ₦{{ number_format($walletCapRemaining ?? 0) }} more before you need to verify your BVN. Earnings from gigs, sales, and referrals aren't affected.</p>
+    </div>
+    @endif
+
     <div class="glass-card p-6">
         <h2 class="font-semibold mb-4">Transaction History</h2>
         @if(session('status'))
@@ -83,10 +90,14 @@
 <div id="withdrawModal" class="modal-overlay">
     <div class="glass-card p-6 max-w-sm mx-auto mt-24">
         <h3 class="font-semibold mb-3">Withdraw Funds</h3>
+        @unless($hasPin ?? false)
+        <p class="text-sm text-muted mb-3">You need a transaction PIN before withdrawing. <a href="{{ route('wallet.pin.edit') }}" class="underline font-semibold">Set one now</a>.</p>
+        @endunless
         <form method="POST" action="{{ route('wallet.withdraw') }}">
             @csrf
             <input type="number" name="amount" min="100" placeholder="Amount (₦)" required class="input-field !mt-0 mb-3">
-            <button type="submit" class="btn-primary w-full justify-center">Confirm Withdraw</button>
+            <input type="password" name="pin" inputmode="numeric" maxlength="6" placeholder="Transaction PIN" required class="input-field !mt-0 mb-3">
+            <button type="submit" class="btn-primary w-full justify-center" {{ ($hasPin ?? false) ? '' : 'disabled' }}>Confirm Withdraw</button>
         </form>
         <button onclick="document.getElementById('withdrawModal').classList.remove('open')" class="text-muted text-sm mt-3 w-full text-center">Cancel</button>
     </div>

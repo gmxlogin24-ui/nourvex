@@ -31,6 +31,8 @@ class ProfileController extends Controller
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'accent_color' => 'nullable|string|max:7',
             'theme_style' => 'nullable|string|in:glass,neumorphic,plain',
+            'mobile_nav_style' => 'nullable|string|in:floating_glow,gradient_card,sidebar_accent,dark_ring,white_pill_fab,dark_floating_icons',
+            'sidebar_style' => 'nullable|string|in:classic,rail',
             'avatar' => 'nullable|image|max:4096',
             'background' => 'nullable|image|max:8192',
         ]);

@@ -17,8 +17,8 @@ use Illuminate\Support\Facades\Hash;
     'tier', 'tier_upgraded_at', 'is_verified_seller',
     'virtual_account_number', 'virtual_account_bank', 'virtual_account_ref',
     'account_type', 'business_name', 'business_logo', 'business_whatsapp', 'is_vendor_active', 'interests',
-    'streak_days', 'last_active_date', 'leaderboard_opt_in', 'wallet_restricted', 'google_id', 'transaction_pin', 'theme_style',
-    'is_admin',
+    'streak_days', 'last_active_date', 'leaderboard_opt_in', 'wallet_restricted', 'google_id', 'transaction_pin', 'theme_style', 'mobile_nav_style', 'sidebar_style',
+    'is_admin', 'role',
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
@@ -74,6 +74,21 @@ class User extends Authenticatable
     // Transaction PIN gates real-money purchases (VTU, cable, withdrawals).
     // Hashed via the cast below, same treatment as password - never compared
     // or stored in plaintext.
+    // Users without a verified virtual account (BVN) are capped on how much
+    // they can hold in-wallet - defends against using the wallet to stash/move
+    // money with zero identity verification. Earnings owed to the user (gigs,
+    // marketplace sales, referral bonuses) are NOT subject to this cap - only
+    // top-ups and incoming transfers, which are funds the user chooses to add.
+    const NO_BVN_WALLET_CAP = 20000;
+
+    public function wouldExceedNoBvnCap(float $incomingAmount): bool
+    {
+        if ($this->virtual_account_number) {
+            return false;
+        }
+        return ($this->wallet_balance + $incomingAmount) > self::NO_BVN_WALLET_CAP;
+    }
+
     public function hasTransactionPin(): bool
     {
         return !is_null($this->transaction_pin);
@@ -82,6 +97,23 @@ class User extends Authenticatable
     public function verifyTransactionPin(string $pin): bool
     {
         return $this->hasTransactionPin() && Hash::check($pin, $this->transaction_pin);
+    }
+
+    // Role-based access, alongside legacy is_admin (kept for backward compatibility).
+    // 'role' is the source of truth going forward: 'user' | 'customer_care' | 'admin'.
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin' || $this->is_admin;
+    }
+
+    public function isCustomerCare(): bool
+    {
+        return $this->role === 'customer_care';
+    }
+
+    public function isCustomerCareOrAdmin(): bool
+    {
+        return $this->isCustomerCare() || $this->isAdmin();
     }
 
     protected function casts(): array

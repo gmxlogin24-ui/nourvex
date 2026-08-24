@@ -28,14 +28,14 @@ body[data-theme-style="glass"] .btn-primary {
 
 /* ===== NEUMORPHIC — soft UI, dual shadows, flat matching background ===== */
 body[data-theme-style="neumorphic"] {
-    background: #e6e9ef !important;
+    background: #ffffff !important;
 }
 body[data-theme-style="neumorphic"][data-theme="dark"] {
     background: #2b2f38 !important;
 }
 body[data-theme-style="neumorphic"] .glass-card,
 body[data-theme-style="neumorphic"] .stat-card {
-    background: #e6e9ef;
+    background: #ffffff !important;
     border: none;
     border-radius: 1.5rem;
     box-shadow: 8px 8px 16px rgba(163, 177, 198, 0.55), -8px -8px 16px rgba(255, 255, 255, 0.85);
@@ -48,7 +48,7 @@ body[data-theme-style="neumorphic"][data-theme="dark"] .stat-card {
 }
 body[data-theme-style="neumorphic"] .btn-primary,
 body[data-theme-style="neumorphic"] .btn-secondary {
-    background: #e6e9ef;
+    background: #ffffff !important;
     color: var(--color-text, #333);
     border: none;
     border-radius: 0.9rem;
@@ -60,12 +60,16 @@ body[data-theme-style="neumorphic"][data-theme="dark"] .btn-secondary {
     color: #eee;
     box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4), -4px -4px 8px rgba(255, 255, 255, 0.03);
 }
+body[data-theme-style="neumorphic"] .btn-primary,
+body[data-theme-style="neumorphic"] .btn-secondary {
+    color: #16181d !important;
+}
 body[data-theme-style="neumorphic"] .btn-primary:active,
 body[data-theme-style="neumorphic"] .btn-secondary:active {
     box-shadow: inset 3px 3px 6px rgba(163, 177, 198, 0.5), inset -3px -3px 6px rgba(255, 255, 255, 0.8);
 }
 body[data-theme-style="neumorphic"] .input-field {
-    background: #e6e9ef;
+    background: #ffffff !important;
     border: none;
     border-radius: 0.9rem;
     box-shadow: inset 3px 3px 6px rgba(163, 177, 198, 0.4), inset -3px -3px 6px rgba(255, 255, 255, 0.8);
@@ -103,18 +107,18 @@ body[data-theme-style="plain"] .input-field {
 /* ===== PER-SECTION OVERRIDES — layered on top of the base presets above ===== */
 /* Sidebar */
 body[data-sidebar-style="glass"] .app-sidebar-single { background: rgba(255,255,255,0.15) !important; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-right: 1px solid rgba(255,255,255,0.25) !important; }
-body[data-sidebar-style="neumorphic"] .app-sidebar-single { background: #e6e9ef !important; box-shadow: 8px 0 16px rgba(163,177,198,0.4); border: none !important; }
+body[data-sidebar-style="neumorphic"] .app-sidebar-single { background: #ffffff !important; box-shadow: 8px 0 16px rgba(163,177,198,0.4); border: none !important; }
 body[data-sidebar-style="plain"] .app-sidebar-single { background: var(--color-card, #fff) !important; box-shadow: none; border-right: 1px solid var(--border-color, #e2e2e2) !important; }
 
 /* Notifications / toasts */
 body[data-notif-style="glass"] .news-toast { background: rgba(255,255,255,0.55) !important; backdrop-filter: blur(14px); }
-body[data-notif-style="neumorphic"] .news-toast { background: #e6e9ef !important; box-shadow: 6px 6px 12px rgba(163,177,198,0.5), -6px -6px 12px rgba(255,255,255,0.8); backdrop-filter: none; }
+body[data-notif-style="neumorphic"] .news-toast { background: #ffffff !important; box-shadow: 6px 6px 12px rgba(163,177,198,0.5), -6px -6px 12px rgba(255,255,255,0.8); backdrop-filter: none; }
 body[data-notif-style="plain"] .news-toast { background: var(--color-card, #fff) !important; box-shadow: none; backdrop-filter: none; border: 1px solid var(--border-color, #e2e2e2); }
 
 /* Navbar / topbar — using <nav> and header selectors as a starting point.
    Tell me the actual wrapper class in nav.blade.php and I'll swap these to match exactly. */
 body[data-navbar-style="glass"] nav { background: rgba(255,255,255,0.15) !important; backdrop-filter: blur(14px); }
-body[data-navbar-style="neumorphic"] nav { background: #e6e9ef !important; box-shadow: 4px 4px 8px rgba(163,177,198,0.4); }
+body[data-navbar-style="neumorphic"] nav { background: #ffffff !important; box-shadow: 4px 4px 8px rgba(163,177,198,0.4); }
 body[data-navbar-style="plain"] nav { background: var(--color-card, #fff) !important; box-shadow: none; }
 
 /* =====================================================================
@@ -518,3 +522,66 @@ body[data-theme-style="plain"] .icon-badge-referral {
 }
 .admin-section-nav a.active { background: var(--color-accent); color: #fff; border-color: transparent; }
 .admin-page-body { min-height: 100vh; max-width: 100vw; overflow-x: hidden; }
+
+/* =====================================================================
+   NEUMORPHIC WHITE-ON-WHITE FIX — cards were changed to white but
+   inner elements (Quick Link buttons using inline var(--color-card))
+   have no shadow of their own, so they visually merge into the card
+   behind them. Giving them their own raised shadow restores the
+   embossed look. Also strengthening the main card shadow since it
+   reads much weaker against white than it did against gray.
+   ===================================================================== */
+body[data-theme-style="neumorphic"] .rounded-xl[style*="--color-card"],
+body[data-theme-style="neumorphic"] a.rounded-xl {
+  box-shadow: 5px 5px 12px rgba(163, 177, 198, 0.55), -5px -5px 12px rgba(255, 255, 255, 0.9);
+}
+
+body[data-theme-style="neumorphic"] .glass-card,
+body[data-theme-style="neumorphic"] .stat-card {
+  box-shadow: 10px 10px 22px rgba(163, 177, 198, 0.7), -10px -10px 22px rgba(255, 255, 255, 0.95) !important;
+}
+
+/* =====================================================================
+   NEUMORPHIC WHITE — remaining card types not covered by the original
+   .glass-card/.stat-card fix: analytics-card, gauge-panel, kpi-tile.
+   These were inheriting gray/tinted backgrounds from generic app-v2.css
+   rules. Forcing white + matching embossed shadow so they read
+   consistently with the rest of the neumorphic cards.
+   ===================================================================== */
+body[data-theme-style="neumorphic"] .analytics-card,
+body[data-theme-style="neumorphic"] .gauge-panel,
+body[data-theme-style="neumorphic"] .kpi-tile {
+  background: #ffffff !important;
+  box-shadow: 10px 10px 22px rgba(163, 177, 198, 0.7), -10px -10px 22px rgba(255, 255, 255, 0.95) !important;
+  border: none !important;
+}
+
+/* =====================================================================
+   NEUMORPHIC GAUGE-PANEL BORDER — remove the accent-colored top
+   border (was designed for the old gray version, now clashes since
+   the panel is white). Also fix analytics-tabs wrapping: at narrow
+   widths 5 tabs don't fit on one line, causing an awkward partial
+   wrap. Adding explicit flex-wrap with tuned gap for two breakpoints:
+   mobile-Chrome-desktop-mode width (~980-1100px common on phones with
+   "Desktop site" on) and true laptop width (1280px+).
+   ===================================================================== */
+body[data-theme-style="neumorphic"] .gauge-panel {
+  border-top: none !important;
+}
+
+.analytics-tabs {
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+
+/* Mobile-Chrome-desktop-mode range: tighter tab padding so more fit per row */
+@media (min-width: 900px) and (max-width: 1150px) {
+  .analytics-tabs { gap: 0.1rem; padding: 0.2rem; }
+  .analytics-tab { padding: 0.4rem 0.7rem; font-size: 0.72rem; }
+}
+
+/* True laptop/desktop width: full comfortable spacing, tabs fit in one row */
+@media (min-width: 1151px) {
+  .analytics-tabs { gap: 0.2rem; padding: 0.3rem; flex-wrap: nowrap; }
+  .analytics-tab { padding: 0.55rem 1.1rem; font-size: 0.8rem; }
+}

@@ -14,7 +14,7 @@ class AppearanceController extends Controller
             'notif_style'   => 'nullable|in:glass,neumorphic,plain,default',
             'sidebar_style' => 'nullable|in:glass,neumorphic,plain,default',
             'card_style'    => 'nullable|in:glass,neumorphic,plain,default',
-            'mobile_nav_style' => 'nullable|in:floating_glow,gradient_card,sidebar_accent,dark_ring',
+            'mobile_nav_style' => 'nullable|in:floating_glow,gradient_card,sidebar_accent,dark_ring,white_pill_fab,dark_floating_icons',
             'accent_color'  => 'nullable|string|max:7',
         ]);
 

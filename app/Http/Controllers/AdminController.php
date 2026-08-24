@@ -10,6 +10,7 @@ use App\Models\Subscription;
 use App\Models\News;
 use App\Models\Blog;
 use App\Models\PlatformRevenue;
+use App\Models\Invite;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -142,6 +143,43 @@ class AdminController extends Controller
         abort_if($user->id === Auth::id(), 403, 'You cannot ban yourself.');
         $user->update(['is_banned' => !$user->is_banned]);
         return back()->with('status', $user->name . ($user->is_banned ? ' banned.' : ' unbanned.'));
+    }
+
+    // Flips a user in/out of the customer_care role. Does not touch is_admin -
+    // customer_care is a separate, lesser-privileged role, not an admin variant.
+    public function toggleCustomerCare(User $user)
+    {
+        $this->guard();
+        abort_if($user->id === Auth::id(), 403, 'You cannot change your own role.');
+        abort_if($user->isAdmin(), 403, 'Admins are not eligible for the customer_care role.');
+
+        $newRole = $user->role === 'customer_care' ? 'user' : 'customer_care';
+        $user->update(['role' => $newRole]);
+
+        return back()->with('status', $user->name . ' is now ' . ($newRole === 'customer_care' ? 'Customer Care.' : 'a regular user.'));
+    }
+
+    // ===== CUSTOMER CARE INVITES =====
+    public function invites()
+    {
+        $this->guard();
+        return view('admin.invites', ['invites' => Invite::with(['creator', 'usedBy'])->latest()->paginate(25)]);
+    }
+
+    public function invitesStore(Request $r)
+    {
+        $this->guard();
+        $r->validate(['expires_in_days' => 'nullable|integer|min:1|max:30']);
+        Invite::generate(Auth::id(), 'customer_care', $r->input('expires_in_days', 7));
+        return back()->with('status', 'Invite link generated.');
+    }
+
+    public function invitesRevoke(Invite $invite)
+    {
+        $this->guard();
+        abort_if($invite->used_at, 403, 'This invite has already been used and cannot be revoked.');
+        $invite->delete();
+        return back()->with('status', 'Invite revoked.');
     }
 
     // Locked to prevent this admin write from racing with a concurrent user-side wallet

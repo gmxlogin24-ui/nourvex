@@ -28,7 +28,7 @@ class EnsureSignupFeePaid
     {
         $user = Auth::user();
 
-        if ($user && !$user->signup_fee_paid && !$user->is_admin) {
+        if ($user && !$user->signup_fee_paid && !$user->isCustomerCareOrAdmin()) {
             $routeName = $request->route()?->getName();
 
             if (in_array($routeName, $this->exemptRouteNames, true)) {

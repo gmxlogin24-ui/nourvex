@@ -87,7 +87,7 @@ class Subscription extends Model
 
         if ($user->referred_by) {
             $referrer = \App\Models\User::find($user->referred_by);
-            if ($referrer) {
+            if ($referrer && !$referrer->wallet_restricted) {
                 $pct = in_array($referrer->tier, ['tier2', 'tier3'], true) ? 0.15 : 0;
                 $bonus = $this->amount * $pct;
                 if ($bonus > 0) {

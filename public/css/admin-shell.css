@@ -1,0 +1,371 @@
+/* =====================================================================
+   ADMIN SHELL — icon-rail sidebar + card-variety system.
+   Scoped to body[data-page="admin"] only, so nothing outside the
+   admin/customer-care panel is touched. Applies to every page that
+   extends layouts.app-admin automatically (no per-page edits).
+   ===================================================================== */
+
+body[data-page="admin"] { padding-left: 0; }
+
+body[data-page="admin"] .admin-sidebar {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 6px;
+  background: var(--color-card);
+  border-right: 1px solid var(--border-color);
+  z-index: 50;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+body[data-page="admin"] .admin-sidebar::-webkit-scrollbar { display: none; }
+
+body[data-page="admin"] .admin-sidebar-exit {
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px;
+  border-radius: var(--radius-md, 14px);
+  color: var(--color-muted);
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+  flex-shrink: 0;
+}
+body[data-page="admin"] .admin-sidebar-exit svg { width: 18px; height: 18px; }
+
+body[data-page="admin"] .admin-sidebar-divider {
+  width: 32px; height: 1px;
+  background: var(--border-color);
+  margin: 4px 0 8px;
+  flex-shrink: 0;
+}
+
+body[data-page="admin"] .admin-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+body[data-page="admin"] .admin-sidebar-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 100%;
+  padding: 8px 2px;
+  border-radius: var(--radius-md, 14px);
+  color: var(--color-muted);
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+body[data-page="admin"] .admin-sidebar-link svg { width: 18px; height: 18px; }
+body[data-page="admin"] .admin-sidebar-link span {
+  font-size: 8.5px;
+  line-height: 1.1;
+  text-align: center;
+  font-weight: 600;
+}
+body[data-page="admin"] .admin-sidebar-link:hover {
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  color: var(--color-text);
+}
+body[data-page="admin"] .admin-sidebar-link.active {
+  color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-accent) 30%, transparent),
+              0 0 14px color-mix(in srgb, var(--color-accent) 35%, transparent);
+}
+
+/* Old top pill-nav no longer used (sidebar replaces it), hide if present */
+body[data-page="admin"] .admin-topbar,
+body[data-page="admin"] .admin-section-nav { display: none !important; }
+
+/* Push page content right to clear the sidebar */
+body[data-page="admin"] .admin-page-body {
+  margin-left: 72px;
+  padding-top: 1rem;
+}
+
+/* ===== Card variety system ===== */
+body[data-page="admin"] .stat-card {
+  position: relative;
+  overflow: hidden;
+}
+body[data-page="admin"] .stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  border-radius: inherit inherit 0 0;
+  background: var(--color-accent);
+  opacity: 0.85;
+}
+/* Cycle through 4 accent colors so cards don't look identical */
+body[data-page="admin"] .grid > .stat-card:nth-child(4n+2)::before,
+body[data-page="admin"] .flex.flex-col > .stat-card:nth-child(4n+2)::before {
+  background: #2563eb;
+}
+body[data-page="admin"] .grid > .stat-card:nth-child(4n+3)::before,
+body[data-page="admin"] .flex.flex-col > .stat-card:nth-child(4n+3)::before {
+  background: #16a34a;
+}
+body[data-page="admin"] .grid > .stat-card:nth-child(4n+4)::before,
+body[data-page="admin"] .flex.flex-col > .stat-card:nth-child(4n+4)::before {
+  background: #9333ea;
+}
+
+/* Alternate size/curve rhythm so cards read as varied, not a uniform grid */
+body[data-page="admin"] .grid > .stat-card:nth-child(3n+1),
+body[data-page="admin"] .flex.flex-col > .stat-card:nth-child(3n+1) {
+  border-radius: var(--radius-xl, 28px) !important;
+}
+body[data-page="admin"] .grid > .stat-card:nth-child(3n+2),
+body[data-page="admin"] .flex.flex-col > .stat-card:nth-child(3n+2) {
+  border-radius: var(--radius-sm, 10px) !important;
+  transform: scale(0.98);
+}
+body[data-page="admin"] .grid > .stat-card:nth-child(3n+3),
+body[data-page="admin"] .flex.flex-col > .stat-card:nth-child(3n+3) {
+  border-radius: var(--radius-lg, 22px) !important;
+}
+
+@media (max-width: 420px) {
+  body[data-page="admin"] .admin-sidebar { width: 62px; padding: 10px 4px; }
+  body[data-page="admin"] .admin-page-body { margin-left: 62px; }
+  body[data-page="admin"] .admin-sidebar-link span { font-size: 7.5px; }
+}
+
+/* =====================================================================
+   OVERRIDE: neumorphic theme-style removed entirely for admin/CC pages,
+   regardless of the user's global theme_style setting. Higher
+   specificity than theme-presets.css's neumorphic rules so this wins.
+   ===================================================================== */
+body[data-page="admin"][data-theme-style="neumorphic"] .stat-card,
+body[data-page="admin"][data-theme-style="neumorphic"] .glass-card,
+body[data-page="admin"][data-theme-style="neumorphic"][data-theme="dark"] .stat-card,
+body[data-page="admin"][data-theme-style="neumorphic"][data-theme="dark"] .glass-card {
+  background: var(--color-card) !important;
+  box-shadow: 0 4px 16px rgba(16,24,40,0.06) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--radius-lg, 22px) !important;
+}
+body[data-page="admin"][data-theme-style="neumorphic"] .balance-chip,
+body[data-page="admin"][data-theme-style="neumorphic"] .quick-action {
+  box-shadow: none !important;
+  background: var(--color-card) !important;
+}
+
+/* =====================================================================
+   NOTCHED CARD SHAPE — cut top-right corner via clip-path, like the
+   reference dashboard's invoice detail panel. Applied to stat-card and
+   the split-view detail panel specifically (not every small chip).
+   ===================================================================== */
+body[data-page="admin"] .stat-card,
+body[data-page="admin"] .split-view-detail {
+  clip-path: polygon(0 0, calc(100% - 28px) 0, 100% 28px, 100% 100%, 0 100%);
+  border-radius: var(--radius-lg, 22px);
+}
+
+/* Bolder pill-shaped primary buttons, matching the reference's high-contrast CTA */
+body[data-page="admin"] .balance-chip.primary,
+body[data-page="admin"] .split-detail-action {
+  border-radius: var(--radius-pill, 999px) !important;
+  padding: 8px 18px !important;
+  font-weight: 700 !important;
+  background: var(--color-accent) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--color-accent) 40%, transparent) !important;
+}
+
+/* =====================================================================
+   STAT TILE FIX — was flat gray-blue for every tile with a barely
+   visible notch. Now: bigger, clearer cut corner + distinct color per
+   tile position (cycles 4 colors, like the reference's mixed palette),
+   using solid left-border + tinted background instead of the muted
+   default border-color everything was inheriting.
+   ===================================================================== */
+body[data-page="admin"] .grid.md\:grid-cols-4 > .stat-card {
+  clip-path: polygon(0 0, calc(100% - 40px) 0, 100% 40px, 100% 100%, 0 100%);
+  border-radius: var(--radius-lg, 22px);
+  border-left: 4px solid transparent;
+  background: var(--color-card) !important;
+}
+body[data-page="admin"] .grid.md\:grid-cols-4 > .stat-card:nth-child(4n+1) {
+  border-left-color: #2563eb;
+  background: color-mix(in srgb, #2563eb 6%, var(--color-card)) !important;
+}
+body[data-page="admin"] .grid.md\:grid-cols-4 > .stat-card:nth-child(4n+2) {
+  border-left-color: #16a34a;
+  background: color-mix(in srgb, #16a34a 6%, var(--color-card)) !important;
+}
+body[data-page="admin"] .grid.md\:grid-cols-4 > .stat-card:nth-child(4n+3) {
+  border-left-color: #9333ea;
+  background: color-mix(in srgb, #9333ea 6%, var(--color-card)) !important;
+}
+body[data-page="admin"] .grid.md\:grid-cols-4 > .stat-card:nth-child(4n+4) {
+  border-left-color: #f59e0b;
+  background: color-mix(in srgb, #f59e0b 6%, var(--color-card)) !important;
+}
+[data-theme="dark"] body[data-page="admin"] .grid.md\:grid-cols-4 > .stat-card:nth-child(4n+1) { background: color-mix(in srgb, #2563eb 14%, var(--color-card)) !important; }
+[data-theme="dark"] body[data-page="admin"] .grid.md\:grid-cols-4 > .stat-card:nth-child(4n+2) { background: color-mix(in srgb, #16a34a 14%, var(--color-card)) !important; }
+[data-theme="dark"] body[data-page="admin"] .grid.md\:grid-cols-4 > .stat-card:nth-child(4n+3) { background: color-mix(in srgb, #9333ea 14%, var(--color-card)) !important; }
+[data-theme="dark"] body[data-page="admin"] .grid.md\:grid-cols-4 > .stat-card:nth-child(4n+4) { background: color-mix(in srgb, #f59e0b 14%, var(--color-card)) !important; }
+
+/* Bigger, clearer notch on the split-view detail panel too */
+body[data-page="admin"] .split-view-detail {
+  clip-path: polygon(0 0, calc(100% - 40px) 0, 100% 40px, 100% 100%, 0 100%);
+}
+
+/* =====================================================================
+   SIDEBAR VISIBILITY FIX — was nearly invisible (same near-white as
+   page background). Now a solid charcoal-navy panel so it reads as a
+   clear distinct rail regardless of light/dark mode.
+   ===================================================================== */
+body[data-page="admin"] .admin-sidebar {
+  background: #0f172a !important;
+  border-right: 1px solid #1e293b !important;
+}
+body[data-page="admin"] .admin-sidebar-exit {
+  background: rgba(255,255,255,0.08) !important;
+  color: #cbd5e1 !important;
+}
+body[data-page="admin"] .admin-sidebar-divider {
+  background: rgba(255,255,255,0.12) !important;
+}
+body[data-page="admin"] .admin-sidebar-link {
+  color: #94a3b8 !important;
+}
+body[data-page="admin"] .admin-sidebar-link:hover {
+  background: rgba(255,255,255,0.08) !important;
+  color: #f1f5f9 !important;
+}
+body[data-page="admin"] .admin-sidebar-link.active {
+  background: color-mix(in srgb, var(--color-accent) 25%, transparent) !important;
+  color: #fff !important;
+}
+
+/* =====================================================================
+   FLOATING CENTERED TOP BAR — second selectable nav style. Toggled via
+   body[data-admin-nav="topbar"|"sidebar"], set from localStorage in
+   the layout (same pattern as the existing theme toggle). Default is
+   "sidebar" until the person switches.
+   ===================================================================== */
+body[data-page="admin"] .admin-topbar-float { display: none; }
+
+body[data-page="admin"][data-admin-nav="topbar"] .admin-sidebar { display: none !important; }
+body[data-page="admin"][data-admin-nav="topbar"] .admin-page-body { margin-left: 0 !important; padding-top: 76px !important; }
+body[data-page="admin"][data-admin-nav="topbar"] .admin-topbar-float { display: flex; }
+
+body[data-page="admin"] .admin-topbar-float {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  align-items: center;
+  gap: 6px;
+  max-width: 92vw;
+  width: max-content;
+  padding: 10px 14px;
+  border-radius: var(--radius-pill, 999px);
+  background: #0f172a;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+body[data-page="admin"] .admin-topbar-float::-webkit-scrollbar { display: none; }
+
+body[data-page="admin"] .admin-topbar-float-exit,
+body[data-page="admin"] .admin-topbar-float-link,
+body[data-page="admin"] .admin-topbar-float-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  color: #94a3b8;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+}
+body[data-page="admin"] .admin-topbar-float-exit svg,
+body[data-page="admin"] .admin-topbar-float-link svg,
+body[data-page="admin"] .admin-topbar-float-toggle svg { width: 20px; height: 20px; }
+
+body[data-page="admin"] .admin-topbar-float-exit { color: #f87171; }
+body[data-page="admin"] .admin-topbar-float-link:hover { background: rgba(255,255,255,0.08); color: #f1f5f9; }
+body[data-page="admin"] .admin-topbar-float-link.active {
+  background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+  color: #fff;
+}
+body[data-page="admin"] .admin-topbar-float-toggle {
+  color: #fbbf24;
+  border-left: 1px solid rgba(255,255,255,0.12);
+  border-radius: 0;
+  margin-left: 4px;
+  padding-left: 10px;
+}
+
+/* Small "switch nav style" button on the sidebar too, so you can go back and forth */
+body[data-page="admin"] .admin-sidebar-toggle-btn {
+  margin-top: auto;
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-md, 14px);
+  color: #fbbf24;
+  background: rgba(255,255,255,0.06);
+  border: none;
+  flex-shrink: 0;
+}
+body[data-page="admin"] .admin-sidebar-toggle-btn svg { width: 16px; height: 16px; }
+
+/* =====================================================================
+   TOPBAR LOGO + SELECTED USER SLOT + NEAR-BLACK PAGE BACKGROUND
+   ===================================================================== */
+body[data-page="admin"] .admin-edge-logo,
+body[data-page="admin"] .admin-edge-selected {
+  display: none;
+}
+body[data-page="admin"][data-admin-nav="topbar"] .admin-edge-logo,
+body[data-page="admin"][data-admin-nav="topbar"] .admin-edge-selected {
+  display: flex;
+  position: fixed;
+  top: 16px;
+  height: 46px;
+  align-items: center;
+  z-index: 61;
+}
+body[data-page="admin"][data-admin-nav="topbar"] .admin-edge-logo {
+  left: 16px;
+}
+body[data-page="admin"][data-admin-nav="topbar"] .admin-edge-selected {
+  right: 16px;
+}
+body[data-page="admin"] .admin-edge-logo .logo-badge {
+  width: 2.8rem; height: 2.8rem;
+  border-radius: 0.7rem;
+}
+body[data-page="admin"] .admin-topbar-selected-avatar {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+body[data-page="admin"] {
+  background: #0b1120 !important;
+}
+[data-theme="dark"] body[data-page="admin"] {
+  background: #0b1120 !important;
+}
+
+/* Actual body background rule - higher specificity than app-v2.css's plain `body{}` !important rule */
+body[data-page="admin"] {
+  background: #0b1120 !important;
+}

@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="{{ asset('css/neumorphic-auth.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/theme-presets.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/nav-authenticated-green.css') }}?v={{ time() }}">
+        <link rel="stylesheet" href="{{ asset('css/dashboard2.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/mobile-nav-styles.css') }}?v={{ time() }}">
     <script>
         if (localStorage.getItem('theme') === 'dark') {
@@ -32,9 +33,15 @@
     $pageKey = $routeName ? explode('.', $routeName)[0] : '';
 @endphp
 <body data-page="{{ $pageKey }}" data-theme-style="{{ auth()->user()->theme_style ?? 'glass' }}"
+    data-sidebar-style="{{ auth()->user()->sidebar_style ?? 'rail' }}"
     data-mobile-nav-style="{{ auth()->user()->mobile_nav_style ?? 'floating_glow' }}" style="--user-accent: {{ auth()->user()->accent_color ?? '#38D9E8' }};">
     <div class="app-shell-flex">
-        @include('partials.nav-authenticated', ['active' => $pageKey])
+        @if((auth()->user()->sidebar_style ?? 'rail') === 'rail')
+        @include('partials.nav-rail', ['active' => $pageKey])
+        @else
+        @include('partials.nav-sidebar-classic', ['active' => $pageKey])
+        @endif
+        @include('partials.nav-mobile-bar', ['active' => $pageKey])
             <div class="auth-page-shell">
                 <div class="app-push-content auth-reveal-content" id="appPushContent">
                     @yield('content')

@@ -12,23 +12,35 @@
     <link rel="stylesheet" href="{{ asset('css/app-enhance.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/neumorphic-auth.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/theme-presets.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/dispute-ring.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/admin-shell.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/split-view.css') }}?v={{ time() }}">
     <script>
         if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
+        window.__adminNavStyle = localStorage.getItem('adminNavStyle') || 'sidebar';
     </script>
 </head>
 @php
     $routeName = request()->route() ? request()->route()->getName() : '';
 @endphp
-<body data-page="admin" data-theme-style="{{ auth()->user()->theme_style ?? 'glass' }}"
+<body data-page="admin" data-theme-style="{{ auth()->user()->theme_style ?? 'glass' }}" data-admin-nav="sidebar"
     style="--user-accent: {{ auth()->user()->accent_color ?? '#38D9E8' }};">
+    <script>document.body.setAttribute('data-admin-nav', window.__adminNavStyle);</script>
     @include('partials.nav-admin', ['activeRoute' => $routeName])
     <div class="admin-page-body">
         @yield('content')
     </div>
     <script>
         lucide.createIcons();
+        function toggleAdminNavStyle() {
+            const body = document.body;
+            const current = body.getAttribute('data-admin-nav');
+            const next = current === 'topbar' ? 'sidebar' : 'topbar';
+            body.setAttribute('data-admin-nav', next);
+            localStorage.setItem('adminNavStyle', next);
+        }
         function toggleTheme() {
             const html = document.documentElement;
             const isDark = html.getAttribute('data-theme') === 'dark';
@@ -36,6 +48,7 @@
             localStorage.setItem('theme', isDark ? 'light' : 'dark');
         }
     </script>
+    <script src="{{ asset('js/dispute-ring.js') }}?v={{ time() }}"></script>
     @yield('scripts')
 </body>
 </html>

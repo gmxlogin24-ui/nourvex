@@ -35,7 +35,7 @@ class GigPayoutService
 
         if ($worker->referred_by) {
             $referrer = User::where('id', $worker->referred_by)->lockForUpdate()->first();
-            if ($referrer) {
+            if ($referrer && !$referrer->wallet_restricted) {
                 $pct = in_array($referrer->tier, ['tier2', 'tier3'], true) ? 0.15 : 0;
                 $bonus = $payout * $pct;
                 if ($bonus > 0) {

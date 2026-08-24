@@ -1,0 +1,64 @@
+/* =====================================================================
+   DISPUTE RING — horizontal scroll-snap carousel where the centered
+   card scales up and glows. Built on top of .stat-card (not replacing
+   it) so it inherits whatever theme-style (glass/neumorphic/plain) and
+   light/dark mode the user already has set. Only transform + filter
+   are used for the highlight effect, since those are the only two
+   properties nothing else in app-v2.css fights over with !important.
+   ===================================================================== */
+
+.dispute-ring-container {
+  display: flex;
+  gap: var(--space-lg, 24px);
+  overflow-x: auto;
+  overflow-y: visible;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 40px 50vw 48px;
+  margin: 0 -1rem;
+  scrollbar-width: none;
+}
+.dispute-ring-container::-webkit-scrollbar { display: none; }
+
+.dispute-ring-card {
+  flex: 0 0 auto;
+  width: min(86vw, 400px);
+  scroll-snap-align: center;
+  transform: scale(0.86);
+  opacity: 0.55;
+  filter: saturate(0.85);
+  transition: transform 0.35s cubic-bezier(.22,1,.36,1),
+              opacity 0.35s ease,
+              filter 0.35s ease;
+  cursor: pointer;
+}
+
+.dispute-ring-card.is-active {
+  transform: scale(1.045);
+  opacity: 1;
+  filter: saturate(1) drop-shadow(0 0 26px color-mix(in srgb, var(--color-accent) 45%, transparent))
+                       drop-shadow(0 8px 20px rgba(0,0,0,0.18));
+}
+
+/* Small dot indicator row under the ring, one dot per card */
+.dispute-ring-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: -8px;
+  margin-bottom: 24px;
+}
+.dispute-ring-dot {
+  width: 7px; height: 7px;
+  border-radius: 999px;
+  background: var(--border-color);
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+.dispute-ring-dot.is-active {
+  background: var(--color-accent);
+  transform: scale(1.35);
+}
+
+@media (max-width: 480px) {
+  .dispute-ring-container { padding: 32px 8vw 40px; }
+}

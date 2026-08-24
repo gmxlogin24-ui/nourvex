@@ -172,6 +172,48 @@
                 </div>
             </div>
 
+            <div>
+                <p class="text-sm font-medium mb-2">Dock Style</p>
+                <p class="text-muted text-xs mb-3">Changes the look of the bottom navigation bar on mobile.</p>
+                <div class="grid grid-cols-3 gap-3">
+                    @foreach([
+                        'floating_glow' => ['label' => 'Floating Glow', 'desc' => 'Red glow, default'],
+                        'gradient_card' => ['label' => 'Gradient Card', 'desc' => 'Warm gradient'],
+                        'sidebar_accent' => ['label' => 'Sidebar Accent', 'desc' => 'Soft green'],
+                        'dark_ring' => ['label' => 'Dark Ring', 'desc' => 'Orange ring glow'],
+                        'white_pill_fab' => ['label' => 'White Pill', 'desc' => 'White dock, floating button'],
+                        'dark_floating_icons' => ['label' => 'Minimalist', 'desc' => 'Icon-only, no labels'],
+                    ] as $style => $meta)
+                    <label class="theme-style-option" style="cursor:pointer;">
+                        <input type="radio" name="mobile_nav_style" value="{{ $style }}" {{ ($user->mobile_nav_style ?? 'floating_glow') === $style ? 'checked' : '' }} class="dock-style-radio" style="display:none;" onchange="previewDockStyle('{{ $style }}')">
+                        <div class="theme-style-swatch" data-dock-swatch="{{ $style }}" style="border-radius:0.75rem;padding:0.75rem;text-align:center;border:2px solid {{ ($user->mobile_nav_style ?? 'floating_glow') === $style ? 'var(--color-accent)' : 'var(--border-color)' }};transition:border-color 0.2s;">
+                            <p class="text-sm font-medium">{{ $meta['label'] }}</p>
+                            <p class="text-muted text-xs mt-1">{{ $meta['desc'] }}</p>
+                        </div>
+                    </label>
+                    @endforeach
+                </div>
+            </div>
+
+            <div>
+                <p class="text-sm font-medium mb-2">Sidebar Style</p>
+                <p class="text-muted text-xs mb-3">Choose which sidebar design you see across the whole app.</p>
+                <div class="grid grid-cols-2 gap-3">
+                    @foreach([
+                        'rail' => ['label' => 'Rail (New)', 'desc' => 'Compact icon rail, neumorphic'],
+                        'classic' => ['label' => 'Classic', 'desc' => 'Original full sidebar'],
+                    ] as $style => $meta)
+                    <label class="theme-style-option" style="cursor:pointer;">
+                        <input type="radio" name="sidebar_style" value="{{ $style }}" {{ ($user->sidebar_style ?? 'rail') === $style ? 'checked' : '' }} class="sidebar-style-radio" style="display:none;" onchange="previewSidebarStyle('{{ $style }}')">
+                        <div class="theme-style-swatch" data-sidebar-swatch="{{ $style }}" style="border-radius:0.75rem;padding:0.75rem;text-align:center;border:2px solid {{ ($user->sidebar_style ?? 'rail') === $style ? 'var(--color-accent)' : 'var(--border-color)' }};transition:border-color 0.2s;">
+                            <p class="text-sm font-medium">{{ $meta['label'] }}</p>
+                            <p class="text-muted text-xs mt-1">{{ $meta['desc'] }}</p>
+                        </div>
+                    </label>
+                    @endforeach
+                </div>
+            </div>
+
             <button type="submit" class="btn-primary">Save Appearance</button>
         </form>
 
@@ -213,6 +255,30 @@
     document.addEventListener('DOMContentLoaded', function () {
         const checked = document.querySelector('.theme-style-radio:checked');
         if (checked) previewThemeStyle(checked.value);
+    });
+
+    // Same pattern as previewThemeStyle, for the mobile dock style picker.
+    function previewDockStyle(style) {
+        document.body.setAttribute('data-mobile-nav-style', style);
+        document.querySelectorAll('[data-dock-swatch]').forEach(el => {
+            el.style.borderColor = el.dataset.dockSwatch === style ? 'var(--color-accent)' : 'var(--border-color)';
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        const checkedDock = document.querySelector('.dock-style-radio:checked');
+        if (checkedDock) previewDockStyle(checkedDock.value);
+    });
+
+    // Same pattern as previewDockStyle, for the sidebar style picker.
+    function previewSidebarStyle(style) {
+        document.body.setAttribute('data-sidebar-style', style);
+        document.querySelectorAll('[data-sidebar-swatch]').forEach(el => {
+            el.style.borderColor = el.dataset.sidebarSwatch === style ? 'var(--color-accent)' : 'var(--border-color)';
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        const checkedSidebar = document.querySelector('.sidebar-style-radio:checked');
+        if (checkedSidebar) previewSidebarStyle(checkedSidebar.value);
     });
     </script>
 

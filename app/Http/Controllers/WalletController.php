@@ -46,6 +46,10 @@ class WalletController extends Controller
 
             $lockedRecipient = User::where('id', $recipient->id)->lockForUpdate()->first();
 
+            if ($lockedRecipient->wouldExceedNoBvnCap($validated['amount'])) {
+                return 'recipient_capped';
+            }
+
             $lockedSender->decrement('wallet_balance', $validated['amount']);
             $lockedRecipient->increment('wallet_balance', $validated['amount']);
 
@@ -72,6 +76,7 @@ class WalletController extends Controller
         return match ($result) {
             'restricted' => back()->withErrors(['amount' => 'Your wallet is restricted due to an unresolved payment issue.'])->withInput(),
             'insufficient' => back()->withErrors(['amount' => 'Insufficient wallet balance.'])->withInput(),
+            'recipient_capped' => back()->withErrors(['recipient_identifier' => 'This recipient has an unverified wallet and cannot receive that much right now.'])->withInput(),
             default => redirect()->route('wallet.index')->with('status', 'Sent ₦' . number_format($validated['amount']) . ' to ' . $recipient->name),
         };
     }
@@ -83,6 +88,9 @@ class WalletController extends Controller
         return view('wallet.index', [
             'balance' => $user->wallet_balance,
             'transactions' => Transaction::where('user_id', $user->id)->latest()->get(),
+            'hasPin' => $user->hasTransactionPin(),
+            'isVerified' => (bool) $user->virtual_account_number,
+            'walletCapRemaining' => $user->virtual_account_number ? null : max(0, \App\Models\User::NO_BVN_WALLET_CAP - $user->wallet_balance),
         ]);
     }
 

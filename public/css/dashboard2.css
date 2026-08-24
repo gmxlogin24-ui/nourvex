@@ -1,0 +1,777 @@
+.d2-page {
+    background: #e6e9ef;
+    border-radius: 28px;
+    padding: 18px;
+    margin: 12px auto;
+    max-width: 1200px;
+}
+.d2-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    grid-template-rows: 1fr 220px;
+    gap: 18px;
+    min-height: 620px;
+}
+.d2-card {
+    background: #e6e9ef;
+    border-radius: 32px;
+    box-shadow: 8px 8px 16px rgba(163,177,198,0.55), -8px -8px 16px rgba(255,255,255,0.85);
+}
+
+/* Main card (top) + leg merged into ONE real shape, drawn as a single SVG
+   <path> (see public/js/dashboard2-shape.js) instead of two divs faking a
+   merge. One fill, one drop-shadow filter, no seam possible because
+   there's nothing to seam. The path is rebuilt on load/resize from the
+   actual measured pixel size of the top/leg content, so it stays correct
+   at any width. small-card stays a normal separate card. */
+.d2-left-union {
+    grid-row: 1 / 3;
+    grid-column: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+.d2-union-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    filter: drop-shadow(6px 6px 10px rgba(163,177,198,0.5)) drop-shadow(-5px -5px 10px rgba(255,255,255,0.7));
+}
+body[data-theme="dark"] .d2-union-svg {
+    filter: drop-shadow(6px 6px 10px rgba(0,0,0,0.4)) drop-shadow(-5px -5px 10px rgba(255,255,255,0.03));
+}
+.d2-union-top-content {
+    flex: 2.4;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.d2-union-bottom-row {
+    flex: 1.6;
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+}
+.d2-union-leg-content {
+    flex: 0 0 55%;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+}
+/* Explicit + overflow:hidden so this can't visually clip square anywhere,
+   fixing the reported square bottom-right corner. */
+.d2-small-card {
+    flex: 1;
+    height: 92%;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 32px;
+    overflow: hidden;
+}
+.d2-quick-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3px;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+}
+.d2-quick-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--d2-quick-bg, #e6e9ef);
+    box-shadow: 3px 3px 6px rgba(163,177,198,0.5), -3px -3px 6px rgba(255,255,255,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #7a8296;
+    text-decoration: none;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.d2-quick-icon:hover {
+    transform: translateY(-2px);
+    color: #4a5266;
+}
+body[data-theme="dark"] .d2-quick-icon {
+    background: #1c2536;
+    box-shadow: 3px 3px 6px rgba(0,0,0,0.4), -3px -3px 6px rgba(255,255,255,0.03);
+    color: #8b93a8;
+}
+.d2-rail {
+    grid-row: 1 / 3;
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 18px 0;
+    gap: 22px;
+}
+.d2-rail-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #e6e9ef;
+    box-shadow: 4px 4px 8px rgba(163,177,198,0.55), -4px -4px 8px rgba(255,255,255,0.85);
+    flex-shrink: 0;
+}
+/* Real nav rail: avatar circle + icon links, styled to match this page's
+   neumorphic language. Active link uses the user's accent color, same
+   idea as the real sidebar's .active state. */
+.d2-rail-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #e6e9ef;
+    box-shadow: 4px 4px 8px rgba(163,177,198,0.55), -4px -4px 8px rgba(255,255,255,0.85);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-size: 15px;
+    font-weight: 600;
+    color: #555;
+}
+.d2-rail-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.d2-rail-link {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #e6e9ef;
+    box-shadow: 4px 4px 8px rgba(163,177,198,0.55), -4px -4px 8px rgba(255,255,255,0.85);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #7a8296;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+.d2-rail-link:hover {
+    color: #4a5266;
+}
+.d2-rail-link.active {
+    background: var(--user-accent, #38D9E8);
+    color: #fff;
+    box-shadow: inset 2px 2px 4px rgba(0,0,0,0.15), inset -2px -2px 4px rgba(255,255,255,0.15);
+}
+body[data-theme="dark"] .d2-rail-avatar,
+body[data-theme="dark"] .d2-rail-link {
+    background: #1c2536;
+    box-shadow: 4px 4px 8px rgba(0,0,0,0.4), -4px -4px 8px rgba(255,255,255,0.03);
+    color: #8b93a8;
+}
+body[data-theme="dark"] .d2-rail-link.active {
+    box-shadow: inset 2px 2px 4px rgba(0,0,0,0.3), inset -2px -2px 4px rgba(255,255,255,0.05);
+}
+
+/* Global sitewide rail sidebar (Phase B) — sticky flex sibling of .neu-sidebar,
+   toggled via body[data-sidebar-style]. Reuses .d2-rail-avatar/.d2-rail-link
+   so the look matches dashboard2's own original rail. */
+.d2-global-rail {
+    position: sticky;
+    top: 20px;
+    align-self: flex-start;
+    height: calc(100vh - 40px);
+    width: 84px;
+    flex-shrink: 0;
+    margin: 20px 0 20px 20px;
+    background: #e6e9ef;
+    border-radius: 28px;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+    box-shadow: 10px 10px 22px rgba(163,177,198,0.5), -8px -8px 18px rgba(255,255,255,0.7);
+    z-index: 10;
+}
+body[data-theme="dark"] .d2-global-rail {
+    background: #1c2536;
+    box-shadow: 10px 10px 22px rgba(0,0,0,0.4), -8px -8px 18px rgba(255,255,255,0.03);
+}
+@media (max-width: 900px) {
+    .d2-global-rail { display: none; }
+}
+body[data-sidebar-style="rail"] .neu-sidebar {
+    display: none;
+}
+.d2-rail-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 3px;
+    background: #c8cdd8;
+    box-shadow: inset 2px 2px 4px rgba(163,177,198,0.5), inset -2px -2px 4px rgba(255,255,255,0.7);
+    flex-shrink: 0;
+}
+.d2-rail-toggle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #e6e9ef;
+    box-shadow: inset 3px 3px 6px rgba(163,177,198,0.55), inset -3px -3px 6px rgba(255,255,255,0.85);
+    flex-shrink: 0;
+    margin: 6px 0;
+}
+.d2-main {
+    grid-row: 1;
+    grid-column: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+.d2-placeholder-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: #d3d8e2;
+    opacity: 0.7;
+}
+.d2-right-col {
+    grid-row: 1;
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.d2-right-header {
+    height: 40px;
+    border-radius: 20px;
+}
+.d2-right-stack {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+/* Each pill is its own card again (own radius + shadow) instead of one
+   flush block, then overlapped with negative margin so lower pills sit
+   partly on top of the one above - matching the fan-card's stacked look. */
+.d2-right-stack .d2-right-pill {
+    border-radius: 18px;
+    position: relative;
+}
+/* Shadow tinted to each card's OWN color instead of one shared light-gray
+   shadow. The gray card matches the page bg, so it keeps the embossed
+   dual shadow (dark+white highlight). The blue and black cards are far
+   from the page color, so a white highlight on them reads as a mismatched
+   glow - they get a shadow tinted to their own hue instead, and the black
+   card drops the highlight entirely in favor of a simple cast shadow
+   (it's meant to read as floating on top, not carved into the page). */
+.d2-right-stack .d2-right-pill:nth-child(1) {
+    box-shadow: 8px 8px 16px rgba(163,177,198,0.55), -8px -8px 16px rgba(255,255,255,0.85);
+}
+.d2-right-stack .d2-right-pill:nth-child(2) {
+    box-shadow: 8px 8px 16px rgba(90,150,200,0.4), -6px -6px 12px rgba(255,255,255,0.55);
+}
+.d2-right-stack .d2-right-pill:nth-child(3) {
+    box-shadow: 10px 10px 22px rgba(0,0,0,0.4);
+}
+.d2-right-stack .d2-right-pill:nth-child(1) { z-index: 1; }
+.d2-right-stack .d2-right-pill:nth-child(2) { z-index: 2; margin-top: -14px; }
+.d2-right-stack .d2-right-pill:nth-child(3) { z-index: 3; margin-top: -14px; }
+.d2-right-pill {
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0 16px;
+    gap: 2px;
+}
+.d2-pill-label {
+    font-size: 11px;
+    opacity: 0.65;
+    font-weight: 500;
+}
+.d2-pill-value {
+    font-size: 15px;
+    font-weight: 700;
+}
+/* Wallet stack: gray (back/bottom) -> light blue (middle) -> black (top/front).
+   Uses CSS variables so a later switch to glassy/flat cards only means
+   redefining these, not rewriting every rule. */
+.d2-right-pill:nth-child(1) {
+    height: 22%;
+    background: var(--d2-wallet-back, #dfe3ea);
+    color: var(--d2-wallet-back-text, #2c313d);
+}
+.d2-right-pill:nth-child(2) {
+    height: 30%;
+    background: var(--d2-wallet-mid, #d3ecfb);
+    color: var(--d2-wallet-mid-text, #2c313d);
+}
+.d2-right-pill:nth-child(3) {
+    height: 48%;
+    background: var(--d2-wallet-front, #14161b);
+    color: var(--d2-wallet-front-text, #ffffff);
+}
+body[data-theme="dark"] .d2-right-pill:nth-child(1) { background: #2a2f3a; color: #d8dce4; }
+body[data-theme="dark"] .d2-right-pill:nth-child(2) { background: #1e3a52; color: #d8ecfb; }
+body[data-theme="dark"] .d2-right-pill:nth-child(3) { background: #000000; color: #ffffff; }
+.d2-pill-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #c8cdd8;
+    box-shadow: inset 1px 1px 3px rgba(163,177,198,0.5), inset -1px -1px 3px rgba(255,255,255,0.7);
+    flex-shrink: 0;
+}
+.d2-list-card {
+    grid-row: 2;
+    grid-column: 2;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.d2-list-title-bar {
+    width: 45%;
+    height: 12px;
+    border-radius: 6px;
+    background: #d3d8e2;
+}
+.d2-list-rows {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    flex: 1;
+}
+.d2-list-row-bar {
+    height: 14px;
+    border-radius: 7px;
+    background: #dfe3ea;
+    box-shadow: inset 2px 2px 4px rgba(163,177,198,0.4), inset -2px -2px 4px rgba(255,255,255,0.6);
+}
+.d2-list-bottom-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.d2-list-bottom-bars .d2-list-row-bar { height: 8px; width: 60%; }
+.d2-fan-card {
+    grid-row: 2;
+    grid-column: 2;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.d2-fan-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.d2-fan-title-bar {
+    width: 55%;
+    height: 12px;
+    border-radius: 6px;
+    background: #d3d8e2;
+}
+.d2-fan-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #e6e9ef;
+    box-shadow: 3px 3px 6px rgba(163,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.85);
+}
+.d2-fan-stack {
+    position: relative;
+    flex: 1;
+}
+.d2-fan-stack .d2-card {
+    position: absolute;
+    width: 80%;
+    height: 70%;
+    border-radius: 16px;
+}
+.d2-fan-stack .d2-card:nth-child(1) { background: #dcdfe6; top: 0; left: 20%; transform: rotate(6deg); }
+.d2-fan-stack .d2-card:nth-child(2) { background: #e2e5eb; top: 6%; left: 10%; transform: rotate(-3deg); }
+.d2-fan-stack .d2-card:nth-child(3) { background: #eceef2; top: 12%; left: 0; transform: rotate(0deg); }
+
+@media (max-width: 768px) {
+    .d2-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+    }
+    .d2-right-col { grid-row: 2; grid-column: 1; }
+    .d2-main { grid-row: 1; grid-column: 1; min-height: 260px; }
+    .d2-list-card { grid-row: 3; grid-column: 1; }
+    .d2-fan-card { grid-row: 4; grid-column: 1; min-height: 200px; }
+}
+
+body[data-theme="dark"] .d2-page,
+body[data-theme="dark"] .d2-card,
+body[data-theme="dark"] .d2-rail-icon,
+body[data-theme="dark"] .d2-rail-toggle {
+    background: #1c2536;
+    box-shadow: 8px 8px 16px rgba(0,0,0,0.4), -8px -8px 16px rgba(255,255,255,0.03);
+}
+body[data-theme="dark"] .d2-placeholder-icon,
+body[data-theme="dark"] .d2-list-title-bar,
+body[data-theme="dark"] .d2-fan-title-bar { background: #2a3450; }
+body[data-theme="dark"] .d2-right-pill:nth-child(1) { background: #232d44; }
+body[data-theme="dark"] .d2-right-pill:nth-child(2) { background: #27324b; }
+body[data-theme="dark"] .d2-right-pill:nth-child(3) { background: #2d3852; }
+body[data-theme="dark"] .d2-fan-stack .d2-card:nth-child(1) { background: #232d44; }
+body[data-theme="dark"] .d2-fan-stack .d2-card:nth-child(2) { background: #27324b; }
+body[data-theme="dark"] .d2-fan-stack .d2-card:nth-child(3) { background: #2d3852; }
+
+/* Fix: .auth-page-shell has no flex-grow/width rule, so it shrinks to
+   content width. Other pages don't notice because their content is wide
+   enough to fill the row anyway. dashboard2's mobile-stacked content is
+   narrower, so it was shrinking the whole page. Scoped to this page only. */
+body[data-page="dashboard2"] .auth-page-shell {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    min-width: 0;
+}
+
+/* concave-gradient hack removed — was solving the wrong problem */
+
+/* ===== Money Flow: glowing liquid-fill bar ===== */
+.d2-flow-card {
+    background: #e6e9ef;
+    border-radius: 28px;
+    padding: 22px 26px;
+    margin: 18px auto 0;
+    max-width: 1200px;
+    box-shadow: 8px 8px 16px rgba(163,177,198,0.55), -8px -8px 16px rgba(255,255,255,0.85);
+}
+.d2-flow-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 14px;
+}
+.d2-flow-title {
+    font-weight: 700;
+    font-size: 15px;
+    color: #2c313d;
+}
+.d2-flow-value {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--user-accent, #38D9E8);
+}
+.d2-liquid-track {
+    position: relative;
+    width: 100%;
+    height: 18px;
+    border-radius: 999px;
+    background: #dde1e8;
+    box-shadow: inset 3px 3px 6px rgba(163,177,198,0.6), inset -3px -3px 6px rgba(255,255,255,0.7);
+    overflow: hidden;
+}
+.d2-liquid-fill {
+    position: relative;
+    height: 100%;
+    min-width: 18px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--user-accent, #38D9E8), #4f7bff);
+    box-shadow: 0 0 10px var(--user-accent, #38D9E8), 0 0 20px rgba(56,217,232,0.5);
+    animation: d2LiquidGlow 2.2s ease-in-out infinite alternate;
+    overflow: hidden;
+    transition: width 1s ease;
+}
+@keyframes d2LiquidGlow {
+    from { box-shadow: 0 0 6px var(--user-accent, #38D9E8), 0 0 14px rgba(56,217,232,0.35); }
+    to   { box-shadow: 0 0 14px var(--user-accent, #38D9E8), 0 0 28px rgba(56,217,232,0.6); }
+}
+.d2-liquid-shimmer {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 200%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+    animation: d2LiquidShimmer 2.4s linear infinite;
+}
+@keyframes d2LiquidShimmer {
+    from { transform: translateX(-50%); }
+    to   { transform: translateX(0%); }
+}
+.d2-flow-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #7a8296;
+}
+body[data-theme="dark"] .d2-flow-card {
+    background: #1c2536;
+    box-shadow: 8px 8px 16px rgba(0,0,0,0.4), -8px -8px 16px rgba(255,255,255,0.03);
+}
+body[data-theme="dark"] .d2-liquid-track {
+    background: #141a28;
+    box-shadow: inset 3px 3px 6px rgba(0,0,0,0.5), inset -3px -3px 6px rgba(255,255,255,0.04);
+}
+body[data-theme="dark"] .d2-flow-title { color: #e2e6ec; }
+body[data-theme="dark"] .d2-flow-meta { color: #8b93a8; }
+
+/* ===== Big card hero: greeting + glowing streak ring + CTA ===== */
+.d2-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+    padding: 20px;
+}
+.d2-hero-greeting {
+    font-size: 15px;
+    font-weight: 600;
+    color: #2c313d;
+    margin: 0;
+}
+.d2-hero-ring-wrap {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.d2-hero-ring {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+    filter: drop-shadow(0 0 8px rgba(56,217,232,0.5));
+}
+.d2-hero-ring-track {
+    fill: none;
+    stroke: #dde1e8;
+    stroke-width: 10;
+}
+.d2-hero-ring-fill {
+    fill: none;
+    stroke: url(#d2RingGrad);
+    stroke-width: 10;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s ease;
+    animation: d2RingPulse 2.2s ease-in-out infinite alternate;
+}
+@keyframes d2RingPulse {
+    from { filter: drop-shadow(0 0 4px rgba(56,217,232,0.4)); }
+    to   { filter: drop-shadow(0 0 12px rgba(56,217,232,0.75)); }
+}
+.d2-hero-ring-center {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.d2-hero-streak-num {
+    font-size: 30px;
+    font-weight: 800;
+    color: #2c313d;
+    line-height: 1;
+}
+.d2-hero-streak-label {
+    font-size: 11px;
+    color: #7a8296;
+    margin-top: 2px;
+}
+.d2-hero-milestone {
+    font-size: 12px;
+    color: #7a8296;
+    margin: 0;
+}
+.d2-hero-cta {
+    margin-top: 6px;
+    padding: 10px 22px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--user-accent, #38D9E8), #4f7bff);
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(56,217,232,0.4);
+    transition: transform 0.15s ease;
+}
+.d2-hero-cta:hover {
+    transform: translateY(-2px);
+}
+body[data-theme="dark"] .d2-hero-greeting,
+body[data-theme="dark"] .d2-hero-streak-num { color: #e2e6ec; }
+body[data-theme="dark"] .d2-hero-streak-label,
+body[data-theme="dark"] .d2-hero-milestone { color: #8b93a8; }
+body[data-theme="dark"] .d2-hero-ring-track { stroke: #1c2536; }
+
+/* ===== Big card: Top Hustle spotlight ===== */
+.d2-spotlight {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+    padding: 20px;
+}
+.d2-spotlight-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--user-accent, #38D9E8);
+}
+.d2-spotlight-orb {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 35% 30%, #2a3450, #14161b);
+    color: var(--user-accent, #38D9E8);
+    box-shadow: 0 0 20px rgba(56,217,232,0.4), 8px 8px 16px rgba(163,177,198,0.5), -8px -8px 16px rgba(255,255,255,0.8);
+    margin: 6px 0;
+}
+.d2-spotlight-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #2c313d;
+    margin: 0;
+    max-width: 240px;
+}
+.d2-spotlight-amount {
+    font-size: 15px;
+    font-weight: 600;
+    color: #4a5266;
+    margin: 0;
+}
+.d2-spotlight-cta {
+    margin-top: 6px;
+    padding: 10px 24px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--user-accent, #38D9E8), #4f7bff);
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(56,217,232,0.4);
+    transition: transform 0.15s ease;
+}
+.d2-spotlight-cta:hover { transform: translateY(-2px); }
+body[data-theme="dark"] .d2-spotlight-title { color: #e2e6ec; }
+body[data-theme="dark"] .d2-spotlight-amount { color: #b0b8c8; }
+
+/* ===== Small leg card: compact streak/greeting widget ===== */
+.d2-mini-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+.d2-mini-greeting {
+    font-size: 12px;
+    font-weight: 600;
+    color: #2c313d;
+    margin: 0;
+}
+.d2-mini-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.d2-mini-ring-wrap {
+    position: relative;
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.d2-mini-ring {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+.d2-mini-ring-track { fill: none; stroke: #dde1e8; stroke-width: 6; }
+.d2-mini-ring-fill {
+    fill: none;
+    stroke: var(--user-accent, #38D9E8);
+    stroke-width: 6;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s ease;
+}
+.d2-mini-ring-center { position: absolute; }
+.d2-mini-streak-num { font-size: 13px; font-weight: 800; color: #2c313d; }
+.d2-mini-cta {
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--user-accent, #38D9E8), #4f7bff);
+    color: #fff;
+    font-weight: 600;
+    font-size: 11px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+body[data-theme="dark"] .d2-mini-greeting,
+body[data-theme="dark"] .d2-mini-streak-num { color: #e2e6ec; }
+body[data-theme="dark"] .d2-mini-ring-track { stroke: #1c2536; }
+
+/* ===== Spotlight enrichment: category, description, poster, browse-all ===== */
+.d2-spotlight-category {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--user-accent, #38D9E8);
+    background: rgba(56,217,232,0.12);
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-top: -2px;
+}
+.d2-spotlight-desc {
+    font-size: 12px;
+    color: #7a8296;
+    margin: 0;
+    max-width: 260px;
+    line-height: 1.4;
+}
+.d2-spotlight-poster {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #7a8296;
+    margin-top: -2px;
+}
+.d2-spotlight-poster-avatar {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #dde1e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-size: 9px;
+    font-weight: 700;
+    color: #4a5266;
+    flex-shrink: 0;
+}
+.d2-spotlight-poster-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.d2-spotlight-browse-all {
+    font-size: 11px;
+    color: #7a8296;
+    text-decoration: underline;
+    margin-top: 2px;
+}
+body[data-theme="dark"] .d2-spotlight-desc,
+body[data-theme="dark"] .d2-spotlight-poster,
+body[data-theme="dark"] .d2-spotlight-browse-all { color: #8b93a8; }
