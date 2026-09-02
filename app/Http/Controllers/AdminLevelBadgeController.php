@@ -172,8 +172,8 @@ class AdminLevelBadgeController extends Controller
         if (count($result['new_badges']) > 0) {
             $message .= count($result['new_badges']) . ' new badge(s) earned. ';
         }
-        if ($result['leveled_up']) {
-            $message .= 'User leveled up to ' . $result['leveled_up']->name . '!';
+        if ($result['level_up'] && $result['level']) {
+            $message .= 'User leveled up to ' . $result['level']->name . '!';
         }
 
         return back()->with('success', $message);
