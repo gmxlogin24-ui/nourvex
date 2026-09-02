@@ -6,23 +6,11 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Swapped: route('dashboard') now shows the new dashboard2 design.
-        // The old classic dashboard is still reachable at route('dashboard2').
         return view('dashboard2', $this->getData());
-    }
-
-    public function dashboard2()
-    {
-        return view('dashboard', $this->getData());
     }
 
     protected function getData()
     {
-        // FIX: $weekStart was used below (leaderboard rank query) but was
-        // never defined in the original /dashboard closure - would throw an
-        // undefined-variable error for any user with leaderboard_opt_in=true.
-        // Defaulting to start of the current calendar week - flag if you meant
-        // something else (rolling 7 days, etc).
         $weekStart = now()->startOfWeek();
 
         $gigs = \App\Models\Gig::leftJoin('gig_views', function ($join) {
@@ -71,15 +59,12 @@ class DashboardController extends Controller
         $avgRating = \App\Models\Review::where('reviewed_user_id', $userId)->avg('rating');
         $reviewCount = \App\Models\Review::where('reviewed_user_id', $userId)->count();
 
-        // Streak milestones
         $streakMilestones = [7, 30, 100, 365];
         $nextStreakMilestone = collect($streakMilestones)->first(fn($m) => $m > (auth()->user()->streak_days ?? 0));
 
-        // Referral earnings (tier2/3) or upsell (tier1/free)
         $referralEarnings = \App\Models\Transaction::where('user_id', $userId)->where('type', 'referral_bonus')->sum('amount');
         $canEarnReferralBonus = in_array(auth()->user()->tier, ['tier2', 'tier3'], true);
 
-        // Leaderboard rank this week
         $leaderboardRank = null;
         if (auth()->user()->leaderboard_opt_in) {
             $rankedUsers = \App\Models\Transaction::where('transactions.created_at', '>=', $weekStart)
@@ -98,10 +83,11 @@ class DashboardController extends Controller
 
         $currentSubscription = \App\Models\Subscription::currentFor(auth()->user());
 
-
         return [
             'user' => auth()->user(),
             'balance' => auth()->user()->wallet_balance,
+            'qCoinBalance' => auth()->user()->q_coin_balance,
+            'qCoinClaimedToday' => auth()->user()->q_coin_last_claim_date === now()->toDateString(),
             'currentSubscription' => $currentSubscription,
             'earnings' => $earnings,
             'todayFeed' => $todayFeed,

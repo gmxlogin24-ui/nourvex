@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="{{ asset('css/balance-ledger.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/neumorphic-auth.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/theme-presets.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/glass-dashboard.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/profile-glass.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/nav-authenticated-green.css') }}?v={{ time() }}">
         <link rel="stylesheet" href="{{ asset('css/dashboard2.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/mobile-nav-styles.css') }}?v={{ time() }}">
@@ -27,6 +29,18 @@
             document.documentElement.setAttribute('data-sidebar', 'collapsed');
         }
     </script>
+    <style>
+    @media (max-width: 900px) {
+      .neu-sidebar { display: none !important; }
+      .d2-global-rail { display: none !important; }
+    }
+    @media (min-width: 901px) {
+      .mnav-bar { display: none !important; }
+    }
+    @media (max-width: 900px) {
+      .auth-page-shell, .app-push-content { margin-left: 0 !important; }
+    }
+    </style>
 </head>
 @php
     $routeName = request()->route() ? request()->route()->getName() : '';
@@ -44,6 +58,12 @@
         @include('partials.nav-mobile-bar', ['active' => $pageKey])
             <div class="auth-page-shell">
                 <div class="app-push-content auth-reveal-content" id="appPushContent">
+                    @unless(($pageKey ?? '') === 'dashboard')
+                        @include('partials.nav-icons')
+                        @unless(($pageKey ?? '') === 'dashboard')
+                            @include('partials.levi-bubble')
+                        @endunless
+                    @endunless
                     @yield('content')
                 </div>
             </div>
@@ -89,5 +109,6 @@
         }
     </script>
     @yield('scripts')
+<script src="{{ asset('js/levi.js') }}"></script>
 </body>
 </html>

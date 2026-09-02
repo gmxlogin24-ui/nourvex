@@ -181,3 +181,4 @@ body[data-mobile-nav-style="dark_floating_icons"] .mnav-item{ color:#7a7a7a; }
 body[data-mobile-nav-style="dark_floating_icons"] .mnav-item.active{ color:#fff; }
 body[data-mobile-nav-style="dark_floating_icons"] .mnav-label{ display:none; }
 body[data-mobile-nav-style="dark_floating_icons"] .mnav-fab{ display:none; }
+body[data-theme-style] { background: red !important; }

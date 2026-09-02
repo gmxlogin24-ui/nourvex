@@ -94,7 +94,10 @@ Route::get('/marketplace/{listing}', [MarketplaceController::class, 'show'])->na
 Route::middleware(['auth', 'signup.paid'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/dashboard2', [DashboardController::class, 'dashboard2'])->name('dashboard2');
+    Route::get('/q-coin', [\App\Http\Controllers\QCoinController::class, 'index'])->name('qcoin.index');
+    Route::post('/q-coin/claim', [\App\Http\Controllers\QCoinController::class, 'claim'])->name('qcoin.claim');
+    Route::post('/concierge/message', [\App\Http\Controllers\ConciergeController::class, 'sendMessage'])->name('concierge.message');
+    Route::get('/concierge', [\App\Http\Controllers\ConciergeController::class, 'show'])->name('concierge.show');
 
 
     Route::post('/gigs/{gig}/complete', [GigController::class, 'complete'])->name('gigs.complete');
@@ -213,6 +216,9 @@ Route::middleware(['auth', 'signup.paid'])->group(function () {
 Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::get('/profile/reputation', [ProfileController::class, 'reputation'])->name('profile.reputation');
+    Route::get('/profile/account', [ProfileController::class, 'account'])->name('profile.account');
+    Route::get('/profile/appearance', [ProfileController::class, 'appearance'])->name('profile.appearance');
 
     Route::get('/vendor/activate', function () { return view('auth.vendor-activate'); })->name('vendor.activate');
     Route::post('/vendor/pay', [FlutterwaveController::class, 'initiateVendor'])->name('vendor.pay');
@@ -284,4 +290,39 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings/appearance', function () {
         return view('settings.appearance');
     })->name('appearance.edit');
+});
+
+// Level & Badge routes
+Route::middleware(['auth', 'signup.paid'])->group(function () {
+    Route::prefix('levels-badges')->name('levels-badges.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\LevelBadgeController::class, 'show'])->name('show');
+        Route::get('/badges', [\App\Http\Controllers\LevelBadgeController::class, 'badges'])->name('badges');
+        Route::get('/levels', [\App\Http\Controllers\LevelBadgeController::class, 'levels'])->name('levels');
+    });
+});
+
+// Admin Level & Badge Management Routes
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Levels
+    Route::prefix('levels')->name('levels.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\AdminLevelBadgeController::class, 'levels'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\AdminLevelBadgeController::class, 'createLevel'])->name('create');
+        Route::post('/', [\App\Http\Controllers\AdminLevelBadgeController::class, 'storeLevel'])->name('store');
+        Route::get('/{level}/edit', [\App\Http\Controllers\AdminLevelBadgeController::class, 'editLevel'])->name('edit');
+        Route::put('/{level}', [\App\Http\Controllers\AdminLevelBadgeController::class, 'updateLevel'])->name('update');
+        Route::delete('/{level}', [\App\Http\Controllers\AdminLevelBadgeController::class, 'deleteLevel'])->name('destroy');
+    });
+
+    // Badges
+    Route::prefix('badges')->name('badges.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\AdminLevelBadgeController::class, 'badges'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\AdminLevelBadgeController::class, 'createBadge'])->name('create');
+        Route::post('/', [\App\Http\Controllers\AdminLevelBadgeController::class, 'storeBadge'])->name('store');
+        Route::get('/{badge}/edit', [\App\Http\Controllers\AdminLevelBadgeController::class, 'editBadge'])->name('edit');
+        Route::put('/{badge}', [\App\Http\Controllers\AdminLevelBadgeController::class, 'updateBadge'])->name('update');
+        Route::delete('/{badge}', [\App\Http\Controllers\AdminLevelBadgeController::class, 'deleteBadge'])->name('destroy');
+    });
+
+    // Refresh user levels/badges
+    Route::post('/users/{user}/refresh-badges', [\App\Http\Controllers\AdminLevelBadgeController::class, 'refreshUser'])->name('users.refresh-badges');
 });

@@ -2,6 +2,11 @@
 
 return [
 
+    'anthropic' => [
+        'api_key' => env('ANTHROPIC_API_KEY'),
+        'model' => env('ANTHROPIC_MODEL', 'claude-sonnet-5'),
+    ],
+
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),

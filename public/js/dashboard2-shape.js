@@ -9,7 +9,7 @@
         return document.body.dataset.theme === 'dark';
     }
     function fillColor() {
-        return isDark() ? '#1c2536' : '#e6e9ef';
+        return isDark() ? '#1c2536' : '#f6f9fd';
     }
 
     // topW/totalH = full outer box. topH = height of the top piece.

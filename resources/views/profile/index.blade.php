@@ -1,305 +1,152 @@
 @extends('layouts.app-authenticated')
 @section('content')
 
-
-<main class="max-w-2xl mx-auto p-6">
+<main class="profile-shell p-6">
     <h1 class="text-2xl font-semibold mb-1 hoverfade-text">Profile</h1>
     <p class="text-muted text-sm mb-6">Manage your account details</p>
 
     @if (session('status'))
     <div class="bg-green-500/10 text-green-500 text-sm rounded-lg p-3 mb-4">{{ session('status') }}</div>
     @endif
-    @if ($errors->any())
-    <div class="bg-red-500/10 text-red-500 text-sm rounded-lg p-3 mb-4">{{ $errors->first() }}</div>
-    @endif
 
-    <div class="glass-card p-6 mb-6 reveal-on-scroll">
-        <div class="flex items-center gap-4">
-            <div class="relative">
-                <div class="w-16 h-16 rounded-full bg-card flex items-center justify-center text-xl font-semibold overflow-hidden" id="avatarPreviewWrap" data-face-cursor>
+    <div class="profile-home-grid">
+
+        <div class="profile-hero-card reveal-on-scroll"
+            @if($user->avatar_url) style="--hero-photo: url('{{ $user->avatar_url }}')" @endif>
+            <div class="profile-hero-top">
+                <div class="profile-hero-avatar">
                     @if($user->avatar_url)
-                    <img src="{{ $user->avatar_url }}" id="avatarPreview" class="w-full h-full object-cover">
+                    <img src="{{ $user->avatar_url }}">
                     @else
-                    <span id="avatarPreview">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                    <span>{{ strtoupper(substr($user->name, 0, 1)) }}</span>
                     @endif
                 </div>
-                <label for="avatarInput" class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer" style="background:var(--color-accent);">
-                    <i data-lucide="camera" class="w-3 h-3 text-white"></i>
-                </label>
-            </div>
-            <div>
-                <p class="font-semibold">{{ $user->name }} <span class="merchant-badge">Merchant</span></p>
-                <p class="text-muted text-sm">{{ $user->tier === 'tier1' ? 'Plus' : ($user->tier === 'tier2' ? 'Pro' : strtoupper($user->tier)) }}
-                    @if($user->is_verified_seller) · <span class="text-accent">Verified</span> @endif
+                <p class="profile-hero-name">{{ $user->name }} <span class="merchant-badge">Merchant</span></p>
+                <a href="{{ route('levels-badges.show') }}" class="block mt-2 mb-1 p-3 rounded-lg bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-semibold flex items-center gap-1.5">
+                            <i data-lucide="award" class="w-4 h-4 text-blue-500"></i>
+                            {{ $currentLevel?->name ?? 'Unranked' }}
+                        </span>
+                        <span class="text-xs text-muted flex items-center gap-1">
+                            {{ $totalBadgesEarned }} badges <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                        </span>
+                    </div>
+                    @if($earnedBadges->count())
+                    <div class="flex gap-2">
+                        @foreach($earnedBadges as $badge)
+                        <span class="w-7 h-7 rounded-full bg-blue-500/10 flex items-center justify-center" title="{{ $badge->name }}">
+                            <i data-lucide="{{ $badge->icon ?? 'award' }}" class="w-3.5 h-3.5 text-blue-600"></i>
+                        </span>
+                        @endforeach
+                    </div>
+                    @else
+                    <p class="text-xs text-muted">Complete activities to earn your first badge</p>
+                    @endif
+                </a>
+                <p class="profile-hero-tier">
+                    {{ $user->tier === 'tier1' ? 'Plus' : ($user->tier === 'tier2' ? 'Pro' : strtoupper($user->tier)) }}
+                    @if($user->is_verified_seller) · Verified @endif
                 </p>
-                <p class="text-muted text-xs mt-1">Referral code: {{ $user->referral_code }}</p>
+                <p class="profile-hero-ref">Referral code: {{ $user->referral_code }}</p>
             </div>
-        </div>
-    </div>
 
-    <div class="glass-card p-6 mb-6 reveal-on-scroll" id="repCard">
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="font-semibold">Reputation</h2>
-            <span class="trust-pill" style="gap:0.4rem;">
-                <i data-lucide="{{ $workerLevel['icon'] }}" class="w-4 h-4" style="color:var(--color-accent);"></i>
-                <span class="font-semibold text-sm">{{ $workerLevel['label'] }}</span>
-                @if($user->badge_tier === 'bronze')
-                <span class="member-badge member-badge-bronze"><i data-lucide="medal"></i> Bronze Member</span>
-                @endif
-                @if($user->tier === 'tier3')
-                <span class="member-badge member-badge-gold"><i data-lucide="crown"></i> Premium</span>
-                @endif
-            </span>
-        </div>
-        <div class="grid grid-cols-3 gap-3 text-center">
-            <div>
-                <p class="text-xl font-bold">{{ $completedGigsCount }}</p>
-                <p class="text-muted text-xs">Jobs Completed</p>
+            <div class="profile-hero-stats">
+                <div>
+                    <p class="profile-hero-stat-val">{{ $completedGigsCount }}</p>
+                    <p class="profile-hero-stat-lbl"><i data-lucide="briefcase" class="w-3.5 h-3.5"></i> Jobs</p>
+                </div>
+                <div>
+                    <p class="profile-hero-stat-val">
+                        @if($averageRating)<i data-lucide="star" class="w-3.5 h-3.5" style="fill:#fbbf24;color:#fbbf24;"></i> {{ $averageRating }}@else —@endif
+                    </p>
+                    <p class="profile-hero-stat-lbl">Rating</p>
+                </div>
+                <div>
+                    <p class="profile-hero-stat-val">{{ $reviewsReceivedCount }}</p>
+                    <p class="profile-hero-stat-lbl"><i data-lucide="medal" class="w-3.5 h-3.5"></i> Reviews</p>
+                </div>
             </div>
-            <div>
-                <p class="text-xl font-bold flex items-center justify-center gap-1">
-                    @if($averageRating)<i data-lucide="star" class="w-4 h-4" style="color:#fbbf24;fill:#fbbf24;"></i>{{ $averageRating }}@else —@endif
-                </p>
-                <p class="text-muted text-xs">Avg Rating</p>
-            </div>
-            <div>
-                <p class="text-xl font-bold">{{ $reviewsReceivedCount }}</p>
-                <p class="text-muted text-xs">Reviews</p>
+
+            <div class="profile-hero-curve" aria-hidden="true">
+                <svg viewBox="0 0 400 60" preserveAspectRatio="none"><path d="M0,60 C100,0 300,0 400,60 L400,60 L0,60 Z"></path></svg>
             </div>
         </div>
-    </div>
-    <div class="glass-card p-6 mb-6 reveal-on-scroll" id="quickLinksCard">
-        <h2 class="font-semibold mb-4">Quick Links</h2>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <a href="{{ route('wallet.index') }}" class="flex flex-col items-center gap-2 p-3 rounded-xl text-center text-sm" style="background:var(--color-card);">
-                <i data-lucide="wallet" class="w-5 h-5"></i> Wallet
+
+        <div class="glass-card profile-tile-grid reveal-on-scroll" style="overflow:hidden;">
+            <a href="{{ route('profile.reputation') }}" class="profile-list-row">
+                <span class="profile-list-row-icon"><i data-lucide="star" class="w-4 h-4"></i></span>
+                <span class="profile-list-row-text">
+                    <span class="profile-list-row-title">Reputation</span>
+                    <span class="profile-list-row-sub">Jobs completed, rating, reviews</span>
+                </span>
+                <i data-lucide="chevron-right" class="w-4 h-4 profile-list-row-chevron"></i>
             </a>
-            <a href="{{ route('referrals.index') }}" class="flex flex-col items-center gap-2 p-3 rounded-xl text-center text-sm" style="background:var(--color-card);">
-                <i data-lucide="users" class="w-5 h-5"></i> Referrals
+            <a href="{{ route('profile.account') }}" class="profile-list-row">
+                <span class="profile-list-row-icon"><i data-lucide="user" class="w-4 h-4"></i></span>
+                <span class="profile-list-row-text">
+                    <span class="profile-list-row-title">Account Details</span>
+                    <span class="profile-list-row-sub">Name, email, password</span>
+                </span>
+                <i data-lucide="chevron-right" class="w-4 h-4 profile-list-row-chevron"></i>
             </a>
-            <a href="{{ route('subscriptions.index') }}" class="flex flex-col items-center gap-2 p-3 rounded-xl text-center text-sm" style="background:var(--color-card);">
-                <i class="ph-fill ph-crown" style="font-size:1.1rem;"></i> Upgrade
+            <a href="{{ route('profile.appearance') }}" class="profile-list-row">
+                <span class="profile-list-row-icon"><i data-lucide="palette" class="w-4 h-4"></i></span>
+                <span class="profile-list-row-text">
+                    <span class="profile-list-row-title">Appearance</span>
+                    <span class="profile-list-row-sub">Theme, accent color, dock, sidebar, dark mode</span>
+                </span>
+                <i data-lucide="chevron-right" class="w-4 h-4 profile-list-row-chevron"></i>
             </a>
-            <a href="{{ route('money-tracker.index') }}" class="flex flex-col items-center gap-2 p-3 rounded-xl text-center text-sm" style="background:var(--color-card);">
-                <i data-lucide="line-chart" class="w-5 h-5"></i> Money Tracker
+            <a href="{{ route('wallet.index') }}" class="profile-list-row">
+                <span class="profile-list-row-icon"><i data-lucide="wallet" class="w-4 h-4"></i></span>
+                <span class="profile-list-row-text"><span class="profile-list-row-title">Wallet</span></span>
+                <i data-lucide="chevron-right" class="w-4 h-4 profile-list-row-chevron"></i>
             </a>
-            <a href="{{ route('posts.index') }}" class="flex flex-col items-center gap-2 p-3 rounded-xl text-center text-sm" style="background:var(--color-card);">
-                <i data-lucide="file-text" class="w-5 h-5"></i> My Posts
+            <a href="{{ route('referrals.index') }}" class="profile-list-row">
+                <span class="profile-list-row-icon"><i data-lucide="users" class="w-4 h-4"></i></span>
+                <span class="profile-list-row-text"><span class="profile-list-row-title">Referrals</span></span>
+                <i data-lucide="chevron-right" class="w-4 h-4 profile-list-row-chevron"></i>
             </a>
-            <a href="{{ route('leaderboard.index') }}" class="flex flex-col items-center gap-2 p-3 rounded-xl text-center text-sm" style="background:var(--color-card);">
-                <i data-lucide="trophy" class="w-5 h-5"></i> Leaderboard
+            <a href="{{ route('subscriptions.index') }}" class="profile-list-row">
+                <span class="profile-list-row-icon"><i class="ph-fill ph-crown"></i></span>
+                <span class="profile-list-row-text"><span class="profile-list-row-title">Upgrade</span></span>
+                <i data-lucide="chevron-right" class="w-4 h-4 profile-list-row-chevron"></i>
             </a>
-            <a href="{{ route('services.index') }}" class="flex flex-col items-center gap-2 p-3 rounded-xl text-center text-sm" style="background:var(--color-card);">
-                <i data-lucide="lightbulb" class="w-5 h-5"></i> Services
+            <a href="{{ route('money-tracker.index') }}" class="profile-list-row">
+                <span class="profile-list-row-icon"><i data-lucide="line-chart" class="w-4 h-4"></i></span>
+                <span class="profile-list-row-text"><span class="profile-list-row-title">Money Tracker</span></span>
+                <i data-lucide="chevron-right" class="w-4 h-4 profile-list-row-chevron"></i>
             </a>
-            <a href="{{ route('pulse.index') }}" class="flex flex-col items-center gap-2 p-3 rounded-xl text-center text-sm" style="background:var(--color-card);">
-                <i data-lucide="zap" class="w-5 h-5"></i> Pulse
+            <a href="{{ route('posts.index') }}" class="profile-list-row">
+                <span class="profile-list-row-icon"><i data-lucide="file-text" class="w-4 h-4"></i></span>
+                <span class="profile-list-row-text"><span class="profile-list-row-title">My Posts</span></span>
+                <i data-lucide="chevron-right" class="w-4 h-4 profile-list-row-chevron"></i>
+            </a>
+            <a href="{{ route('leaderboard.index') }}" class="profile-list-row">
+                <span class="profile-list-row-icon"><i data-lucide="trophy" class="w-4 h-4"></i></span>
+                <span class="profile-list-row-text"><span class="profile-list-row-title">Leaderboard</span></span>
+                <i data-lucide="chevron-right" class="w-4 h-4 profile-list-row-chevron"></i>
+            </a>
+            <a href="{{ route('services.index') }}" class="profile-list-row">
+                <span class="profile-list-row-icon"><i data-lucide="lightbulb" class="w-4 h-4"></i></span>
+                <span class="profile-list-row-text"><span class="profile-list-row-title">Services</span></span>
+                <i data-lucide="chevron-right" class="w-4 h-4 profile-list-row-chevron"></i>
+            </a>
+            <a href="{{ route('pulse.index') }}" class="profile-list-row">
+                <span class="profile-list-row-icon"><i data-lucide="zap" class="w-4 h-4"></i></span>
+                <span class="profile-list-row-text"><span class="profile-list-row-title">Pulse</span></span>
+                <i data-lucide="chevron-right" class="w-4 h-4 profile-list-row-chevron"></i>
             </a>
             @if($user->is_admin ?? false)
-            <a href="{{ route('admin.index') }}" class="flex flex-col items-center gap-2 p-3 rounded-xl text-center text-sm" style="background:var(--color-card);">
-                <i data-lucide="shield" class="w-5 h-5"></i> Admin
+            <a href="{{ route('admin.index') }}" class="profile-list-row">
+                <span class="profile-list-row-icon"><i data-lucide="shield" class="w-4 h-4"></i></span>
+                <span class="profile-list-row-text"><span class="profile-list-row-title">Admin</span></span>
+                <i data-lucide="chevron-right" class="w-4 h-4 profile-list-row-chevron"></i>
             </a>
             @endif
         </div>
-    </div>
-    <div class="glass-card p-6 mb-6 reveal-on-scroll">
-        <h2 class="font-semibold mb-4">Account Details</h2>
-        <form method="POST" action="{{ route('profile.update') }}" class="space-y-4">
-            @csrf
-            <div>
-                <label class="text-sm text-muted">Name</label>
-                <input type="text" name="name" value="{{ old('name', $user->name) }}" required class="input-field !mt-1">
-            </div>
-            <div>
-                <label class="text-sm text-muted">Email</label>
-                <input type="email" name="email" value="{{ old('email', $user->email) }}" required class="input-field !mt-1">
-            </div>
-            <button type="submit" class="btn-primary">Save Changes</button>
-        </form>
-    </div>
 
-    <div class="glass-card p-6 mb-6 reveal-on-scroll">
-        <h2 class="font-semibold mb-4">Appearance</h2>
-
-        <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data" class="space-y-5">
-            @csrf
-            <input type="hidden" name="name" value="{{ $user->name }}">
-            <input type="hidden" name="email" value="{{ $user->email }}">
-
-            <div>
-                <p class="text-sm font-medium mb-1">Profile Picture</p>
-                <input type="file" name="avatar" id="avatarInput" accept="image/*" class="input-field !mt-1" onchange="previewImage(this, 'avatarPreview', true)">
-            </div>
-
-            <div>
-                <p class="text-sm font-medium mb-1">Personal Background</p>
-                <p class="text-muted text-xs mb-2">This replaces the default background across the whole site, just for you.</p>
-                @if($user->background_url)
-                <img src="{{ $user->background_url }}" class="w-full h-28 object-cover rounded-xl mb-2">
-                @endif
-                <input type="file" name="background" accept="image/*" class="input-field !mt-1">
-            </div>
-
-            <div>
-                <p class="text-sm font-medium mb-2">Theme Style</p>
-                <p class="text-muted text-xs mb-3">Changes how every card and button looks across the whole app.</p>
-                <div class="grid grid-cols-3 gap-3">
-                    @foreach([
-                        'glass' => ['label' => 'Glass', 'desc' => 'Frosted, translucent'],
-                        'neumorphic' => ['label' => 'Neumorphic', 'desc' => 'Soft, embossed'],
-                        'plain' => ['label' => 'Minimal', 'desc' => 'Flat, no shadows'],
-                    ] as $style => $meta)
-                    <label class="theme-style-option" style="cursor:pointer;">
-                        <input type="radio" name="theme_style" value="{{ $style }}" {{ ($user->theme_style ?? 'glass') === $style ? 'checked' : '' }} class="theme-style-radio" style="display:none;" onchange="previewThemeStyle('{{ $style }}')">
-                        <div class="theme-style-swatch theme-style-swatch-{{ $style }}" data-style-swatch="{{ $style }}" style="border-radius:0.75rem;padding:0.75rem;text-align:center;border:2px solid var(--border-color);transition:border-color 0.2s;">
-                            <p class="text-sm font-medium">{{ $meta['label'] }}</p>
-                            <p class="text-muted text-xs mt-1">{{ $meta['desc'] }}</p>
-                        </div>
-                    </label>
-                    @endforeach
-                </div>
-            </div>
-
-            <div>
-                <p class="text-sm font-medium mb-2">Accent Color</p>
-                <div class="flex items-center gap-3 flex-wrap">
-                    <input type="color" name="accent_color" id="accentColorInput" value="{{ $user->accent_color ?? '#38D9E8' }}" style="width:3rem;height:2.6rem;border-radius:0.75rem;border:1px solid var(--border-color);background:none;cursor:pointer;">
-                    <div class="flex gap-2">
-                        @foreach(['#38D9E8','#F472B6','#A78BFA','#FB923C','#4ADE80','#F43F5E'] as $swatch)
-                        <button type="button" onclick="document.getElementById('accentColorInput').value='{{ $swatch }}'; document.getElementById('accentColorInput').dispatchEvent(new Event('input'));" class="w-7 h-7 rounded-full" style="background:{{ $swatch }};border:2px solid var(--border-color);"></button>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <p class="text-sm font-medium mb-2">Dock Style</p>
-                <p class="text-muted text-xs mb-3">Changes the look of the bottom navigation bar on mobile.</p>
-                <div class="grid grid-cols-3 gap-3">
-                    @foreach([
-                        'floating_glow' => ['label' => 'Floating Glow', 'desc' => 'Red glow, default'],
-                        'gradient_card' => ['label' => 'Gradient Card', 'desc' => 'Warm gradient'],
-                        'sidebar_accent' => ['label' => 'Sidebar Accent', 'desc' => 'Soft green'],
-                        'dark_ring' => ['label' => 'Dark Ring', 'desc' => 'Orange ring glow'],
-                        'white_pill_fab' => ['label' => 'White Pill', 'desc' => 'White dock, floating button'],
-                        'dark_floating_icons' => ['label' => 'Minimalist', 'desc' => 'Icon-only, no labels'],
-                    ] as $style => $meta)
-                    <label class="theme-style-option" style="cursor:pointer;">
-                        <input type="radio" name="mobile_nav_style" value="{{ $style }}" {{ ($user->mobile_nav_style ?? 'floating_glow') === $style ? 'checked' : '' }} class="dock-style-radio" style="display:none;" onchange="previewDockStyle('{{ $style }}')">
-                        <div class="theme-style-swatch" data-dock-swatch="{{ $style }}" style="border-radius:0.75rem;padding:0.75rem;text-align:center;border:2px solid {{ ($user->mobile_nav_style ?? 'floating_glow') === $style ? 'var(--color-accent)' : 'var(--border-color)' }};transition:border-color 0.2s;">
-                            <p class="text-sm font-medium">{{ $meta['label'] }}</p>
-                            <p class="text-muted text-xs mt-1">{{ $meta['desc'] }}</p>
-                        </div>
-                    </label>
-                    @endforeach
-                </div>
-            </div>
-
-            <div>
-                <p class="text-sm font-medium mb-2">Sidebar Style</p>
-                <p class="text-muted text-xs mb-3">Choose which sidebar design you see across the whole app.</p>
-                <div class="grid grid-cols-2 gap-3">
-                    @foreach([
-                        'rail' => ['label' => 'Rail (New)', 'desc' => 'Compact icon rail, neumorphic'],
-                        'classic' => ['label' => 'Classic', 'desc' => 'Original full sidebar'],
-                    ] as $style => $meta)
-                    <label class="theme-style-option" style="cursor:pointer;">
-                        <input type="radio" name="sidebar_style" value="{{ $style }}" {{ ($user->sidebar_style ?? 'rail') === $style ? 'checked' : '' }} class="sidebar-style-radio" style="display:none;" onchange="previewSidebarStyle('{{ $style }}')">
-                        <div class="theme-style-swatch" data-sidebar-swatch="{{ $style }}" style="border-radius:0.75rem;padding:0.75rem;text-align:center;border:2px solid {{ ($user->sidebar_style ?? 'rail') === $style ? 'var(--color-accent)' : 'var(--border-color)' }};transition:border-color 0.2s;">
-                            <p class="text-sm font-medium">{{ $meta['label'] }}</p>
-                            <p class="text-muted text-xs mt-1">{{ $meta['desc'] }}</p>
-                        </div>
-                    </label>
-                    @endforeach
-                </div>
-            </div>
-
-            <button type="submit" class="btn-primary">Save Appearance</button>
-        </form>
-
-        <div class="flex items-center justify-between mt-5 pt-5" style="border-top:1px solid var(--border-color);">
-            <div>
-                <p class="text-sm font-medium">Dark Mode</p>
-                <p class="text-muted text-xs mt-1">Switch between light and dark</p>
-            </div>
-            <button onclick="toggleTheme()" class="theme-toggle"><i data-lucide="sun-moon" class="w-4 h-4"></i></button>
-        </div>
-    </div>
-
-    <script>
-    function previewImage(input, targetId, isAvatar) {
-        if (!input.files || !input.files[0]) return;
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const wrap = document.getElementById('avatarPreviewWrap');
-            if (isAvatar && wrap) {
-                wrap.innerHTML = '<img src="' + e.target.result + '" id="avatarPreview" class="w-full h-full object-cover">';
-            }
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
-    document.getElementById('accentColorInput')?.addEventListener('input', function () {
-        document.body.style.setProperty('--user-accent', this.value);
-    });
-
-    // Live-preview a theme style immediately on selection, before saving -
-    // sets the same [data-theme-style] attribute the CSS presets key off of,
-    // and highlights the chosen swatch. Reverts to the saved value if the
-    // form isn't submitted (next page load re-renders from the DB anyway).
-    function previewThemeStyle(style) {
-        document.body.setAttribute('data-theme-style', style);
-        document.querySelectorAll('[data-style-swatch]').forEach(el => {
-            el.style.borderColor = el.dataset.styleSwatch === style ? 'var(--color-accent)' : 'var(--border-color)';
-        });
-    }
-    document.addEventListener('DOMContentLoaded', function () {
-        const checked = document.querySelector('.theme-style-radio:checked');
-        if (checked) previewThemeStyle(checked.value);
-    });
-
-    // Same pattern as previewThemeStyle, for the mobile dock style picker.
-    function previewDockStyle(style) {
-        document.body.setAttribute('data-mobile-nav-style', style);
-        document.querySelectorAll('[data-dock-swatch]').forEach(el => {
-            el.style.borderColor = el.dataset.dockSwatch === style ? 'var(--color-accent)' : 'var(--border-color)';
-        });
-    }
-    document.addEventListener('DOMContentLoaded', function () {
-        const checkedDock = document.querySelector('.dock-style-radio:checked');
-        if (checkedDock) previewDockStyle(checkedDock.value);
-    });
-
-    // Same pattern as previewDockStyle, for the sidebar style picker.
-    function previewSidebarStyle(style) {
-        document.body.setAttribute('data-sidebar-style', style);
-        document.querySelectorAll('[data-sidebar-swatch]').forEach(el => {
-            el.style.borderColor = el.dataset.sidebarSwatch === style ? 'var(--color-accent)' : 'var(--border-color)';
-        });
-    }
-    document.addEventListener('DOMContentLoaded', function () {
-        const checkedSidebar = document.querySelector('.sidebar-style-radio:checked');
-        if (checkedSidebar) previewSidebarStyle(checkedSidebar.value);
-    });
-    </script>
-
-    <div class="glass-card p-6">
-        <h2 class="font-semibold mb-4">Change Password</h2>
-        <form method="POST" action="{{ route('profile.password') }}" class="space-y-4">
-            @csrf
-            <div>
-                <label class="text-sm text-muted">Current Password</label>
-                <input type="password" name="current_password" required class="input-field !mt-1">
-            </div>
-            <div>
-                <label class="text-sm text-muted">New Password</label>
-                <input type="password" name="password" required class="input-field !mt-1">
-            </div>
-            <div>
-                <label class="text-sm text-muted">Confirm New Password</label>
-                <input type="password" name="password_confirmation" required class="input-field !mt-1">
-            </div>
-            <button type="submit" class="btn-primary">Update Password</button>
-        </form>
     </div>
 </main>
 @endsection

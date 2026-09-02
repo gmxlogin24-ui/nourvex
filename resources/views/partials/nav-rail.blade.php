@@ -13,6 +13,7 @@
     <a href="{{ route('gigs.index') }}" class="d2-rail-link {{ ($active ?? '') == 'gigs' ? 'active' : '' }}" title="Hustles"><i data-lucide="briefcase" class="w-4 h-4"></i></a>
     <a href="{{ route('marketplace.index') }}" class="d2-rail-link {{ ($active ?? '') == 'marketplace' ? 'active' : '' }}" title="Market"><i data-lucide="shopping-bag" class="w-4 h-4"></i></a>
     <a href="{{ route('profile.index') }}" class="d2-rail-link {{ ($active ?? '') == 'profile' ? 'active' : '' }}" title="Profile"><i data-lucide="user-circle" class="w-4 h-4"></i></a>
+    <a href="{{ route('levels-badges.show') }}" class="d2-rail-link {{ ($active ?? '') == 'levels-badges' ? 'active' : '' }}" title="Levels &amp; Badges"><i data-lucide="award" class="w-4 h-4"></i></a>
     @if($navRailIsAdmin)
     <a href="{{ route('admin.index') }}" class="d2-rail-link {{ ($active ?? '') == 'admin' ? 'active' : '' }}" title="Admin"><i data-lucide="shield" class="w-4 h-4"></i></a>
     @endif

@@ -27,3 +27,6 @@ Homestead.yaml
 Thumbs.db
 database/*.sqlite
 database/*.sqlite-journal
+_qcheck/
+*.bak*
+page_check.html

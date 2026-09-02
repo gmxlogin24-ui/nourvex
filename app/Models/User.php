@@ -10,21 +10,46 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
+use App\Events\TierUpgraded;
 
 #[Fillable([
     'name', 'email', 'password', 'gender', 'spoken_language', 'avatar_url', 'background_url', 'accent_color',
-    'referral_code', 'referred_by', 'wallet_balance',
+    'referral_code', 'referred_by', 'wallet_balance', 'q_coin_balance', 'q_coin_last_claim_date',
     'tier', 'tier_upgraded_at', 'is_verified_seller',
     'virtual_account_number', 'virtual_account_bank', 'virtual_account_ref',
     'account_type', 'business_name', 'business_logo', 'business_whatsapp', 'is_vendor_active', 'interests',
-    'streak_days', 'last_active_date', 'leaderboard_opt_in', 'wallet_restricted', 'google_id', 'transaction_pin', 'theme_style', 'mobile_nav_style', 'sidebar_style',
-    'is_admin', 'role',
+    'streak_days', 'last_active_date', 'leaderboard_opt_in', 'q_coin_streak_days', 'wallet_restricted', 'google_id', 'transaction_pin', 'theme_style', 'mobile_nav_style', 'sidebar_style',
+    'is_admin', 'role', 'level_id',
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'transaction_pin' => 'hashed',
+            'interests' => 'array',
+            'is_admin' => 'boolean',
+            'leaderboard_opt_in' => 'boolean',
+            'wallet_restricted' => 'boolean',
+            'is_vendor_active' => 'boolean',
+            'tier_upgraded_at' => 'datetime',
+        ];
+    }
+
+    protected static function booted(): void
+    {
+        static::updated(function (User $user) {
+            if ($user->wasChanged('tier')) {
+                event(new TierUpgraded($user, $user->getOriginal('tier'), $user->tier));
+            }
+        });
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -39,6 +64,24 @@ class User extends Authenticatable
     public function favoriteListings()
     {
         return $this->belongsToMany(Listing::class, 'listing_favorites')->withTimestamps();
+    }
+
+    /**
+     * User's level relationship
+     */
+    public function level()
+    {
+        return $this->belongsTo(Level::class);
+    }
+
+    /**
+     * User's badges relationship
+     */
+    public function badges()
+    {
+        return $this->belongsToMany(Badge::class, 'user_badges')
+            ->withPivot('earned_at')
+            ->withTimestamps();
     }
 
     public function averageRatingReceived(): ?float
@@ -91,19 +134,17 @@ class User extends Authenticatable
 
     public function hasTransactionPin(): bool
     {
-        return !is_null($this->transaction_pin);
+        return !empty($this->transaction_pin);
     }
 
     public function verifyTransactionPin(string $pin): bool
     {
-        return $this->hasTransactionPin() && Hash::check($pin, $this->transaction_pin);
+        return Hash::check($pin, $this->transaction_pin ?? '');
     }
 
-    // Role-based access, alongside legacy is_admin (kept for backward compatibility).
-    // 'role' is the source of truth going forward: 'user' | 'customer_care' | 'admin'.
     public function isAdmin(): bool
     {
-        return $this->role === 'admin' || $this->is_admin;
+        return $this->is_admin || $this->role === 'admin';
     }
 
     public function isCustomerCare(): bool
@@ -113,16 +154,6 @@ class User extends Authenticatable
 
     public function isCustomerCareOrAdmin(): bool
     {
-        return $this->isCustomerCare() || $this->isAdmin();
-    }
-
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'transaction_pin' => 'hashed',
-            'interests' => 'array',
-        ];
+        return $this->isAdmin() || $this->isCustomerCare();
     }
 }

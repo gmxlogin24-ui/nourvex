@@ -1,0 +1,243 @@
+/* =====================================================================
+   GLASS THEME — DASHBOARD REDESIGN
+   Scoped to body[data-theme-style="glass"][data-page="dashboard"] only.
+   Built from --user-accent (already wired on <body> in
+   app-authenticated.blade.php) — no photo background. A photo-background
+   option can be added later as an opt-in on the profile page; this is
+   the default gradient-only look.
+   ===================================================================== */
+
+/* ---- Page gradient background, derived from the user's accent color ---- */
+body[data-theme-style="glass"][data-page="dashboard"] {
+    background:
+        radial-gradient(circle at 15% 0%, color-mix(in srgb, var(--user-accent, #38D9E8) 22%, transparent), transparent 55%),
+        radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--user-accent, #38D9E8) 16%, transparent), transparent 60%),
+        linear-gradient(160deg, #f4f7fb 0%, #e9edf5 55%, #eef2f8 100%);
+    background-attachment: fixed;
+}
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] {
+    background:
+        radial-gradient(circle at 15% 0%, color-mix(in srgb, var(--user-accent, #38D9E8) 30%, transparent), transparent 55%),
+        radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--user-accent, #38D9E8) 20%, transparent), transparent 60%),
+        linear-gradient(160deg, #0b0d14 0%, #10131c 55%, #0d0f17 100%);
+    background-attachment: fixed;
+}
+
+/* .d2-page currently hardcodes a solid bg (#eef2f8) — that has to go
+   transparent here or none of the blur below has anything real to blur. */
+body[data-theme-style="glass"][data-page="dashboard"] .d2-page {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* =====================================================================
+   THE CORE GLASS CARD TREATMENT — reused by every surface below.
+   Double outline = a crisp 1px outer border + a soft 1px inner hairline
+   half a pixel in, so the edge reads as two fine lines instead of one.
+   The sheen is a diagonal light streak baked in with ::before, angled
+   so it always looks like light hitting glass from the upper-left.
+   ===================================================================== */
+body[data-theme-style="glass"][data-page="dashboard"] .d2-card,
+body[data-theme-style="glass"][data-page="dashboard"] .d2-flow-card,
+body[data-theme-style="glass"][data-page="dashboard"] .d2-topbar-icon-btn,
+body[data-theme-style="glass"][data-page="dashboard"] .d2-topbar-avatar,
+body[data-theme-style="glass"][data-page="dashboard"] .d2-topbar-wallet,
+body[data-theme-style="glass"][data-page="dashboard"] .d2-search,
+body[data-theme-style="glass"][data-page="dashboard"] .d2-side-col .d2-profile-card,
+body[data-theme-style="glass"][data-page="dashboard"] .d2-profile-card-v2,
+body[data-theme-style="glass"][data-page="dashboard"] .d2-small-card,
+body[data-theme-style="glass"][data-page="dashboard"] .d2-global-rail,
+body[data-theme-style="glass"][data-page="dashboard"] .d2-rail-avatar,
+body[data-theme-style="glass"][data-page="dashboard"] .d2-rail-link,
+body[data-theme-style="glass"][data-page="dashboard"] .d2-quick-icon {
+    position: relative;
+    background: linear-gradient(135deg, rgba(255,255,255,0.42), rgba(255,255,255,0.10)) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid rgba(255,255,255,0.55) !important;
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.6) inset,
+        0 0 0 1px rgba(255,255,255,0.14) inset,
+        0 14px 34px rgba(20,30,60,0.14) !important;
+    overflow: hidden;
+}
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] .d2-card,
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] .d2-flow-card,
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] .d2-topbar-icon-btn,
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] .d2-topbar-avatar,
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] .d2-topbar-wallet,
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] .d2-search,
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] .d2-side-col .d2-profile-card,
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] .d2-profile-card-v2,
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] .d2-small-card,
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] .d2-global-rail,
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] .d2-rail-avatar,
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] .d2-rail-link,
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] .d2-quick-icon {
+    background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02)) !important;
+    border: 1px solid rgba(255,255,255,0.14) !important;
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.08) inset,
+        0 0 0 1px rgba(255,255,255,0.05) inset,
+        0 14px 34px rgba(0,0,0,0.45) !important;
+}
+
+/* The sheen streak — a soft diagonal band of light, not a hard shine.
+   ::before so it never interferes with real content (which is in the
+   normal content layer above it via z-index on children if needed). */
+body[data-theme-style="glass"][data-page="dashboard"] .d2-card::before,
+body[data-theme-style="glass"][data-page="dashboard"] .d2-flow-card::before,
+body[data-theme-style="glass"][data-page="dashboard"] .d2-profile-card-v2::before,
+body[data-theme-style="glass"][data-page="dashboard"] .d2-side-col .d2-profile-card::before {
+    content: '';
+    position: absolute;
+    top: -60%;
+    left: -20%;
+    width: 60%;
+    height: 220%;
+    background: linear-gradient(120deg, rgba(255,255,255,0.35), rgba(255,255,255,0) 70%);
+    transform: rotate(20deg);
+    pointer-events: none;
+    z-index: 0;
+}
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] .d2-card::before,
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] .d2-flow-card::before,
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] .d2-profile-card-v2::before,
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] .d2-side-col .d2-profile-card::before {
+    background: linear-gradient(120deg, rgba(255,255,255,0.08), rgba(255,255,255,0) 70%);
+}
+
+/* Keep real content above the sheen layer */
+body[data-theme-style="glass"][data-page="dashboard"] .d2-card > *,
+body[data-theme-style="glass"][data-page="dashboard"] .d2-flow-card > *,
+body[data-theme-style="glass"][data-page="dashboard"] .d2-profile-card-v2 > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* =====================================================================
+   THE UNION-SHAPE SPOTLIGHT CARD — the one JS draws as a single SVG
+   path (dashboard2-shape.js). Its fill is set inline via JS
+   (fillColor() returns a solid hex). For glass we override that with a
+   semi-transparent fill + backdrop-filter directly on the <svg>, so the
+   same concave-fillet silhouette becomes real frosted glass instead of
+   a flat color. No JS change needed — this is pure CSS override.
+   ===================================================================== */
+body[data-theme-style="glass"][data-page="dashboard"] .d2-union-svg path {
+    fill: rgba(255,255,255,0.22) !important;
+}
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] .d2-union-svg path {
+    fill: rgba(255,255,255,0.06) !important;
+}
+body[data-theme-style="glass"][data-page="dashboard"] .d2-union-svg {
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    filter:
+        drop-shadow(0 1px 0 rgba(255,255,255,0.5))
+        drop-shadow(0 14px 30px rgba(20,30,60,0.16)) !important;
+}
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] .d2-union-svg {
+    filter:
+        drop-shadow(0 1px 0 rgba(255,255,255,0.06))
+        drop-shadow(0 14px 30px rgba(0,0,0,0.5)) !important;
+}
+/* NOTE: backdrop-filter on an <svg> element has inconsistent support
+   across engines. If the union card doesn't visibly blur what's behind
+   it after this loads, tell me and I'll swap this for a clip-path div
+   overlay instead (same look, works everywhere) — that needs one small
+   JS addition to mirror the path into a CSS clip-path, so I held off
+   until we confirm it's actually needed. */
+
+/* =====================================================================
+   STAT ROW — liquid-fill cards get a lighter glass treatment so the
+   colored fill bars stay the visual focus, not competing with a heavy
+   frosted card underneath them.
+   ===================================================================== */
+body[data-theme-style="glass"][data-page="dashboard"] .d2-stat-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.38), rgba(255,255,255,0.08)) !important;
+    backdrop-filter: blur(16px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+    border: 1px solid rgba(255,255,255,0.5) !important;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.5) inset, 0 8px 22px rgba(20,30,60,0.10) !important;
+}
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] .d2-stat-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 8px 22px rgba(0,0,0,0.35) !important;
+}
+
+/* =====================================================================
+   QUICK ACTIONS — glass pill treatment, accent-tinted on hover instead
+   of the flat colored backgrounds the neumorphic version implies.
+   ===================================================================== */
+body[data-theme-style="glass"][data-page="dashboard"] .d2-qa-item {
+    background: linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.08)) !important;
+    backdrop-filter: blur(14px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(160%) !important;
+    border: 1px solid rgba(255,255,255,0.5) !important;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.5) inset, 0 6px 16px rgba(20,30,60,0.10) !important;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+body[data-theme-style="glass"][data-page="dashboard"] .d2-qa-item:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--user-accent, #38D9E8) 55%, rgba(255,255,255,0.5)) !important;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.5) inset, 0 10px 24px rgba(20,30,60,0.16) !important;
+}
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] .d2-qa-item {
+    background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+}
+
+/* Icon chip inside each quick-action — small glossy accent orb instead
+   of a flat color swatch */
+body[data-theme-style="glass"][data-page="dashboard"] .d2-qa-icon {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--user-accent, #38D9E8) 70%, white), color-mix(in srgb, var(--user-accent, #38D9E8) 40%, white)) !important;
+    box-shadow: 0 4px 10px color-mix(in srgb, var(--user-accent, #38D9E8) 35%, transparent) !important;
+}
+
+/* =====================================================================
+   PHOTO BACKGROUND — swap gradient-only for a real photo + tinted
+   overlay, so the glass blur actually has something visible to blur.
+   --d2-bg-photo is a variable so swapping to the user's own uploaded
+   photo later is a one-line change, not a rewrite of this block.
+   ===================================================================== */
+body[data-theme-style="glass"][data-page="dashboard"] {
+    --d2-bg-photo: url('https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=1600&q=80');
+    background-image:
+        linear-gradient(160deg, color-mix(in srgb, var(--user-accent, #38D9E8) 20%, rgba(244,247,251,0.55)), rgba(238,242,248,0.7)),
+        var(--d2-bg-photo);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+body[data-theme-style="glass"][data-theme="dark"][data-page="dashboard"] {
+    background-image:
+        linear-gradient(160deg, color-mix(in srgb, var(--user-accent, #38D9E8) 26%, rgba(10,12,20,0.72)), rgba(8,10,16,0.82)),
+        var(--d2-bg-photo);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+/* =====================================================================
+   STAT ROW — simplified to 3 clean equal cards. The 3rd card's
+   "Success Rate: Coming soon" half added visual clutter and a phantom
+   divider with no real data behind it yet — hidden until that feature
+   ships. Q Coin Balance now fills the full card instead of half.
+   ===================================================================== */
+.d2-stat-split-divider,
+.d2-stat-placeholder {
+    display: none !important;
+}
+.d2-stat-split-half:not(.d2-stat-placeholder) {
+    width: 100% !important;
+}
+.d2-stat-row {
+    display: flex !important;
+    width: 100% !important;
+    gap: 12px !important;
+}
+.d2-stat-row > * {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+}

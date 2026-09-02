@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\LevelBadgeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -9,9 +10,14 @@ use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
+    public function __construct(protected LevelBadgeService $levelBadgeService) {}
+
     public function index()
     {
         $user = Auth::user();
+
+        $result = $this->levelBadgeService->refresh($user);
+        $earnedBadges = $user->badges()->get();
 
         return view('profile.index', [
             'user' => $user,
@@ -19,7 +25,33 @@ class ProfileController extends Controller
             'completedGigsCount' => $user->completedGigsCount(),
             'averageRating' => $user->averageRatingReceived(),
             'reviewsReceivedCount' => $user->reviewsReceivedCount(),
+            'currentLevel' => $result['level'],
+            'earnedBadges' => $earnedBadges->take(6),
+            'totalBadgesEarned' => $earnedBadges->count(),
         ]);
+    }
+
+    public function reputation()
+    {
+        $user = Auth::user();
+
+        return view('profile.reputation', [
+            'user' => $user,
+            'workerLevel' => $user->workerLevel(),
+            'completedGigsCount' => $user->completedGigsCount(),
+            'averageRating' => $user->averageRatingReceived(),
+            'reviewsReceivedCount' => $user->reviewsReceivedCount(),
+        ]);
+    }
+
+    public function account()
+    {
+        return view('profile.account', ['user' => Auth::user()]);
+    }
+
+    public function appearance()
+    {
+        return view('profile.appearance', ['user' => Auth::user()]);
     }
 
     public function update(Request $request)
