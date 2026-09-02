@@ -47,7 +47,8 @@ class DashboardController extends Controller
             ->groupBy('type')
             ->pluck('total', 'type');
 
-        $userInterests = $user_interests = auth()->user()->interests ?? [];
+        $userInterests = auth()->user()->interests;
+        $userInterests = is_array($userInterests) ? $userInterests : [];
         $feedGigs = \App\Models\Gig::where('status', 'open')
             ->when(count($userInterests) > 0, fn($q) => $q->whereIn('category', $userInterests))
             ->latest()->take(4)->get()->map(fn($g) => ['type' => 'gig', 'title' => $g->title, 'meta' => '₦' . number_format($g->amount), 'url' => route('gigs.show', $g->id), 'time' => $g->created_at]);
