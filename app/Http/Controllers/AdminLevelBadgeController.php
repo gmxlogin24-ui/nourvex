@@ -9,11 +9,6 @@ use Illuminate\Support\Facades\DB;
 
 class AdminLevelBadgeController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('admin');
-    }
-
     /**
      * List all levels
      */
