@@ -2,15 +2,7 @@
 @if ($level->exists) @method('PUT') @endif
 
 <div class="space-y-6">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div>
-            <label for="key" class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                <i data-lucide="key" class="w-4 h-4"></i> Key
-            </label>
-            <input type="text" name="key" id="key" required value="{{ old('key', $level->key) }}" placeholder="contributor"
-                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
-            @error('key') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-        </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
             <label for="name" class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <i data-lucide="tag" class="w-4 h-4"></i> Name
@@ -20,56 +12,20 @@
             @error('name') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
         </div>
         <div>
-            <label for="level_number" class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                <i data-lucide="hash" class="w-4 h-4"></i> Level Number
+            <label for="rank" class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <i data-lucide="hash" class="w-4 h-4"></i> Rank (higher = further along)
             </label>
-            <input type="number" name="level_number" id="level_number" required min="1" value="{{ old('level_number', $level->level_number) }}"
+            <input type="number" name="rank" id="rank" required min="1" value="{{ old('rank', $level->rank) }}"
                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
-            @error('level_number') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+            @error('rank') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
         </div>
     </div>
 
-    <div>
-        <label for="description" class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            <i data-lucide="align-left" class="w-4 h-4"></i> Description
-        </label>
-        <textarea name="description" id="description" rows="2"
-                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">{{ old('description', $level->description) }}</textarea>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-            <label for="icon" class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                <i data-lucide="sparkles" class="w-4 h-4"></i> Lucide Icon Name
-            </label>
-            <div class="flex gap-2">
-                <input type="text" name="icon" id="icon" required value="{{ old('icon', $level->icon ?? 'star') }}"
-                       class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
-                <div class="px-4 flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg" id="iconPreview">
-                    <i data-lucide="{{ old('icon', $level->icon ?? 'star') }}" class="w-6 h-6 text-blue-600"></i>
-                </div>
-            </div>
-            @error('icon') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-        </div>
-        <div>
-            <label for="color" class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                <i data-lucide="palette" class="w-4 h-4"></i> Accent Colour
-            </label>
-            <select name="color" id="color" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
-                @foreach (['slate','blue','emerald','violet','amber','rose','cyan','teal','indigo'] as $c)
-                <option value="{{ $c }}" @selected(old('color', $level->color ?? 'blue') === $c)>{{ ucfirst($c) }}</option>
-                @endforeach
-            </select>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         @foreach ([
             ['min_q_coins', 'Min Q Coins Earned', 'coins'],
             ['min_gigs_completed', 'Min Gigs Completed', 'briefcase'],
-            ['min_sales', 'Min Marketplace Sales', 'store'],
             ['min_referrals', 'Min Referrals', 'user-plus'],
-            ['min_account_age_days', 'Min Account Age (days)', 'calendar-days'],
         ] as [$field, $label, $icon])
         <div>
             <label for="{{ $field }}" class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -80,6 +36,15 @@
             @error($field) <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
         </div>
         @endforeach
+    </div>
+
+    <div>
+        <label for="benefits_text" class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <i data-lucide="list" class="w-4 h-4"></i> Benefits (one per line)
+        </label>
+        <textarea name="benefits_text" id="benefits_text" rows="4" placeholder="Priority support&#10;Lower fees&#10;Custom badge"
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">{{ old('benefits_text', $level->benefits ? implode("\n", $level->benefits) : '') }}</textarea>
+        @error('benefits') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
     </div>
 
     <label class="flex items-center">
@@ -105,11 +70,3 @@
         </a>
     </div>
 </div>
-
-<script>
-document.getElementById('icon').addEventListener('input', function () {
-    document.getElementById('iconPreview').innerHTML =
-        '<i data-lucide="' + (this.value || 'star') + '" class="w-6 h-6 text-blue-600"></i>';
-    if (window.lucide) window.lucide.createIcons();
-});
-</script>

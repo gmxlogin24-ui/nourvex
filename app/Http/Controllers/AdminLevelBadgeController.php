@@ -19,7 +19,7 @@ class AdminLevelBadgeController extends Controller
      */
     public function levels()
     {
-        $levels = Level::orderBy('rank')->get();
+        $levels = Level::withCount('users')->orderBy('rank')->get();
         return view('admin.levels.index', ['pageKey' => 'admin-levels', 'levels' => $levels]);
     }
 
@@ -36,6 +36,8 @@ class AdminLevelBadgeController extends Controller
      */
     public function storeLevel(Request $request)
     {
+        $request->merge(['benefits' => $this->parseBenefits($request->input('benefits_text'))]);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:levels',
             'rank' => 'required|integer|unique:levels',
@@ -64,6 +66,8 @@ class AdminLevelBadgeController extends Controller
      */
     public function updateLevel(Request $request, Level $level)
     {
+        $request->merge(['benefits' => $this->parseBenefits($request->input('benefits_text'))]);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:levels,name,' . $level->id,
             'rank' => 'required|integer|unique:levels,rank,' . $level->id,
@@ -93,8 +97,21 @@ class AdminLevelBadgeController extends Controller
      */
     public function badges()
     {
-        $badges = Badge::orderBy('name')->get();
+        $badges = Badge::withCount('users')->orderBy('name')->get();
         return view('admin.badges.index', ['pageKey' => 'admin-badges', 'badges' => $badges]);
+    }
+
+    protected function parseBenefits(?string $text): array
+    {
+        if (! $text) {
+            return [];
+        }
+
+        return collect(explode("\n", $text))
+            ->map(fn ($line) => trim($line))
+            ->filter()
+            ->values()
+            ->all();
     }
 
     /**

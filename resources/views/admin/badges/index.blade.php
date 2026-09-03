@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-admin')
 
 @section('content')
 <div class="container mx-auto px-4 py-6">
@@ -27,7 +27,6 @@
                     <th class="px-6 py-3">Key</th>
                     <th class="px-6 py-3">Criteria</th>
                     <th class="px-6 py-3">Target</th>
-                    <th class="px-6 py-3">Reward</th>
                     <th class="px-6 py-3">Holders</th>
                     <th class="px-6 py-3">Status</th>
                     <th class="px-6 py-3">Actions</th>
@@ -36,14 +35,13 @@
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                 @forelse ($badges as $badge)
                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <td class="px-6 py-4"><i data-lucide="{{ $badge->icon }}" class="w-5 h-5 text-amber-600"></i></td>
+                    <td class="px-6 py-4"><i data-lucide="{{ $badge->icon ?? 'award' }}" class="w-5 h-5 text-amber-600"></i></td>
                     <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">{{ $badge->name }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                         <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-gray-700 dark:text-gray-300">{{ $badge->key }}</code>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">{{ $badge->criteriaLabel() }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ number_format($badge->criteria_value) }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">{{ number_format($badge->q_coin_reward) }} Q</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">{{ $badge->users_count }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         @if ($badge->is_active)
@@ -73,7 +71,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="9" class="px-6 py-8 text-center text-gray-600 dark:text-gray-400">
+                    <td colspan="8" class="px-6 py-8 text-center text-gray-600 dark:text-gray-400">
                         No badges yet. <a href="{{ route('admin.badges.create') }}" class="text-blue-600">Create one</a>
                     </td>
                 </tr>

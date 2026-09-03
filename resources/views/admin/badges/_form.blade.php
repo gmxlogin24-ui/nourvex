@@ -32,35 +32,22 @@
         @error('description') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-            <label for="icon" class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                <i data-lucide="sparkles" class="w-4 h-4"></i> Lucide Icon Name
-            </label>
-            <div class="flex gap-2">
-                <input type="text" name="icon" id="icon" required value="{{ old('icon', $badge->icon ?? 'award') }}" placeholder="award"
-                       class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
-                <div class="px-4 flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg" id="iconPreview">
-                    <i data-lucide="{{ old('icon', $badge->icon ?? 'award') }}" class="w-6 h-6 text-amber-600"></i>
-                </div>
+    <div>
+        <label for="icon" class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <i data-lucide="sparkles" class="w-4 h-4"></i> Lucide Icon Name
+        </label>
+        <div class="flex gap-2">
+            <input type="text" name="icon" id="icon" value="{{ old('icon', $badge->icon ?? 'award') }}" placeholder="award"
+                   class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
+            <div class="px-4 flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg" id="iconPreview">
+                <i data-lucide="{{ old('icon', $badge->icon ?? 'award') }}" class="w-6 h-6 text-amber-600"></i>
             </div>
-            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Name only, e.g. award, trophy, flame. See lucide.dev/icons</p>
-            @error('icon') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
         </div>
-
-        <div>
-            <label for="color" class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                <i data-lucide="palette" class="w-4 h-4"></i> Accent Colour
-            </label>
-            <select name="color" id="color" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
-                @foreach (['amber','blue','emerald','violet','red','rose','cyan','pink','teal','indigo','orange','yellow','slate'] as $c)
-                <option value="{{ $c }}" @selected(old('color', $badge->color ?? 'amber') === $c)>{{ ucfirst($c) }}</option>
-                @endforeach
-            </select>
-        </div>
+        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Name only, e.g. award, trophy, flame. See lucide.dev/icons</p>
+        @error('icon') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
             <label for="criteria_type" class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <i data-lucide="list-checks" class="w-4 h-4"></i> Criteria Type
@@ -83,24 +70,6 @@
             <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Met or exceeded to unlock.</p>
             @error('criteria_value') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
         </div>
-
-        <div>
-            <label for="q_coin_reward" class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                <i data-lucide="coins" class="w-4 h-4"></i> Q Coin Reward
-            </label>
-            <input type="number" name="q_coin_reward" id="q_coin_reward" required min="0" value="{{ old('q_coin_reward', $badge->q_coin_reward ?? 0) }}"
-                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
-            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Credited via the Q Coin ledger.</p>
-            @error('q_coin_reward') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-        </div>
-    </div>
-
-    <div>
-        <label for="sort_order" class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            <i data-lucide="arrow-up-down" class="w-4 h-4"></i> Sort Order
-        </label>
-        <input type="number" name="sort_order" id="sort_order" required min="0" value="{{ old('sort_order', $badge->sort_order ?? 0) }}"
-               class="w-full md:w-40 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
     </div>
 
     <label class="flex items-center">

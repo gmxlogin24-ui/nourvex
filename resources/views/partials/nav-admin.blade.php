@@ -78,6 +78,15 @@
         <a href="{{ route('admin.blog') }}" class="admin-sidebar-link {{ $activeRoute === 'admin.blog' ? 'active' : '' }}" title="Blog">
             <i data-lucide="file-text"></i><span>Blog</span>
         </a>
+        <a href="{{ route('admin.levels.index') }}" class="admin-sidebar-link {{ $activeRoute === 'admin.levels.index' ? 'active' : '' }}" title="Levels">
+            <i data-lucide="trending-up"></i><span>Levels</span>
+        </a>
+        <a href="{{ route('admin.badges.index') }}" class="admin-sidebar-link {{ $activeRoute === 'admin.badges.index' ? 'active' : '' }}" title="Badges">
+            <i data-lucide="award"></i><span>Badges</span>
+        </a>
+        <a href="{{ route('admin.feature-gates.index') }}" class="admin-sidebar-link {{ $activeRoute === 'admin.feature-gates.index' ? 'active' : '' }}" title="Feature Gates">
+            <i data-lucide="toggle-left"></i><span>Features</span>
+        </a>
     </nav>
     <button type="button" class="admin-sidebar-toggle-btn" onclick="toggleAdminNavStyle()" title="Switch nav style">
         <i data-lucide="arrow-left-right"></i>
@@ -93,6 +102,9 @@
     <a href="{{ route('admin.transactions') }}" class="admin-topbar-float-link {{ $activeRoute === 'admin.transactions' ? 'active' : '' }}" title="Transactions"><i data-lucide="arrow-left-right"></i></a>
     <a href="{{ route('admin.disputes.index') }}" class="admin-topbar-float-link {{ $activeRoute === 'admin.disputes.index' ? 'active' : '' }}" title="Gig Disputes"><i data-lucide="scale"></i></a>
     <a href="{{ route('admin.marketplace-disputes.index') }}" class="admin-topbar-float-link {{ $activeRoute === 'admin.marketplace-disputes.index' ? 'active' : '' }}" title="Market Disputes"><i data-lucide="shield-alert"></i></a>
+    <a href="{{ route('admin.levels.index') }}" class="admin-topbar-float-link {{ $activeRoute === 'admin.levels.index' ? 'active' : '' }}" title="Levels"><i data-lucide="trending-up"></i></a>
+    <a href="{{ route('admin.badges.index') }}" class="admin-topbar-float-link {{ $activeRoute === 'admin.badges.index' ? 'active' : '' }}" title="Badges"><i data-lucide="award"></i></a>
+    <a href="{{ route('admin.feature-gates.index') }}" class="admin-topbar-float-link {{ $activeRoute === 'admin.feature-gates.index' ? 'active' : '' }}" title="Feature Gates"><i data-lucide="toggle-left"></i></a>
     <button type="button" class="admin-topbar-float-toggle" onclick="toggleAdminNavStyle()" title="Switch nav style"><i data-lucide="arrow-left-right"></i></button>
 </nav>
 @endif

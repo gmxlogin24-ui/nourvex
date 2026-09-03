@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-admin')
 
 @section('content')
 <div class="container mx-auto px-4 py-6">
@@ -22,11 +22,10 @@
         <table class="min-w-full">
             <thead class="bg-gray-100 dark:bg-gray-700">
                 <tr class="text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    <th class="px-6 py-3">#</th>
-                    <th class="px-6 py-3">Level</th>
+                    <th class="px-6 py-3">Rank</th>
+                    <th class="px-6 py-3">Name</th>
                     <th class="px-6 py-3">Q Coins</th>
                     <th class="px-6 py-3">Gigs</th>
-                    <th class="px-6 py-3">Sales</th>
                     <th class="px-6 py-3">Referrals</th>
                     <th class="px-6 py-3">Verified</th>
                     <th class="px-6 py-3">Users</th>
@@ -37,15 +36,10 @@
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                 @forelse ($levels as $level)
                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <td class="px-6 py-4 font-bold text-gray-900 dark:text-white">{{ $level->level_number }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="inline-flex items-center gap-2 font-medium text-gray-900 dark:text-white">
-                            <i data-lucide="{{ $level->icon }}" class="w-4 h-4 text-blue-600"></i> {{ $level->name }}
-                        </span>
-                    </td>
+                    <td class="px-6 py-4 font-bold text-gray-900 dark:text-white">{{ $level->rank }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">{{ $level->name }}</td>
                     <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ number_format($level->min_q_coins) }}</td>
                     <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $level->min_gigs_completed }}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $level->min_sales }}</td>
                     <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $level->min_referrals }}</td>
                     <td class="px-6 py-4">
                         <i data-lucide="{{ $level->requires_verified ? 'shield-check' : 'minus' }}" class="w-4 h-4 {{ $level->requires_verified ? 'text-emerald-600' : 'text-gray-400' }}"></i>
@@ -79,7 +73,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="10" class="px-6 py-8 text-center text-gray-600 dark:text-gray-400">
+                    <td colspan="9" class="px-6 py-8 text-center text-gray-600 dark:text-gray-400">
                         No levels yet. <a href="{{ route('admin.levels.create') }}" class="text-blue-600">Create one</a>
                     </td>
                 </tr>
