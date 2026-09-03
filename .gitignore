@@ -30,3 +30,7 @@ database/*.sqlite-journal
 _qcheck/
 *.bak*
 page_check.html
+_*_headers.txt
+_*_cookies.txt
+_*_body.html
+_*_response.html
