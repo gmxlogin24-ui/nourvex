@@ -1,0 +1,11 @@
+HTTP/2 302 
+cache-control: no-cache, private
+content-type: text/html; charset=utf-8
+date: Thu, 03 Sep 2026 08:49:48 GMT
+host: barricade-unplanned-settle.ngrok-free.dev
+location: https://barricade-unplanned-settle.ngrok-free.dev/dashboard
+ngrok-agent-ips: 102.89.47.14
+set-cookie: XSRF-TOKEN=eyJpdiI6IlZNQkFScURMV2h1cDZJTGFlZHZuZmc9PSIsInZhbHVlIjoiNVd2alY0S01RaHVBOWUzbXlnKzBSdFZVSkkyVU1Mb3l1c0pmc0JvbmFTWjF4TVZMWGZINERqQ3VDZmkrNGlzVFlGNW9FMXEya2hERXBzM1hoTHBNeGNYQXVBUDRQTXY4NnRTb3pGN3JwY2IwVDRBUWwyczFpRWltSVY3R3VvcWEiLCJtYWMiOiIzZTQwYjc0Y2YyNDViMzViZDUwZDM1NWY1Nzc0YWNjNjk5N2E0NGE2NDNlMzhmZTgxM2NhMjVjNTk3Y2VmOWQ1IiwidGFnIjoiIn0%3D; expires=Thu, 03 Sep 2026 10:49:48 GMT; Max-Age=7200; path=/; secure; samesite=lax
+set-cookie: qelvo-session=eyJpdiI6IjRobDROdG5NMHl5azIyb3lRN1FPS2c9PSIsInZhbHVlIjoiakpoL2lGU3poWHhEZjJpUmlHLzRZUUlxOGVURW04WGVvd05yTVJhTnRZR3RheWxwM2g3YzFrVmdLUUphTCtMamZ3UlVnSDU3WFF6cUViNGNYZzNsVVM4RlVJL0Njc1dJS2pDL2xkVU1kSHhTOG5Nd2dhb1kyWGhQbGJXMzF5RzQiLCJtYWMiOiIwYTIwZjA1ZDc4ZDFmOGM5ODAzNTIyODdmMDMxMzRjM2M2NDA4N2NiM2MyOTliYjg1YzE3NGJiOTU4YmIxMzZiIiwidGFnIjoiIn0%3D; expires=Thu, 03 Sep 2026 10:49:48 GMT; Max-Age=7200; path=/; secure; httponly; samesite=lax
+x-powered-by: PHP/8.5.1
+

@@ -47,6 +47,11 @@ class WalletActionController extends Controller
         return back()->withErrors(['amount' => 'Could not start payment. Please try again.']);
     }
 
+    // No-BVN accounts pay a 1.5% withdrawal fee; verified (virtual account / BVN)
+    // accounts withdraw free. This is the only friction non-BVN users face -
+    // withdrawals are never blocked, just costlier, matching the deposit cap logic.
+    const NO_BVN_WITHDRAWAL_FEE_RATE = 0.015;
+
     public function withdraw(Request $request)
     {
         $validated = $request->validate([
@@ -63,15 +68,18 @@ class WalletActionController extends Controller
         }
 
         $userId = Auth::id();
+        $hasVirtualAccount = (bool) $user->virtual_account_number;
+        $fee = $hasVirtualAccount ? 0 : round($validated['amount'] * self::NO_BVN_WITHDRAWAL_FEE_RATE, 2);
+        $totalDebit = $validated['amount'] + $fee;
 
-        $result = DB::transaction(function () use ($userId, $validated) {
+        $result = DB::transaction(function () use ($userId, $validated, $fee, $totalDebit) {
             $lockedUser = User::where('id', $userId)->lockForUpdate()->first();
 
-            if ($lockedUser->wallet_balance < $validated['amount']) {
+            if ($lockedUser->wallet_balance < $totalDebit) {
                 return ['ok' => false];
             }
 
-            $lockedUser->decrement('wallet_balance', $validated['amount']);
+            $lockedUser->decrement('wallet_balance', $totalDebit);
             Transaction::create([
                 'user_id' => $lockedUser->id,
                 'type' => 'withdrawal',
@@ -79,13 +87,29 @@ class WalletActionController extends Controller
                 'description' => 'Withdrawal',
             ]);
 
+            if ($fee > 0) {
+                Transaction::create([
+                    'user_id' => $lockedUser->id,
+                    'type' => 'withdrawal_fee',
+                    'amount' => -$fee,
+                    'description' => 'No-BVN withdrawal fee (1.5%)',
+                ]);
+            }
+
             return ['ok' => true];
         });
 
         if (!$result['ok']) {
-            return back()->withErrors(['amount' => 'Insufficient balance.']);
+            $msg = $fee > 0
+                ? 'Insufficient balance. You need ₦' . number_format($totalDebit, 2) . ' (amount + 1.5% no-BVN fee).'
+                : 'Insufficient balance.';
+            return back()->withErrors(['amount' => $msg]);
         }
 
-        return redirect()->route('wallet.index')->with('status', 'Withdrawal requested.');
+        $statusMsg = $fee > 0
+            ? 'Withdrawal requested. A 1.5% no-BVN fee (₦' . number_format($fee, 2) . ') was applied - verify your BVN to withdraw free.'
+            : 'Withdrawal requested.';
+
+        return redirect()->route('wallet.index')->with('status', $statusMsg);
     }
 }

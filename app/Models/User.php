@@ -20,6 +20,9 @@ use App\Events\TierUpgraded;
     'account_type', 'business_name', 'business_logo', 'business_whatsapp', 'is_vendor_active', 'interests',
     'streak_days', 'last_active_date', 'leaderboard_opt_in', 'q_coin_streak_days', 'wallet_restricted', 'google_id', 'transaction_pin', 'theme_style', 'mobile_nav_style', 'sidebar_style',
     'is_admin', 'role', 'level_id',
+    'signup_fee_paid', 'badge_tier', 'card_token', 'card_last4', 'card_type',
+    'is_banned', 'subscription_expires_at', 'skills',
+    'notif_style', 'navbar_style', 'topbar_style', 'card_style',
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable

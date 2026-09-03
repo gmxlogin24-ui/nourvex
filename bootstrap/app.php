@@ -18,6 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'signup.paid' => \App\Http\Middleware\EnsureSignupFeePaid::class,
             'customer_care' => \App\Http\Middleware\IsCustomerCareOrAdmin::class,
         ]);
+        // Trust ngrok (and any reverse proxy) so HTTPS/host headers are read correctly -
+        // without this, requests through the tunnel can be misread as plain HTTP, breaking
+        // secure cookies and generating wrong (http://) links/redirects.
+        $middleware->trustProxies(at: '*');
         $middleware->appendToGroup('web', \App\Http\Middleware\TrackStreak::class);
         $middleware->validateCsrfTokens(except: [
             'webhooks/flutterwave',

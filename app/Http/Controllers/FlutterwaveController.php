@@ -136,7 +136,7 @@ class FlutterwaveController extends Controller
             return redirect()->route('dashboard');
         }
 
-        $amount = 2000; // Starter tier — corrected from old ₦1,000 base fee
+        $amount = 200; // TEMP TESTING PRICE - was 2000, lower for test payments, raise back before launch
         $txRef = 'SIGNUPFEE-' . $user->id . '-' . time();
 
         WalletTopup::create([
@@ -230,7 +230,7 @@ class FlutterwaveController extends Controller
             Transaction::create([
                 'user_id' => $user->id,
                 'type' => 'signup_fee',
-                'amount' => -2000,
+                'amount' => -200,
                 'description' => 'Account activation fee',
             ]);
 

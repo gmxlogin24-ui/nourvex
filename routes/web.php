@@ -63,9 +63,6 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/auth/google', [App\Http\Controllers\SocialAuthController::class, 'redirect'])->name('auth.google');
 Route::get('/auth/google/callback', [App\Http\Controllers\SocialAuthController::class, 'callback'])->name('auth.google.callback');
 
-Route::get('/auth/google', [App\Http\Controllers\SocialAuthController::class, 'redirect'])->name('auth.google');
-Route::get('/auth/google/callback', [App\Http\Controllers\SocialAuthController::class, 'callback'])->name('auth.google.callback');
-
 Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
 Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
@@ -186,6 +183,11 @@ Route::middleware(['auth', 'signup.paid'])->group(function () {
 
         Route::get('/blog', [AdminController::class, 'blog'])->name('blog');
         Route::delete('/blog/{blog}', [AdminController::class, 'deleteBlog'])->name('blog.delete');
+
+        // Feature gates - admin on/off toggle + tier requirement per feature
+        Route::get('/feature-gates', [App\Http\Controllers\Admin\FeatureGateController::class, 'index'])->name('feature-gates.index');
+        Route::post('/feature-gates/{featureGate}/toggle', [App\Http\Controllers\Admin\FeatureGateController::class, 'toggle'])->name('feature-gates.toggle');
+        Route::put('/feature-gates/{featureGate}', [App\Http\Controllers\Admin\FeatureGateController::class, 'update'])->name('feature-gates.update');
     });
 
         Route::prefix('customer-care')->name('customer-care.')->middleware('customer_care')->group(function () {
