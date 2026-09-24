@@ -2,12 +2,31 @@
 
 @section('content')
 
+@if((auth()->user()->theme_style ?? 'glass') === 'plain')
+    @include('gigs.partials.gigs-minimal')
+@elseif((auth()->user()->theme_style ?? 'glass') === 'aurora')
+    @include('gigs.partials.gigs-aurora')
+@else
+
 <main class="max-w-6xl mx-auto p-6">
     @php
         $openCount = $gigs->where('status', 'open')->count();
         $avgReward = $gigs->count() ? $gigs->avg('amount') : 0;
         $myPosted = $gigs->where('user_id', auth()->id())->count();
     @endphp
+
+    @php
+        $myStackSource = $gigs->where('user_id', auth()->id())->count() >= 2
+            ? $gigs->where('user_id', auth()->id())
+            : $gigs;
+        $myStackItems = $myStackSource->take(6)->map(fn($g) => ['title' => $g->title, 'image_url' => $g->image_url ?? null]);
+    @endphp
+    <link rel="stylesheet" href="{{ asset('css/sponsor-stack.css') }}?v={{ time() }}">
+    <script src="{{ asset('js/sponsor-stack.js') }}?v={{ time() }}" defer></script>
+    <div style="margin-bottom:1.25rem;">
+        <p class="text-sm font-semibold text-muted" style="margin-bottom:0.5rem;">Your Hustles</p>
+        @include('partials.sponsor-stack', ['items' => $myStackItems, 'tagLabel' => 'Your Hustle'])
+    </div>
 
     <div class="flex justify-between items-center mb-4 flex-wrap gap-3 reveal-on-scroll">
         <div>
@@ -17,8 +36,11 @@
         @auth<a href="{{ route('gigs.create') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Post a Hustle</a>@else<a href="{{ route('register') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Sign Up to Post</a>@endauth
     </div>
 
-    <form method="GET" class="reveal-on-scroll" style="margin-bottom:0.75rem;">
+    <form method="GET" class="reveal-on-scroll flex flex-wrap gap-2" style="margin-bottom:0.75rem;">
         <input type="text" name="search" value="{{ request('search') }}" placeholder="Search hustles..." class="input-field" style="max-width:320px;">
+        <input type="number" name="min_price" value="{{ request('min_price') }}" placeholder="Min ₦" class="input-field" style="max-width:110px;">
+        <input type="number" name="max_price" value="{{ request('max_price') }}" placeholder="Max ₦" class="input-field" style="max-width:110px;">
+        <button type="submit" class="btn-secondary text-sm">Filter</button>
     </form>
 
     <div class="flex flex-wrap items-center justify-between gap-3 reveal-on-scroll" style="margin-bottom:0.75rem;">
@@ -55,7 +77,7 @@
 
 
     <div class="grid md:grid-cols-3 gap-4 reveal-on-scroll">
-        @forelse($gigs as $gig)
+        @forelse($gigsPage as $gig)
         <a href="{{ route('gigs.show', $gig->id) }}" class="gig-card-v2 reveal-on-scroll" style="{{ $gig->status !== 'open' ? 'opacity:0.6;' : '' }}">
             <div class="gig-card-v2-top">
                 <span class="gig-card-category">{{ $gig->category }}</span>
@@ -98,6 +120,12 @@
         <p class="text-muted text-sm col-span-full">No hustles match — try a different search or category.</p>
         @endforelse
     </div>
+
+    <div class="mt-6 reveal-on-scroll">
+        {{ $gigsPage->links() }}
+    </div>
 </main>
+
+@endif
 
 @endsection

@@ -50,3 +50,11 @@
 /* compact variant so it fits marketplace's grid/card look */
 .sponsor-stack.compact { height: 130px; width: 100%; }
 .sponsor-stack.compact .sponsor-card { border-radius: 1rem; }
+
+/* Mobile: smaller deck, pushed to the right of its row */
+@media (max-width: 640px) {
+    .sponsor-stack:not(.compact) { width: min(150px, 46%); height: 175px; margin: 0 0 0 auto; }
+}
+@media (min-width: 641px) {
+    .sponsor-stack:not(.compact) { width: min(220px, 40%); height: 250px; margin: 0 0 0 auto; }
+}

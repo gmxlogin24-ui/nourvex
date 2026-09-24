@@ -691,8 +691,8 @@ html[data-sidebar="collapsed"] .sidebar-group{ padding: 10px 6px; }
 
 /* ---------- FIX: real dark mode — restore page-level background,
    properly scoped so it can't wash out light theme again ---------- */
-html[data-theme="dark"] body[data-page],
-html:not([data-theme="dark"]) body[data-page]{
+html[data-theme="dark"] body[data-page]:not([data-theme-style="aurora"]),
+html:not([data-theme="dark"]) body[data-page]:not([data-theme-style="aurora"]){
   background: var(--neu-bg) !important;
 }
 html[data-theme="dark"] body[data-page="marketplace"]{
@@ -741,8 +741,8 @@ html[data-theme="dark"] body[data-page="marketplace"]{
 }
 
 /* ---------- Force real grey (not near-black) at the root level ---------- */
-html[data-theme="dark"]{ background: #23262d !important; }
-html[data-theme="dark"] body{ background: #23262d !important; }
+html[data-theme="dark"]:not(:has(body[data-theme-style="aurora"])){ background: #23262d !important; }
+html[data-theme="dark"] body:not([data-theme-style="aurora"]){ background: #23262d !important; }
 html[data-theme="dark"] body[data-page="marketplace"],
 html[data-theme="dark"] body[data-page="marketplace"] main,
 html[data-theme="dark"] body[data-page="marketplace"] .app-push-content,

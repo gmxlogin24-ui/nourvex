@@ -11,7 +11,7 @@ class GigFactory extends Factory
     {
         return [
             'title' => fake()->sentence(4),
-            'category' => fake()->randomElement(['Design', 'Writing', 'Tech', 'Tutoring', 'Other']),
+            'category' => fake()->randomElement(array_keys(config('gig_categories'))),
             'description' => fake()->paragraph(),
             'amount' => fake()->numberBetween(500, 20000),
             'status' => 'open',

@@ -1,7 +1,7 @@
 @extends('layouts.app-authenticated')
 @section('content')
 
-<main class="profile-shell p-6">
+<main class="profile-shell p-6 {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-page' : '' }}" style="{{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'padding-top:0 !important;max-width:1240px;' : '' }}">
     <a href="{{ route('profile.index') }}" class="profile-back-link"><i data-lucide="arrow-left" class="w-4 h-4"></i> Profile</a>
 
     <div class="profile-detail-grid">
@@ -9,7 +9,7 @@
             <h1 class="text-2xl font-semibold mb-1 hoverfade-text">Reputation</h1>
             <p class="text-muted text-sm mb-6">How you look to other users</p>
 
-            <div class="glass-card p-6 mb-6 reveal-on-scroll">
+            <div class="glass-card p-6 mb-6 reveal-on-scroll {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-card' : '' }}">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="font-semibold">Rank</h2>
                     <span class="trust-pill" style="gap:0.4rem;">

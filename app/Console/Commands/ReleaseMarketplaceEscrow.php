@@ -49,6 +49,11 @@ class ReleaseMarketplaceEscrow extends Command
                         'description' => 'Sold (auto-released after 6 days): ' . $lockedListing->title . ($commission > 0 ? ' (after ₦' . number_format($commission) . ' platform fee)' : ''),
                     ]);
                     \App\Models\PlatformRevenue::record('marketplace', $commission, 'Commission (auto-released): ' . $lockedListing->title, 'listing', $lockedListing->id);
+                    // Was silent before - confirmDelivery() (the manual path)
+                    // already notifies the seller when they're paid; the
+                    // automatic path should tell them too, not leave them to
+                    // notice a wallet change on their own.
+                    $seller->notify(new \App\Notifications\MarketplaceSaleCompleted($lockedListing, $payout, auto: true));
                 }
 
                 $lockedListing->update(['status' => 'completed']);

@@ -56,6 +56,20 @@
                             <button class="balance-chip" style="font-size:0.75rem;">{{ $u->role === 'customer_care' ? 'Remove Customer Care' : 'Make Customer Care' }}</button>
                         </form>
                         @endif
+                        @if($u->role === 'customer_care')
+                        <form method="POST" action="{{ route('admin.users.cc-permissions', $u) }}" class="flex flex-wrap items-center gap-2" style="font-size:0.7rem;background:var(--color-card);border:1px solid var(--border-color);border-radius:0.5rem;padding:0.3rem 0.5rem;">
+                            @csrf
+                            @method('PUT')
+                            @php $perms = $u->customer_care_permissions ?? []; @endphp
+                            @foreach(['orders'=>'Orders','gig_disputes'=>'Gig Disp.','listing_disputes'=>'Mkt Disp.','user_lookup'=>'Lookup','flags'=>'Flags'] as $key => $label)
+                                <label style="display:flex;align-items:center;gap:2px;">
+                                    <input type="checkbox" name="permissions[]" value="{{ $key }}" @checked(in_array($key, $perms))>
+                                    {{ $label }}
+                                </label>
+                            @endforeach
+                            <button class="balance-chip primary" style="font-size:0.7rem;">Save Access</button>
+                        </form>
+                        @endif
                         <form method="POST" action="{{ route('admin.adjust-balance', $u) }}" class="flex gap-1">
                             @csrf
                             <input type="number" step="0.01" name="amount" placeholder="+/- amt" style="width:90px;background:var(--color-card);border:1px solid var(--border-color);border-radius:0.5rem;padding:0 0.4rem;font-size:0.75rem;">

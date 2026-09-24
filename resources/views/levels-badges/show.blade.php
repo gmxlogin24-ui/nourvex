@@ -1,6 +1,9 @@
 @extends('layouts.app-authenticated')
 
 @section('content')
+@if((auth()->user()->theme_style ?? 'glass') === 'plain')
+@include('levels-badges.partials.levels-badges-minimal')
+@else
 <div class="container mx-auto px-4 py-6">
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Your Level & Badges</h1>
@@ -88,4 +91,5 @@
         @endif
     </div>
 </div>
+@endif
 @endsection

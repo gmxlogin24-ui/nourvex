@@ -5,7 +5,6 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Gig;
 use App\Models\Listing;
 
 class RequireTier
@@ -14,20 +13,28 @@ class RequireTier
     {
         $user = Auth::user();
 
+        // Admins are never gated by tier restrictions.
+        if ($user->is_admin) {
+            return $next($request);
+        }
+
+        // No free tier - everyone must pay (vendor registration) to reach tier1 before posting.
         if ($user->tier === 'free') {
             return redirect()->route('tier.index')->withErrors([
                 'tier' => 'You need to upgrade to Tier 1 to post gigs or marketplace listings.'
             ]);
         }
 
-        // Only check the limit on the actual submit (POST), not the form page (GET)
+        // Only check the limit on the actual submit (POST), not the form page (GET).
+        // Gigs are no longer capped here - the cap on gigs is how many a user can
+        // have *claimed* at once (see GigController::claimCap()), not how many
+        // they post. Listings are still capped on posting.
         if ($request->isMethod('post') && $user->tier === 'tier1') {
-            $activeGigs = Gig::where('user_id', $user->id)->where('status', 'open')->count();
             $activeListings = Listing::where('user_id', $user->id)->count();
 
-            if (($activeGigs + $activeListings) >= 5) {
+            if ($activeListings >= 5) {
                 return back()->withErrors([
-                    'tier' => 'Tier 1 allows up to 5 active posts. Upgrade to Tier 2 for unlimited posts.'
+                    'tier' => 'Tier 1 allows up to 5 active listings. Upgrade to Tier 2 for unlimited listings.'
                 ]);
             }
         }

@@ -32,5 +32,7 @@ class RecordTierUpgradeReveal
                 'label' => $f->label,
             ])->all(),
         ]);
+
+        $event->user->notify(new \App\Notifications\TierUpgradedNotification($event->fromTier, $event->toTier, $newFeatures));
     }
 }

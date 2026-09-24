@@ -4,6 +4,11 @@
 
 @section('content')
 <main class="w-full p-6">
+@if((auth()->user()->theme_style ?? 'glass') === 'plain')
+    @include('partials.dashboard-minimal')
+@elseif((auth()->user()->theme_style ?? 'glass') === 'aurora')
+    @include('partials.dashboard-aurora')
+@else
     @php
         $d2Avatar = auth()->user()?->avatar_url;
         $d2Name = auth()->user()?->name ?? 'Guest';
@@ -31,7 +36,7 @@
             <div class="d2-topbar-icons">
                 <a href="{{ Route::has('chat.index') ? route('chat.index') : '#' }}" class="d2-topbar-icon-btn" title="Chat">
                     <i data-lucide="message-circle" class="w-5 h-5"></i>
-                    @if(($unreadChats ?? 0) > 0)<span class="d2-topbar-badge">{{ $unreadChats }}</span>@endif
+                    @if(($navUnreadChats ?? 0) > 0)<span class="d2-topbar-badge">{{ $navUnreadChats }}</span>@endif
                 </a>
                 <a href="{{ Route::has('notifications.index') ? route('notifications.index') : '#' }}" class="d2-topbar-icon-btn" title="Notifications">
                     <i data-lucide="bell" class="w-5 h-5"></i>
@@ -76,6 +81,12 @@
                             <span class="d2-stat-label">Total Earnings</span>
                             <span class="d2-stat-value">₦{{ number_format($earnings) }}</span>
                             <div class="d2-stat-liquid-track"><div class="d2-stat-liquid-fill d2-stat-liq-blue" style="width: {{ $earnings > 0 ? min(100, round($earnings / 5000)) : 0 }}%;"><span class="d2-liquid-shimmer"></span></div></div>
+    @if(!($isVerified ?? true))
+    <div class="glass-card p-4 mb-4" style="border:1px solid var(--color-accent);">
+        <p class="text-sm font-medium">Unverified wallet limit</p>
+        <p class="text-muted text-xs mt-1">You can hold up to ₦{{ number_format($walletCapRemaining ?? 0) }} more before you need to verify your BVN. <a href="{{ route('wallet.virtual-account') }}" class="text-accent underline">Verify now</a></p>
+    </div>
+    @endif
                         </div>
                     </div>
                     <div class="d2-stat-card d2-stat-orange">
@@ -292,6 +303,7 @@
 
         </div>
     </div>
+@endif
 </main>
 
 <script src="{{ asset('js/dashboard2-shape.js') }}"></script>

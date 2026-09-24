@@ -7,15 +7,17 @@ use Illuminate\Support\Facades\Auth;
 
 class OnboardingController extends Controller
 {
-    const CATEGORIES = [
-        'Tutoring', 'Typing & Printing', 'Hair & Beauty', 'Repairs',
-        'Laundry', 'Errands & Delivery', 'Photography', 'Cash Agent (POS)',
-        'Fashion', 'Electronics', 'Books', 'Food',
-    ];
+    // Categories now live in config/gig_categories.php (the single source
+    // of truth also used by GigController and the create/edit forms) rather
+    // than a separate hardcoded list that could drift out of sync.
+    public static function categories(): array
+    {
+        return array_keys(config('gig_categories'));
+    }
 
     public function show()
     {
-        return view('onboarding.interests', ['categories' => self::CATEGORIES]);
+        return view('onboarding.interests', ['categories' => self::categories()]);
     }
 
     public function store(Request $request)

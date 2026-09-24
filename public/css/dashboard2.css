@@ -14,8 +14,8 @@
 }
 .d2-card {
     background: #eef2f8;
-    border-radius: 32px;
-    box-shadow: 8px 8px 16px rgba(178,196,224,0.45), -8px -8px 16px rgba(255,255,255,0.95);
+    border-radius: 18px;
+    box-shadow: 4px 4px 10px rgba(178,196,224,0.35), -4px -4px 10px rgba(255,255,255,0.9);
 }
 
 /* Main card (top) + leg merged into ONE real shape, drawn as a single SVG
@@ -770,8 +770,8 @@ body[data-theme="dark"] .d2-spotlight-browse-all { color: #8b93a8; }
 .d2-stat-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-    margin-bottom: 14px;
+    gap: 8px;
+    margin-bottom: 8px;
 }
 .d2-stat-split {
     display: flex;
@@ -794,16 +794,16 @@ body[data-theme="dark"] .d2-spotlight-browse-all { color: #8b93a8; }
 body[data-theme="dark"] .d2-stat-split-divider { background: rgba(255,255,255,0.08); }
 .d2-stat-card {
     background: #eef2f8;
-    border-radius: 22px;
-    padding: 14px 16px;
+    border-radius: 16px;
+    padding: 10px 12px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    box-shadow: 8px 8px 16px rgba(178,196,224,0.45), -8px -8px 16px rgba(255,255,255,0.95);
+    gap: 8px;
+    box-shadow: 4px 4px 10px rgba(178,196,224,0.35), -4px -4px 10px rgba(255,255,255,0.9);
 }
 .d2-stat-icon {
-    width: 40px;
-    height: 40px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -816,8 +816,8 @@ body[data-theme="dark"] .d2-stat-split-divider { background: rgba(255,255,255,0.
 .d2-stat-purple .d2-stat-icon { background: linear-gradient(135deg,#9b7cf0,#7c5cf0); }
 .d2-stat-orange .d2-stat-icon { background: linear-gradient(135deg,#f5924a,#e8723a); }
 .d2-stat-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.d2-stat-label { font-size: 11px; color: #7a8296; white-space: nowrap; }
-.d2-stat-value { font-size: 16px; font-weight: 700; color: #2c313d; }
+.d2-stat-label { font-size: 9px; color: #7a8296; white-space: nowrap; }
+.d2-stat-value { font-size: 13px; font-weight: 700; color: #2c313d; }
 .d2-stat-placeholder { opacity: 0.7; }
 .d2-stat-placeholder .d2-stat-value { font-size: 13px; font-weight: 600; font-style: italic; color: #9099ab; }
 body[data-theme="dark"] .d2-stat-card {
@@ -913,7 +913,7 @@ body[data-theme="dark"] .d2-profile-stat .lbl { color: #8b93a8; }
 
 /* ===== Recent Gigs / Marketplace Overview ===== */
 .d2-secondary-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-.d2-card-header { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; font-weight: 700; color: #2c313d; margin-bottom: 10px; padding: 16px 16px 0; }
+.d2-card-header { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; font-weight: 700; color: #2c313d; margin-bottom: 6px; padding: 12px 12px 0; }
 .d2-card-header a { font-size: 11px; font-weight: 500; color: var(--user-accent, #38D9E8); text-decoration: none; }
 .d2-recent-gigs-card, .d2-marketplace-overview-card { padding-bottom: 14px; }
 .d2-gig-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 16px; text-decoration: none; font-size: 12px; }
@@ -930,15 +930,15 @@ body[data-theme="dark"] .d2-card-header, body[data-theme="dark"] .d2-gig-title, 
 body[data-theme="dark"] .d2-mp-stat { background: rgba(255,255,255,0.04); }
 
 /* ===== Activity feed ===== */
-.d2-activity-card { padding: 16px; margin-bottom: 14px; }
-.d2-activity-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; text-decoration: none; font-size: 12px; border-top: 1px solid rgba(163,177,198,0.2); }
+.d2-activity-card { padding: 10px; margin-bottom: 8px; }
+.d2-activity-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; text-decoration: none; font-size: 11px; border-top: 1px solid rgba(163,177,198,0.2); }
 .d2-activity-row:first-of-type { border-top: none; }
-.d2-activity-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.d2-activity-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 .d2-activity-gig { background: #3ecf7a; }
 .d2-activity-news { background: #4a9de8; }
 .d2-activity-listing { background: #f5924a; }
 .d2-activity-title { flex: 1; color: #2c313d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.d2-activity-time { color: #9099ab; font-size: 10px; flex-shrink: 0; }
+.d2-activity-time { color: #9099ab; font-size: 9px; flex-shrink: 0; }
 body[data-theme="dark"] .d2-activity-title { color: #e2e6ec; }
 body[data-theme="dark"] .d2-activity-row { border-color: rgba(255,255,255,0.06); }
 
@@ -1311,109 +1311,7 @@ body[data-theme="dark"] .d2-stat-liquid-track {
     box-sizing: border-box;
 }
 
-/* ===== LEVI - sitewide AI bubble + glass panel ===== */
-.levi-root { position: fixed; bottom: 20px; right: 20px; z-index: 9999; }
-
-.levi-bubble {
-    position: relative;
-    width: 56px; height: 56px;
-    border-radius: 50%;
-    border: none;
-    background: linear-gradient(135deg, #6d5efc, #a06dfc);
-    box-shadow: 0 4px 20px rgba(109, 94, 252, 0.45);
-    color: #fff;
-    font-size: 22px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-}
-.levi-bubble-glow {
-    position: absolute; inset: -6px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(160,109,252,0.5), transparent 70%);
-    animation: levi-pulse 2.4s ease-in-out infinite;
-}
-@keyframes levi-pulse {
-    0%, 100% { transform: scale(0.9); opacity: 0.6; }
-    50% { transform: scale(1.25); opacity: 0.15; }
-}
-
-.levi-panel { position: fixed; inset: 0; z-index: 10000; }
-.levi-panel-backdrop {
-    position: absolute; inset: 0;
-    background: rgba(10, 8, 20, 0.35);
-    backdrop-filter: blur(2px);
-}
-.levi-panel-card {
-    position: absolute; bottom: 20px; right: 20px;
-    width: min(380px, calc(100vw - 32px));
-    height: min(560px, calc(100vh - 100px));
-    display: flex; flex-direction: column;
-    border-radius: 20px;
-    background: rgba(24, 20, 40, 0.55);
-    backdrop-filter: blur(20px) saturate(160%);
-    border: 1px solid rgba(255,255,255,0.12);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-    overflow: hidden;
-}
-.levi-panel-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    color: #fff; font-weight: 600; letter-spacing: 0.3px;
-}
-.levi-panel-close { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; opacity: 0.7; }
-.levi-panel-messages { flex: 1; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
-.levi-msg { max-width: 85%; padding: 10px 13px; border-radius: 14px; font-size: 14px; line-height: 1.4; }
-.levi-msg-ai { align-self: flex-start; background: rgba(255,255,255,0.08); color: #f1f0ff; }
-.levi-msg-user { align-self: flex-end; background: linear-gradient(135deg, #6d5efc, #a06dfc); color: #fff; }
-.levi-panel-input { display: flex; gap: 8px; padding: 12px; border-top: 1px solid rgba(255,255,255,0.08); }
-.levi-panel-input input {
-    flex: 1; border: none; border-radius: 12px; padding: 10px 12px;
-    background: rgba(255,255,255,0.08); color: #fff; font-size: 14px;
-}
-.levi-panel-input input::placeholder { color: rgba(255,255,255,0.4); }
-.levi-panel-input button {
-    width: 40px; border: none; border-radius: 12px;
-    background: linear-gradient(135deg, #6d5efc, #a06dfc); color: #fff; font-size: 16px; cursor: pointer;
-}
-
-/* ===== LEVI - sitewide AI bubble + glass panel ===== */
-.levi-root { position: fixed; bottom: 20px; right: 20px; z-index: 9999; }
-.levi-bubble {
-    position: relative; width: 56px; height: 56px; border-radius: 50%; border: none;
-    background: linear-gradient(135deg, #6d5efc, #a06dfc);
-    box-shadow: 0 4px 20px rgba(109, 94, 252, 0.45);
-    color: #fff; font-size: 22px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-}
-.levi-bubble-glow {
-    position: absolute; inset: -6px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(160,109,252,0.5), transparent 70%);
-    animation: levi-pulse 2.4s ease-in-out infinite;
-}
-@keyframes levi-pulse {
-    0%, 100% { transform: scale(0.9); opacity: 0.6; }
-    50% { transform: scale(1.25); opacity: 0.15; }
-}
-.levi-panel { position: fixed; inset: 0; z-index: 10000; }
-.levi-panel-backdrop { position: absolute; inset: 0; background: rgba(10, 8, 20, 0.35); backdrop-filter: blur(2px); }
-.levi-panel-card {
-    position: absolute; bottom: 20px; right: 20px;
-    width: min(380px, calc(100vw - 32px)); height: min(560px, calc(100vh - 100px));
-    display: flex; flex-direction: column; border-radius: 20px;
-    background: rgba(24, 20, 40, 0.55); backdrop-filter: blur(20px) saturate(160%);
-    border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 20px 60px rgba(0,0,0,0.4); overflow: hidden;
-}
-.levi-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); color: #fff; font-weight: 600; letter-spacing: 0.3px; }
-.levi-panel-close { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; opacity: 0.7; }
-.levi-panel-messages, .levi-inline-messages { flex: 1; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
-.levi-msg { max-width: 85%; padding: 10px 13px; border-radius: 14px; font-size: 14px; line-height: 1.4; }
-.levi-msg-ai { align-self: flex-start; background: rgba(255,255,255,0.1); color: #f1f0ff; }
-.levi-msg-user { align-self: flex-end; background: linear-gradient(135deg, #6d5efc, #a06dfc); color: #fff; }
-.levi-panel-input, .levi-inline-input { display: flex; gap: 8px; padding: 12px; border-top: 1px solid rgba(255,255,255,0.08); }
-.levi-panel-input input, .levi-inline-input input { flex: 1; border: none; border-radius: 12px; padding: 10px 12px; background: rgba(255,255,255,0.1); color: #fff; font-size: 14px; }
-.levi-panel-input input::placeholder, .levi-inline-input input::placeholder { color: rgba(255,255,255,0.45); }
-.levi-panel-input button, .levi-inline-input button { width: 40px; border: none; border-radius: 12px; background: linear-gradient(135deg, #6d5efc, #a06dfc); color: #fff; font-size: 16px; cursor: pointer; }
+/* All LEVI bubble/panel styles now defined once, in levi.css only */
 
 /* ===== LEVI - inline variant, embedded in the dashboard spotlight card ===== */
 .levi-inline {
@@ -1574,7 +1472,7 @@ body[data-theme="dark"] .profile-list-row:hover { background: rgba(255,255,255,0
 .profile-back-link:hover { color: var(--color-accent); }
 
 /* ===== Q Coin own full-width line + true 2x2 stat grid on phone ===== */
-.d2-qcoin-row { margin-bottom: 14px; }
+.d2-qcoin-row { margin-bottom: 8px; }
 .d2-qcoin-full { width: 100%; }
 @media (max-width: 640px) {
   .d2-stat-row { grid-template-columns: repeat(2, 1fr) !important; }

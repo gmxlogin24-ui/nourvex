@@ -8,13 +8,13 @@ class AppearanceController extends Controller
     public function update(Request $request)
     {
         $data = $request->validate([
-            'theme_style'   => 'nullable|in:glass,neumorphic,plain',
+            'theme_style'   => 'nullable|in:glass,neumorphic,plain,aurora',
             'navbar_style'  => 'nullable|in:glass,neumorphic,plain,default',
             'topbar_style'  => 'nullable|in:glass,neumorphic,plain,default',
             'notif_style'   => 'nullable|in:glass,neumorphic,plain,default',
             'sidebar_style' => 'nullable|in:glass,neumorphic,plain,default',
             'card_style'    => 'nullable|in:glass,neumorphic,plain,default',
-            'mobile_nav_style' => 'nullable|in:floating_glow,gradient_card,sidebar_accent,dark_ring,white_pill_fab,dark_floating_icons',
+            'mobile_nav_style' => 'nullable|in:painted_pill,edge_dock',
             'accent_color'  => 'nullable|string|max:7',
         ]);
 

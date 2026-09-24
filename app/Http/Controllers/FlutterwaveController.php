@@ -136,7 +136,7 @@ class FlutterwaveController extends Controller
             return redirect()->route('dashboard');
         }
 
-        $amount = 200; // TEMP TESTING PRICE - was 2000, lower for test payments, raise back before launch
+        $amount = 2000;
         $txRef = 'SIGNUPFEE-' . $user->id . '-' . time();
 
         WalletTopup::create([
@@ -174,14 +174,13 @@ class FlutterwaveController extends Controller
         $txRef = $request->query('tx_ref');
         $status = $request->query('status');
 
-        $topup = WalletTopup::where('tx_ref', $txRef)->first();
+        $user = \App\Models\User::where('id', auth()->id())->first();
 
-        if (!$topup || $topup->status === 'successful') {
+        if (!$user || $user->signup_fee_paid) {
             return redirect()->route('dashboard');
         }
 
         if ($status !== 'successful') {
-            $topup->update(['status' => 'failed']);
             return redirect()->route('signup-fee.initiate')->withErrors(['payment' => 'Payment was not completed.']);
         }
 
@@ -191,31 +190,27 @@ class FlutterwaveController extends Controller
         $verified = ($verifyData['status'] ?? null) === 'success'
             && ($verifyData['data']['status'] ?? null) === 'successful'
             && ($verifyData['data']['tx_ref'] ?? null) === $txRef
-            && (float) ($verifyData['data']['amount'] ?? 0) >= (float) $topup->amount
+            && (float) ($verifyData['data']['amount'] ?? 0) >= 100
             && ($verifyData['data']['currency'] ?? null) === 'NGN';
 
         if (!$verified) {
-            $topup->update(['status' => 'failed']);
             return redirect()->route('signup-fee.initiate')->withErrors(['payment' => 'Payment verification failed.']);
         }
 
         $settledCount = 0;
 
-        DB::transaction(function () use ($topup, &$settledCount) {
-            $topup = WalletTopup::where('id', $topup->id)->lockForUpdate()->first();
-            if ($topup->status === 'successful') {
+        DB::transaction(function () use ($user, $verifyData, &$settledCount) {
+            $lockedUser = User::where('id', $user->id)->lockForUpdate()->first();
+
+            if ($lockedUser->signup_fee_paid) {
                 return;
             }
-
-            $user = User::where('id', $topup->user_id)->lockForUpdate()->first();
-
-            $topup->update(['status' => 'successful']);
 
             $cardUpdate = [
                 'signup_fee_paid' => true,
                 'badge_tier' => 'bronze',
             ];
-            if ($user->tier === 'free') {
+            if ($lockedUser->tier === 'free') {
                 $cardUpdate['tier'] = 'tier1';
                 $cardUpdate['tier_upgraded_at'] = now();
             }
@@ -225,18 +220,18 @@ class FlutterwaveController extends Controller
                 $cardUpdate['card_last4'] = $card['last_4digits'] ?? null;
                 $cardUpdate['card_type'] = $card['type'] ?? null;
             }
-            $user->update($cardUpdate);
+            $lockedUser->update($cardUpdate);
 
             Transaction::create([
-                'user_id' => $user->id,
+                'user_id' => $lockedUser->id,
                 'type' => 'signup_fee',
-                'amount' => -200,
-                'description' => 'Account activation fee',
+                'amount' => -((float) ($verifyData['data']['amount'] ?? 100)),
+                'description' => 'Account activation via Flutterwave',
             ]);
 
             $guestToken = request()->cookie('qelvo_guest_token');
             if ($guestToken) {
-                $settledCount = app(\App\Http\Controllers\GigController::class)->settleGuestGigs($user, $guestToken);
+                $settledCount = app(\App\Http\Controllers\GigController::class)->settleGuestGigs($lockedUser, $guestToken);
             }
         });
 
@@ -337,6 +332,12 @@ class FlutterwaveController extends Controller
                 'description' => 'Wallet top up via Flutterwave',
             ]);
         });
+
+        try {
+            $topup->user->notify(new \App\Notifications\WalletTopupCredited($topup->amount));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('WalletTopupCredited notify failed: ' . $e->getMessage());
+        }
 
         return redirect()->route('wallet.index')->with('status', 'Wallet topped up successfully!');
     }

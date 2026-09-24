@@ -72,6 +72,9 @@
         <a href="{{ route('admin.subscriptions') }}" class="admin-sidebar-link {{ $activeRoute === 'admin.subscriptions' ? 'active' : '' }}" title="Subscriptions">
             <i data-lucide="credit-card"></i><span>Subs</span>
         </a>
+        <a href="{{ route('admin.settings.appearance') }}" class="admin-sidebar-link {{ $activeRoute === 'admin.settings.appearance' ? 'active' : '' }}" title="App Appearance">
+            <i data-lucide="paintbrush"></i><span>Appear.</span>
+        </a>
         <a href="{{ route('admin.news') }}" class="admin-sidebar-link {{ $activeRoute === 'admin.news' ? 'active' : '' }}" title="News">
             <i data-lucide="newspaper"></i><span>News</span>
         </a>

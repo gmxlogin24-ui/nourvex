@@ -1,10 +1,12 @@
+.mnav-icon{font-size:20px;line-height:1;}
 .mnav-bar{ display:none; }
 @media (max-width: 900px){
   .neu-sidebar{ display:none; }
   .mnav-bar{
-    display:flex; align-items:center; justify-content:space-around;
-    position:fixed; left:12px; right:12px; bottom:calc(12px + env(safe-area-inset-bottom));
-    height:64px; z-index:500; border-radius:var(--radius-lg); padding:0 6px;
+    display:flex; align-items:center; justify-content:center; gap:28px;
+    position:fixed; left:50%; right:auto; transform:translateX(-50%);
+    bottom:calc(10px + env(safe-area-inset-bottom));
+    width:auto; height:auto; z-index:500; padding:0;
   }
   .mnav-item{
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
@@ -25,160 +27,146 @@
   .app-push-content, .app-shell-with-sidebar{ padding-bottom: 90px; }
 }
 
-/* Style A: floating_glow */
-body[data-mobile-nav-style="floating_glow"] .mnav-bar,
+/* ===== painted_pill: the only active dock style ===== */
+body[data-mobile-nav-style="painted_pill"] .mnav-bar,
 body:not([data-mobile-nav-style]) .mnav-bar{
-  background:#101012; border:1px solid rgba(255,255,255,0.06); box-shadow:0 12px 30px rgba(0,0,0,0.5);
+  border-radius: 30px;
+  background: #0a0a0a;
+  padding: 8px 18px;
+  box-shadow: 0 -6px 24px rgba(0,0,0,0.35);
+  border: none;
 }
-body[data-mobile-nav-style="floating_glow"] .mnav-item,
-body:not([data-mobile-nav-style]) .mnav-item{ color:#888; }
-body[data-mobile-nav-style="floating_glow"] .mnav-item.active,
-body:not([data-mobile-nav-style]) .mnav-item.active{ color:#ff3b30; }
-body[data-mobile-nav-style="floating_glow"] .mnav-item.active i,
-body:not([data-mobile-nav-style]) .mnav-item.active i{ filter: drop-shadow(0 0 8px rgba(255,59,48,0.7)); }
-body[data-mobile-nav-style="floating_glow"] .mnav-item.active::before,
-body:not([data-mobile-nav-style]) .mnav-item.active::before{
-  content:''; position:absolute; top:0px; left:50%; transform:translateX(-50%);
-  width:26px; height:3px; border-radius:2px;
-  background: rgba(255,59,48,0.95);
-  box-shadow: 0 0 10px 2px rgba(255,59,48,0.9);
+body[data-mobile-nav-style="painted_pill"] .mnav-item,
+body:not([data-mobile-nav-style]) .mnav-item{
+  color:#ffffff;
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+}
+body[data-mobile-nav-style="painted_pill"] .mnav-icon,
+body:not([data-mobile-nav-style]) .mnav-icon{
+  width:30px; height:30px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  background: linear-gradient(145deg, #2a2a2a, #050505);
+  border:1.5px solid #ffffff;
+  color:#ffffff;
+  font-size:15px;
+  box-shadow:
+    0 3px 6px rgba(0,0,0,0.5),
+    inset 0 1px 1px rgba(255,255,255,0.15),
+    inset 0 -2px 2px rgba(0,0,0,0.4);
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+body[data-mobile-nav-style="painted_pill"] .mnav-item.active,
+body:not([data-mobile-nav-style]) .mnav-item.active{ color: var(--user-accent, #0F9D6E); }
+body[data-mobile-nav-style="painted_pill"] .mnav-item.active .mnav-icon,
+body:not([data-mobile-nav-style]) .mnav-item.active .mnav-icon{
+  background: linear-gradient(145deg, color-mix(in srgb, var(--user-accent, #0F9D6E) 85%, white), var(--user-accent, #0F9D6E));
+  border-color: transparent;
+  color:#ffffff;
+  transform: translateY(-2px);
+  box-shadow:
+    0 5px 12px -2px color-mix(in srgb, var(--user-accent, #0F9D6E) 60%, transparent),
+    inset 0 1px 1px rgba(255,255,255,0.4),
+    inset 0 -2px 3px rgba(0,0,0,0.15);
+}
+body[data-mobile-nav-style="painted_pill"] .mnav-label,
+body:not([data-mobile-nav-style]) .mnav-label{ font-size:10px; }
+body[data-mobile-nav-style="painted_pill"] .mnav-fab,
+body:not([data-mobile-nav-style]) .mnav-fab{
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+  flex:1; height:100%; margin-top:0;
+  background:none; box-shadow:none; color:#ffffff;
+}
+body[data-mobile-nav-style="painted_pill"] .mnav-fab .mnav-icon,
+body:not([data-mobile-nav-style]) .mnav-fab .mnav-icon{
+  width:36px; height:36px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:#eeeeee; color:#ffffff; font-size:18px;
+}
+body[data-mobile-nav-style="painted_pill"] .mnav-badge,
+body:not([data-mobile-nav-style]) .mnav-badge{
+  background:#e24b4a; color:#fff;
+}
+
+
+body[data-mobile-nav-style="edge_dock"] .mnav-bar{
+  transform: translateY(160%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.28s ease, opacity 0.2s ease;
+}
+body[data-mobile-nav-style="edge_dock"].edge-dock-open .mnav-bar{
+  display: flex !important;
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.edge-dock-fixed-bar{
+  display:none;
+  position:fixed; top:0; right:0; height:100vh; width:14px;
+  background:#0a0a0a; border-radius:7px 0 0 7px;
+  z-index:600;
+  transition: transform 0.28s ease, opacity 0.2s ease;
+}
+body[data-mobile-nav-style="edge_dock"] .edge-dock-fixed-bar{ display:block; }
+body[data-mobile-nav-style="edge_dock"].edge-dock-open .edge-dock-fixed-bar{
+  transform: translateX(100%);
+  opacity: 0;
   pointer-events:none;
 }
-body[data-mobile-nav-style="floating_glow"] .mnav-item.active::after,
-body:not([data-mobile-nav-style]) .mnav-item.active::after{
-  content:''; position:absolute; top:2px; left:50%; transform:translateX(-50%);
-  width:34px; height:30px;
-  background: linear-gradient(180deg, rgba(255,59,48,0.35), rgba(255,59,48,0) 80%);
+.edge-dock{
+  display:none;
+  position:fixed; top:50%; right:0; z-index:601;
+  touch-action:none; user-select:none;
+  transition: transform 0.28s ease, opacity 0.2s ease;
+}
+body[data-mobile-nav-style="edge_dock"] .edge-dock{ display:block; }
+body[data-mobile-nav-style="edge_dock"].edge-dock-open .edge-dock{
+  transform: translateX(100%);
+  opacity: 0;
   pointer-events:none;
 }
-body[data-mobile-nav-style="floating_glow"] .mnav-item.active i,
-body:not([data-mobile-nav-style]) .mnav-item.active i{ filter: drop-shadow(0 0 8px rgba(255,59,48,0.85)); }
+.edge-dock-bulge{
+  position:absolute; right:-8px; top:50%; transform:translateY(calc(-50% + 79px));
+  width:70px; height:70px; border-radius:50%; background:#0a0a0a;
+}
+.edge-dock-btn{
+  position:absolute; right:1px; top:50%; transform:translateY(calc(-50% + 79px + 5px));
+  width:52px; height:52px; border-radius:50%; border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--user-accent, #0F9D6E) 85%, white), var(--user-accent, #0F9D6E));
+  color:#fff; font-size:20px; z-index:2;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+  transition: transform 0.15s ease;
+}
+.edge-dock-btn:active{ transform: translateY(calc(-50% + 79px + 5px)) scale(0.92); }
+.edge-dock.dragging .edge-dock-bulge{ opacity:0.85; }
 
-body[data-mobile-nav-style="gradient_card"] .mnav-item.active::before{
-  content:''; position:absolute; top:2px; left:50%; transform:translateX(-50%);
-  width:4px; height:32px; border-radius:3px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0));
-  box-shadow: 0 0 16px 4px rgba(255,255,255,0.7);
-  pointer-events:none;
+body[data-mobile-nav-style="painted_pill"] .mnav-bar,
+body:not([data-mobile-nav-style]) .mnav-bar{
+  transition: opacity 0.2s ease;
+}
+.mnav-bar.mnav-bar-scrolling{ opacity: 0.45; }
+
+@keyframes mnavPulse{
+  0%{ box-shadow: 0 0 0 0 color-mix(in srgb, var(--user-accent, #0F9D6E) 55%, transparent); }
+  70%{ box-shadow: 0 0 0 10px color-mix(in srgb, var(--user-accent, #0F9D6E) 0%, transparent); }
+  100%{ box-shadow: 0 0 0 0 color-mix(in srgb, var(--user-accent, #0F9D6E) 0%, transparent); }
+}
+body[data-mobile-nav-style="painted_pill"] .mnav-item.active .mnav-icon,
+body:not([data-mobile-nav-style]) .mnav-item.active .mnav-icon,
+body[data-mobile-nav-style="painted_pill"] .mnav-item-pulse.active .mnav-icon,
+body:not([data-mobile-nav-style]) .mnav-item-pulse.active .mnav-icon{
+  animation: mnavPulse 2s ease-out infinite;
+}
+.edge-dock-btn{
+  animation: mnavPulse 2s ease-out infinite;
 }
 
-body[data-mobile-nav-style="sidebar_accent"] .mnav-item.active::before{
-  content:''; position:absolute; top:2px; left:50%; transform:translateX(-50%);
-  width:4px; height:32px; border-radius:3px;
-  background: linear-gradient(180deg, rgba(234,243,239,0.95), rgba(234,243,239,0));
-  box-shadow: 0 0 16px 4px rgba(234,243,239,0.7);
-  pointer-events:none;
+body[data-mobile-nav-style="painted_pill"] .mnav-item-pulse.active .mnav-icon,
+body:not([data-mobile-nav-style]) .mnav-item-pulse.active .mnav-icon{
+  background: linear-gradient(145deg, #ff8a5c, #ff3b30);
+  border-color: transparent;
+  color:#ffffff;
 }
-
-body[data-mobile-nav-style="dark_ring"] .mnav-item.active::before{
-  content:''; position:absolute; top:2px; left:50%; transform:translateX(-50%);
-  width:4px; height:32px; border-radius:3px;
-  background: linear-gradient(180deg, rgba(255,122,61,0.95), rgba(255,122,61,0));
-  box-shadow: 0 0 16px 4px rgba(255,122,61,0.85);
-  pointer-events:none;
-}
-body[data-mobile-nav-style="floating_glow"] .mnav-fab,
-body:not([data-mobile-nav-style]) .mnav-fab{ background:#ff3b30; color:#fff; box-shadow:0 0 18px 4px rgba(255,59,48,0.65), 0 6px 14px rgba(0,0,0,0.3); }
-
-/* Style B: gradient_card */
-body[data-mobile-nav-style="gradient_card"] .mnav-bar{
-  background: linear-gradient(135deg, #ff8a65 0%, #2b2f66 100%); box-shadow:0 14px 32px rgba(0,0,0,0.3);
-}
-body[data-mobile-nav-style="gradient_card"] .mnav-item{ color:rgba(255,255,255,0.75); }
-body[data-mobile-nav-style="gradient_card"] .mnav-item.active{ color:#fff; background:rgba(255,255,255,0.18); border-radius:14px; }
-body[data-mobile-nav-style="gradient_card"] .mnav-fab{ background:#fff; color:#ff8a65; }
-
-/* Style C: sidebar_accent — matches green desktop sidebar */
-body[data-mobile-nav-style="sidebar_accent"] .mnav-bar{
-  background: linear-gradient(180deg, #1f4d3f 0%, #17392f 100%); border:1px solid rgba(255,255,255,0.08);
-}
-body[data-mobile-nav-style="sidebar_accent"] .mnav-item{ color:#9fbdb0; }
-body[data-mobile-nav-style="sidebar_accent"] .mnav-item.active{ color:#17392f; background:#eaf3ef; border-radius:14px; }
-body[data-mobile-nav-style="sidebar_accent"] .mnav-fab{ background:#eaf3ef; color:#17392f; }
-
-/* Style D: dark_ring */
-body[data-mobile-nav-style="dark_ring"] .mnav-bar{
-  background: rgba(20,20,20,0.75); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border:1px solid rgba(255,255,255,0.08);
-}
-body[data-mobile-nav-style="dark_ring"] .mnav-item{ color:#888; }
-body[data-mobile-nav-style="dark_ring"] .mnav-item i{
-  width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center;
-}
-body[data-mobile-nav-style="dark_ring"] .mnav-item.active{ color:#ff7a3d; }
-body[data-mobile-nav-style="dark_ring"] .mnav-item.active i{ background:rgba(255,122,61,0.15); box-shadow:0 0 14px rgba(255,122,61,0.6); }
-body[data-mobile-nav-style="dark_ring"] .mnav-fab{ background:radial-gradient(circle, #ff7a3d, #b8451c); color:#fff; }
-
-/* ===== FAB cutout notch + rotating glow ring ===== */
-@media (max-width: 900px){
-  .mnav-bar{ position:fixed; overflow:visible; }
-
-  /* Notch: circle behind the FAB matching page bg, creating a cutout look */
-
-  .mnav-fab{ position:relative; z-index:3; }
-
-  /* Rotating glow ring around the FAB - tight to the button, no drop-shadow filter (was causing repaint residue on mobile) */
-  .mnav-fab::before{
-    content:'';
-    position:absolute;
-    inset:-3px;
-    border-radius:50%;
-    padding:2px;
-    background: conic-gradient(from 0deg, transparent 0deg, rgba(255,255,255,0.98) 0deg, rgba(255,255,255,0.98) 75deg, transparent 75deg, transparent 360deg);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    animation: mnavRingSpin 2.6s linear infinite;
-    z-index:2;
-    pointer-events:none;
-  }
-  @keyframes mnavRingSpin{ to{ transform: rotate(360deg); } }
-}
-
-/* ===== white_pill_fab: white pill dock, labeled icons, black circular button floating dead-center above (matches ref image) ===== */
-@media (max-width: 900px){
-  body[data-mobile-nav-style="white_pill_fab"] .mnav-bar{
-    left:12px; right:12px;
-    background:#ffffff; border-radius:34px; box-shadow:0 10px 30px rgba(0,0,0,0.16);
-    padding:8px 20px; border:none; height:66px;
-    overflow:visible;
-  }
-  body[data-mobile-nav-style="white_pill_fab"] .mnav-label{ font-size:0.6rem; font-weight:600; }
-  /* Bump: same white as the pill, grows up behind the button so the container
-     visibly wraps/covers the button's lower half while the top still pokes out. */
-  body[data-mobile-nav-style="white_pill_fab"] .mnav-bar::before{
-    content:'';
-    position:absolute; top:-32px; left:50%; transform:translateX(-50%);
-    width:86px; height:62px; border-radius:43px 43px 0 0;
-    background:#ffffff;
-    z-index:0;
-  }
-  body[data-mobile-nav-style="white_pill_fab"] .mnav-item{ position:relative; z-index:1; }
-}
-body[data-mobile-nav-style="white_pill_fab"] .mnav-item{ color:#b0b0b5; }
-body[data-mobile-nav-style="white_pill_fab"] .mnav-item.active{ color:#111; }
-body[data-mobile-nav-style="white_pill_fab"] .mnav-item.active i{ filter:none; }
-body[data-mobile-nav-style="white_pill_fab"] .mnav-fab{
-  background:#111; color:#fff;
-  width:56px; height:56px; border-radius:50%;
-  position:absolute; top:2px; left:50%; transform:translateX(-50%);
-  z-index:2;
-  border:4px solid #ffffff;
-  box-shadow:0 8px 20px rgba(0,0,0,0.4);
-}
-body[data-mobile-nav-style="white_pill_fab"] .mnav-fab::before{ display:none; }
-
-/* ===== dark_floating_icons: Minimalist - small dark icon-only pill, centered, compact ===== */
-@media (max-width: 900px){
-  body[data-mobile-nav-style="dark_floating_icons"] .mnav-bar{
-    left:50%; right:auto; transform:translateX(-50%);
-    width:auto; min-width:0; gap:20px;
-    background:#141414; border-radius:30px; box-shadow:0 10px 24px rgba(0,0,0,0.4);
-    padding:10px 20px; height:52px;
-  }
-  body[data-mobile-nav-style="dark_floating_icons"] .mnav-item{ flex:0 0 auto; }
-}
-body[data-mobile-nav-style="dark_floating_icons"] .mnav-item{ color:#7a7a7a; }
-body[data-mobile-nav-style="dark_floating_icons"] .mnav-item.active{ color:#fff; }
-body[data-mobile-nav-style="dark_floating_icons"] .mnav-label{ display:none; }
-body[data-mobile-nav-style="dark_floating_icons"] .mnav-fab{ display:none; }
-body[data-theme-style] { background: red !important; }
+body[data-mobile-nav-style="painted_pill"] .mnav-item-pulse.active,
+body:not([data-mobile-nav-style]) .mnav-item-pulse.active{ color:#ff3b30; }

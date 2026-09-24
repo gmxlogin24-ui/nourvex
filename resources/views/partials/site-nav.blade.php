@@ -1,23 +1,25 @@
 <nav class="sn-bar" id="snBar">
-    <div class="max-w-6xl mx-auto flex justify-between items-center px-4 py-3">
+    <div class="sn-bar-inner">
         <a href="{{ route('welcome') }}" class="sn-logo">
             <div class="logo-badge" style="width:2rem;height:2rem;"></div>
             <span>Qelvo</span>
         </a>
 
-        <div class="sn-links-desktop">
+        <div class="sn-links-center">
             <a href="{{ route('welcome') }}">Home</a>
             <a href="{{ route('gigs.index') }}">Hustles</a>
             <a href="{{ route('marketplace.index') }}">Campus Market</a>
             <a href="{{ route('pulse.index') }}">Pulse</a>
             <a href="{{ route('features') }}">Features</a>
-            <a href="{{ route('login') }}" class="sn-login-btn">Log In</a>
-            <a href="{{ route('register') }}" class="sn-cta-pill">Get Started</a>
         </div>
 
-        <button class="sn-burger" id="snBurger" aria-label="Menu" type="button">
-            <span></span><span></span><span></span>
-        </button>
+        <div class="sn-actions">
+            <a href="{{ route('login') }}" class="sn-login-btn">Log In</a>
+            <a href="{{ route('register') }}" class="sn-cta-pill">Get Started</a>
+            <button class="sn-burger" id="snBurger" aria-label="Menu" type="button">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
     </div>
 </nav>
 

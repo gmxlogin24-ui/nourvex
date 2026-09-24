@@ -35,6 +35,65 @@
         <p class="mt-6 text-sm">{{ $gig->description }}</p>
     </div>
 
+    @if($gig->deadline || $gig->location_type || $gig->location || $gig->phone || $gig->attachment_path || !empty($gig->details) || $gig->has_item || !empty($gig->packages))
+    <div class="glass-card p-5 mt-6 reveal-on-scroll">
+        <h2 class="font-semibold mb-3">Job Details</h2>
+        <div class="space-y-2 text-sm">
+            @if(!empty($gig->packages))
+            <div>
+                <span class="text-muted">Packages:</span>
+                <ul class="mt-1 space-y-1">
+                    @foreach($gig->packages as $pkg)
+                    <li>
+                        {{ $pkg['name'] }} — ₦{{ number_format($pkg['price']) }}
+                        @if($gig->chosen_package === $pkg['name'])<span class="text-accent">(chosen)</span>@endif
+                        @if(!empty($pkg['description']))<span class="text-muted"> — {{ $pkg['description'] }}</span>@endif
+                    </li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+            @if($gig->has_item)
+            <p><span class="text-muted">Item:</span> {{ $gig->item_name }}{{ $gig->item_qty ? ' × ' . $gig->item_qty : '' }}</p>
+            @if($gig->item_cost)
+            <p><span class="text-muted">Item cost:</span> ₦{{ number_format($gig->item_cost) }} (not included in gig escrow — arrange directly)</p>
+            @endif
+            @if($gig->delivery_address)
+            <p><span class="text-muted">Delivery address:</span> {{ $gig->delivery_address }}</p>
+            @endif
+            @if($gig->item_delivery_method)
+            <p><span class="text-muted">Delivery method:</span> {{ $gig->item_delivery_method === 'ship' ? 'Ship / send' : 'Meet on campus' }}</p>
+            @endif
+            @endif
+            @if($gig->deadline)
+            <p><span class="text-muted">Deadline:</span> {{ $gig->deadline->format('M j, Y') }}</p>
+            @endif
+            @if($gig->location_type)
+            <p><span class="text-muted">Location type:</span> {{ ucfirst($gig->location_type) }}</p>
+            @endif
+            @if($gig->location)
+            <p><span class="text-muted">Location:</span> {{ $gig->location }}</p>
+            @endif
+            @if($gig->phone)
+            <p><span class="text-muted">Call:</span> {{ $gig->phone }}</p>
+            @endif
+            @if(!empty($gig->details))
+            @foreach($gig->details as $key => $value)
+            @if($value)
+            <p><span class="text-muted">{{ ucfirst(str_replace('_', ' ', $key)) }}:</span> {{ $value }}</p>
+            @endif
+            @endforeach
+            @endif
+            @if($gig->attachment_path)
+            <p><a href="/storage/{{ $gig->attachment_path }}" target="_blank" class="text-accent">View attached brief</a></p>
+            @endif
+            @if($gig->delivery_attachment_path)
+            <p><a href="/storage/{{ $gig->delivery_attachment_path }}" target="_blank" class="text-accent">View delivered file</a></p>
+            @endif
+        </div>
+    </div>
+    @endif
+
     @if($poster)
     <div class="glass-card p-5 mt-6 flex items-center gap-3 reveal-on-scroll">
         <div class="w-12 h-12 rounded-full bg-card flex items-center justify-center font-semibold overflow-hidden">
@@ -50,8 +109,8 @@
             @endif
             <p class="text-xs text-muted mt-0.5">{{ $posterCompletedCount }} gig{{ $posterCompletedCount === 1 ? '' : 's' }} completed · Member since {{ $poster->created_at->format('M Y') }}</p>
         </div>
-        @if($poster->whatsapp ?? $gig->whatsapp)
-        <a href="https://wa.me/234{{ ltrim($gig->whatsapp, '0') }}" target="_blank" class="theme-toggle"><i data-lucide="message-circle" class="w-4 h-4"></i></a>
+        @if($gig->whatsappLink())
+        <a href="{{ $gig->whatsappLink() }}" target="_blank" class="theme-toggle"><i data-lucide="message-circle" class="w-4 h-4"></i></a>
         @endif
     </div>
     @endif
@@ -96,6 +155,18 @@
             @else
             <form method="POST" action="{{ route('gigs.accept', $gig->id) }}" onsubmit="return confirm('Claim this gig? You won\'t get paid until the poster confirms the delivered work.');">
                 @csrf
+                @if(!empty($gig->packages))
+                <div class="space-y-2 mb-3">
+                    <p class="text-sm text-muted">Choose a package:</p>
+                    @foreach($gig->packages as $i => $pkg)
+                    <label class="flex items-center gap-2 text-sm">
+                        <input type="radio" name="package_index" value="{{ $i }}" required>
+                        {{ $pkg['name'] }} — ₦{{ number_format($pkg['price']) }}
+                        @if(!empty($pkg['description']))<span class="text-muted">({{ $pkg['description'] }})</span>@endif
+                    </label>
+                    @endforeach
+                </div>
+                @endif
                 <button type="submit" class="btn-primary mt-6 w-full justify-center">Claim This Gig</button>
             </form>
             @endif
@@ -111,6 +182,18 @@
                 <form method="POST" action="{{ route('gigs.accept', $gig->id) }}">
                     @csrf
                     <input type="text" name="guest_name" required maxlength="255" placeholder="Your name" class="input-field !mt-0">
+                    @if(!empty($gig->packages))
+                    <div class="space-y-2 my-3">
+                        <p class="text-sm text-muted">Choose a package:</p>
+                        @foreach($gig->packages as $i => $pkg)
+                        <label class="flex items-center gap-2 text-sm">
+                            <input type="radio" name="package_index" value="{{ $i }}" required>
+                            {{ $pkg['name'] }} — ₦{{ number_format($pkg['price']) }}
+                            @if(!empty($pkg['description']))<span class="text-muted">({{ $pkg['description'] }})</span>@endif
+                        </label>
+                        @endforeach
+                    </div>
+                    @endif
                     <button type="submit" class="btn-primary mt-3 w-full justify-center">Claim This Gig</button>
                 </form>
             </div>
@@ -124,10 +207,15 @@
             @if($gig->accepted_by === auth()->id())
             <div class="glass-card p-5 mt-6 reveal-on-scroll">
                 <h2 class="font-semibold mb-3">Mark as Delivered</h2>
-                <form method="POST" action="{{ route('gigs.deliver', $gig->id) }}">
+                <form method="POST" action="{{ route('gigs.deliver', $gig->id) }}" enctype="multipart/form-data">
                     @csrf
                     <textarea name="delivery_note" placeholder="Optional note about what you delivered..." class="input-field !mt-0" rows="2"></textarea>
+                    <input type="file" name="delivery_attachment" class="input-field !mt-2">
                     <button type="submit" class="btn-primary mt-3 w-full justify-center">Mark as Delivered</button>
+                </form>
+                <form method="POST" action="{{ route('gigs.withdraw', $gig->id) }}" onsubmit="return confirm('Withdraw from this gig? It will go back to open for someone else to claim.');" class="mt-2">
+                    @csrf
+                    <button type="submit" class="btn-secondary w-full justify-center text-sm">Withdraw From This Gig</button>
                 </form>
             </div>
             @elseif($gig->user_id === auth()->id())
@@ -139,10 +227,15 @@
             @if($isGuestWorker)
             <div class="glass-card p-5 mt-6 reveal-on-scroll">
                 <h2 class="font-semibold mb-3">Mark as Delivered</h2>
-                <form method="POST" action="{{ route('gigs.deliver', $gig->id) }}">
+                <form method="POST" action="{{ route('gigs.deliver', $gig->id) }}" enctype="multipart/form-data">
                     @csrf
                     <textarea name="delivery_note" placeholder="Optional note about what you delivered..." class="input-field !mt-0" rows="2"></textarea>
+                    <input type="file" name="delivery_attachment" class="input-field !mt-2">
                     <button type="submit" class="btn-primary mt-3 w-full justify-center">Mark as Delivered</button>
+                </form>
+                <form method="POST" action="{{ route('gigs.withdraw', $gig->id) }}" onsubmit="return confirm('Withdraw from this gig? It will go back to open for someone else to claim.');" class="mt-2">
+                    @csrf
+                    <button type="submit" class="btn-secondary w-full justify-center text-sm">Withdraw From This Gig</button>
                 </form>
             </div>
             @else
@@ -216,24 +309,108 @@
         @if($poster && ($gig->accepted_by || $gig->user_id === auth()->id()))
         <div class="glass-card p-5 mt-6 reveal-on-scroll">
             <h2 class="font-semibold mb-3 flex items-center gap-2"><i data-lucide="message-square" class="w-4 h-4"></i> Chat</h2>
-            <div class="space-y-3 mb-4" style="max-height:300px;overflow-y:auto;">
+            <div id="gigChatMessages" class="space-y-3 mb-4" style="max-height:300px;overflow-y:auto;">
                 @forelse($messages as $msg)
-                <div class="flex {{ $msg->sender_id === auth()->id() ? 'justify-end' : 'justify-start' }}">
+                <div class="flex {{ $msg->sender_id === auth()->id() ? 'justify-end' : 'justify-start' }}" data-msg-id="{{ $msg->id }}">
                     <div class="{{ $msg->sender_id === auth()->id() ? 'btn-primary' : 'bg-card' }}" style="max-width:75%;padding:0.6rem 0.9rem;border-radius:1rem;">
-                        <p class="text-sm">{{ $msg->body }}</p>
+                        @if($msg->message_type === 'image' && ($msg->meta['url'] ?? null))
+                        <img src="{{ $msg->meta['url'] }}" style="max-width:100%;border-radius:0.5rem;margin-bottom:{{ $msg->body ? '0.4rem' : '0' }};">
+                        @endif
+                        @if($msg->body)<p class="text-sm">{{ $msg->body }}</p>@endif
                         <p class="text-xs mt-1" style="opacity:0.65;">{{ $msg->created_at->diffForHumans() }}</p>
                     </div>
                 </div>
                 @empty
-                <p class="text-muted text-sm">No messages yet — say hello.</p>
+                <p class="text-muted text-sm" id="gigChatEmptyState">No messages yet — say hello.</p>
                 @endforelse
             </div>
             @if($gig->accepted_by || $gig->user_id === auth()->id())
-            <form method="POST" action="{{ route('gigs.message', $gig->id) }}" class="flex gap-2">
+            <form id="gigChatForm" method="POST" action="{{ route('gigs.message', $gig->id) }}" enctype="multipart/form-data" class="flex gap-2" data-gig-id="{{ $gig->id }}" data-my-id="{{ auth()->id() }}">
                 @csrf
-                <input type="text" name="body" required placeholder="Type a message..." class="input-field !mt-0 flex-1">
+                <label class="btn-secondary" style="padding:0.6rem 0.75rem;cursor:pointer;">
+                    <i data-lucide="paperclip" class="w-4 h-4"></i>
+                    <input type="file" name="attachment" accept="image/*" style="display:none;" id="gigChatAttachment">
+                </label>
+                <input type="text" name="body" placeholder="Type a message..." class="input-field !mt-0 flex-1">
                 <button type="submit" class="btn-primary" style="padding:0.6rem 1rem;"><i data-lucide="send" class="w-4 h-4"></i></button>
             </form>
+            <script>
+            (function() {
+                const form = document.getElementById('gigChatForm');
+                if (!form) return;
+                const gigId = form.dataset.gigId;
+                const myId = form.dataset.myId;
+                const container = document.getElementById('gigChatMessages');
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+                function renderBubble(msg) {
+                    const mine = String(msg.sender_id) === String(myId);
+                    const wrap = document.createElement('div');
+                    wrap.className = 'flex ' + (mine ? 'justify-end' : 'justify-start');
+                    wrap.dataset.msgId = msg.id;
+                    const bubble = document.createElement('div');
+                    bubble.className = mine ? 'btn-primary' : 'bg-card';
+                    bubble.style.cssText = 'max-width:75%;padding:0.6rem 0.9rem;border-radius:1rem;';
+                    if (msg.message_type === 'image' && msg.meta && msg.meta.url) {
+                        const img = document.createElement('img');
+                        img.src = msg.meta.url;
+                        img.style.cssText = 'max-width:100%;border-radius:0.5rem;margin-bottom:' + (msg.body ? '0.4rem' : '0');
+                        bubble.appendChild(img);
+                    }
+                    if (msg.body) {
+                        const p = document.createElement('p');
+                        p.className = 'text-sm';
+                        p.textContent = msg.body;
+                        bubble.appendChild(p);
+                    }
+                    const time = document.createElement('p');
+                    time.className = 'text-xs mt-1';
+                    time.style.opacity = '0.65';
+                    time.textContent = msg.created_at;
+                    bubble.appendChild(time);
+                    wrap.appendChild(bubble);
+                    container.appendChild(wrap);
+                }
+
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(form);
+                    fetch(`/gigs/${gigId}/message`, {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+                        body: formData,
+                    })
+                    .then(r => r.json())
+                    .then(msg => {
+                        const empty = document.getElementById('gigChatEmptyState');
+                        if (empty) empty.remove();
+                        renderBubble(msg);
+                        container.scrollTop = container.scrollHeight;
+                        form.reset();
+                    })
+                    .catch(() => {});
+                });
+
+                function poll() {
+                    const seenIds = new Set(Array.from(container.querySelectorAll('[data-msg-id]')).map(el => el.dataset.msgId));
+                    fetch(`/gigs/${gigId}/messages`, { headers: { 'Accept': 'application/json' } })
+                        .then(r => r.ok ? r.json() : [])
+                        .then(messages => {
+                            let appended = false;
+                            messages.forEach(msg => {
+                                if (!seenIds.has(String(msg.id))) {
+                                    renderBubble(msg);
+                                    seenIds.add(String(msg.id));
+                                    appended = true;
+                                }
+                            });
+                            if (appended) container.scrollTop = container.scrollHeight;
+                        })
+                        .catch(() => {});
+                }
+                setInterval(poll, 4000);
+            })();
+            </script>
             @endif
         </div>
         @elseif($gig->guest_name && ($gig->user_id === auth()->id()))

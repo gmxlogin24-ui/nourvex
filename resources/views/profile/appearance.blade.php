@@ -1,11 +1,10 @@
 @extends('layouts.app-authenticated')
 @section('content')
 
-<main class="profile-shell p-6">
+<main class="profile-shell p-6 {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-page' : '' }}" style="{{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'padding-top:0 !important;max-width:1240px;' : '' }}">
     <a href="{{ route('profile.index') }}" class="profile-back-link"><i data-lucide="arrow-left" class="w-4 h-4"></i> Profile</a>
     <div class="profile-detail-grid">
     <div class="profile-detail-main">
-    <a href="{{ route('profile.index') }}" class="profile-back-link"><i data-lucide="arrow-left" class="w-4 h-4"></i> Profile</a>
     <h1 class="text-2xl font-semibold mb-1 hoverfade-text">Appearance</h1>
     <p class="text-muted text-sm mb-6">How the app looks for you</p>
 
@@ -13,7 +12,7 @@
     <div class="bg-green-500/10 text-green-500 text-sm rounded-lg p-3 mb-4">{{ session('status') }}</div>
     @endif
 
-    <div class="glass-card p-6 mb-6 reveal-on-scroll">
+    <div class="glass-card p-6 mb-6 reveal-on-scroll {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-card' : '' }}">
         <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data" class="space-y-5">
             @csrf
             <input type="hidden" name="name" value="{{ $user->name }}">
@@ -36,11 +35,12 @@
             <div>
                 <p class="text-sm font-medium mb-2">Theme Style</p>
                 <p class="text-muted text-xs mb-3">Changes how every card and button looks across the whole app.</p>
-                <div class="grid grid-cols-3 gap-3">
+                <div class="grid grid-cols-2 gap-3">
                     @foreach([
                         'glass' => ['label' => 'Glass', 'desc' => 'Frosted, translucent'],
                         'neumorphic' => ['label' => 'Neumorphic', 'desc' => 'Soft, embossed'],
                         'plain' => ['label' => 'Minimal', 'desc' => 'Flat, no shadows'],
+                        'aurora' => ['label' => 'Aurora', 'desc' => 'Soft, puffed glass'],
                     ] as $style => $meta)
                     <label class="theme-style-option" style="cursor:pointer;">
                         <input type="radio" name="theme_style" value="{{ $style }}" {{ ($user->theme_style ?? 'glass') === $style ? 'checked' : '' }} class="theme-style-radio" style="display:none;" onchange="previewThemeStyle('{{ $style }}')">
@@ -56,9 +56,9 @@
             <div>
                 <p class="text-sm font-medium mb-2">Accent Color</p>
                 <div class="flex items-center gap-3 flex-wrap">
-                    <input type="color" name="accent_color" id="accentColorInput" value="{{ $user->accent_color ?? '#38D9E8' }}" style="width:3rem;height:2.6rem;border-radius:0.75rem;border:1px solid var(--border-color);background:none;cursor:pointer;">
+                    <input type="color" name="accent_color" id="accentColorInput" value="{{ $user->accent_color ?? '#0F9D6E' }}" style="width:3rem;height:2.6rem;border-radius:0.75rem;border:1px solid var(--border-color);background:none;cursor:pointer;">
                     <div class="flex gap-2">
-                        @foreach(['#38D9E8','#F472B6','#A78BFA','#FB923C','#4ADE80','#F43F5E'] as $swatch)
+                        @foreach(['#0F9D6E','#F472B6','#A78BFA','#FB923C','#4ADE80','#F43F5E'] as $swatch)
                         <button type="button" onclick="document.getElementById('accentColorInput').value='{{ $swatch }}'; document.getElementById('accentColorInput').dispatchEvent(new Event('input'));" class="w-7 h-7 rounded-full" style="background:{{ $swatch }};border:2px solid var(--border-color);"></button>
                         @endforeach
                     </div>
@@ -70,16 +70,12 @@
                 <p class="text-muted text-xs mb-3">Changes the look of the bottom navigation bar on mobile.</p>
                 <div class="grid grid-cols-3 gap-3">
                     @foreach([
-                        'floating_glow' => ['label' => 'Floating Glow', 'desc' => 'Red glow, default'],
-                        'gradient_card' => ['label' => 'Gradient Card', 'desc' => 'Warm gradient'],
-                        'sidebar_accent' => ['label' => 'Sidebar Accent', 'desc' => 'Soft green'],
-                        'dark_ring' => ['label' => 'Dark Ring', 'desc' => 'Orange ring glow'],
-                        'white_pill_fab' => ['label' => 'White Pill', 'desc' => 'White dock, floating button'],
-                        'dark_floating_icons' => ['label' => 'Minimalist', 'desc' => 'Icon-only, no labels'],
+                        'painted_pill' => ['label' => 'Painted Pill', 'desc' => 'Rounded bottom, painted icon badges'],
+                        'edge_dock' => ['label' => 'Edge Dock', 'desc' => 'Draggable floating handle'],
                     ] as $style => $meta)
                     <label class="theme-style-option" style="cursor:pointer;">
-                        <input type="radio" name="mobile_nav_style" value="{{ $style }}" {{ ($user->mobile_nav_style ?? 'floating_glow') === $style ? 'checked' : '' }} class="dock-style-radio" style="display:none;" onchange="previewDockStyle('{{ $style }}')">
-                        <div class="theme-style-swatch" data-dock-swatch="{{ $style }}" style="border-radius:0.75rem;padding:0.75rem;text-align:center;border:2px solid {{ ($user->mobile_nav_style ?? 'floating_glow') === $style ? 'var(--color-accent)' : 'var(--border-color)' }};transition:border-color 0.2s;">
+                        <input type="radio" name="mobile_nav_style" value="{{ $style }}" {{ ($user->mobile_nav_style ?? 'painted_pill') === $style ? 'checked' : '' }} class="dock-style-radio" style="display:none;" onchange="previewDockStyle('{{ $style }}')">
+                        <div class="theme-style-swatch" data-dock-swatch="{{ $style }}" style="border-radius:0.75rem;padding:0.75rem;text-align:center;border:2px solid {{ ($user->mobile_nav_style ?? 'painted_pill') === $style ? 'var(--color-accent)' : 'var(--border-color)' }};transition:border-color 0.2s;">
                             <p class="text-sm font-medium">{{ $meta['label'] }}</p>
                             <p class="text-muted text-xs mt-1">{{ $meta['desc'] }}</p>
                         </div>
@@ -120,7 +116,7 @@
     </div>
 
         </div>
-    <div class="profile-detail-aside profile-shape-appearance" id="appearanceShapeAside" style="background: linear-gradient(135deg, var(--user-accent, #38D9E8), color-mix(in srgb, var(--user-accent, #38D9E8) 40%%, white));">
+    <div class="profile-detail-aside profile-shape-appearance" id="appearanceShapeAside" style="background: linear-gradient(135deg, var(--user-accent, #0F9D6E), color-mix(in srgb, var(--user-accent, #0F9D6E) 40%, white));">
         <div class="profile-shape-inner">
             <p class="profile-shape-title" style="color:#fff;">Your Accent</p>
             <p class="profile-shape-sub" style="color:rgba(255,255,255,0.85);">Live preview</p>

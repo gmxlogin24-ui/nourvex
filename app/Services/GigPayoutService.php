@@ -13,23 +13,30 @@ class GigPayoutService
      * Must always be called from inside a DB::transaction() with $worker
      * already locked (lockForUpdate) by the caller — this method does not
      * open its own transaction or lock.
+     *
+     * $overrideAmount: if given, pays out based on this amount instead of
+     * the gig's full price — used for partial dispute resolutions where
+     * the worker is only paid for a percentage of the job. Null (default)
+     * keeps the normal full-payout behavior.
      */
-    public function payout(Gig $gig, User $worker): void
+    public function payout(Gig $gig, User $worker, ?float $overrideAmount = null): void
     {
+        $baseAmount = $overrideAmount ?? $gig->amount;
+
         $rate = match ($worker->tier) {
             'tier2', 'tier3' => 0,
             'tier1' => 0.03,
             default => 0.05,
         };
-        $commission = round($gig->amount * $rate, 2);
-        $payout = $gig->amount - $commission;
+        $commission = round($baseAmount * $rate, 2);
+        $payout = $baseAmount - $commission;
 
         $worker->increment('wallet_balance', $payout);
         Transaction::create([
             'user_id' => $worker->id,
             'type' => 'gig_earning',
             'amount' => $payout,
-            'description' => 'Completed gig: ' . $gig->title . ($commission > 0 ? ' (after ₦' . number_format($commission) . ' platform fee)' : ''),
+            'description' => 'Completed gig: ' . $gig->title . ($commission > 0 ? ' (after ₦' . number_format($commission) . ' platform fee)' : '') . ($overrideAmount !== null ? ' (partial payout)' : ''),
         ]);
         \App\Models\PlatformRevenue::record('gigs', $commission, 'Commission: ' . $gig->title, 'gig', $gig->id);
 

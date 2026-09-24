@@ -238,12 +238,17 @@
 }
 .auth-form-wrap .glass-btn:hover { background: var(--color-accent-light) !important; }
 
-.auth-form-wrap .auth-logo-badge,
-.auth-form-wrap .logo-badge {
+.auth-form-wrap .auth-logo-badge {
   background: var(--color-accent) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   color: #fff !important;
+  border: none !important;
+}
+.auth-form-wrap .logo-badge {
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   border: none !important;
 }
 

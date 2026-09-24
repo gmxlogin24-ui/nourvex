@@ -17,7 +17,7 @@
     <div class="flex flex-col gap-3">
         @foreach($disputes as $dispute)
             @php $remaining = $dispute->gig->amount - $dispute->gig->escrowed_amount; @endphp
-            <div class="stat-card">
+            <div class="stat-card" data-lazy-card="lazy-wrap-gig" data-dispute-id="{{ $dispute->id }}">
                 <div class="flex justify-between items-start gap-3 mb-3">
                     <div>
                         <a href="{{ route('gigs.show', $dispute->gig_id) }}" class="text-accent font-semibold">{{ $dispute->gig->title }}</a>
@@ -36,6 +36,11 @@
                             @csrf
                             <button class="balance-chip primary" style="font-size:0.75rem;">Pay Worker</button>
                         </form>
+                        <form method="POST" action="{{ route('admin.disputes.partial', $dispute) }}" onsubmit="return confirm('Resolve as partial? Worker gets that % of the gig amount, poster is charged or refunded to match.');" class="flex items-center gap-1">
+                            @csrf
+                            <input type="number" name="worker_percent" min="0" max="100" step="1" required placeholder="%" class="input-field" style="width:60px;padding:0.3rem 0.4rem;font-size:0.75rem;">
+                            <button class="balance-chip" style="font-size:0.75rem;">Partial</button>
+                        </form>
                         <form method="POST" action="{{ route('admin.disputes.dismiss', $dispute) }}" onsubmit="return confirm('Dismiss this complaint? No payment will be made.');">
                             @csrf
                             <button class="balance-chip" style="font-size:0.75rem;">Dismiss</button>
@@ -48,5 +53,7 @@
     @else
     <div class="stat-card text-center text-muted py-8">No open disputes.</div>
     @endif
+
+    @include('partials.lazy-mode-bar', ['ccAgents' => $ccAgents, 'assignType' => 'gig'])
 </div>
 @endsection

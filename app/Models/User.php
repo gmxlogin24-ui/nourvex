@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use NotificationChannels\WebPush\HasPushSubscriptions;
 use Illuminate\Support\Facades\Hash;
 use App\Events\TierUpgraded;
 
@@ -19,7 +20,7 @@ use App\Events\TierUpgraded;
     'virtual_account_number', 'virtual_account_bank', 'virtual_account_ref',
     'account_type', 'business_name', 'business_logo', 'business_whatsapp', 'is_vendor_active', 'interests',
     'streak_days', 'last_active_date', 'leaderboard_opt_in', 'q_coin_streak_days', 'wallet_restricted', 'google_id', 'transaction_pin', 'theme_style', 'mobile_nav_style', 'sidebar_style',
-    'is_admin', 'role', 'level_id',
+    'is_admin', 'role', 'level_id', 'has_seen_tour',
     'signup_fee_paid', 'badge_tier', 'card_token', 'card_last4', 'card_type',
     'is_banned', 'subscription_expires_at', 'skills',
     'notif_style', 'navbar_style', 'topbar_style', 'card_style',
@@ -28,7 +29,7 @@ use App\Events\TierUpgraded;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasPushSubscriptions;
 
     protected function casts(): array
     {
@@ -37,6 +38,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'transaction_pin' => 'hashed',
             'interests' => 'array',
+            'customer_care_permissions' => 'array',
             'is_admin' => 'boolean',
             'leaderboard_opt_in' => 'boolean',
             'wallet_restricted' => 'boolean',
@@ -158,5 +160,13 @@ class User extends Authenticatable
     public function isCustomerCareOrAdmin(): bool
     {
         return $this->isAdmin() || $this->isCustomerCare();
+    }
+
+    public function hasCcPermission(string $key): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+        return in_array($key, $this->customer_care_permissions ?? [], true);
     }
 }

@@ -1,5 +1,6 @@
 @php
     $compact = $compact ?? false;
+    $tagLabel = $tagLabel ?? 'Sponsored';
     $placeholderSeeds = ['gigA', 'gigB', 'gigC', 'gigD', 'gigE', 'gigF'];
 @endphp
 <div class="sponsor-stack {{ $compact ? 'compact' : '' }}">
@@ -14,7 +15,7 @@
         <img src="https://picsum.photos/seed/{{ $placeholderSeeds[$i % count($placeholderSeeds)] }}/600/800" alt="Sponsored spot" loading="lazy">
         @endif
         <div class="sponsor-card-label">
-            <span class="tag">Sponsored</span>
+            <span class="tag">{{ $tagLabel }}</span>
             <span class="name">{{ $item['title'] ?? 'Featured' }}</span>
         </div>
     </div>

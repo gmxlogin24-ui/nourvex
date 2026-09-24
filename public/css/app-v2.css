@@ -98,12 +98,13 @@ body {
 
 .logo-badge {
   width: 2.25rem; height: 2.25rem;
-  border-radius: 0.65rem;
-  background-image: url('/images/qelvo-mark.png') !important;
-  background-size: cover !important;
+  background-image: url('/images/qelvo-mark.png?v=2') !important;
+  background-size: contain !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
   background-color: transparent !important;
+  border-radius: 0 !important;
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,0.25));
 }
 
 .hero-blob {
@@ -1416,7 +1417,7 @@ h1, h2, .balance-amount {
   overflow-y: auto;
 }
 .sidebar-logo { display: flex; align-items: center; gap: 0.6rem; padding: 0 0.35rem; }
-.sidebar-logo .logo-badge { background-image: url('/images/qelvo-mark.png') !important; background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important; background-color: transparent !important; }
+.sidebar-logo .logo-badge { background-image: url('/images/qelvo-mark.png?v=2') !important; background-size: contain !important; background-position: center !important; background-repeat: no-repeat !important; background-color: transparent !important; }
 .sidebar-search { position: relative; }
 .sidebar-links { display: flex; flex-direction: column; gap: 0.3rem; flex: 1; }
 .sidebar-links a {
@@ -3986,3 +3987,13 @@ main .grid.md\:grid-cols-3 .glass-card:has(.tx-status.done){
 }
 .balance-folder.is-open .folder-front{ opacity: .55; }
 .balance-folder .glass-balance-card{ box-shadow: 0 8px 32px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08); }
+
+/* ===== Force kpi-row to clean 2x2 on phone, featured tile stays full-width ===== */
+@media (max-width: 640px) {
+  .kpi-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .kpi-tile.featured {
+    grid-column: 1 / -1 !important;
+  }
+}

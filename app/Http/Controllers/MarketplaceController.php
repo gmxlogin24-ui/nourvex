@@ -142,25 +142,24 @@ class MarketplaceController extends Controller
         $conversations = collect();
 
         if (Auth::check() && $listing->user_id) {
+            $convs = \App\Models\Conversation::where('type', 'business')
+                ->where('subject_type', Listing::class)
+                ->where('subject_id', $listing->id)
+                ->whereHas('participants', fn($q) => $q->where('user_id', Auth::id()))
+                ->with(['messages.sender', 'participants'])
+                ->get();
+
             if ($isOwner) {
                 // Group all messages by the other party (each distinct buyer who has messaged).
-                $all = \App\Models\ListingMessage::where('listing_id', $listing->id)
-                    ->with(['sender', 'recipient'])
-                    ->orderBy('created_at')
-                    ->get();
-                $conversations = $all->groupBy(function ($m) use ($listing) {
-                    return $m->sender_id === $listing->user_id ? $m->recipient_id : $m->sender_id;
-                });
+                foreach ($convs as $conv) {
+                    $otherId = $conv->participants->pluck('user_id')->first(fn($id) => $id !== $listing->user_id);
+                    if ($otherId) {
+                        $conversations[$otherId] = $conv->messages;
+                    }
+                }
             } else {
-                $messages = \App\Models\ListingMessage::where('listing_id', $listing->id)
-                    ->where(function ($q) use ($listing) {
-                        $q->where('sender_id', Auth::id())->orWhere('recipient_id', Auth::id());
-                    })
-                    ->where(function ($q) use ($listing) {
-                        $q->where('sender_id', $listing->user_id)->orWhere('recipient_id', $listing->user_id);
-                    })
-                    ->orderBy('created_at')
-                    ->get();
+                $conv = $convs->first();
+                $messages = $conv ? $conv->messages : collect();
             }
         }
 
@@ -217,6 +216,7 @@ class MarketplaceController extends Controller
                 $listing->id, Auth::id(), $listing->buyer_id,
                 '📦 Marked as shipped.' . ($note ? ' ' . $note : '')
             );
+            \App\Models\User::find($listing->buyer_id)?->notify(new \App\Notifications\MarketplaceOrderShipped($listing));
         }
 
         return back()->with('status', 'Marked as shipped.');
@@ -231,12 +231,46 @@ class MarketplaceController extends Controller
         return view('marketplace.orders', ['orders' => $orders]);
     }
 
+    private function findOrCreateListingConversation(int $listingId, int $userA, int $userB): \App\Models\Conversation
+    {
+        $ids = collect([$userA, $userB])->unique()->sort()->values();
+        $existing = \App\Models\Conversation::where('type', 'business')
+            ->where('subject_type', \App\Models\Listing::class)
+            ->where('subject_id', $listingId)
+            ->whereHas('participants', fn($q) => $q->where('user_id', $ids[0]))
+            ->whereHas('participants', fn($q) => $q->where('user_id', $ids->count() > 1 ? $ids[1] : $ids[0]))
+            ->get()
+            ->first(function ($conv) use ($ids) {
+                $convUserIds = $conv->participants()->pluck('user_id')->unique()->sort()->values();
+                return $convUserIds->count() === $ids->count() && $convUserIds->all() === $ids->all();
+            });
+        if ($existing) return $existing;
+
+        $conv = \App\Models\Conversation::create([
+            'type' => 'business',
+            'subject_type' => \App\Models\Listing::class,
+            'subject_id' => $listingId,
+        ]);
+        foreach ($ids as $uid) {
+            \App\Models\ConversationParticipant::firstOrCreate(['conversation_id' => $conv->id, 'user_id' => $uid]);
+        }
+        return $conv;
+    }
+
     public function sendMessage(Request $request, Listing $listing)
     {
+        if (!app(\App\Services\TierService::class)->unlocked(Auth::user(), 'chat.enabled')) {
+            return back()->withErrors(['message' => 'Chat is currently unavailable.']);
+        }
+
         $validated = $request->validate([
-            'body' => 'required|string|max:1000',
+            'body' => 'nullable|string|max:1000',
+            'attachment' => 'nullable|image|max:4096',
             'recipient_id' => 'nullable|exists:users,id',
         ]);
+        if (empty($validated['body']) && !$request->hasFile('attachment')) {
+            return back()->withErrors(['message' => 'Type a message or attach a photo.']);
+        }
 
         if (!$listing->user_id) {
             return back()->withErrors(['message' => 'This listing has no seller to message.']);
@@ -250,18 +284,27 @@ class MarketplaceController extends Controller
                 return back()->withErrors(['message' => 'Select a buyer to reply to.']);
             }
         } else {
-            if ($userId === $listing->user_id) {
-                return back()->withErrors(['message' => 'You cannot message yourself about your own listing.']);
-            }
             $recipientId = $listing->user_id;
         }
 
-        $message = \App\Models\ListingMessage::create([
-            'listing_id' => $listing->id,
+        $conversation = $this->findOrCreateListingConversation($listing->id, $userId, $recipientId);
+
+        $messageType = 'text';
+        $meta = null;
+        if ($request->hasFile('attachment')) {
+            $path = $request->file('attachment')->store('chat-attachments', 'public');
+            $messageType = 'image';
+            $meta = ['url' => '/storage/' . $path];
+        }
+
+        $message = \App\Models\ConversationMessage::create([
+            'conversation_id' => $conversation->id,
             'sender_id' => $userId,
-            'recipient_id' => $recipientId,
-            'body' => $validated['body'],
+            'message_type' => $messageType,
+            'body' => $validated['body'] ?? null,
+            'meta' => $meta,
         ]);
+        $conversation->update(['last_message_at' => now()]);
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -298,10 +341,10 @@ class MarketplaceController extends Controller
         $recipientId = $isOwner ? ($validated['recipient_id'] ?? $listing->buyer_id) : $listing->user_id;
         abort_unless($recipientId, 422, 'No counterparty to send this proposal to.');
 
-        $message = \App\Models\ListingMessage::create([
-            'listing_id' => $listing->id,
+        $conversation = $this->findOrCreateListingConversation($listing->id, $userId, $recipientId);
+        $message = \App\Models\ConversationMessage::create([
+            'conversation_id' => $conversation->id,
             'sender_id' => $userId,
-            'recipient_id' => $recipientId,
             'body' => '📍 Meetup proposed: ' . $validated['when'] . ' at ' . $validated['where'],
             'message_type' => 'meetup_proposal',
             'meta' => [
@@ -311,6 +354,7 @@ class MarketplaceController extends Controller
                 'proposed_by' => $userId,
             ],
         ]);
+        $conversation->update(['last_message_at' => now()]);
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -328,9 +372,9 @@ class MarketplaceController extends Controller
 
     // Buyer or seller (whichever didn't propose) accepts/declines. Posts a
     // system-event confirmation into the same thread on either outcome.
-    public function respondMeetup(Request $request, Listing $listing, \App\Models\ListingMessage $message)
+    public function respondMeetup(Request $request, Listing $listing, \App\Models\ConversationMessage $message)
     {
-        abort_unless($message->listing_id === $listing->id, 404);
+        abort_unless($message->conversation->subject_type === \App\Models\Listing::class && (int) $message->conversation->subject_id === $listing->id, 404);
         abort_unless($message->message_type === 'meetup_proposal', 422, 'This message is not a meetup proposal.');
 
         $meta = $message->meta ?? [];
@@ -338,18 +382,24 @@ class MarketplaceController extends Controller
 
         $userId = Auth::id();
         abort_if((int) ($meta['proposed_by'] ?? 0) === $userId, 403, 'You cannot respond to your own proposal.');
-        abort_unless($userId === $message->sender_id || $userId === $message->recipient_id, 403, 'Not part of this conversation.');
+        abort_unless($message->conversation->participants()->where('user_id', $userId)->exists(), 403, 'Not part of this conversation.');
 
         $validated = $request->validate(['action' => 'required|in:accept,decline']);
 
         $meta['status'] = $validated['action'] === 'accept' ? 'accepted' : 'declined';
         $message->update(['meta' => $meta]);
 
-        $counterpartyId = $userId === $message->sender_id ? $message->recipient_id : $message->sender_id;
         $eventText = $validated['action'] === 'accept'
             ? '✅ Meetup confirmed — ' . ($meta['when'] ?? '') . ' at ' . ($meta['where'] ?? '')
             : '❌ Meetup proposal declined.';
-        \App\Models\ListingMessage::postSystemEvent($listing->id, $userId, $counterpartyId, $eventText);
+        \App\Models\ConversationMessage::create([
+            'conversation_id' => $message->conversation_id,
+            'sender_id' => $userId,
+            'is_system' => true,
+            'message_type' => 'text',
+            'body' => $eventText,
+        ]);
+        $message->conversation->update(['last_message_at' => now()]);
 
         if ($request->wantsJson()) {
             return response()->json(['status' => $meta['status']]);
@@ -370,26 +420,16 @@ class MarketplaceController extends Controller
 
         abort_unless($otherUserId, 422, 'other_user_id is required.');
 
-        $messages = \App\Models\ListingMessage::where('listing_id', $listing->id)
-            ->where(function ($q) use ($userId, $otherUserId) {
-                $q->where(function ($q2) use ($userId, $otherUserId) {
-                    $q2->where('sender_id', $userId)->where('recipient_id', $otherUserId);
-                })->orWhere(function ($q2) use ($userId, $otherUserId) {
-                    $q2->where('sender_id', $otherUserId)->where('recipient_id', $userId);
-                });
-            })
-            ->orderBy('created_at')
-            ->get()
-            ->map(fn ($m) => [
-                'id' => $m->id,
-                'sender_id' => $m->sender_id,
-                'recipient_id' => $m->recipient_id,
-                'body' => $m->body,
-                'is_system' => $m->is_system,
-                'message_type' => $m->message_type,
-                'meta' => $m->meta,
-                'created_at' => $m->created_at->diffForHumans(),
-            ]);
+        $conversation = $this->findOrCreateListingConversation($listing->id, $userId, (int) $otherUserId);
+        $messages = $conversation->messages()->get()->map(fn ($m) => [
+            'id' => $m->id,
+            'sender_id' => $m->sender_id,
+            'body' => $m->body,
+            'is_system' => $m->is_system,
+            'message_type' => $m->message_type,
+            'meta' => $m->meta,
+            'created_at' => $m->created_at->diffForHumans(),
+        ]);
 
         return response()->json($messages);
     }
@@ -452,6 +492,7 @@ class MarketplaceController extends Controller
                     $lockedListing->id, $lockedBuyer->id, $lockedListing->user_id,
                     '💰 Payment sent — ₦' . number_format($lockedListing->amount) . ' held in escrow until delivery is confirmed.'
                 );
+                \App\Models\User::find($lockedListing->user_id)?->notify(new \App\Notifications\MarketplaceOrderPlaced($lockedListing, $lockedBuyer));
             }
 
             return redirect()->route('marketplace.show', $lockedListing->id)->with('status', 'Payment sent — funds are held until you confirm you received the item.');
@@ -491,6 +532,7 @@ class MarketplaceController extends Controller
                     'description' => 'Sold: ' . $lockedListing->title . ($commission > 0 ? ' (after ₦' . number_format($commission) . ' platform fee)' : ''),
                 ]);
                 \App\Models\PlatformRevenue::record('marketplace', $commission, 'Commission: ' . $lockedListing->title, 'listing', $lockedListing->id);
+                $seller->notify(new \App\Notifications\MarketplaceSaleCompleted($lockedListing, $payout));
             }
 
             $lockedListing->update(['status' => 'completed']);
@@ -538,6 +580,7 @@ class MarketplaceController extends Controller
                     'description' => 'Sold (unit): ' . $listing->title . ($commission > 0 ? ' (after ₦' . number_format($commission) . ' platform fee)' : ''),
                 ]);
                 \App\Models\PlatformRevenue::record('marketplace', $commission, 'Commission (unit): ' . $listing->title, 'listing_order', $lockedOrder->id);
+                $seller->notify(new \App\Notifications\MarketplaceSaleCompleted($listing, $payout));
             }
 
             $lockedOrder->update(['status' => 'completed']);

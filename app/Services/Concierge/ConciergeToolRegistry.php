@@ -100,7 +100,7 @@ class ConciergeToolRegistry
         }
 
         if (!empty($input['max_budget'])) {
-            $q->where('budget', '<=', (float) $input['max_budget']);
+            $q->where('amount', '<=', (float) $input['max_budget']);
         }
 
         $gigs = $q->orderByDesc('created_at')->limit(5)->get();
@@ -110,7 +110,7 @@ class ConciergeToolRegistry
                 'gigs' => $gigs->map(fn (Gig $gig) => [
                     'id' => $gig->id,
                     'title' => $gig->title,
-                    'budget' => (float) $gig->budget,
+                    'budget' => (float) $gig->amount,
                     'url' => route('gigs.show', $gig),
                 ])->values(),
             ],
@@ -126,7 +126,7 @@ class ConciergeToolRegistry
         }
 
         if (!empty($input['max_price'])) {
-            $q->where('price', '<=', (float) $input['max_price']);
+            $q->where('amount', '<=', (float) $input['max_price']);
         }
 
         $listings = $q->orderByDesc('created_at')->limit(5)->get();
@@ -136,7 +136,7 @@ class ConciergeToolRegistry
                 'listings' => $listings->map(fn (Listing $listing) => [
                     'id' => $listing->id,
                     'title' => $listing->title,
-                    'price' => (float) $listing->price,
+                    'price' => (float) $listing->amount,
                     'url' => route('marketplace.show', $listing),
                 ])->values(),
             ],

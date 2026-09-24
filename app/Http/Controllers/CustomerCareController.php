@@ -26,6 +26,9 @@ class CustomerCareController extends Controller
     // ===== TRACKING / DELIVERY =====
     public function orders(Request $r)
     {
+        $user = Auth::user();
+        abort_unless($user->isAdmin() || $user->hasCcPermission('orders'), 403);
+
         $q = ListingOrder::with(['listing', 'buyer'])->latest();
         if ($r->filled('search')) {
             $q->where('tracking_id', 'like', "%{$r->search}%");
@@ -51,12 +54,30 @@ class CustomerCareController extends Controller
     // ===== DISPUTES =====
     public function gigDisputes()
     {
-        return view('customer-care.gig-disputes', ['disputes' => GigDispute::with(['gig', 'raisedBy'])->latest()->paginate(25)]);
+        $user = Auth::user();
+        abort_unless($user->isAdmin() || $user->hasCcPermission('gig_disputes'), 403);
+
+        $q = GigDispute::with(['gig', 'raisedBy', 'assignedTo'])->latest();
+        if (!$user->isAdmin()) {
+            $q->where(function ($sub) use ($user) {
+                $sub->whereNull('assigned_to')->orWhere('assigned_to', $user->id);
+            });
+        }
+        return view('customer-care.gig-disputes', ['disputes' => $q->paginate(25)]);
     }
 
     public function listingDisputes()
     {
-        return view('customer-care.listing-disputes', ['disputes' => ListingDispute::with(['listing', 'raisedBy'])->latest()->paginate(25)]);
+        $user = Auth::user();
+        abort_unless($user->isAdmin() || $user->hasCcPermission('listing_disputes'), 403);
+
+        $q = ListingDispute::with(['listing', 'raisedBy', 'assignedTo'])->latest();
+        if (!$user->isAdmin()) {
+            $q->where(function ($sub) use ($user) {
+                $sub->whereNull('assigned_to')->orWhere('assigned_to', $user->id);
+            });
+        }
+        return view('customer-care.listing-disputes', ['disputes' => $q->paginate(25)]);
     }
 
     public function addGigDisputeNote(Request $r, GigDispute $dispute)
@@ -90,37 +111,84 @@ class CustomerCareController extends Controller
     // ===== MESSAGING (join existing threads) =====
     public function gigThread(\App\Models\Gig $gig)
     {
-        $messages = GigMessage::where('gig_id', $gig->id)->with(['sender', 'recipient'])->orderBy('created_at')->get();
+        $conversation = \App\Models\Conversation::where('type', 'business')
+            ->where('subject_type', \App\Models\Gig::class)
+            ->where('subject_id', $gig->id)
+            ->first();
+        $messages = $conversation ? $conversation->messages()->with('sender')->get() : collect();
         return view('customer-care.gig-thread', ['gig' => $gig, 'messages' => $messages]);
     }
 
     public function sendGigMessage(Request $r, \App\Models\Gig $gig)
     {
         $validated = $r->validate(['recipient_id' => 'required|exists:users,id', 'body' => 'required|string|max:2000']);
-        GigMessage::create([
-            'gig_id' => $gig->id,
+
+        $conversation = \App\Models\Conversation::where('type', 'business')
+            ->where('subject_type', \App\Models\Gig::class)
+            ->where('subject_id', $gig->id)
+            ->first();
+        if (!$conversation) {
+            $conversation = \App\Models\Conversation::create([
+                'type' => 'business',
+                'subject_type' => \App\Models\Gig::class,
+                'subject_id' => $gig->id,
+            ]);
+        }
+        foreach ([$gig->user_id, $gig->accepted_by] as $uid) {
+            if ($uid) {
+                \App\Models\ConversationParticipant::firstOrCreate(['conversation_id' => $conversation->id, 'user_id' => $uid]);
+            }
+        }
+
+        \App\Models\ConversationMessage::create([
+            'conversation_id' => $conversation->id,
             'sender_id' => Auth::id(),
-            'recipient_id' => $validated['recipient_id'],
+            'message_type' => 'text',
+            'is_system' => false,
             'body' => '[Customer Care] ' . $validated['body'],
         ]);
+        $conversation->update(['last_message_at' => now()]);
+
         return back()->with('status', 'Message sent.');
     }
 
     public function listingThread(\App\Models\Listing $listing)
     {
-        $messages = ListingMessage::where('listing_id', $listing->id)->with(['sender', 'recipient'])->orderBy('created_at')->get();
+        $messages = \App\Models\ConversationMessage::whereHas('conversation', function ($q) use ($listing) {
+            $q->where('type', 'business')->where('subject_type', \App\Models\Listing::class)->where('subject_id', $listing->id);
+        })->with('sender')->orderBy('created_at')->get();
         return view('customer-care.listing-thread', ['listing' => $listing, 'messages' => $messages]);
     }
 
     public function sendListingMessage(Request $r, \App\Models\Listing $listing)
     {
         $validated = $r->validate(['recipient_id' => 'required|exists:users,id', 'body' => 'required|string|max:2000']);
-        ListingMessage::create([
-            'listing_id' => $listing->id,
+        $ids = collect([$listing->user_id, (int) $validated['recipient_id']])->unique()->sort()->values();
+        $conversation = \App\Models\Conversation::where('type', 'business')
+            ->where('subject_type', \App\Models\Listing::class)
+            ->where('subject_id', $listing->id)
+            ->get()
+            ->first(function ($conv) use ($ids) {
+                $convIds = $conv->participants()->pluck('user_id')->unique()->sort()->values();
+                return $convIds->all() === $ids->all();
+            });
+        if (!$conversation) {
+            $conversation = \App\Models\Conversation::create([
+                'type' => 'business',
+                'subject_type' => \App\Models\Listing::class,
+                'subject_id' => $listing->id,
+            ]);
+            foreach ($ids as $uid) {
+                \App\Models\ConversationParticipant::firstOrCreate(['conversation_id' => $conversation->id, 'user_id' => $uid]);
+            }
+        }
+        \App\Models\ConversationMessage::create([
+            'conversation_id' => $conversation->id,
             'sender_id' => Auth::id(),
-            'recipient_id' => $validated['recipient_id'],
+            'message_type' => 'text',
             'body' => '[Customer Care] ' . $validated['body'],
         ]);
+        $conversation->update(['last_message_at' => now()]);
         return back()->with('status', 'Message sent.');
     }
 
@@ -149,6 +217,9 @@ class CustomerCareController extends Controller
     // ===== READ-ONLY USER LOOKUP =====
     public function userLookup(Request $r)
     {
+        $authUser = Auth::user();
+        abort_unless($authUser->isAdmin() || $authUser->hasCcPermission('user_lookup'), 403);
+
         $user = null;
         if ($r->filled('search')) {
             $user = \App\Models\User::where('email', $r->search)->orWhere('name', 'like', "%{$r->search}%")->first();

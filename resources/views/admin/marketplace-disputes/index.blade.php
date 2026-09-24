@@ -16,7 +16,7 @@
     @if($disputes->count())
     <div class="flex flex-col gap-3">
         @foreach($disputes as $dispute)
-            <div class="stat-card">
+            <div class="stat-card" data-lazy-card="lazy-wrap-listing" data-dispute-id="{{ $dispute->id }}">
                 <div class="flex justify-between items-start gap-3 mb-3">
                     <div>
                         <a href="{{ route('marketplace.show', $dispute->listing_id) }}" class="text-accent font-semibold">{{ $dispute->listing->title }}</a>
@@ -51,5 +51,7 @@
     @else
     <div class="stat-card text-center text-muted py-8">No open disputes.</div>
     @endif
+
+    @include('partials.lazy-mode-bar', ['ccAgents' => $ccAgents, 'assignType' => 'listing'])
 </div>
 @endsection

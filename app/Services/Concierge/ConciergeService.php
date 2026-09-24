@@ -12,14 +12,15 @@ use RuntimeException;
 class ConciergeService
 {
     protected const MAX_TOOL_ROUNDS = 4;
+    protected const MAX_RETRIES = 3;
 
     public function __construct(protected ConciergeToolRegistry $tools) {}
 
     protected function systemPrompt(User $user): string
     {
         return "You are LEVI, QLEVO's built-in AI assistant. You are not a generic chatbot - you are "
-            . "a native part of the QLEVO product, and you should never refer to yourself as Claude, "
-            . "an Anthropic model, or any name other than LEVI. If asked what model or company powers you, "
+            . "a native part of the QLEVO product, and you should never refer to yourself as Gemini, "
+            . "a Google model, or any name other than LEVI. If asked what model or company powers you, "
             . "say you're LEVI, built for QLEVO, and redirect back to helping them. "
             . "QLEVO is an ecosystem with Gigs, a Marketplace, a Wallet, and Q Coin rewards. "
             . "Your personality: warm, sharp, a little upbeat - like a capable friend who works at QLEVO "
@@ -34,11 +35,6 @@ class ConciergeService
             . "The user's name is {$user->name} and their tier is {$user->tier}.";
     }
 
-    /**
-     * Send a user message, run the tool-use loop, persist everything,
-     * return the assistant's final reply plus any client actions
-     * (e.g. navigation) that occurred along the way.
-     */
     public function handleUserMessage(User $user, Conversation $conversation, string $userText): array
     {
         ConversationMessage::create([
@@ -53,50 +49,45 @@ class ConciergeService
         $roundsLeft = self::MAX_TOOL_ROUNDS;
 
         while ($roundsLeft-- > 0) {
-            $response = $this->callClaude($user, $history);
-            $stopReason = $response['stop_reason'] ?? null;
-            $toolUses = array_filter($response['content'] ?? [], fn ($b) => ($b['type'] ?? null) === 'tool_use');
+            $response = $this->callGemini($user, $history);
+            $parts = $response['candidates'][0]['content']['parts'] ?? [];
+            $functionCalls = array_filter($parts, fn ($p) => isset($p['functionCall']));
 
-            if (empty($toolUses)) {
-                $text = $this->extractText($response);
+            if (empty($functionCalls)) {
+                $text = $this->extractText($parts);
                 $this->persistAssistantMessage($conversation, $text, null);
                 return ['reply' => $text, 'client_actions' => $clientActions];
             }
 
-            // Assistant turn (including tool_use blocks) goes back into history
-            $history[] = ['role' => 'assistant', 'content' => $response['content']];
+            $history[] = ['role' => 'model', 'parts' => $parts];
 
-            $toolResults = [];
-            foreach ($toolUses as $toolUse) {
-                $execResult = $this->tools->execute($user, $toolUse['name'], $toolUse['input'] ?? []);
+            $responseParts = [];
+            foreach ($functionCalls as $call) {
+                $name = $call['functionCall']['name'] ?? '';
+                $args = $call['functionCall']['args'] ?? [];
+                $execResult = $this->tools->execute($user, $name, $args);
 
                 if (isset($execResult['client_action'])) {
                     $clientActions[] = $execResult['client_action'];
                 }
 
-                $toolResults[] = [
-                    'type' => 'tool_result',
-                    'tool_use_id' => $toolUse['id'],
-                    'content' => json_encode($execResult['result'] ?? []),
+                $responseParts[] = [
+                    'functionResponse' => [
+                        'name' => $name,
+                        'response' => $execResult['result'] ?? [],
+                    ],
                 ];
 
-                // Log the tool call itself as a system-ish message for auditability
                 ConversationMessage::create([
                     'conversation_id' => $conversation->id,
                     'is_ai' => true,
                     'message_type' => 'action_card',
                     'body' => null,
-                    'meta' => ['tool' => $toolUse['name'], 'input' => $toolUse['input'] ?? [], 'result' => $execResult['result'] ?? []],
+                    'meta' => ['tool' => $name, 'input' => $args, 'result' => $execResult['result'] ?? []],
                 ]);
             }
 
-            $history[] = ['role' => 'user', 'content' => $toolResults];
-
-            if ($stopReason !== 'tool_use') {
-                $text = $this->extractText($response);
-                $this->persistAssistantMessage($conversation, $text, null);
-                return ['reply' => $text, 'client_actions' => $clientActions];
-            }
+            $history[] = ['role' => 'user', 'parts' => $responseParts];
         }
 
         $fallback = "I ran into a lot of steps handling that — could you rephrase or simplify the request?";
@@ -104,37 +95,68 @@ class ConciergeService
         return ['reply' => $fallback, 'client_actions' => $clientActions];
     }
 
-    protected function callClaude(User $user, array $messages): array
+    protected function callGemini(User $user, array $contents): array
     {
-        $apiKey = config('services.anthropic.api_key');
+        $apiKey = config('services.gemini.api_key');
         if (!$apiKey) {
-            throw new RuntimeException('ANTHROPIC_API_KEY is not set.');
+            throw new RuntimeException('GEMINI_API_KEY is not set.');
+        }
+        $model = config('services.gemini.model', 'gemini-flash-latest');
+
+        $body = [
+            'system_instruction' => ['parts' => [['text' => $this->systemPrompt($user)]]],
+            'contents' => $contents,
+            'tools' => [['functionDeclarations' => $this->toGeminiTools($this->tools->schemas())]],
+        ];
+
+        $attempt = 0;
+        $lastError = null;
+
+        while ($attempt < self::MAX_RETRIES) {
+            $attempt++;
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'X-goog-api-key' => $apiKey,
+            ])->timeout(30)->post(
+                "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent",
+                $body
+            );
+
+            if ($response->successful()) {
+                return $response->json();
+            }
+
+            $status = $response->status();
+            $lastError = $response->body();
+
+            // 503 = model overloaded, temporary - retry with backoff.
+            // Anything else (bad key, bad request) - fail immediately, retrying won't help.
+            if ($status !== 503) {
+                break;
+            }
+
+            usleep(500000 * $attempt); // 0.5s, 1s, 1.5s
         }
 
-        $response = Http::withHeaders([
-            'x-api-key' => $apiKey,
-            'anthropic-version' => '2023-06-01',
-            'content-type' => 'application/json',
-        ])->timeout(30)->post('https://api.anthropic.com/v1/messages', [
-            'model' => config('services.anthropic.model'),
-            'max_tokens' => 1024,
-            'system' => $this->systemPrompt($user),
-            'messages' => $messages,
-            'tools' => $this->tools->schemas(),
-        ]);
-
-        if ($response->failed()) {
-            Log::error('Concierge Claude call failed', ['status' => $response->status(), 'body' => $response->body()]);
-            throw new RuntimeException('Concierge is temporarily unavailable.');
-        }
-
-        return $response->json();
+        Log::error('Concierge Gemini call failed', ['error' => $lastError]);
+        throw new RuntimeException('LEVI is temporarily unavailable — please try again in a moment.');
     }
 
-    protected function extractText(array $response): string
+    protected function toGeminiTools(array $anthropicSchemas): array
     {
-        $textBlocks = array_filter($response['content'] ?? [], fn ($b) => ($b['type'] ?? null) === 'text');
-        return trim(implode("\n", array_map(fn ($b) => $b['text'], $textBlocks))) ?: "Done.";
+        return array_map(function ($tool) {
+            return [
+                'name' => $tool['name'],
+                'description' => $tool['description'],
+                'parameters' => $tool['input_schema'],
+            ];
+        }, $anthropicSchemas);
+    }
+
+    protected function extractText(array $parts): string
+    {
+        $texts = array_filter(array_map(fn ($p) => $p['text'] ?? null, $parts));
+        return trim(implode("\n", $texts)) ?: "Done.";
     }
 
     protected function persistAssistantMessage(Conversation $conversation, string $text, ?array $meta): void
@@ -149,27 +171,17 @@ class ConciergeService
         $conversation->update(['last_message_at' => now()]);
     }
 
-    /**
-     * Rebuild the Claude message array from stored conversation history.
-     * Tool-call/result pairs stored as action_card messages are replayed
-     * as assistant/tool_result turns so context survives across requests.
-     */
     protected function buildHistoryPayload(Conversation $conversation): array
     {
-        $messages = $conversation->messages()->orderBy('created_at')->limit(40)->get();
-        $payload = [];
-
-        foreach ($messages as $m) {
-            if ($m->message_type === 'action_card') {
-                continue; // reconstructing full tool-call turns from storage is a v2 concern; keep context on plain text turns for now
-            }
-            if ($m->is_ai) {
-                $payload[] = ['role' => 'assistant', 'content' => $m->body ?? ''];
-            } elseif (!$m->is_system) {
-                $payload[] = ['role' => 'user', 'content' => $m->body ?? ''];
-            }
-        }
-
-        return $payload;
+        return $conversation->messages()
+            ->orderBy('created_at')
+            ->get()
+            ->filter(fn ($m) => $m->message_type === 'text')
+            ->map(fn ($m) => [
+                'role' => $m->is_ai ? 'model' : 'user',
+                'parts' => [['text' => $m->body ?? '']],
+            ])
+            ->values()
+            ->toArray();
     }
 }

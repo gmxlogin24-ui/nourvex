@@ -49,7 +49,7 @@ class EnsureSignupFeePaid
             }
 
             return redirect()->route('signup-fee.activate')
-                ->withErrors(['payment' => 'Activate your account (₦200) to continue.']);
+                ->withErrors(['payment' => 'Activate your account (₦100) to continue.']);
         }
 
         return $next($request);

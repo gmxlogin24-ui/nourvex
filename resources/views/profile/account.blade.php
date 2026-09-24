@@ -1,7 +1,7 @@
 @extends('layouts.app-authenticated')
 @section('content')
 
-<main class="profile-shell p-6">
+<main class="profile-shell p-6 {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-page' : '' }}" style="{{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'padding-top:0 !important;max-width:1240px;' : '' }}">
     <a href="{{ route('profile.index') }}" class="profile-back-link"><i data-lucide="arrow-left" class="w-4 h-4"></i> Profile</a>
 
     <div class="profile-detail-grid">
@@ -16,7 +16,7 @@
             <div class="bg-red-500/10 text-red-500 text-sm rounded-lg p-3 mb-4">{{ $errors->first() }}</div>
             @endif
 
-            <div class="glass-card p-6 mb-6 reveal-on-scroll">
+            <div class="glass-card p-6 mb-6 reveal-on-scroll {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-card' : '' }}">
                 <h2 class="font-semibold mb-4">Basic Info</h2>
                 <form method="POST" action="{{ route('profile.update') }}" class="space-y-4">
                     @csrf
@@ -32,7 +32,7 @@
                 </form>
             </div>
 
-            <div class="glass-card p-6 reveal-on-scroll">
+            <div class="glass-card p-6 reveal-on-scroll {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-card' : '' }}">
                 <h2 class="font-semibold mb-4">Change Password</h2>
                 <form method="POST" action="{{ route('profile.password') }}" class="space-y-4">
                     @csrf

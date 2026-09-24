@@ -26,10 +26,8 @@
         <h3 style="font-weight:700;margin-bottom:1rem;">Mobile bottom nav style <span style="font-weight:400;font-size:0.78rem;color:var(--color-muted)">(phones only — desktop keeps the sidebar)</span></h3>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
             @foreach([
-                'floating_glow' => 'Floating Glow',
-                'gradient_card' => 'Gradient Card',
-                'sidebar_accent' => 'Green Accent',
-                'dark_ring' => 'Dark Ring',
+                'painted_pill' => 'Painted Pill',
+                'edge_dock' => 'Edge Dock',
             ] as $val => $label)
             <button type="button" class="mnav-style-choice" data-value="{{ $val }}"
                 style="padding:0.5rem 1rem;border-radius:999px;border:1.5px solid var(--border-color,#e2e2e2);background:var(--color-card,#fff);cursor:pointer;font-size:0.8rem;font-weight:600;">
@@ -78,7 +76,7 @@
         sidebar_style: '{{ auth()->user()->sidebar_style ?? "default" }}',
         card_style: '{{ auth()->user()->card_style ?? "default" }}',
         accent_color: '{{ auth()->user()->accent_color ?? "#38D9E8" }}',
-        mobile_nav_style: '{{ auth()->user()->mobile_nav_style ?? "floating_glow" }}',
+        mobile_nav_style: '{{ auth()->user()->mobile_nav_style ?? "painted_pill" }}',
     };
 
     const attrMap = {

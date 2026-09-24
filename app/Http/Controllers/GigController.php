@@ -7,6 +7,7 @@ use App\Models\GigView;
 use App\Models\Review;
 use App\Services\GigPayoutService;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Transaction;
@@ -37,10 +38,20 @@ class GigController extends Controller
             ->with(['poster', 'worker', 'reviews']);
 
         if ($request->filled('search')) {
-            $query->where('gigs.title', 'like', '%' . $request->search . '%');
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('gigs.title', 'like', '%' . $search . '%')
+                  ->orWhere('gigs.description', 'like', '%' . $search . '%');
+            });
         }
         if ($request->filled('category')) {
             $query->where('gigs.category', $request->category);
+        }
+        if ($request->filled('min_price')) {
+            $query->where('gigs.amount', '>=', $request->min_price);
+        }
+        if ($request->filled('max_price')) {
+            $query->where('gigs.amount', '<=', $request->max_price);
         }
         if ($request->sort === 'newest') {
             $query->reorder('gigs.created_at', 'desc');
@@ -64,9 +75,27 @@ class GigController extends Controller
             return $gig;
         });
 
+        // $gigs stays the FULL filtered collection - index.blade.php and
+        // guest.blade.php both compute stats (open count, category counts,
+        // average reward) from it directly, so it's left untouched. Only
+        // the grid display gets a paginated slice, as its own variable.
+        $perPage = 12;
+        $page = LengthAwarePaginator::resolveCurrentPage();
+        $gigsPage = new LengthAwarePaginator(
+            $gigs->slice(($page - 1) * $perPage, $perPage)->values(),
+            $gigs->count(),
+            $perPage,
+            $page,
+            ['path' => LengthAwarePaginator::resolveCurrentPath(), 'query' => $request->query()]
+        );
+
         $categories = Gig::select('category')->distinct()->pluck('category')->filter()->values();
 
-        return view(Auth::check() ? 'gigs.index' : 'gigs.guest', ['gigs' => $gigs, 'categories' => $categories]);
+        return view(Auth::check() ? 'gigs.index' : 'gigs.guest', [
+            'gigs' => $gigs,
+            'gigsPage' => $gigsPage,
+            'categories' => $categories,
+        ]);
     }
 
     public function show(Request $request, Gig $gig)
@@ -89,14 +118,13 @@ class GigController extends Controller
         if (Auth::check() && $poster) {
             $otherUserId = Auth::id() === $poster->id ? $gig->accepted_by : $poster->id;
             if ($otherUserId) {
-                $messages = GigMessage::where('gig_id', $gig->id)
-                    ->where(function ($q) use ($otherUserId) {
-                        $q->where(fn($q2) => $q2->where('sender_id', Auth::id())->where('recipient_id', $otherUserId))
-                          ->orWhere(fn($q2) => $q2->where('sender_id', $otherUserId)->where('recipient_id', Auth::id()));
-                    })
-                    ->with('sender')
-                    ->oldest()
-                    ->get();
+                $conversation = \App\Models\Conversation::where('type', 'business')
+                    ->where('subject_type', Gig::class)
+                    ->where('subject_id', $gig->id)
+                    ->first();
+                if ($conversation) {
+                    $messages = $conversation->messages()->with('sender')->get();
+                }
             }
         }
 
@@ -122,7 +150,16 @@ class GigController extends Controller
 
     public function sendMessage(Request $request, Gig $gig)
     {
-        $validated = $request->validate(['body' => 'required|string|max:1000']);
+        if (!app(\App\Services\TierService::class)->unlocked(Auth::user(), 'chat.enabled')) {
+            return back()->withErrors(['message' => 'Chat is currently unavailable.']);
+        }
+        $validated = $request->validate([
+            'body' => 'nullable|string|max:1000',
+            'attachment' => 'nullable|image|max:4096',
+        ]);
+        if (empty($validated['body']) && !$request->hasFile('attachment')) {
+            return back()->withErrors(['message' => 'Type a message or attach a photo.']);
+        }
 
         $poster = $gig->poster;
         if (!$poster) {
@@ -134,48 +171,107 @@ class GigController extends Controller
             return back()->withErrors(['message' => 'No one to message yet — wait until someone claims this gig.']);
         }
 
-        GigMessage::create([
-            'gig_id' => $gig->id,
+        $conversation = \App\Models\Conversation::where('type', 'business')
+            ->where('subject_type', Gig::class)
+            ->where('subject_id', $gig->id)
+            ->first();
+        if (!$conversation) {
+            $conversation = \App\Models\Conversation::create([
+                'type' => 'business',
+                'subject_type' => Gig::class,
+                'subject_id' => $gig->id,
+            ]);
+        }
+        foreach ([Auth::id(), $recipientId] as $uid) {
+            \App\Models\ConversationParticipant::firstOrCreate(['conversation_id' => $conversation->id, 'user_id' => $uid]);
+        }
+
+        $messageType = 'text';
+        $meta = null;
+        if ($request->hasFile('attachment')) {
+            $path = $request->file('attachment')->store('chat-attachments', 'public');
+            $messageType = 'image';
+            $meta = ['url' => '/storage/' . $path];
+        }
+
+        $message = \App\Models\ConversationMessage::create([
+            'conversation_id' => $conversation->id,
             'sender_id' => Auth::id(),
-            'recipient_id' => $recipientId,
-            'body' => $validated['body'],
+            'message_type' => $messageType,
+            'body' => $validated['body'] ?? null,
+            'meta' => $meta,
         ]);
+        $conversation->update(['last_message_at' => now()]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'id' => $message->id,
+                'sender_id' => $message->sender_id,
+                'body' => $message->body,
+                'message_type' => $message->message_type,
+                'meta' => $message->meta,
+                'created_at' => $message->created_at->diffForHumans(),
+            ]);
+        }
 
         return back();
     }
 
+    public function messages(Gig $gig)
+    {
+        $userId = Auth::id();
+        $poster = $gig->poster;
+        if (!$poster) {
+            return response()->json([]);
+        }
+        $otherUserId = $userId === $poster->id ? $gig->accepted_by : $poster->id;
+        if (!$otherUserId) {
+            return response()->json([]);
+        }
+        $conversation = \App\Models\Conversation::where('type', 'business')
+            ->where('subject_type', Gig::class)
+            ->where('subject_id', $gig->id)
+            ->first();
+        $messages = $conversation ? $conversation->messages()->get() : collect();
+        return response()->json($messages->map(fn ($m) => [
+            'id' => $m->id,
+            'sender_id' => $m->sender_id,
+            'body' => $m->body,
+            'is_system' => $m->is_system,
+            'message_type' => $m->message_type,
+            'meta' => $m->meta,
+            'created_at' => $m->created_at->diffForHumans(),
+        ]));
+    }
+
     // Open-gig caps by tier: free=4, tier1=10, tier2/tier3=unlimited.
-    private function gigPostCap(string $tier): ?int
+    // Caps how many gigs a user can have claimed (in_progress or delivered)
+    // at once - not how many they post. Posting is uncapped for gigs.
+    private function claimCap(string $tier): ?int
     {
         return match ($tier) {
             'tier2', 'tier3' => null,
-            'tier1' => 10,
-            default => 4,
+            'tier1' => 5,
+            default => 2,
         };
     }
 
     public function create()
     {
-        $user = Auth::user();
-
-        $cap = $this->gigPostCap($user->tier);
-        $openCount = Gig::where('user_id', $user->id)->where('status', 'open')->count();
-        $remaining = $cap === null ? null : max(0, $cap - $openCount);
-        $canPost = $cap === null || $remaining > 0;
-        if (!$canPost) {
-            return redirect()->route('subscriptions.index')->withErrors([
-                'tier' => 'You\'ve reached your open gig limit (' . $cap . '). Upgrade for a higher limit.'
-            ]);
-        }
-
-        return view('gigs.create', ['freePostsRemaining' => $remaining]);
+        return view('gigs.create', [
+            'freePostsRemaining' => null,
+            'categories' => array_keys(config('gig_categories')),
+        ]);
     }
 
     public function edit(Gig $gig)
     {
         abort_unless($gig->user_id === Auth::id(), 403, 'You can only edit your own gigs.');
         abort_if($gig->status !== 'open', 403, 'You can only edit a gig while it is still open.');
-        return view('gigs.edit', ['gig' => $gig]);
+        return view('gigs.edit', [
+            'gig' => $gig,
+            'categories' => array_keys(config('gig_categories')),
+        ]);
     }
 
     // Editing only happens while status === 'open', i.e. before a deposit was
@@ -190,21 +286,47 @@ class GigController extends Controller
             'title' => 'required|string|max:255',
             'category' => 'required|string|max:100',
             'description' => 'nullable|string',
-            'amount' => 'required|numeric|min:1',
+            'amount' => 'required_without:packages|nullable|numeric|min:1',
             'whatsapp' => 'nullable|string|max:20',
             'phone' => 'nullable|string|max:20',
+            'deadline' => 'nullable|date|after_or_equal:today',
+            'location_type' => 'nullable|in:remote,onsite,pickup',
+            'location' => 'nullable|string|max:255',
+            'attachment' => 'nullable|file|max:2048',
+            'details' => 'nullable|array',
+            'details.*' => 'nullable|string|max:500',
+            'has_item' => 'nullable|boolean',
+            'item_name' => 'nullable|required_if:has_item,1|string|max:255',
+            'item_qty' => 'nullable|integer|min:1',
+            'item_cost' => 'nullable|numeric|min:0',
+            'delivery_address' => 'nullable|string|max:255',
+            'item_delivery_method' => 'nullable|in:meetup,ship',
+            'packages' => 'nullable|array|max:3',
+            'packages.*.name' => 'required_with:packages|string|max:100',
+            'packages.*.price' => 'required_with:packages|numeric|min:1',
+            'packages.*.description' => 'nullable|string|max:500',
         ]);
+
+        $packages = !empty($validated['packages'])
+            ? array_values(array_filter($validated['packages'], fn ($p) => !empty($p['name']) && !empty($p['price'])))
+            : null;
+        $computedAmount = $packages ? min(array_column($packages, 'price')) : $validated['amount'];
 
         $posterId = Auth::id();
 
-        $result = DB::transaction(function () use ($gig, $validated, $posterId) {
+        $attachmentPath = null;
+        if ($request->hasFile('attachment')) {
+            $attachmentPath = $request->file('attachment')->store('gig-attachments', 'public');
+        }
+
+        $result = DB::transaction(function () use ($gig, $validated, $posterId, $attachmentPath, $packages, $computedAmount) {
             $lockedGig = Gig::where('id', $gig->id)->lockForUpdate()->first();
 
             if ($lockedGig->user_id !== $posterId || $lockedGig->status !== 'open') {
                 return ['ok' => false];
             }
 
-            $newDeposit = round($validated['amount'] * 0.5, 2);
+            $newDeposit = round($computedAmount * 0.5, 2);
             $diff = $newDeposit - $lockedGig->escrowed_amount;
 
             $poster = User::where('id', $posterId)->lockForUpdate()->first();
@@ -220,7 +342,18 @@ class GigController extends Controller
                 Transaction::create(['user_id' => $poster->id, 'type' => 'gig_escrow_refund', 'amount' => abs($diff), 'description' => 'Reduced deposit for gig: ' . $gig->title]);
             }
 
-            $lockedGig->update([...$validated, 'escrowed_amount' => $newDeposit]);
+            $updateData = $validated;
+            unset($updateData['attachment']);
+            $updateData['amount'] = $computedAmount;
+            $updateData['packages'] = $packages;
+            $updateData['details'] = !empty($validated['details']) ? array_filter($validated['details']) : null;
+            $updateData['has_item'] = !empty($validated['has_item']);
+            $updateData['escrowed_amount'] = $newDeposit;
+            if ($attachmentPath) {
+                $updateData['attachment_path'] = $attachmentPath;
+            }
+
+            $lockedGig->update($updateData);
             return ['ok' => true];
         });
 
@@ -241,29 +374,48 @@ class GigController extends Controller
     {
         $poster = Auth::user();
 
-        $cap = $this->gigPostCap($poster->tier);
-        $openCount = Gig::where('user_id', $poster->id)->where('status', 'open')->count();
-        $canPost = $cap === null || $openCount < $cap;
-
-        if (!$canPost) {
-            return redirect()->route('subscriptions.index')->withErrors([
-                'tier' => 'You\'ve reached your open gig limit (' . $cap . '). Upgrade for a higher limit.'
-            ]);
-        }
-
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'category' => 'required|string|max:100',
             'description' => 'nullable|string',
-            'amount' => 'required|numeric|min:1',
+            'amount' => 'required_without:packages|nullable|numeric|min:1',
             'whatsapp' => 'nullable|string|max:20',
             'phone' => 'nullable|string|max:20',
+            'deadline' => 'nullable|date|after_or_equal:today',
+            'location_type' => 'nullable|in:remote,onsite,pickup',
+            'location' => 'nullable|string|max:255',
+            'attachment' => 'nullable|file|max:2048',
+            'details' => 'nullable|array',
+            'details.*' => 'nullable|string|max:500',
+            'has_item' => 'nullable|boolean',
+            'item_name' => 'nullable|required_if:has_item,1|string|max:255',
+            'item_qty' => 'nullable|integer|min:1',
+            'item_cost' => 'nullable|numeric|min:0',
+            'delivery_address' => 'nullable|string|max:255',
+            'item_delivery_method' => 'nullable|in:meetup,ship',
+            'packages' => 'nullable|array|max:3',
+            'packages.*.name' => 'required_with:packages|string|max:100',
+            'packages.*.price' => 'required_with:packages|numeric|min:1',
+            'packages.*.description' => 'nullable|string|max:500',
         ]);
 
-        $posterId = $poster->id;
-        $deposit = round($validated['amount'] * 0.5, 2);
+        // Packages, if given, are the source of truth for price - the poster's
+        // deposit is based on the LOWEST tier. Never trust a client-submitted
+        // amount when packages are present; always recompute it here.
+        $packages = !empty($validated['packages'])
+            ? array_values(array_filter($validated['packages'], fn ($p) => !empty($p['name']) && !empty($p['price'])))
+            : null;
+        $computedAmount = $packages ? min(array_column($packages, 'price')) : $validated['amount'];
 
-        $gig = DB::transaction(function () use ($posterId, $validated, $deposit) {
+        $posterId = $poster->id;
+        $deposit = round($computedAmount * 0.5, 2);
+
+        $attachmentPath = null;
+        if ($request->hasFile('attachment')) {
+            $attachmentPath = $request->file('attachment')->store('gig-attachments', 'public');
+        }
+
+        $gig = DB::transaction(function () use ($posterId, $validated, $deposit, $attachmentPath, $packages, $computedAmount) {
             $lockedPoster = User::where('id', $posterId)->lockForUpdate()->first();
 
             if ($lockedPoster->wallet_restricted) {
@@ -285,10 +437,22 @@ class GigController extends Controller
                 'title' => $validated['title'],
                 'category' => $validated['category'],
                 'description' => $validated['description'] ?? '',
-                'amount' => $validated['amount'],
+                'amount' => $computedAmount,
                 'escrowed_amount' => $deposit,
                 'whatsapp' => $validated['whatsapp'] ?? null,
                 'phone' => $validated['phone'] ?? null,
+                'deadline' => $validated['deadline'] ?? null,
+                'location_type' => $validated['location_type'] ?? null,
+                'location' => $validated['location'] ?? null,
+                'details' => !empty($validated['details']) ? array_filter($validated['details']) : null,
+                'attachment_path' => $attachmentPath,
+                'has_item' => !empty($validated['has_item']),
+                'item_name' => $validated['item_name'] ?? null,
+                'item_qty' => $validated['item_qty'] ?? null,
+                'item_cost' => $validated['item_cost'] ?? null,
+                'delivery_address' => $validated['delivery_address'] ?? null,
+                'item_delivery_method' => $validated['item_delivery_method'] ?? null,
+                'packages' => $packages,
                 'user_id' => $lockedPoster->id,
                 'status' => 'open',
             ]);
@@ -325,17 +489,71 @@ class GigController extends Controller
 
         $userId = Auth::id();
 
-        $result = DB::transaction(function () use ($gig, $token, $guestName, $userId) {
+        if ($userId) {
+            $claimer = Auth::user();
+            $cap = $this->claimCap($claimer->tier);
+            if ($cap !== null) {
+                $activeClaims = Gig::where('accepted_by', $userId)
+                    ->whereIn('status', ['in_progress', 'delivered'])
+                    ->count();
+                if ($activeClaims >= $cap) {
+                    return back()->withErrors([
+                        'gig' => 'You already have ' . $cap . ' gig(s) claimed and not yet paid out. Finish one or get paid before claiming another - upgrade your tier for a higher limit.'
+                    ]);
+                }
+            }
+        }
+
+        $packageIndex = $request->input('package_index');
+
+        $result = DB::transaction(function () use ($gig, $token, $guestName, $userId, $packageIndex) {
             $locked = Gig::where('id', $gig->id)->lockForUpdate()->first();
 
             if ($locked->status !== 'open') {
                 return ['ok' => false, 'reason' => 'unavailable'];
             }
 
-            if ($userId) {
-                if ($locked->user_id === $userId) {
-                    return ['ok' => false, 'reason' => 'own_gig'];
+            if ($userId && $locked->user_id === $userId) {
+                return ['ok' => false, 'reason' => 'own_gig'];
+            }
+
+            // A gig with packages requires the claimer to pick one before
+            // claiming - it decides the final price. The poster's deposit
+            // was taken at posting based on the lowest tier, so if the
+            // claimer picks a pricier tier, the poster is charged the extra
+            // deposit needed right here, in the same locked transaction.
+            if (!empty($locked->packages)) {
+                if ($packageIndex === null || !isset($locked->packages[$packageIndex])) {
+                    return ['ok' => false, 'reason' => 'invalid_package'];
                 }
+                $chosen = $locked->packages[$packageIndex];
+                $chosenPrice = (float) $chosen['price'];
+                $newDeposit = round($chosenPrice * 0.5, 2);
+                $diff = $newDeposit - $locked->escrowed_amount;
+
+                if ($diff > 0) {
+                    $poster = $locked->user_id ? User::where('id', $locked->user_id)->lockForUpdate()->first() : null;
+                    if (!$poster || $poster->wallet_restricted || $poster->wallet_balance < $diff) {
+                        return ['ok' => false, 'reason' => 'poster_insufficient'];
+                    }
+                    $poster->decrement('wallet_balance', $diff);
+                    Transaction::create(['user_id' => $poster->id, 'type' => 'gig_escrow', 'amount' => -$diff, 'description' => 'Increased deposit for gig (package: ' . $chosen['name'] . '): ' . $locked->title]);
+                } elseif ($diff < 0 && $locked->user_id) {
+                    $poster = User::where('id', $locked->user_id)->lockForUpdate()->first();
+                    if ($poster) {
+                        $poster->increment('wallet_balance', abs($diff));
+                        Transaction::create(['user_id' => $poster->id, 'type' => 'gig_escrow_refund', 'amount' => abs($diff), 'description' => 'Reduced deposit for gig (package: ' . $chosen['name'] . '): ' . $locked->title]);
+                    }
+                }
+
+                $locked->update([
+                    'amount' => $chosenPrice,
+                    'escrowed_amount' => $newDeposit,
+                    'chosen_package' => $chosen['name'],
+                ]);
+            }
+
+            if ($userId) {
                 $locked->update(['status' => 'in_progress', 'accepted_by' => $userId, 'guest_name' => null, 'guest_token' => null]);
             } else {
                 $locked->update([
@@ -350,10 +568,17 @@ class GigController extends Controller
         });
 
         if (!$result['ok']) {
-            $message = $result['reason'] === 'own_gig'
-                ? 'You cannot claim your own gig.'
-                : 'This gig is no longer available.';
+            $messages = [
+                'own_gig' => 'You cannot claim your own gig.',
+                'invalid_package' => 'Please select a package before claiming this gig.',
+                'poster_insufficient' => 'This gig\'s poster cannot currently cover the deposit for that package. Try again later or choose a lower tier if available.',
+            ];
+            $message = $messages[$result['reason']] ?? 'This gig is no longer available.';
             return back()->withErrors(['gig' => $message]);
+        }
+
+        if ($userId && $gig->user_id) {
+            \App\Models\User::find($gig->user_id)?->notify(new \App\Notifications\GigAccepted($gig));
         }
 
         if (!$userId) {
@@ -376,16 +601,55 @@ class GigController extends Controller
             return back()->withErrors(['gig' => 'This gig cannot be marked delivered right now.']);
         }
 
-        $validated = $request->validate(['delivery_note' => 'nullable|string|max:1000']);
+        $validated = $request->validate([
+            'delivery_note' => 'nullable|string|max:1000',
+            'delivery_attachment' => 'nullable|file|max:2048',
+        ]);
+
+        $deliveryAttachmentPath = $gig->delivery_attachment_path;
+        if ($request->hasFile('delivery_attachment')) {
+            $deliveryAttachmentPath = $request->file('delivery_attachment')->store('gig-deliveries', 'public');
+        }
 
         $gig->update([
             'status' => 'delivered',
             'delivery_note' => $validated['delivery_note'] ?? null,
+            'delivery_attachment_path' => $deliveryAttachmentPath,
             'delivered_at' => now(),
             'payment_reminder_sent_at' => null,
         ]);
 
         return redirect()->route('gigs.show', $gig->id)->with('status', 'Marked as delivered — waiting for the poster to confirm and release payment.');
+    }
+
+    // Lets the claimer (logged-in or guest) back out of a gig they can't
+    // finish, while it's still in_progress. Poster's 50% deposit is left
+    // untouched - it's released or refunded through the normal complete()
+    // or deleteGig() paths, not here.
+    public function withdraw(Request $request, Gig $gig)
+    {
+        $isOwnerWorker = Auth::check() && $gig->accepted_by === Auth::id();
+        $isGuestWorker = !Auth::check() && $gig->guest_token && $gig->guest_token === $request->cookie('qelvo_guest_token');
+
+        abort_unless($isOwnerWorker || $isGuestWorker, 403, 'Only the person who claimed this gig can withdraw from it.');
+        if ($gig->status !== 'in_progress') {
+            return back()->withErrors(['gig' => 'This gig can only be withdrawn from while it is in progress.']);
+        }
+
+        DB::transaction(function () use ($gig) {
+            $locked = Gig::where('id', $gig->id)->lockForUpdate()->first();
+            if ($locked->status !== 'in_progress') {
+                return;
+            }
+            $locked->update([
+                'status' => 'open',
+                'accepted_by' => null,
+                'guest_name' => null,
+                'guest_token' => null,
+            ]);
+        });
+
+        return redirect()->route('gigs.show', $gig->id)->with('status', 'You\'ve withdrawn from this gig — it\'s open again for others to claim.');
     }
 
     // STEP 3: poster confirms the delivered work is good.
@@ -467,12 +731,19 @@ class GigController extends Controller
         return redirect()->route('gigs.show', $gig->id)->with('status', 'Marked complete — payment is held until ' . $result['guest_name'] . ' creates an account to receive it.');
     }
 
+    public const MAX_REVISIONS = 3;
+
     public function rejectDelivery(Request $request, Gig $gig)
     {
         $user = Auth::user();
         abort_unless($gig->user_id === $user->id, 403, 'Only the poster can request changes.');
         if ($gig->status !== 'delivered') {
             return back()->withErrors(['gig' => 'This gig is not awaiting confirmation.']);
+        }
+        if ($gig->revision_count >= self::MAX_REVISIONS) {
+            return back()->withErrors([
+                'gig' => 'You\'ve already requested changes ' . self::MAX_REVISIONS . ' times. Confirm and release payment, or contact customer care if the work still isn\'t right.'
+            ]);
         }
 
         $validated = $request->validate(['rejection_note' => 'required|string|max:1000']);
@@ -483,6 +754,7 @@ class GigController extends Controller
             'delivered_at' => null,
             'rejection_note' => $validated['rejection_note'],
             'payment_reminder_sent_at' => null,
+            'revision_count' => $gig->revision_count + 1,
         ]);
 
         return redirect()->route('gigs.show', $gig->id)->with('status', 'Sent back for revisions.');

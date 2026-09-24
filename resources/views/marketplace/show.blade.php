@@ -162,7 +162,7 @@
                             <i data-lucide="shopping-cart" class="w-4 h-4"></i> Add to Cart
                         </button>
                     </form>
-                    <form method="POST" action="{{ route('marketplace.purchase', $listing->id) }}" class="flex-1">
+                    <form method="POST" action="{{ route('marketplace.purchase', $listing->id) }}" class="flex-1" onsubmit="return confirm('Buy this item for ₦{{ number_format($listing->amount) }}? The amount will be held in escrow until you confirm delivery.');">
                         @csrf
                         <button type="submit" class="btn-primary w-full justify-center">
                             <i data-lucide="shopping-bag" class="w-4 h-4"></i> Buy Now — ₦{{ number_format($listing->amount) }}
@@ -211,7 +211,10 @@
             @else
             <div class="flex {{ $msg->sender_id === auth()->id() ? 'justify-end' : 'justify-start' }}" data-msg-id="{{ $msg->id }}">
                 <div class="{{ $msg->sender_id === auth()->id() ? 'btn-primary' : 'bg-card' }}" style="max-width:75%;padding:0.6rem 0.9rem;border-radius:1rem;">
-                    <p class="text-sm">{{ $msg->body }}</p>
+                    @if($msg->message_type === 'image' && ($msg->meta['url'] ?? null))
+                    <img src="{{ $msg->meta['url'] }}" style="max-width:100%;border-radius:0.5rem;margin-bottom:{{ $msg->body ? '0.4rem' : '0' }};">
+                    @endif
+                    @if($msg->body)<p class="text-sm">{{ $msg->body }}</p>@endif
                     <p class="text-xs mt-1" style="opacity:0.65;">{{ $msg->created_at->diffForHumans() }}</p>
                 </div>
             </div>
@@ -237,9 +240,13 @@
             <input type="text" id="meetupWhere" placeholder="Where? e.g. Main gate" class="input-field !mt-0" style="flex:1;min-width:140px;">
             <button type="button" id="meetupSubmitBtn" class="btn-primary text-sm" style="padding:0.5rem 1rem;">Send</button>
         </div>
-        <form class="chat-form flex gap-2" data-listing-id="{{ $listing->id }}" data-my-id="{{ auth()->id() }}">
+        <form class="chat-form flex gap-2" data-listing-id="{{ $listing->id }}" data-my-id="{{ auth()->id() }}" enctype="multipart/form-data">
             @csrf
-            <input type="text" name="body" required placeholder="Type a message..." class="input-field !mt-0 flex-1">
+            <label class="btn-secondary" style="padding:0.6rem 0.75rem;cursor:pointer;">
+                <i data-lucide="paperclip" class="w-4 h-4"></i>
+                <input type="file" name="attachment" accept="image/*" style="display:none;" class="chat-attachment-input">
+            </label>
+            <input type="text" name="body" placeholder="Type a message..." class="input-field !mt-0 flex-1">
             <button type="submit" class="btn-primary" style="padding:0.6rem 1rem;"><i data-lucide="send" class="w-4 h-4"></i></button>
         </form>
     </div>
@@ -373,8 +380,15 @@
             const wrapper = document.createElement('div');
             wrapper.innerHTML = bubbleHtml(msg, myId);
             const node = wrapper.firstElementChild;
+            const bubbleDiv = msg.is_system ? null : node.querySelector('div > div');
+            if (!msg.is_system && msg.message_type === 'image' && msg.meta && msg.meta.url && bubbleDiv) {
+                const img = document.createElement('img');
+                img.src = msg.meta.url;
+                img.style.cssText = 'max-width:100%;border-radius:0.5rem;margin-bottom:' + (msg.body ? '0.4rem' : '0');
+                bubbleDiv.insertBefore(img, bubbleDiv.firstChild);
+            }
             const textEl = msg.is_system ? node.querySelector('span') : node.querySelector('p.text-sm');
-            textEl.textContent = msg.body; // textContent — avoids XSS from message body
+            if (textEl) textEl.textContent = msg.body || ''; // textContent — avoids XSS from message body
             container.appendChild(node);
         }
 
@@ -427,11 +441,14 @@
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
                 const input = form.querySelector('input[name="body"]');
+                const attachmentInput = form.querySelector('.chat-attachment-input');
                 const body = input.value.trim();
-                if (!body) return;
+                const hasFile = attachmentInput && attachmentInput.files.length > 0;
+                if (!body && !hasFile) return;
 
                 const formData = new FormData();
-                formData.append('body', body);
+                if (body) formData.append('body', body);
+                if (hasFile) formData.append('attachment', attachmentInput.files[0]);
                 if (otherUserId) formData.append('recipient_id', otherUserId);
 
                 fetch(`/marketplace/${listingId}/message`, {
@@ -446,6 +463,7 @@
                     renderBubble(msg, myId, container);
                     container.scrollTop = container.scrollHeight;
                     input.value = '';
+                    if (attachmentInput) attachmentInput.value = '';
                 })
                 .catch(() => { input.value = body; }); // keep text if send failed
             });

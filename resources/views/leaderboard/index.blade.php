@@ -1,6 +1,6 @@
 @extends('layouts.app-authenticated')
 @section('content')
-<main class="max-w-2xl mx-auto p-6">
+<main class="max-w-2xl mx-auto p-6 {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-page' : '' }}" style="{{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'padding-top:0 !important;' : '' }}">
     <h1 class="text-2xl font-semibold mb-1">This Week's Top Earners</h1>
     <p class="text-muted text-sm mb-6">Resets every Monday. Open to everyone — no plan required to join.</p>
 
@@ -8,7 +8,7 @@
     <div class="bg-green-500/10 text-green-500 text-sm rounded-lg p-3 mb-4">{{ session('status') }}</div>
     @endif
 
-    <div class="glass-card p-4 mb-6 flex items-center justify-between reveal-on-scroll">
+    <div class="glass-card p-4 mb-6 flex items-center justify-between reveal-on-scroll {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-card' : '' }}">
         <div>
             <p class="text-sm font-medium">{{ $optedIn ? "You're visible on the leaderboard" : "Join the leaderboard" }}</p>
             <p class="text-muted text-xs mt-1">Only your first name and weekly total show, nothing else.</p>
@@ -48,7 +48,7 @@
     </div>
     @endif
 
-    <div class="stat-card reveal-on-scroll">
+    <div class="stat-card reveal-on-scroll {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-card' : '' }}">
         @forelse($topEarners->slice(3) as $i => $entry)
         <div class="tx-table-row">
             <div class="flex items-center gap-3">

@@ -10,6 +10,38 @@ use Illuminate\Support\Facades\DB;
 
 class WalletController extends Controller
 {
+    public function sendMoneyForm()
+    {
+        return view('wallet.send', [
+            'hasPin' => Auth::user()->hasTransactionPin(),
+        ]);
+    }
+
+    // AJAX: show the sender the recipient's real name before they commit to
+    // sending. Display-only - sendMoney() below re-looks-up the recipient
+    // itself before crediting anything, so this can't be tampered with
+    // client-side, matching BankAccountController::resolve()'s pattern.
+    public function resolveRecipient(Request $request)
+    {
+        $validated = $request->validate([
+            'recipient_identifier' => 'required|string',
+        ]);
+
+        $sender = Auth::user();
+        $recipient = User::where('email', $validated['recipient_identifier'])
+            ->orWhere('id', $validated['recipient_identifier'])
+            ->first();
+
+        if (!$recipient) {
+            return response()->json(['error' => 'No user found with that email or ID.'], 422);
+        }
+        if ($recipient->id === $sender->id) {
+            return response()->json(['error' => 'You cannot send money to yourself.'], 422);
+        }
+
+        return response()->json(['name' => $recipient->name]);
+    }
+
     // Locked transaction, mirrors the pattern used everywhere else in this app
     // (GigController deposit, NewsController::storeAd, ServicesController::processPurchase)
     // to prevent race conditions on concurrent transfer requests.
@@ -20,7 +52,15 @@ class WalletController extends Controller
             'recipient_identifier' => 'required|string',
             'amount' => 'required|numeric|min:1',
             'note' => 'nullable|string|max:255',
+            'pin' => 'required|string',
         ]);
+
+        if (!$sender->hasTransactionPin()) {
+            return back()->withErrors(['pin' => 'Set a transaction PIN before sending money.'])->withInput();
+        }
+        if (!$sender->verifyTransactionPin($validated['pin'])) {
+            return back()->withErrors(['pin' => 'Incorrect transaction PIN.'])->withInput();
+        }
 
         $recipient = User::where('email', $validated['recipient_identifier'])
             ->orWhere('id', $validated['recipient_identifier'])
@@ -69,6 +109,7 @@ class WalletController extends Controller
                 'amount' => $validated['amount'],
                 'description' => 'Received from ' . $lockedSender->name . ($note ? ': ' . $note : ''),
             ]);
+            $lockedRecipient->notify(new \App\Notifications\MoneyReceived($lockedSender, $validated['amount'], $note ?: null));
 
             return 'ok';
         });
@@ -89,6 +130,7 @@ class WalletController extends Controller
             'balance' => $user->wallet_balance,
             'transactions' => Transaction::where('user_id', $user->id)->latest()->get(),
             'hasPin' => $user->hasTransactionPin(),
+            'hasBankAccount' => (bool) $user->payout_account_number,
             'isVerified' => (bool) $user->virtual_account_number,
             'walletCapRemaining' => $user->virtual_account_number ? null : max(0, \App\Models\User::NO_BVN_WALLET_CAP - $user->wallet_balance),
         ]);

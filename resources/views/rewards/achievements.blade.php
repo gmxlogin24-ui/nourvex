@@ -5,7 +5,7 @@
 
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Levels &amp; Achievements</h1>
-        <p class="text-gray-600 dark:text-gray-400 mt-2">Your progress across the QLEVO ecosystem.</p>
+        <p class="text-gray-600 dark:text-gray-400 mt-2">Your progress across the QELVO ecosystem.</p>
     </div>
 
     @foreach ($newBadges as $new)
@@ -82,7 +82,7 @@
     @else
     <div class="mb-6 flex items-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-300 rounded-lg">
         <i data-lucide="crown" class="w-5 h-5 text-emerald-600"></i>
-        <span class="text-emerald-800 dark:text-emerald-200">Maximum level reached. You are at the top of QLEVO.</span>
+        <span class="text-emerald-800 dark:text-emerald-200">Maximum level reached. You are at the top of QELVO.</span>
     </div>
     @endif
 

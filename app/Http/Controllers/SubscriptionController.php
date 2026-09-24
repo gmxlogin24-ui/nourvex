@@ -74,6 +74,8 @@ class SubscriptionController extends Controller
             $subscription->activate();
             $subscription->refresh();
 
+            $lockedUser->notify(new \App\Notifications\SubscriptionActivated($subscription));
+
             return ['subscription' => $subscription];
         });
 
@@ -165,6 +167,8 @@ class SubscriptionController extends Controller
 
             $locked->activate();
             $locked->refresh();
+
+            \App\Models\User::find($locked->user_id)?->notify(new \App\Notifications\SubscriptionActivated($locked));
             return ['sub' => $locked];
         });
 

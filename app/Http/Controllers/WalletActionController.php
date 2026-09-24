@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Transaction;
 use App\Models\User;
+use App\Models\Withdrawal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -11,42 +12,6 @@ use Illuminate\Support\Facades\Http;
 
 class WalletActionController extends Controller
 {
-    // Was: topup() directly credited wallet_balance from a user-submitted
-    // amount with no payment behind it - anyone could give themselves
-    // unlimited money. Replaced with a real Flutterwave charge; the wallet
-    // is only credited once FlutterwaveWebhookController verifies the
-    // 'TOPUP-' tx_ref via webhook.
-    public function initiateTopup(Request $request)
-    {
-        $validated = $request->validate(['amount' => 'required|numeric|min:100']);
-        $user = Auth::user();
-
-        if ($user->wouldExceedNoBvnCap($validated['amount'])) {
-            $remaining = max(0, \App\Models\User::NO_BVN_WALLET_CAP - $user->wallet_balance);
-            return back()->withErrors(['amount' => 'Unverified wallets are capped at ₦' . number_format(\App\Models\User::NO_BVN_WALLET_CAP) . '. You can add up to ₦' . number_format($remaining) . ' more, or verify your BVN to remove this limit.']);
-        }
-
-        $txRef = 'TOPUP-' . $user->id . '-' . time();
-
-        $response = Http::withToken(config('services.flutterwave.secret'))
-            ->post('https://api.flutterwave.com/v3/payments', [
-                'tx_ref' => $txRef,
-                'amount' => $validated['amount'],
-                'currency' => 'NGN',
-                'redirect_url' => route('wallet.index'),
-                'customer' => ['email' => $user->email, 'name' => $user->name],
-                'customizations' => ['title' => 'Qelvo Wallet Top-up'],
-            ]);
-
-        $data = $response->json();
-
-        if (($data['status'] ?? null) === 'success') {
-            return redirect($data['data']['link']);
-        }
-
-        return back()->withErrors(['amount' => 'Could not start payment. Please try again.']);
-    }
-
     // No-BVN accounts pay a 1.5% withdrawal fee; verified (virtual account / BVN)
     // accounts withdraw free. This is the only friction non-BVN users face -
     // withdrawals are never blocked, just costlier, matching the deposit cap logic.
@@ -66,25 +31,49 @@ class WalletActionController extends Controller
         if (!$user->verifyTransactionPin($validated['pin'])) {
             return back()->withErrors(['pin' => 'Incorrect transaction PIN.']);
         }
+        if (!$user->payout_account_number) {
+            return back()->withErrors(['amount' => 'Add a payout bank account before withdrawing.']);
+        }
 
-        $userId = Auth::id();
         $hasVirtualAccount = (bool) $user->virtual_account_number;
         $fee = $hasVirtualAccount ? 0 : round($validated['amount'] * self::NO_BVN_WITHDRAWAL_FEE_RATE, 2);
         $totalDebit = $validated['amount'] + $fee;
+        $txRef = 'WD-' . $user->id . '-' . time();
 
-        $result = DB::transaction(function () use ($userId, $validated, $fee, $totalDebit) {
-            $lockedUser = User::where('id', $userId)->lockForUpdate()->first();
+        // Debit immediately so the funds can't be double-spent while the
+        // transfer is in flight. If the Flutterwave call fails to even
+        // initiate, we reverse this below. If it initiates but the bank
+        // payout later fails, the transfer.completed webhook reverses it.
+        $debited = DB::transaction(function () use ($user, $validated, $fee, $totalDebit, $txRef) {
+            $lockedUser = User::where('id', $user->id)->lockForUpdate()->first();
+
+            if ($lockedUser->wallet_restricted) {
+                return false;
+            }
 
             if ($lockedUser->wallet_balance < $totalDebit) {
-                return ['ok' => false];
+                return false;
             }
 
             $lockedUser->decrement('wallet_balance', $totalDebit);
+
+            Withdrawal::create([
+                'user_id' => $lockedUser->id,
+                'tx_ref' => $txRef,
+                'amount' => $validated['amount'],
+                'fee' => $fee,
+                'bank_code' => $lockedUser->payout_bank_code,
+                'bank_name' => $lockedUser->payout_bank_name,
+                'account_number' => $lockedUser->payout_account_number,
+                'account_name' => $lockedUser->payout_account_name,
+                'status' => 'pending',
+            ]);
+
             Transaction::create([
                 'user_id' => $lockedUser->id,
                 'type' => 'withdrawal',
                 'amount' => -$validated['amount'],
-                'description' => 'Withdrawal',
+                'description' => 'Withdrawal to ' . $lockedUser->payout_bank_name . ' ****' . substr($lockedUser->payout_account_number, -4),
             ]);
 
             if ($fee > 0) {
@@ -96,20 +85,66 @@ class WalletActionController extends Controller
                 ]);
             }
 
-            return ['ok' => true];
+            return true;
         });
 
-        if (!$result['ok']) {
+        if (!$debited) {
+            $restricted = User::where('id', $user->id)->value('wallet_restricted');
+            if ($restricted) {
+                return back()->withErrors(['amount' => 'Your wallet is restricted due to an unresolved payment issue. Clear your balance to make withdrawals.']);
+            }
             $msg = $fee > 0
                 ? 'Insufficient balance. You need ₦' . number_format($totalDebit, 2) . ' (amount + 1.5% no-BVN fee).'
                 : 'Insufficient balance.';
             return back()->withErrors(['amount' => $msg]);
         }
 
-        $statusMsg = $fee > 0
-            ? 'Withdrawal requested. A 1.5% no-BVN fee (₦' . number_format($fee, 2) . ') was applied - verify your BVN to withdraw free.'
-            : 'Withdrawal requested.';
+        try {
+            $response = Http::withToken(config('services.flutterwave.secret'))
+                ->post('https://api.flutterwave.com/v3/transfers', [
+                    'account_bank' => $user->payout_bank_code,
+                    'account_number' => $user->payout_account_number,
+                    'amount' => $validated['amount'],
+                    'currency' => 'NGN',
+                    'debit_currency' => 'NGN',
+                    'reference' => $txRef,
+                    'narration' => 'Qelvo withdrawal',
+                ]);
 
-        return redirect()->route('wallet.index')->with('status', $statusMsg);
+            $data = $response->json();
+            $initiated = ($data['status'] ?? null) === 'success';
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Withdrawal transfer init failed: ' . $e->getMessage());
+            $initiated = false;
+        }
+
+        if (!$initiated) {
+            $this->reverseWithdrawal($txRef, 'Withdrawal could not be started - refunded to wallet');
+            return back()->withErrors(['amount' => 'Could not start the transfer. Your wallet has not been charged.']);
+        }
+
+        return redirect()->route('wallet.index')->with('status', 'Withdrawal of ₦' . number_format($validated['amount'], 2) . ' is processing.');
+    }
+
+    public function reverseWithdrawal(string $txRef, string $reason): void
+    {
+        DB::transaction(function () use ($txRef, $reason) {
+            $withdrawal = Withdrawal::where('tx_ref', $txRef)->lockForUpdate()->first();
+            if (!$withdrawal || $withdrawal->status !== 'pending') {
+                return;
+            }
+
+            $withdrawal->update(['status' => 'failed']);
+            $user = User::where('id', $withdrawal->user_id)->lockForUpdate()->first();
+            $refundAmount = (float) $withdrawal->amount + (float) $withdrawal->fee;
+            $user->increment('wallet_balance', $refundAmount);
+
+            Transaction::create([
+                'user_id' => $user->id,
+                'type' => 'withdrawal_reversal',
+                'amount' => $refundAmount,
+                'description' => $reason,
+            ]);
+        });
     }
 }

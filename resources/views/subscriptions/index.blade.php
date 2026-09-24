@@ -2,7 +2,7 @@
 @section('content')
 
 
-<main class="max-w-2xl mx-auto p-6">
+<main class="max-w-2xl mx-auto p-6 {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-page' : '' }}" style="{{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'padding-top:0 !important;' : '' }}">
     <h1 class="text-2xl font-semibold mb-1">Subscriptions</h1>
     <p class="text-muted text-sm mb-6">Post hustles and campus market listings, earn bigger referral bonuses — billed yearly</p>
 
@@ -14,7 +14,7 @@
     @endif
 
     @if ($current)
-    <div class="glass-card p-4 mb-6 flex items-center justify-between reveal-on-scroll">
+    <div class="glass-card p-4 mb-6 flex items-center justify-between reveal-on-scroll {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-card' : '' }}">
         <div>
             <p class="text-sm text-muted">Current plan</p>
             <p class="font-semibold">{{ $plans[$current->plan]['label'] }}</p>
@@ -27,7 +27,7 @@
     @endif
 
     <div class="grid md:grid-cols-2 gap-4">
-        <div class="glass-card p-5 reveal-on-scroll">
+        <div class="glass-card p-5 reveal-on-scroll {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-card' : '' }}">
             <p class="text-sm text-muted">Starter</p>
             <h2 class="text-xl font-semibold mt-1">Plus</h2>
             <p class="text-2xl font-bold text-accent mt-2">₦{{ number_format($plans['tier1']['price']) }} <span class="text-xs text-muted font-normal">/ year</span></p>
@@ -54,7 +54,7 @@
             @endif
         </div>
 
-        <div class="glass-card p-5 reveal-on-scroll" style="position:relative;">
+        <div class="glass-card p-5 reveal-on-scroll {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-card' : '' }}" style="position:relative;">
             <span class="tx-status done" style="position:absolute;top:1rem;right:1rem;">Best Value</span>
             <p class="text-sm text-muted">For power sellers</p>
             <h2 class="text-xl font-semibold mt-1">Pro</h2>

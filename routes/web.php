@@ -89,18 +89,27 @@ Route::get('/marketplace/{listing}', [MarketplaceController::class, 'show'])->na
 
 
 Route::middleware(['auth', 'signup.paid'])->group(function () {
+    Route::post('/push/subscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'store'])->name('push.subscribe');
+    Route::post('/push/unsubscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.readAll');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::delete('/notifications/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->name('notifications.destroy');
+    Route::post('/tour/complete', [\App\Http\Controllers\TourController::class, 'complete'])->middleware('auth')->name('tour.complete');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/q-coin', [\App\Http\Controllers\QCoinController::class, 'index'])->name('qcoin.index');
     Route::post('/q-coin/claim', [\App\Http\Controllers\QCoinController::class, 'claim'])->name('qcoin.claim');
     Route::post('/concierge/message', [\App\Http\Controllers\ConciergeController::class, 'sendMessage'])->name('concierge.message');
     Route::get('/concierge', [\App\Http\Controllers\ConciergeController::class, 'show'])->name('concierge.show');
+    Route::get('/chat', [\App\Http\Controllers\ChatController::class, 'index'])->name('chat.index');
 
 
     Route::post('/gigs/{gig}/complete', [GigController::class, 'complete'])->name('gigs.complete');
     Route::post('/gigs/{gig}/reject', [GigController::class, 'rejectDelivery'])->name('gigs.reject');
     Route::post('/gigs/{gig}/dispute', [App\Http\Controllers\GigDisputeController::class, 'store'])->name('gigs.dispute.store');
     Route::post('/gigs/{gig}/message', [GigController::class, 'sendMessage'])->name('gigs.message');
+    Route::get('/gigs/{gig}/messages', [GigController::class, 'messages'])->name('gigs.messages');
     Route::post('/gigs/{gig}/review', [ReviewController::class, 'storeForGig'])->name('gigs.review');
 
     // Gigs - posting requires Tier 1+
@@ -145,12 +154,14 @@ Route::middleware(['auth', 'signup.paid'])->group(function () {
     Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
         Route::get('/disputes', [App\Http\Controllers\GigDisputeController::class, 'index'])->name('disputes.index');
         Route::post('/disputes/{dispute}/pay', [App\Http\Controllers\GigDisputeController::class, 'resolvePaid'])->name('disputes.pay');
+        Route::post('/disputes/{dispute}/partial', [App\Http\Controllers\GigDisputeController::class, 'resolvePartial'])->name('disputes.partial');
         Route::post('/disputes/{dispute}/dismiss', [App\Http\Controllers\GigDisputeController::class, 'dismiss'])->name('disputes.dismiss');
 
         Route::get('/marketplace-disputes', [App\Http\Controllers\ListingDisputeController::class, 'index'])->name('marketplace-disputes.index');
         Route::post('/marketplace-disputes/{dispute}/pay', [App\Http\Controllers\ListingDisputeController::class, 'resolvePaid'])->name('marketplace-disputes.pay');
         Route::post('/marketplace-disputes/{dispute}/refund', [App\Http\Controllers\ListingDisputeController::class, 'resolveRefunded'])->name('marketplace-disputes.refund');
         Route::post('/marketplace-disputes/{dispute}/dismiss', [App\Http\Controllers\ListingDisputeController::class, 'dismiss'])->name('marketplace-disputes.dismiss');
+        Route::post('/disputes/assign', [App\Http\Controllers\Admin\DisputeAssignmentController::class, 'assign'])->name('disputes.assign');
 
         Route::get('/', [AdminController::class, 'index'])->name('index');
 
@@ -158,6 +169,7 @@ Route::middleware(['auth', 'signup.paid'])->group(function () {
         Route::post('/users/{user}/toggle-admin', [AdminController::class, 'toggleAdmin'])->name('toggle-admin');
         Route::post('/users/{user}/toggle-ban', [AdminController::class, 'toggleBan'])->name('toggle-ban');
         Route::post('/users/{user}/toggle-customer-care', [AdminController::class, 'toggleCustomerCare'])->name('toggle-customer-care');
+        Route::put('/users/{user}/cc-permissions', [App\Http\Controllers\Admin\CustomerCarePermissionController::class, 'update'])->name('users.cc-permissions');
         Route::get('/invites', [AdminController::class, 'invites'])->name('invites');
         Route::post('/invites', [AdminController::class, 'invitesStore'])->name('invites.store');
         Route::delete('/invites/{invite}', [AdminController::class, 'invitesRevoke'])->name('invites.revoke');
@@ -167,6 +179,9 @@ Route::middleware(['auth', 'signup.paid'])->group(function () {
         Route::post('/grant-access', [AdminController::class, 'grantAccessStore'])->name('grant-access.store');
 
         Route::get('/gigs', [AdminController::class, 'gigs'])->name('gigs');
+        Route::get('/conversations', [\App\Http\Controllers\Admin\ConversationController::class, 'index'])->name('conversations.index');
+        Route::get('/conversations/{conversation}', [\App\Http\Controllers\Admin\ConversationController::class, 'show'])->name('conversations.show');
+        Route::delete('/conversations/{conversation}/messages/{message}', [\App\Http\Controllers\Admin\ConversationController::class, 'destroyMessage'])->name('conversations.messages.delete');
         Route::delete('/gigs/{gig}', [AdminController::class, 'deleteGig'])->name('gigs.delete');
 
         Route::get('/listings', [AdminController::class, 'listings'])->name('listings');
@@ -188,6 +203,11 @@ Route::middleware(['auth', 'signup.paid'])->group(function () {
         Route::get('/feature-gates', [App\Http\Controllers\Admin\FeatureGateController::class, 'index'])->name('feature-gates.index');
         Route::post('/feature-gates/{featureGate}/toggle', [App\Http\Controllers\Admin\FeatureGateController::class, 'toggle'])->name('feature-gates.toggle');
         Route::put('/feature-gates/{featureGate}', [App\Http\Controllers\Admin\FeatureGateController::class, 'update'])->name('feature-gates.update');
+
+        Route::get('/settings/appearance', [App\Http\Controllers\Admin\SiteSettingsController::class, 'index'])->name('settings.appearance');
+        Route::post('/settings/appearance/background', [App\Http\Controllers\Admin\SiteSettingsController::class, 'updateBackground'])->name('settings.appearance.background');
+        Route::post('/settings/appearance/background/reset', [App\Http\Controllers\Admin\SiteSettingsController::class, 'resetBackground'])->name('settings.appearance.background.reset');
+        Route::post('/settings/appearance/animations', [App\Http\Controllers\Admin\SiteSettingsController::class, 'updateAnimations'])->name('settings.appearance.animations');
     });
 
         Route::prefix('customer-care')->name('customer-care.')->middleware('customer_care')->group(function () {
@@ -217,6 +237,7 @@ Route::middleware(['auth', 'signup.paid'])->group(function () {
 
 Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/theme-toggle', [ProfileController::class, 'toggleThemeStyle'])->name('profile.theme.toggle');
     Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::get('/profile/reputation', [ProfileController::class, 'reputation'])->name('profile.reputation');
     Route::get('/profile/account', [ProfileController::class, 'account'])->name('profile.account');
@@ -255,11 +276,15 @@ Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index
     Route::get('/money-tracker', [WalletController::class, 'moneyTracker'])->name('money-tracker.index');
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
     Route::post('/wallet/send', [WalletController::class, 'sendMoney'])->name('wallet.send');
+    Route::get('/wallet/send', [WalletController::class, 'sendMoneyForm'])->name('wallet.send.form');
+    Route::post('/wallet/send/resolve', [WalletController::class, 'resolveRecipient'])->name('wallet.send.resolve');
     Route::post('/wallet/flutterwave/initiate', [FlutterwaveController::class, 'initiate'])->name('flutterwave.initiate');
     Route::get('/wallet/flutterwave/callback', [FlutterwaveController::class, 'callback'])->name('flutterwave.callback');
     Route::get('/wallet/virtual-account', [VirtualAccountController::class, 'create'])->name('wallet.virtual-account');
     Route::post('/wallet/virtual-account', [VirtualAccountController::class, 'store'])->name('wallet.virtual-account.store');
-    Route::post('/wallet/topup', [App\Http\Controllers\WalletActionController::class, 'initiateTopup'])->name('wallet.topup');
+    Route::get('/wallet/bank-account', [App\Http\Controllers\BankAccountController::class, 'edit'])->name('wallet.bank-account.edit');
+    Route::post('/wallet/bank-account/resolve', [App\Http\Controllers\BankAccountController::class, 'resolve'])->name('wallet.bank-account.resolve');
+    Route::post('/wallet/bank-account', [App\Http\Controllers\BankAccountController::class, 'store'])->name('wallet.bank-account.store');
     Route::post('/wallet/withdraw', [App\Http\Controllers\WalletActionController::class, 'withdraw'])->name('wallet.withdraw');
 
     Route::post('/news', [NewsController::class, 'store'])->name('news.store');
@@ -275,9 +300,11 @@ Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index
     Route::get('/search', [SearchController::class, 'search'])->name('search');
 });
 
-// Gig accept/deliver: work for both logged-in users and guests (guest identity via qelvo_guest_token cookie, checked inside the controller)
-Route::post('/gigs/{gig}/accept', [App\Http\Controllers\GigController::class, 'accept'])->name('gigs.accept')->middleware(['auth', 'signup.paid']);
-Route::post('/gigs/{gig}/deliver', [App\Http\Controllers\GigController::class, 'deliver'])->name('gigs.deliver')->middleware(['auth', 'signup.paid']);
+// Gig accept/deliver/withdraw: work for both logged-in users and guests (guest identity via qelvo_guest_token cookie, checked inside the controller).
+// Only 'web' middleware here - 'auth'/'signup.paid' would block guests entirely, defeating the guest-claim feature the controller implements.
+Route::post('/gigs/{gig}/accept', [App\Http\Controllers\GigController::class, 'accept'])->name('gigs.accept')->middleware(['web']);
+Route::post('/gigs/{gig}/deliver', [App\Http\Controllers\GigController::class, 'deliver'])->name('gigs.deliver')->middleware(['web']);
+Route::post('/gigs/{gig}/withdraw', [App\Http\Controllers\GigController::class, 'withdraw'])->name('gigs.withdraw')->middleware(['web']);
 
 // Signup fee (₦1,000 account activation) - requires login (user exists) but not signup_fee_paid
 Route::middleware('auth')->group(function () {
@@ -328,3 +355,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Refresh user levels/badges
     Route::post('/users/{user}/refresh-badges', [\App\Http\Controllers\AdminLevelBadgeController::class, 'refreshUser'])->name('users.refresh-badges');
 });
+
+Route::middleware(['auth','admin'])->group(function () {
+    Route::get('/admin/concierge-misses', [\App\Http\Controllers\Admin\ConciergeMissController::class, 'index'])->name('admin.concierge-misses.index');
+    Route::post('/admin/concierge-misses/{miss}/resolve', [\App\Http\Controllers\Admin\ConciergeMissController::class, 'resolve'])->name('admin.concierge-misses.resolve');
+});
+

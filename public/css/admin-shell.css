@@ -345,7 +345,7 @@ body[data-page="admin"][data-admin-nav="topbar"] .admin-edge-selected {
 }
 body[data-page="admin"] .admin-edge-logo .logo-badge {
   width: 2.8rem; height: 2.8rem;
-  border-radius: 0.7rem;
+  border-radius: 0;
 }
 body[data-page="admin"] .admin-topbar-selected-avatar {
   width: 46px; height: 46px;

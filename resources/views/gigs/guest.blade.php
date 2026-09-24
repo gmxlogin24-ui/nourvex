@@ -17,17 +17,17 @@
     ]);
 
     $categoryIcons = [
-        'Design' => 'palette', 'Writing' => 'pen-line', 'Tech' => 'cpu',
-        'Delivery' => 'truck', 'Tutoring' => 'graduation-cap', 'Events' => 'calendar',
+        'Typing & Printing' => 'printer', 'Hair & Beauty' => 'scissors', 'Repairs' => 'wrench',
+        'Errands & Delivery' => 'truck', 'Tutoring' => 'graduation-cap', 'Photography' => 'camera',
     ];
     $badgeColors = ['#16181d', '#2563eb', '#f97316', '#16a34a', '#7c3aed', '#0ea5e9'];
 
     // Default sample gigs shown until real ones are posted — purely visual, not saved anywhere.
     $displayGigs = $gigs->isNotEmpty() ? $gigs : collect([
-        (object)['category' => 'Design', 'title' => 'Design a flyer for campus event', 'status' => 'open', 'amount' => 3000, 'poster_name' => 'Sample Student', 'created_at' => now()],
-        (object)['category' => 'Writing', 'title' => 'Write a 500-word assignment summary', 'status' => 'open', 'amount' => 2000, 'poster_name' => 'Sample Student', 'created_at' => now()],
-        (object)['category' => 'Tech', 'title' => 'Fix laptop WiFi issue', 'status' => 'open', 'amount' => 2500, 'poster_name' => 'Sample Student', 'created_at' => now()],
-        (object)['category' => 'Delivery', 'title' => 'Deliver package across campus', 'status' => 'open', 'amount' => 1500, 'poster_name' => 'Sample Student', 'created_at' => now()],
+        (object)['category' => 'Typing & Printing', 'title' => 'Type and bind my 40-page project', 'status' => 'open', 'amount' => 3000, 'poster_name' => 'Sample Student', 'created_at' => now()],
+        (object)['category' => 'Tutoring', 'title' => 'Tutor me for my calculus exam', 'status' => 'open', 'amount' => 2000, 'poster_name' => 'Sample Student', 'created_at' => now()],
+        (object)['category' => 'Repairs', 'title' => 'Fix my laptop WiFi issue', 'status' => 'open', 'amount' => 2500, 'poster_name' => 'Sample Student', 'created_at' => now()],
+        (object)['category' => 'Errands & Delivery', 'title' => 'Deliver package across campus', 'status' => 'open', 'amount' => 1500, 'poster_name' => 'Sample Student', 'created_at' => now()],
     ]);
 @endphp
 

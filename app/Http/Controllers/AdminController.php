@@ -142,6 +142,9 @@ class AdminController extends Controller
         $this->guard();
         abort_if($user->id === Auth::id(), 403, 'You cannot ban yourself.');
         $user->update(['is_banned' => !$user->is_banned]);
+        if ($user->is_banned) {
+            $user->notify(new \App\Notifications\AccountBanned());
+        }
         return back()->with('status', $user->name . ($user->is_banned ? ' banned.' : ' unbanned.'));
     }
 
@@ -198,6 +201,7 @@ class AdminController extends Controller
                 'amount' => $data['amount'],
                 'description' => $data['note'] ?? 'Admin balance adjustment',
             ]);
+            $lockedUser->notify(new \App\Notifications\AdminBalanceAdjusted($data['amount'], $data['note'] ?? null));
         });
 
         return back()->with('status', 'Balance adjusted for ' . $user->name);

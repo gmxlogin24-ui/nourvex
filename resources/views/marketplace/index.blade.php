@@ -2,6 +2,11 @@
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/marketplace-neu.css') }}?v={{ time() }}">
 
+@if((auth()->user()->theme_style ?? 'glass') === 'plain')
+    @include('marketplace.partials.marketplace-minimal')
+@elseif((auth()->user()->theme_style ?? 'glass') === 'aurora')
+    @include('marketplace.partials.marketplace-aurora')
+@else
 
 <main class="max-w-6xl mx-auto p-6">
     <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
@@ -105,4 +110,5 @@
         @endif
     </div>
 </main>
+@endif
 @endsection

@@ -15,7 +15,22 @@
         <p class="text-muted text-sm mb-2">Your Virtual Account</p>
         <p class="text-2xl font-bold text-accent">{{ $user->virtual_account_number }}</p>
         <p class="text-muted text-sm mt-1">{{ $user->virtual_account_bank }}</p>
+        <button type="button" id="vaCopyBtn" data-account="{{ $user->virtual_account_number }}" class="btn-primary mt-4" style="padding:8px 20px;">Copy Account Number</button>
         <p class="text-xs text-muted mt-4">Transfer any amount to this account to fund your wallet automatically. It may take a few minutes to reflect.</p>
     </div>
+
+    <script>
+    (function(){
+        var btn = document.getElementById('vaCopyBtn');
+        if (!btn) return;
+        btn.addEventListener('click', function(){
+            navigator.clipboard.writeText(btn.dataset.account).then(function(){
+                var original = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(function(){ btn.textContent = original; }, 1500);
+            });
+        });
+    })();
+    </script>
 </main>
 @endsection

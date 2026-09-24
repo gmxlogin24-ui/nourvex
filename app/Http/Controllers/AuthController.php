@@ -58,7 +58,7 @@ class AuthController extends Controller
         $user = \App\Models\User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
+            'password' => $validated['password'],
             'gender' => $validated['gender'],
             'spoken_language' => $validated['spoken_language'],
             'referral_code' => strtoupper(Str::random(6)),
@@ -101,7 +101,7 @@ class AuthController extends Controller
         $user = \App\Models\User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
+            'password' => $validated['password'],
             'gender' => $validated['gender'],
             'spoken_language' => $validated['spoken_language'],
             'referral_code' => strtoupper(Str::random(6)),
@@ -133,7 +133,7 @@ class AuthController extends Controller
         $lastname = $nameParts[1] ?? $nameParts[0];
 
         try {
-            $response = Http::withToken(env('FLW_SECRET_KEY'))
+            $response = Http::withToken(config('services.flutterwave.secret'))
                 ->post('https://api.flutterwave.com/v3/virtual-account-numbers', [
                     'email' => $user->email,
                     'tx_ref' => 'VA-' . $user->id . '-' . time(),
@@ -192,7 +192,7 @@ class AuthController extends Controller
         $user = \App\Models\User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
+            'password' => $validated['password'],
             'referral_code' => strtoupper(Str::random(6)),
             'referred_by' => $referrer?->id,
             'account_type' => 'vendor',
@@ -271,11 +271,19 @@ class AuthController extends Controller
         ]);
 
         $status = Password::reset($validated, function ($user, $password) {
-            $user->update(['password' => Hash::make($password)]);
+            $user->update(['password' => $password]);
         });
 
-        return $status === Password::PASSWORD_RESET
-            ? redirect()->route('login')->with('status', 'Password reset successfully. You can now log in.')
-            : back()->withErrors(['email' => 'This reset link is invalid or has expired.']);
+        if ($status === Password::PASSWORD_RESET) {
+            return redirect()->route('login')->with('status', 'Password reset successfully. You can now log in.');
+        }
+
+        $message = match ($status) {
+            Password::INVALID_USER => 'We could not find an account with that email.',
+            Password::INVALID_TOKEN => 'This reset link is invalid or has already been used.',
+            default => 'This reset link has expired. Please request a new one.',
+        };
+
+        return back()->withErrors(['email' => $message]);
     }
 }

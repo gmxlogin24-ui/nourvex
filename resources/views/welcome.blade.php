@@ -1,236 +1,224 @@
 @extends('layouts.landing')
 @section('content')
+<link rel="stylesheet" href="{{ asset('css/landing.css') }}?v={{ @filemtime(public_path('css/landing.css')) }}">
+<script>document.documentElement.classList.add('lp-js');</script>
 
-{{-- ===== HERO with roll-up reveal ===== --}}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+@php
+    $feed = collect($adsFeed ?? [])->map(fn($a) => $a + ['tag' => 'Sponsored'])->concat(collect($newsFeed ?? []))->take(6);
+@endphp
 
-{{-- NOTE: pt-16 assumes a ~64px top navbar. Adjust this value if your nav is taller/shorter or not fixed. --}}
-<section class="w-full">
-    <div class="relative w-full h-screen sm:h-[600px] lg:h-[760px] xl:h-[860px] overflow-hidden bg-white" id="heroReveal">
+<main class="lp">
 
-        <video autoplay muted loop playsinline
-            class="absolute inset-0 w-full h-full object-cover"
-            src="{{ asset('videos/hero.mp4') }}">
-        </video>
-
-        <div class="absolute inset-x-0 top-6 flex items-center justify-between px-6 md:px-12 z-40">
-            <div class="flex flex-col">
-                <span class="text-white text-sm font-semibold tracking-wide font-hero">QELVO</span>
-                <span class="text-white/60 text-[10px] tracking-widest font-hero">CONNECT &middot; CREATE &middot; EARN</span>
+    {{-- ===== HERO ===== --}}
+    <section class="lp-hero">
+        <div class="lp-hero-bg"></div>
+        <div class="lp-hero-scrim"></div>
+        <div class="lp-hero-in">
+            <span class="lp-hero-side-label" aria-hidden="true">Work &middot; Sell &middot; Earn</span>
+            <div class="lp-hero-word-row lp-rv">
+                <span class="lp-hero-word">QELV<span class="lp-hero-o">O</span></span>
+                <span class="lp-hero-line" aria-hidden="true"></span>
             </div>
-            <a href="{{ route('login') }}" class="text-white/80 text-xs px-4 py-2 rounded-full border border-white/30">Login / Sign up</a>
-        </div>
-
-        <div id="heroSlot" class="absolute z-30 left-1/2 bottom-16 md:bottom-20 -translate-x-1/2 w-[88%] max-w-sm text-center" style="opacity:0; transition: opacity 0.7s ease;">
-        </div>
-
-        <div id="heroCover" class="absolute inset-x-0 top-0 bg-white z-50 flex items-center justify-center text-center px-6" style="height:100%;">
-            <div id="heroHeadlineWrap" style="opacity:0; transition: opacity 0.8s ease;">
-                <p class="text-gray-400 text-xs tracking-widest mb-2 font-hero">QELVO</p>
-                <h1 class="text-gray-900 text-2xl md:text-4xl font-bold leading-tight max-w-lg font-hero">Work, sell, get paid.<br>All in one place.</h1>
+            <div class="lp-hero-social lp-rv">
+                <a href="#" aria-label="Instagram"><i class="ph-bold ph-instagram-logo"></i></a>
+                <a href="#" aria-label="X"><i class="ph-bold ph-x-logo"></i></a>
+                <a href="#" aria-label="Facebook"><i class="ph-bold ph-facebook-logo"></i></a>
+            </div>
+            <div class="lp-hero-bottom">
+                <div class="lp-hero-tag lp-rv">
+                    <b>About Qelvo</b>
+                    Work, sell and get paid — all in one campus app.
+                </div>
+                <a href="{{ route('register') }}" class="lp-hero-cta lp-rv">Get Started <i data-lucide="arrow-right"></i></a>
             </div>
         </div>
+    </section>
 
-    </div>
-</section>
+    {{-- ===== TRUST STRIP ===== --}}
+    <section class="lp-trust">
+        <div class="lp-wrap lp-trust-in">
+            <div class="lp-trust-item"><i data-lucide="lock"></i><span><b>Escrow-held</b> hustle payments</span></div>
+            <div class="lp-trust-item"><i data-lucide="badge-check"></i><span><b>Verified</b> sellers &amp; badges</span></div>
+            <div class="lp-trust-item"><i data-lucide="wallet"></i><span><b>Wallet</b> built for students</span></div>
+            <div class="lp-trust-item"><i data-lucide="life-buoy"></i><span><b>Customer care</b> &amp; dispute help</span></div>
+        </div>
+    </section>
 
-<style>
-.font-hero { font-family: 'Sora', sans-serif; }
-#heroCover { transition: height 1.6s cubic-bezier(0.65, 0, 0.35, 1); }
-#heroSlot .slot-card {
-    background: rgba(0,0,0,0.4);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 1rem;
-    padding: 1.1rem;
-    color: #fff;
-}
-</style>
+@include('partials.landing-features-hscroll')
+
+    {{-- ===== HOW IT WORKS ===== --}}
+    <section class="lp-sec" style="padding-top:0">
+        <div class="lp-wrap">
+            <div class="lp-head lp-rv">
+                <p class="lp-eyebrow">How it works</p>
+                <h2 class="lp-h2">From sign-up to paid in three steps.</h2>
+            </div>
+            <div class="lp-steps">
+                <div class="lp-step lp-rv"><div class="lp-num">01</div><h3>Create your account</h3><p>Join free in minutes and set up your wallet.</p></div>
+                <div class="lp-step lp-rv"><div class="lp-num">02</div><h3>Hustle or sell</h3><p>Post a task, pick one up, or list something on Campus Market.</p></div>
+                <div class="lp-step lp-rv"><div class="lp-num">03</div><h3>Get paid safely</h3><p>Escrow releases to your wallet once the work is delivered.</p></div>
+            </div>
+        </div>
+    </section>
+
+    {{-- ===== LIVE FEED ===== --}}
+    @if($feed->count())
+    <section class="lp-sec" style="padding-top:0">
+        <div class="lp-wrap">
+            <div class="lp-head lp-rv">
+                <p class="lp-eyebrow">Happening now</p>
+                <h2 class="lp-h2">Fresh from the campus feed.</h2>
+            </div>
+            <div class="lp-feed">
+                @foreach($feed as $item)
+                <article class="lp-post lp-rv">
+                    @if(!empty($item['image_url']))
+                        <div class="lp-post-img" style="background-image:url('{{ e($item['image_url']) }}')"></div>
+                    @else
+                        <div class="lp-post-img"></div>
+                    @endif
+                    <div class="lp-post-b">
+                        <span class="lp-chip lp-chip-v" style="align-self:flex-start">{{ $item['tag'] ?? 'Campus Buzz' }}</span>
+                        <h4>{{ \Illuminate\Support\Str::limit($item['title'] ?? '', 70) }}</h4>
+                        <p>{{ \Illuminate\Support\Str::limit(strip_tags($item['body'] ?? ''), 110) }}</p>
+                        @if(!empty($item['time']))
+                            <span class="lp-post-t">{{ \Carbon\Carbon::parse($item['time'])->diffForHumans() }}</span>
+                        @endif
+                    </div>
+                </article>
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
+
+    {{-- ===== PRICING ===== --}}
+    <section class="lp-sec" style="padding-top:0">
+        <div class="lp-wrap">
+            <div class="lp-head lp-rv">
+                <p class="lp-eyebrow">Pricing</p>
+                <h2 class="lp-h2">Pick your plan.</h2>
+                <p class="lp-lead">Start free. Upgrade when you're ready to sell more.</p>
+            </div>
+            <div class="lp-price-grid">
+                <div class="lp-plan lp-plan-silver lp-plan-photo lp-rv" style="--card-photo:url('https://images.unsplash.com/photo-1759185301790-e079e2970809?auto=format&fit=crop&w=1200&q=65');--tier-gradient:linear-gradient(160deg,rgba(15,17,20,.82) 0%,rgba(150,158,168,.5) 55%,rgba(10,11,13,.88) 100%)">
+                    <span class="lp-k">Active sellers</span>
+                    <h3>Silver</h3>
+                    <div class="lp-amt">&#8358;5,000 <small>/ year</small></div>
+                    <ul>
+                        <li><i data-lucide="check"></i> Everything in Free</li>
+                        <li><i data-lucide="check"></i> Post hustles &amp; listings</li>
+                        <li><i data-lucide="check"></i> 10% referral bonus</li>
+                    </ul>
+                    <a href="{{ route('register') }}" class="lp-btn lp-btn-ghost">Get Started</a>
+                </div>
+
+                <div class="lp-plan lp-plan-gold lp-plan-hot lp-plan-photo lp-rv" style="--card-photo:url('https://images.unsplash.com/photo-1517196084897-498e0abd7c2d?auto=format&fit=crop&w=1200&q=65');--tier-gradient:linear-gradient(160deg,rgba(12,9,3,.84) 0%,rgba(180,130,30,.55) 55%,rgba(10,7,3,.9) 100%)">
+                    <span class="lp-badge">BEST VALUE</span>
+                    <span class="lp-k">Power sellers</span>
+                    <h3>Gold</h3>
+                    <div class="lp-amt">&#8358;10,000 <small>/ year</small></div>
+                    <ul>
+                        <li><i data-lucide="check"></i> Everything in Silver</li>
+                        <li><i data-lucide="check"></i> Verified badge</li>
+                        <li><i data-lucide="check"></i> Featured placement</li>
+                        <li><i data-lucide="check"></i> 15% referral bonus</li>
+                    </ul>
+                    <a href="{{ route('register') }}" class="lp-btn lp-btn-primary">Get Started</a>
+                </div>
+
+                <div class="lp-plan lp-plan-platinum lp-plan-photo lp-rv" style="--card-photo:url('https://images.unsplash.com/photo-1759185301790-e079e2970809?auto=format&fit=crop&w=1200&q=65');--tier-gradient:linear-gradient(160deg,rgba(20,21,24,.7) 0%,rgba(235,238,243,.55) 55%,rgba(15,16,18,.8) 100%)">
+                    <span class="lp-k">Top tier</span>
+                    <h3>Platinum</h3>
+                    <div class="lp-amt">&#8358;15,000 <small>/ year</small></div>
+                    <ul>
+                        <li><i data-lucide="check"></i> Everything in Gold</li>
+                        <li><i data-lucide="check"></i> Unlimited active posts</li>
+                        <li><i data-lucide="check"></i> Priority support</li>
+                    </ul>
+                    <a href="{{ route('register') }}" class="lp-btn lp-btn-ghost">Get Started</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- ===== FINAL CTA ===== --}}
+    <section class="lp-wrap">
+        <div class="lp-final lp-rv">
+            <h2>Your campus hustle <span class="lp-grad">starts here.</span></h2>
+            <p>Join Qelvo and put your skills, your stuff and your money to work.</p>
+            <a href="{{ route('register') }}" class="lp-btn lp-btn-primary">Create your free account <i data-lucide="arrow-right"></i></a>
+        </div>
+    </section>
+
+    {{-- ===== FOOTER ===== --}}
+    <footer class="lp-foot">
+        <div class="lp-wrap">
+            <div class="lp-foot-grid">
+                <div>
+                    <div class="lp-foot-brand">Qelvo</div>
+                    <p class="lp-foot-note">Work, sell and get paid, all in one campus app.</p>
+                </div>
+                <div>
+                    <h5>Explore</h5>
+                    <ul>
+                        <li><a href="{{ route('gigs.index') }}">Hustles</a></li>
+                        <li><a href="{{ route('marketplace.index') }}">Campus Market</a></li>
+                        <li><a href="{{ route('pulse.index') }}">Pulse</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5>Company</h5>
+                    <ul>
+                        <li><a href="{{ route('features') }}">Features</a></li>
+                        <li><a href="{{ route('safety') }}">Safety</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5>Account</h5>
+                    <ul>
+                        <li><a href="{{ route('login') }}">Log In</a></li>
+                        <li><a href="{{ route('register') }}">Get Started</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="lp-copy">&copy; {{ date('Y') }} Qelvo. All rights reserved.</div>
+        </div>
+    </footer>
+</main>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const cover = document.getElementById('heroCover');
-    const headlineWrap = document.getElementById('heroHeadlineWrap');
-    const heroReveal = document.getElementById('heroReveal');
-    const slot = document.getElementById('heroSlot');
-
-    const COVER_STOP = 30; // percent
-    let coverPercent = 100;
-    let locked = false;
-    let unlocked = false;
-    let touchStartY = null;
-
-    const slides = [
-        '<div class="slot-card font-hero"><p class="text-[11px] text-white/60 mb-2">Campus Snapshot</p><div class="grid grid-cols-2 gap-2"><div class="bg-white/10 rounded-xl p-2"><p class="text-[10px] text-white/60">Active Hustles</p><p class="text-xl font-bold">128+</p></div><div class="bg-white/10 rounded-xl p-2"><p class="text-[10px] text-white/60">Listings</p><p class="text-xl font-bold">340+</p></div></div></div>',
-        '<div class="font-hero"><h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">Real hustles.<br>Real money.</h2></div>',
-        '<div class="slot-card font-hero"><p class="text-[11px] text-white/60 mb-1">Wallet Payout</p><p class="text-lg font-bold">₦20,000.50 <span class="text-xs text-white/50 font-normal">available now</span></p></div>',
-        '<div class="font-hero"><h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">All in one place.</h2></div>'
-    ];
-    let slideIndex = 0;
-
-    function showSlide(i) {
-        slot.style.opacity = '0';
-        setTimeout(function () {
-            slot.innerHTML = slides[i];
-            slot.style.opacity = '1';
-        }, 400);
-    }
-
-    function startCycle() {
-        showSlide(slideIndex);
-        setInterval(function () {
-            slideIndex = (slideIndex + 1) % slides.length;
-            showSlide(slideIndex);
-        }, 3200);
-    }
-
-    function setCover(pct) {
-        coverPercent = Math.max(0, Math.min(100, pct));
-        cover.style.transition = 'none';
-        cover.style.height = coverPercent + '%';
-    }
-
-    function finishInitialRollUp() {
-        headlineWrap.style.opacity = '1';
-        setTimeout(startCycle, 800);
-        locked = true;
-        document.body.style.overflow = 'hidden';
-    }
-
-    setTimeout(function () {
-        cover.style.transition = 'height 1.6s cubic-bezier(0.65,0,0.35,1)';
-        cover.style.height = COVER_STOP + '%';
-        coverPercent = COVER_STOP;
-        setTimeout(finishInitialRollUp, 1650);
-    }, 500);
-
-    function releaseLock() {
-        if (!unlocked) {
-            unlocked = true;
-            locked = false;
-            document.body.style.overflow = '';
-            document.body.classList.add('sn-over-video');
-        }
-    }
-
-    function shrinkFromLock(delta) {
-        if (!locked) return;
-        const pct = coverPercent - delta;
-        setCover(pct);
-        if (coverPercent <= 0) {
-            releaseLock();
-        }
-    }
-
-    window.addEventListener('wheel', function (e) {
-        if (locked) {
-            e.preventDefault();
-            shrinkFromLock(e.deltaY * 0.08);
-        }
-    }, { passive: false });
-
-    window.addEventListener('touchstart', function (e) {
-        touchStartY = e.touches[0].clientY;
-    }, { passive: true });
-
-    window.addEventListener('touchmove', function (e) {
-        if (locked) {
-            e.preventDefault();
-            const currentY = e.touches[0].clientY;
-            const delta = (touchStartY - currentY) * 0.3;
-            touchStartY = currentY;
-            shrinkFromLock(delta);
-        }
-    }, { passive: false });
-});
+(function () {
+    var els = document.querySelectorAll('.lp-rv');
+    if (!('IntersectionObserver' in window)) { els.forEach(function (e) { e.classList.add('in'); }); return; }
+    var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+            if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+        });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    els.forEach(function (e, i) { e.style.transitionDelay = ((i % 4) * 70) + 'ms'; io.observe(e); });
+})();
 </script>
 
-{{-- ===== Pillars ===== --}}
-<section class="max-w-6xl mx-auto px-4 py-20">
-    <div class="text-center mb-12">
-        <p class="text-indigo-600 text-sm font-semibold mb-2">The platform</p>
-        <h2 class="text-3xl font-bold mb-3">Everything campus life runs on, in one app.</h2>
-        <p class="text-gray-500">Buy, sell, get paid, and stay in the loop — no juggling five different apps.</p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="border rounded-2xl p-6">
-            <i data-lucide="shopping-bag" class="w-6 h-6 text-indigo-600 mb-3"></i>
-            <p class="text-2xl font-bold">{{ $listingCount ?? 340 }}+</p>
-            <p class="font-semibold mb-1">Campus Market</p>
-            <p class="text-sm text-gray-500 mb-3">Sell items, services, and rentals directly to other students.</p>
-            <a href="{{ route('marketplace.index') }}" class="text-indigo-600 text-sm font-medium">Browse listings →</a>
-        </div>
-        <div class="border rounded-2xl p-6">
-            <i data-lucide="briefcase" class="w-6 h-6 text-indigo-600 mb-3"></i>
-            <p class="text-2xl font-bold">{{ $gigCount ?? 128 }}+</p>
-            <p class="font-semibold mb-1">Hustles</p>
-            <p class="text-sm text-gray-500 mb-3">Post a task or pick one up — funds are held safely until it's done.</p>
-            <a href="{{ route('gigs.index') }}" class="text-indigo-600 text-sm font-medium">See open hustles →</a>
-        </div>
-        <div class="border rounded-2xl p-6">
-            <i data-lucide="activity" class="w-6 h-6 text-indigo-600 mb-3"></i>
-            <p class="text-2xl font-bold">12+</p>
-            <p class="font-semibold mb-1">Pulse</p>
-            <p class="text-sm text-gray-500 mb-3">Campus news, buzz, and community updates in one feed.</p>
-            <a href="{{ route('pulse.index') }}" class="text-indigo-600 text-sm font-medium">Check the feed →</a>
-        </div>
-        <div class="border rounded-2xl p-6">
-            <i data-lucide="wallet" class="w-6 h-6 text-indigo-600 mb-3"></i>
-            <p class="text-2xl font-bold">2 min</p>
-            <p class="font-semibold mb-1">Wallet</p>
-            <p class="text-sm text-gray-500 mb-3">Top up, get paid, and track every transaction in real time.</p>
-            <a href="{{ route('register') }}" class="text-indigo-600 text-sm font-medium">Get started →</a>
-        </div>
-    </div>
-</section>
-
-{{-- ===== Pricing ===== --}}
-<section class="max-w-6xl mx-auto px-4 py-20">
-    <div class="text-center mb-12">
-        <p class="text-indigo-600 text-sm font-semibold mb-2">Pricing</p>
-        <h2 class="text-3xl font-bold mb-3">Pick your plan.</h2>
-        <p class="text-gray-500">Start free. Upgrade when you're ready to sell more.</p>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="border rounded-2xl p-8">
-            <p class="text-sm text-gray-500 mb-1">Active sellers</p>
-            <p class="text-xl font-bold mb-2">Pro</p>
-            <p class="text-3xl font-bold mb-4">&#8358;5,000 <span class="text-sm font-normal text-gray-500">/ year</span></p>
-            <ul class="text-sm space-y-2 mb-6 text-gray-600">
-                <li>✓ Everything in Free</li>
-                <li>✓ Post hustles & listings</li>
-                <li>✓ 10% referral bonus</li>
-            </ul>
-            <a href="{{ route('register') }}" class="block text-center py-3 rounded-full border font-semibold">Get Started</a>
-        </div>
-        <div class="border-2 border-indigo-600 rounded-2xl p-8 relative">
-            <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-xs px-3 py-1 rounded-full">Best Value</span>
-            <p class="text-sm text-gray-500 mb-1">Power sellers</p>
-            <p class="text-xl font-bold mb-2">Gold</p>
-            <p class="text-3xl font-bold mb-4">&#8358;10,000 <span class="text-sm font-normal text-gray-500">/ year</span></p>
-            <ul class="text-sm space-y-2 mb-6 text-gray-600">
-                <li>✓ Everything in Pro</li>
-                <li>✓ Verified badge</li>
-                <li>✓ Featured placement</li>
-                <li>✓ 15% referral bonus</li>
-            </ul>
-            <a href="{{ route('register') }}" class="block text-center py-3 rounded-full bg-indigo-600 text-white font-semibold">Get Started</a>
-        </div>
-        <div class="border rounded-2xl p-8">
-            <p class="text-sm text-gray-500 mb-1">Top tier</p>
-            <p class="text-xl font-bold mb-2">Premium</p>
-            <p class="text-3xl font-bold mb-4">&#8358;15,000 <span class="text-sm font-normal text-gray-500">/ year</span></p>
-            <ul class="text-sm space-y-2 mb-6 text-gray-600">
-                <li>✓ Everything in Gold</li>
-                <li>✓ Unlimited active posts</li>
-                <li>✓ Priority support</li>
-            </ul>
-            <a href="{{ route('register') }}" class="block text-center py-3 rounded-full border font-semibold">Get Started</a>
-        </div>
-    </div>
-</section>
-
+<script>
+(function () {
+    var eyes = document.querySelectorAll('.lp-ai-o');
+    if (!eyes.length) return;
+    function look(x, y) {
+        eyes.forEach(function (o) {
+            var pupil = o.querySelector('.lp-ai-o-pupil');
+            if (!pupil) return;
+            var r = o.getBoundingClientRect();
+            var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+            var dx = x - cx, dy = y - cy;
+            var ang = Math.atan2(dy, dx);
+            var rad = Math.min(r.width, r.height) * 0.16;
+            pupil.style.transform = 'translate(' + (Math.cos(ang) * rad) + 'px,' + (Math.sin(ang) * rad) + 'px)';
+        });
+        document.documentElement.classList.add('lp-tracking');
+    }
+    window.addEventListener('pointermove', function (e) { look(e.clientX, e.clientY); }, { passive: true });
+    window.addEventListener('touchmove', function (e) { if (e.touches[0]) look(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+})();
+</script>
 @endsection

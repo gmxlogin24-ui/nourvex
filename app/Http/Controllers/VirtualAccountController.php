@@ -31,7 +31,7 @@ class VirtualAccountController extends Controller
         $firstname = $nameParts[0];
         $lastname = $nameParts[1] ?? $nameParts[0];
 
-        $response = Http::withToken(env('FLW_SECRET_KEY'))
+        $response = Http::withToken(config('services.flutterwave.secret'))
             ->post('https://api.flutterwave.com/v3/virtual-account-numbers', [
                 'email' => $user->email,
                 'tx_ref' => 'VA-' . $user->id . '-' . time(),

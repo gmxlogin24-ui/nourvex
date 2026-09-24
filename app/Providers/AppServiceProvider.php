@@ -36,8 +36,13 @@ class AppServiceProvider extends ServiceProvider
                 $view->with('navAvatar', $user->avatar_url);
                 $view->with('navInitial', strtoupper(substr($user->name ?? 'U', 0, 1)));
                 $view->with('navQCoinBalance', $user->q_coin_balance ?? 0);
-                $view->with('navUnreadChats', 0);
-                $view->with('navUnreadNotifications', 0);
+                $unreadChats = \App\Models\ConversationParticipant::where('user_id', $user->id)
+                    ->whereHas('conversation', fn($q) => $q->where('type', 'business'))
+                    ->with('conversation')
+                    ->get()
+                    ->sum(fn($p) => $p->conversation->unreadCountFor($user->id));
+                $view->with('navUnreadChats', $unreadChats);
+                $view->with('navUnreadNotifications', $user->unreadNotifications()->count());
             }
         });
     }

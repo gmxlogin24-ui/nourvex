@@ -1,6 +1,6 @@
 @extends('layouts.app-authenticated')
 @section('content')
-<main class="max-w-6xl mx-auto p-6">
+<main class="max-w-6xl mx-auto p-6 {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-page' : '' }}" style="{{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'padding-top:0 !important;' : '' }}">
     <div class="mb-6 reveal-on-scroll">
         <h1 class="text-2xl font-bold">Money Tracker</h1>
         <p class="text-muted text-sm">Your income, spending, and category breakdown in one place.</p>

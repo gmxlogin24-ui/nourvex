@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qelvo - Account</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="http://127.0.0.1:8000/css/design-tokens.css">
+    <link rel="stylesheet" href="http://127.0.0.1:8000/css/app-v2.css?v=1788688275">
+    <link rel="stylesheet" href="http://127.0.0.1:8000/css/neumorphic-auth.css?v=1788688275">
+    <link rel="stylesheet" href="http://127.0.0.1:8000/css/preloader.css?v=1788688275">
+    <link rel="stylesheet" href="http://127.0.0.1:8000/css/auth-split.css?v=1788688275">
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    </script>
+</head>
+<body class="auth-body" style="--user-accent: #38D9E8; --auth-bg-image: url('http://127.0.0.1:8000/images/auth-bg-abstract.svg');">
+    <div id="qelvoPreloader" class="qelvo-preloader" aria-hidden="true" style="opacity:0;visibility:hidden;">
+    <div class="qelvo-preloader-mark">
+        <svg viewBox="0 0 100 100">
+            <defs>
+                <linearGradient id="qelvoCapGrad" x1="0" y1="1" x2="0" y2="0">
+                    <stop offset="0%" stop-color="var(--color-accent, #38D9E8)" stop-opacity="0.1"></stop>
+                    <stop offset="100%" stop-color="var(--color-accent, #38D9E8)" stop-opacity="1"></stop>
+                </linearGradient>
+            </defs>
+            <g class="qelvo-mark-orbit">
+                <g transform="rotate(0 50 50)">
+                    <rect x="46" y="12" width="8" height="36" rx="4" fill="url(#qelvoCapGrad)"></rect>
+                    <circle cx="50" cy="12" r="6.5" fill="var(--color-accent, #38D9E8)"></circle>
+                </g>
+                <g transform="rotate(120 50 50)">
+                    <rect x="46" y="12" width="8" height="36" rx="4" fill="url(#qelvoCapGrad)"></rect>
+                    <circle cx="50" cy="12" r="6.5" fill="var(--color-accent, #38D9E8)"></circle>
+                </g>
+                <g transform="rotate(240 50 50)">
+                    <rect x="46" y="12" width="8" height="36" rx="4" fill="url(#qelvoCapGrad)"></rect>
+                    <circle cx="50" cy="12" r="6.5" fill="var(--color-accent, #38D9E8)"></circle>
+                </g>
+            </g>
+        </svg>
+    </div>
+</div>
+    <div class="auth-split-shell">
+        <div class="auth-visual-panel">
+            <div class="auth-visual-topnav">
+                <div class="auth-visual-brand">
+                    <svg viewBox="0 0 100 100" width="22" height="22">
+                        <g transform="rotate(0 50 50)"><rect x="46" y="10" width="8" height="38" rx="4" fill="#fff"></rect><circle cx="50" cy="10" r="7" fill="#fff"></circle></g>
+                        <g transform="rotate(120 50 50)"><rect x="46" y="10" width="8" height="38" rx="4" fill="#fff"></rect><circle cx="50" cy="10" r="7" fill="#fff"></circle></g>
+                        <g transform="rotate(240 50 50)"><rect x="46" y="10" width="8" height="38" rx="4" fill="#fff"></rect><circle cx="50" cy="10" r="7" fill="#fff"></circle></g>
+                    </svg>
+                    Qelvo
+                </div>
+                <div class="auth-visual-nav-pills">
+                    <a href="http://127.0.0.1:8000/login" class="active">Log In</a>
+                    <a href="http://127.0.0.1:8000/register" class="">Sign Up</a>
+                </div>
+            </div>
+            <div class="auth-visual-tagline">
+                <h2>Work. Sell. Get Paid.</h2>
+                <p>Qelvo connects gig workers, sellers, and buyers on one trusted platform — verified, secured, and built for speed.</p>
+            </div>
+        </div>
+
+        <div class="auth-form-panel">
+                            <div class="auth-form-float" style="width:14px;height:14px;top:12%;left:15%;animation-delay:0s;"></div>
+                <div class="auth-form-float" style="width:9px;height:9px;top:70%;left:80%;animation-delay:1.4s;"></div>
+                <div class="auth-form-float" style="width:11px;height:11px;top:85%;left:20%;animation-delay:2.6s;"></div>
+                <div class="auth-form-float" style="width:7px;height:7px;top:20%;left:85%;animation-delay:0.8s;"></div>
+                        <div class="auth-form-card">
+                <div class="auth-form-wrap" data-has-errors="false">
+                        <div class="flex items-center gap-3 mb-5">
+        <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold">C</div>
+        <h1 class="text-lg font-semibold">Qelvo</h1>
+    </div>
+
+    <p class="text-sm mb-6 text-gray-500">Welcome back. Log in to manage your gigs, sales, and earnings.</p>
+
+        
+    <a href="http://127.0.0.1:8000/auth/google" class="w-full py-3 rounded-full border border-gray-300 text-sm font-medium flex items-center justify-center gap-2 mb-4" style="text-decoration:none;color:inherit;">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.71v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.61z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.98v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.98A9 9 0 0 0 0 9c0 1.45.35 2.83.98 4.03l2.97-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .98 4.97l2.97 2.33C4.66 5.17 6.65 3.58 9 3.58z"/></svg>
+        Continue with Google
+    </a>
+    <div class="flex items-center gap-3 mb-4">
+        <div class="flex-1 h-px bg-gray-200"></div>
+        <span class="text-xs text-gray-400">or</span>
+        <div class="flex-1 h-px bg-gray-200"></div>
+    </div>
+
+    <form method="POST" action="http://127.0.0.1:8000/login" class="space-y-4">
+        <input type="hidden" name="_token" value="WKeVNlvac8xXeD4guOfolHg1wb3RvdKclYF70jj9" autocomplete="off">        <div>
+            <label class="text-xs text-gray-500">Email</label>
+            <input type="email" name="email" required placeholder="e-mail address"
+                class="w-full mt-1 px-4 py-3 rounded-full border border-gray-300 focus:border-indigo-500 outline-none text-sm">
+        </div>
+        <div>
+            <div class="flex justify-between items-center">
+                <label class="text-xs text-gray-500">Password</label>
+                <a href="http://127.0.0.1:8000/forgot-password" class="text-xs text-gray-500">Forgot?</a>
+            </div>
+            <input type="password" name="password" required placeholder="password"
+                class="w-full mt-1 px-4 py-3 rounded-full border border-gray-300 focus:border-indigo-500 outline-none text-sm">
+        </div>
+        <button type="submit" class="w-full py-3 rounded-full bg-indigo-600 text-white font-semibold text-sm">Log In</button>
+    </form>
+
+    <p class="text-xs text-gray-400 leading-relaxed mt-6">
+        🔒 Your data and payments are protected with verified identity checks and licensed payment partners. We never ask for your PIN outside the app.
+    </p>
+
+    <p class="text-sm text-center mt-4 text-gray-500">
+        New here? <a href="http://127.0.0.1:8000/register" class="text-indigo-600 font-medium">Create an account</a>
+    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="http://127.0.0.1:8000/js/preloader.js?v=1788688275"></script>
+    </body>
+</html>

@@ -1,0 +1,48 @@
+
+  [39;41;1m FAIL [39;49;22m[39m Tests\Feature\WalletTopupFlowTest[39m
+  [31;1m⨯[39;22m[90m [39m[90mcallback credits wallet when verification succeeds[39m[90m                  [39m [90m5.07s[39m  
+  [31;1m⨯[39;22m[90m [39m[90mcallback does not credit when server side verification fails[39m[90m        [39m [90m0.19s[39m  
+  [32;1m✓[39;22m[90m [39m[90mcallback does not credit when amount paid is short[39m[90m                  [39m [90m0.18s[39m  
+  [32;1m✓[39;22m[90m [39m[90mwebhook credits wallet when browser callback never fires[39m[90m            [39m [90m0.33s[39m  
+  [32;1m✓[39;22m[90m [39m[90mduplicate webhook delivery does not double credit[39m[90m                   [39m [90m0.29s[39m  
+  [32;1m✓[39;22m[90m [39m[90mcallback and webhook both firing only credits once[39m[90m                  [39m [90m0.24s[39m  
+  [32;1m✓[39;22m[90m [39m[90mwebhook rejects request with wrong signature[39m[90m                        [39m [90m0.16s[39m  
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Feature\WalletTopupFlowTest[22m [90m>[39m callback credits walle… [41;1m Error [49;22m  
+[39;1m  Call to a member function all() on array[39;22m
+
+  at [32mtests/Feature/WalletTopupFlowTest.php[39m:[32m54[39m
+     50▕         $response = $this->actingAs($user)->get(
+     51▕             route('flutterwave.callback') . '?tx_ref=' . $topup->tx_ref . '&status=successful&transaction_id=999'
+     52▕         );
+     53▕ 
+  ➜  54▕         $response->assertRedirect(route('wallet.index'));
+     55▕         $this->assertEquals(1000, $user->fresh()->wallet_balance);
+     56▕         $this->assertEquals('successful', $topup->fresh()->status);
+     57▕         $this->assertDatabaseHas('transactions', ['user_id' => $user->id, 'type' => 'wallet_topup', 'amount' => 1000]);
+     58▕         Notification::assertSentTo($user, \App\Notifications\WalletTopupCredited::class);
+
+  [31m────────────────────────────────────────────────────────────────────────────[39m  
+  [41;1m FAILED [49;22m [1mTests\Feature\WalletTopupFlowTest[22m [90m>[39m callback does not credit when…   
+[39;1m  Failed asserting that two strings are equal.
+  [39;22m[31m-'failed'[39m[39;1m
+  [39;22m[32m+'pending'[39m[39;1m
+  [39;22m
+
+  at [32mtests/Feature/WalletTopupFlowTest.php[39m:[32m74[39m
+     70▕             route('flutterwave.callback') . '?tx_ref=' . $topup->tx_ref . '&status=successful&transaction_id=999'
+     71▕         );
+     72▕ 
+     73▕         $this->assertEquals(0, $user->fresh()->wallet_balance);
+  ➜  74▕         $this->assertEquals('failed', $topup->fresh()->status);
+     75▕     }
+     76▕ 
+     77▕     /** Verified amount is less than what was requested (partial/short payment) - must NOT credit. */
+     78▕     public function test_callback_does_not_credit_when_amount_paid_is_short(): void
+
+  [33m1   [39m[39;1mtests/Feature/WalletTopupFlowTest.php[39;22m:[39;1m74[39;22m
+
+
+  [90mTests:[39m    [31;1m2 failed[39;22m[90m,[39m[39m [39m[32;1m5 passed[39;22m[90m (15 assertions)[39m
+  [90mDuration:[39m [39m9.07s[39m
+

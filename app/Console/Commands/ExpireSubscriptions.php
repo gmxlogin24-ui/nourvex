@@ -24,11 +24,16 @@ class ExpireSubscriptions extends Command
 
             $stillActive = Subscription::currentFor($user);
             if (!$stillActive) {
+                $previousTier = $user->tier;
                 $user->update([
                     'tier' => 'free',
                     'subscription_expires_at' => null,
                     'is_verified_seller' => false,
                 ]);
+                // Was silent before - a user could lose paid features with no
+                // idea why. Now they're told their subscription lapsed and
+                // what tier they were on, so they know it's not a bug.
+                $user->notify(new \App\Notifications\SubscriptionExpired($previousTier));
             }
         }
 

@@ -4,10 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Qelvo - @yield('title', 'Work, sell, get paid')</title>
+    @include('partials.favicons')
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <link rel="stylesheet" href="{{ asset('css/site-nav.css') }}?v={{ time() }}">
-    <script src="{{ asset('js/site-nav.js') }}?v={{ time() }}" defer></script>
+    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+    <link rel="stylesheet" href="{{ asset('css/site-nav.css') }}?v={{ @filemtime(public_path('css/site-nav.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/preloader.css') }}?v={{ @filemtime(public_path('css/preloader.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/logo.css') }}?v={{ @filemtime(public_path('css/logo.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/auth-pages.css') }}?v={{ @filemtime(public_path('css/auth-pages.css')) }}">
+
     <script>
         if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
@@ -19,6 +24,7 @@
     $pageKey = $routeName ? explode('.', $routeName)[0] : '';
 @endphp
 <body data-page="{{ $pageKey }}" class="bg-white">
+    @include('partials.preloader')
     @include('partials.site-nav')
 
     <div id="snPushContent">
@@ -34,6 +40,7 @@
             localStorage.setItem('theme', isDark ? 'light' : 'dark');
         }
     </script>
+        <script src="{{ asset('js/preloader.js') }}?v={{ @filemtime(public_path('js/preloader.js')) }}"></script>
     @yield('scripts')
 </body>
 </html>

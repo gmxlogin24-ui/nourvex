@@ -2,7 +2,7 @@
 @section('content')
 
 
-<main class="max-w-4xl mx-auto p-6">
+<main class="max-w-4xl mx-auto p-6 {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-page' : '' }}" style="{{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'padding-top:0 !important;' : '' }}">
     <h1 class="text-2xl font-semibold mb-1">My Posts</h1>
     <p class="text-muted text-sm mb-6">Manage your hustles and campus market listings</p>
 
@@ -10,7 +10,7 @@
     <div class="bg-green-500/10 text-green-500 text-sm rounded-lg p-3 mb-4">{{ session('status') }}</div>
     @endif
 
-    <div class="glass-card p-6 mb-6 reveal-on-scroll">
+    <div class="glass-card p-6 mb-6 reveal-on-scroll {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-card' : '' }}">
         <h2 class="font-semibold mb-4">My Gigs ({{ count($gigs) }})</h2>
         @forelse($gigs as $gig)
         <div class="tx-table-row">
@@ -37,7 +37,7 @@
         @endforelse
     </div>
 
-    <div class="glass-card p-6 reveal-on-scroll">
+    <div class="glass-card p-6 reveal-on-scroll {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-card' : '' }}">
         <h2 class="font-semibold mb-4">My Campus Market Listings ({{ count($listings) }})</h2>
         @forelse($listings as $item)
         <div class="tx-table-row">

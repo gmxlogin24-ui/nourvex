@@ -1,21 +1,25 @@
 @extends('layouts.landing')
 @section('content')
-<div class="max-w-sm mx-auto mt-24 p-6">
-    <div class="glass-card p-6">
-        <h1 class="text-xl font-semibold mb-1">Set New Password</h1>
+<div class="auth-page-wrap">
+    <div class="auth-watermark"></div>
+    <div class="auth-card">
+        <div class="logo-badge auth-card-logo"></div>
+        <h1 class="auth-card-title">Set New Password</h1>
+        <p class="auth-card-subtitle">Choose a new password for your account.</p>
 
         @if ($errors->any())
-        <div class="bg-red-500/10 text-red-500 text-sm rounded-lg p-3 mb-4">{{ $errors->first() }}</div>
+        <div class="auth-alert auth-alert-error">{{ $errors->first() }}</div>
         @endif
 
-        <form method="POST" action="{{ route('password.update') }}" class="space-y-4">
+        <form method="POST" action="{{ route('password.update') }}">
             @csrf
             <input type="hidden" name="token" value="{{ $token }}">
-            <input type="email" name="email" value="{{ $email }}" required placeholder="Email" class="input-field !mt-0">
-            <input type="password" name="password" required placeholder="New password" class="input-field !mt-0">
-            <input type="password" name="password_confirmation" required placeholder="Confirm password" class="input-field !mt-0">
-            <button type="submit" class="btn-primary w-full justify-center">Reset Password</button>
+            <input type="email" name="email" value="{{ $email }}" required placeholder="Email" class="auth-field">
+            <input type="password" name="password" required placeholder="New password" class="auth-field">
+            <input type="password" name="password_confirmation" required placeholder="Confirm password" class="auth-field">
+            <button type="submit" class="auth-submit-btn">Reset Password</button>
         </form>
+        <a href="{{ route('login') }}" class="auth-back-link">← Back to login</a>
     </div>
 </div>
 @endsection

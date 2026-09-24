@@ -17,11 +17,12 @@ class ServicesController extends Controller
     {
         return view('services.index', [
             'balance' => Auth::user()->wallet_balance,
-            'networks' => array_keys(VtuService::NETWORKS),
+            'networks' => VtuService::NETWORKS,
             'hasPin' => Auth::user()->hasTransactionPin(),
             'idempotencyKey' => (string) Str::uuid(),
-            'savedPhones' => \App\Models\SavedNumber::where('user_id', Auth::id())->where('type', 'phone')->latest()->limit(5)->get(),
-            'savedCards' => \App\Models\SavedNumber::where('user_id', Auth::id())->where('type', 'smart_card')->latest()->limit(5)->get(),
+            'savedAirtimeNumbers' => \App\Models\SavedNumber::where('user_id', Auth::id())->where('type', 'airtime')->latest()->limit(6)->get(),
+            'savedDataNumbers' => \App\Models\SavedNumber::where('user_id', Auth::id())->where('type', 'data')->latest()->limit(6)->get(),
+            'savedCards' => \App\Models\SavedNumber::where('user_id', Auth::id())->where('type', 'smart_card')->latest()->limit(6)->get(),
         ]);
     }
 
@@ -87,7 +88,7 @@ class ServicesController extends Controller
             'idempotency_key' => 'required|string',
         ]);
 
-        $this->saveNumberIfRequested($request, 'phone', $validated['network'], $validated['phone']);
+        $this->saveNumberIfRequested($request, 'airtime', $validated['network'], $validated['phone']);
 
         return $this->processPurchase($vtu, 'airtime', $validated['network'], $validated['phone'], (float) $validated['amount'], null, $validated['pin'], $validated['idempotency_key'], (float) $validated['amount']);
     }
@@ -102,7 +103,7 @@ class ServicesController extends Controller
             'idempotency_key' => 'required|string',
         ]);
 
-        $this->saveNumberIfRequested($request, 'phone', $validated['network'], $validated['phone']);
+        $this->saveNumberIfRequested($request, 'data', $validated['network'], $validated['phone']);
 
         // Never trust a client-supplied price. Recompute it server-side from
         // plan_id against the live plan list — otherwise a client can submit

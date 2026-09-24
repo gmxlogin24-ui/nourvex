@@ -58,8 +58,9 @@ class ListingDisputeController extends Controller
     public function index()
     {
         abort_unless(Auth::user()->is_admin, 403);
-        $disputes = ListingDispute::where('status', 'open')->with(['listing', 'raisedBy'])->latest()->get();
-        return view('admin.marketplace-disputes.index', ['disputes' => $disputes]);
+        $disputes = ListingDispute::where('status', 'open')->with(['listing', 'raisedBy', 'assignedTo'])->latest()->get();
+        $ccAgents = User::where('role', 'customer_care')->orderBy('name')->get();
+        return view('admin.marketplace-disputes.index', ['disputes' => $disputes, 'ccAgents' => $ccAgents]);
     }
 
     // Admin sides with the buyer: escrowed funds already sitting in nobody's

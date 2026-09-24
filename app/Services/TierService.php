@@ -27,15 +27,20 @@ class TierService
      */
     public function unlocked(User $user, string $featureKey): bool
     {
+        // Cache a plain array, not the Eloquent model - caching the model itself
+        // can produce an 'incomplete object' error on unserialize if the
+        // FeatureGate class isn't autoloaded yet in the process reading the
+        // cache (seen in practice with the file/array cache drivers).
         $gate = Cache::remember("feature_gate:{$featureKey}", 60, function () use ($featureKey) {
-            return FeatureGate::where('feature_key', $featureKey)->first();
+            $model = FeatureGate::where('feature_key', $featureKey)->first();
+            return $model ? ['enabled' => $model->enabled, 'required_tier' => $model->required_tier] : null;
         });
 
-        if (!$gate || !$gate->enabled) {
+        if (!$gate || !$gate['enabled']) {
             return false;
         }
 
-        return $this->meetsMinimum($user, $gate->required_tier);
+        return $this->meetsMinimum($user, $gate['required_tier']);
     }
 
     /**

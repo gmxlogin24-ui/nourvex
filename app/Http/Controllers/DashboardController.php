@@ -84,7 +84,26 @@ class DashboardController extends Controller
 
         $currentSubscription = \App\Models\Subscription::currentFor(auth()->user());
 
+        $recentConversations = \App\Models\Conversation::whereHas('participants', fn($q) => $q->where('user_id', $userId))
+            ->where('type', 'business')
+            ->with(['participants.user', 'latestMessage'])
+            ->orderByDesc('last_message_at')
+            ->take(5)
+            ->get()
+            ->map(function ($conv) use ($userId) {
+                $other = $conv->participants->pluck('user')->filter(fn($u) => $u && $u->id !== $userId)->first();
+                return [
+                    'other_name' => $other->name ?? 'Unknown',
+                    'other_avatar' => $other->avatar_url ?? null,
+                    'last_body' => $conv->latestMessage->body ?? '',
+                    'last_at' => $conv->last_message_at,
+                    'unread' => $conv->unreadCountFor($userId),
+                ];
+            });
+
         return [
+            'isVerified' => (bool) auth()->user()->virtual_account_number,
+            'walletCapRemaining' => auth()->user()->virtual_account_number ? null : max(0, \App\Models\User::NO_BVN_WALLET_CAP - auth()->user()->wallet_balance),
             'user' => auth()->user(),
             'balance' => auth()->user()->wallet_balance,
             'qCoinBalance' => auth()->user()->q_coin_balance,
@@ -92,6 +111,7 @@ class DashboardController extends Controller
             'currentSubscription' => $currentSubscription,
             'earnings' => $earnings,
             'todayFeed' => $todayFeed,
+            'recentConversations' => $recentConversations,
             'streakDays' => auth()->user()->streak_days,
             'latestNews' => \App\Models\News::latest('published_at')->take(6)->get(),
             'gigCount' => \App\Models\Gig::where('status', 'open')->count(),

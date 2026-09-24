@@ -169,3 +169,14 @@ document.addEventListener('DOMContentLoaded', function () {
     camera.updateProjectionMatrix();
   });
 });
+
+document.querySelectorAll('.rail-btn--like, .rail-btn--save').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        const wasActive = btn.classList.contains('is-active');
+        btn.classList.toggle('is-active');
+        if (!wasActive) {
+            btn.classList.add('bursting');
+            setTimeout(function () { btn.classList.remove('bursting'); }, 500);
+        }
+    });
+});
