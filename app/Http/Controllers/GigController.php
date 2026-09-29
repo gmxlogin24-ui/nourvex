@@ -702,6 +702,7 @@ class GigController extends Controller
             if ($locked->accepted_by) {
                 $worker = User::where('id', $locked->accepted_by)->lockForUpdate()->first();
                 $this->payoutService->payout($locked, $worker);
+                app(\App\Services\LevelBadgeService::class)->refresh($worker);
                 $locked->update(['status' => 'completed']);
                 return ['ok' => true, 'mode' => 'paid', 'worker_name' => $worker->name];
             }

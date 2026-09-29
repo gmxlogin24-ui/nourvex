@@ -6,7 +6,20 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        return view('dashboard2', $this->getData());
+        if (!auth()->user()->has_seen_tour) {
+            return redirect()->route('welcome.show');
+        }
+        return view('dashboard-transfer', $this->getData());
+    }
+
+    public function preview()
+    {
+        return view('dashboard-preview', $this->getData());
+    }
+
+    public function transfer()
+    {
+        return view('dashboard-transfer', $this->getData());
     }
 
     protected function getData()
@@ -129,7 +142,7 @@ class DashboardController extends Controller
             'recentTx' => $recentTx,
             'categoryTotals' => $categoryTotals,
             'topGigs' => $gigs,
-            'topListings' => \App\Models\Listing::latest()->take(3)->get(),
+            'topListings' => \App\Models\Listing::latest()->take(4)->get(),
             'trend' => [4000, 6500, 5200, 8100, 7300, 9200],
             'breakdown' => [55, 30, 15],
             'myReviews' => $myReviews,

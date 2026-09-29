@@ -1,106 +1,100 @@
 @extends('layouts.app-authenticated')
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/marketplace-neu.css') }}?v={{ time() }}">
-
+<link rel="stylesheet" href="{{ asset('css/marketplace-detail.css') }}?v={{ time() }}">
 
 <main class="max-w-4xl mx-auto p-6">
-    <div class="flex items-center justify-between mb-4">
-        <a href="{{ route('marketplace.index') }}" class="text-muted text-sm flex items-center gap-1">
-            <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Campus Market
+<div class="mpd-page">
+
+    <div class="mpd-topbar">
+        <a href="{{ route('marketplace.index') }}" class="mpd-icon-btn">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
         </a>
-        @auth
-        @if(!$isOwner)
-        <form method="POST" action="{{ route('marketplace.favorite', $listing->id) }}">
-            @csrf
-            @php $isFavorited = $listing->favoritedBy()->where('user_id', auth()->id())->exists(); @endphp
-            <button type="submit" class="btn-secondary text-sm" style="{{ $isFavorited ? 'color:#ef4444;' : '' }}">
-                <i data-lucide="heart" class="w-4 h-4" style="{{ $isFavorited ? 'fill:#ef4444;' : '' }}"></i> {{ $isFavorited ? 'Favorited' : 'Favorite' }}
-            </button>
-        </form>
-        @endif
-        @endauth
+        <div class="mpd-topbar-actions">
+            @auth
+                @if(!$isOwner)
+                <form method="POST" action="{{ route('marketplace.favorite', $listing->id) }}">
+                    @csrf
+                    @php $isFavorited = $listing->favoritedBy()->where('user_id', auth()->id())->exists(); @endphp
+                    <button type="submit" class="mpd-icon-btn" style="{{ $isFavorited ? 'color:#ff4757;' : '' }}">
+                        <i data-lucide="heart" class="w-4 h-4" style="{{ $isFavorited ? 'fill:#ff4757;' : '' }}"></i>
+                    </button>
+                </form>
+                @endif
+            @endauth
+            <a href="{{ Route::has('cart.index') ? route('cart.index') : '#' }}" class="mpd-icon-btn">
+                <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+            </a>
+        </div>
     </div>
 
-    <div class="grid md:grid-cols-2 gap-6">
-        <div class="glass-card overflow-hidden reveal-on-scroll" style="position:relative;">
-            @if($listing->images->count() > 0)
-            <img id="mainListingImage" src="{{ $listing->images->first()->image_url }}" alt="{{ $listing->title }}" class="w-full h-full object-cover">
-            @elseif($listing->image_url)
-            <img id="mainListingImage" src="{{ $listing->image_url }}" alt="{{ $listing->title }}" class="w-full h-full object-cover">
-            @else
-            <div class="listing-placeholder" style="aspect-ratio:4/3;"><i data-lucide="image" class="w-12 h-12"></i></div>
-            @endif
-            <span class="type-badge type-{{ $listing->listing_type }}">{{ ucfirst($listing->listing_type) }}</span>
-        </div>
-        @if($listing->images->count() > 1)
-        <div class="flex gap-2 mt-2 overflow-x-auto">
+    <div class="mpd-image-wrap reveal-on-scroll">
+        @if($listing->images->count() > 0)
+            <img id="mainListingImage" src="{{ $listing->images->first()->image_url }}" alt="{{ $listing->title }}" class="mpd-image">
+        @elseif($listing->image_url)
+            <img id="mainListingImage" src="{{ $listing->image_url }}" alt="{{ $listing->title }}" class="mpd-image">
+        @else
+            <div class="mpd-image mpd-image-placeholder"><i data-lucide="image" class="w-12 h-12"></i></div>
+        @endif
+        <span class="type-badge type-{{ $listing->listing_type }} mpd-type-badge">{{ ucfirst($listing->listing_type) }}</span>
+    </div>
+    @if($listing->images->count() > 1)
+        <div class="mpd-thumb-row">
             @foreach($listing->images as $img)
-            <img src="{{ $img->image_url }}" onclick="document.getElementById('mainListingImage').src = this.src;" class="w-16 h-16 object-cover rounded-lg cursor-pointer" style="border:1px solid var(--border-color);">
+                <img src="{{ $img->image_url }}" onclick="document.getElementById('mainListingImage').src = this.src;" class="mpd-thumb">
             @endforeach
         </div>
+    @endif
+
+    <div class="mpd-info">
+        @if($listing->store_name)
+            <p class="mpd-store">{{ $listing->store_name }}</p>
+        @endif
+        <div class="mpd-title-row">
+            <h1 class="mpd-title">{{ $listing->title }}</h1>
+            @if($avgRating)
+                <span class="mpd-rating"><i data-lucide="star" class="w-3 h-3"></i> {{ number_format($avgRating, 1) }}</span>
+            @endif
+        </div>
+        <div class="mpd-meta-row">
+            <span class="mpd-meta-pill"><i data-lucide="map-pin" class="w-3 h-3"></i> {{ $listing->location }}</span>
+            <span class="mpd-meta-pill"><i data-lucide="tag" class="w-3 h-3"></i> {{ $listing->condition }}</span>
+        </div>
+
+        <p class="mpd-price">₦{{ number_format($listing->amount) }}</p>
+
+        <a href="{{ $seller ? route('profile.index') : '#' }}" class="mpd-seller-card">
+            <div class="mpd-seller-avatar">
+                {{ $seller ? strtoupper(substr($seller->business_name ?? $seller->name, 0, 1)) : '?' }}
+            </div>
+            <div class="mpd-seller-body">
+                <p class="mpd-seller-name">{{ $listing->seller_name }}</p>
+                @if($listing->is_verified_seller)
+                    <p class="mpd-seller-verified"><i data-lucide="badge-check" class="w-3 h-3"></i> Verified seller</p>
+                @else
+                    <p class="mpd-seller-sub">Student seller</p>
+                @endif
+                @if($seller)
+                    <p class="mpd-seller-sub">Member since {{ $seller->created_at->format('M Y') }}</p>
+                @endif
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 mpd-seller-chevron"></i>
+        </a>
+
+        <p class="mpd-description">{{ $listing->description }}</p>
+
+        @if ($errors->any())
+            <p class="text-red-500 text-sm mt-4">{{ $errors->first() }}</p>
         @endif
 
-        <div>
-            @if($listing->store_name)
-            <p class="text-sm text-accent font-medium">{{ $listing->store_name }}</p>
-            @endif
-            <p class="text-3xl font-bold text-accent">₦{{ number_format($listing->amount) }}</p>
-            <h1 class="text-xl font-semibold mt-2">{{ $listing->title }}</h1>
-            <div class="flex items-center gap-3 mt-2 text-muted text-sm">
-                <span class="flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> {{ $listing->location }}</span>
-                <span class="flex items-center gap-1"><i data-lucide="tag" class="w-3 h-3"></i> {{ $listing->condition }}</span>
-                @if($avgRating)
-                <span class="flex items-center gap-1"><i data-lucide="star" class="w-3 h-3 text-amber-500"></i> {{ number_format($avgRating, 1) }} ({{ $reviews->count() }})</span>
-                @endif
-            </div>
-
-            <a href="{{ $seller ? route('profile.index') : '#' }}" class="glass-card p-4 mt-6 flex items-center gap-3" style="text-decoration:none;color:inherit;">
-                <div class="w-10 h-10 rounded-full bg-card flex items-center justify-center font-semibold">
-                    {{ $seller ? strtoupper(substr($seller->business_name ?? $seller->name, 0, 1)) : '?' }}
-                </div>
-                <div class="flex-1">
-                    <p class="font-medium text-sm">{{ $listing->seller_name }}</p>
-                    @if($listing->is_verified_seller)
-                    <p class="text-xs text-accent flex items-center gap-1"><i data-lucide="badge-check" class="w-3 h-3"></i> Verified seller</p>
-                    @else
-                    <p class="text-xs text-muted">Student seller</p>
-                    @endif
-                    @if($seller)
-                    <p class="text-xs text-muted mt-0.5">Member since {{ $seller->created_at->format('M Y') }}</p>
-                    @endif
-                </div>
-                <i data-lucide="chevron-right" class="w-4 h-4 text-muted"></i>
-            </a>
-
-            @if($listing->whatsapp || $listing->phone)
-            <div class="flex gap-3 mt-4">
-                @if($listing->whatsapp)
-                <a href="https://wa.me/234{{ ltrim($listing->whatsapp, '0') }}" target="_blank" class="btn-primary flex-1 justify-center" style="background:#25D366;">
-                    <i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp
-                </a>
-                @endif
-                @if($listing->phone)
-                <a href="tel:{{ $listing->phone }}" class="btn-primary flex-1 justify-center">
-                    <i data-lucide="phone" class="w-4 h-4"></i> Call
-                </a>
-                @endif
-            </div>
-            @endif
-
-            <p class="mt-6 text-sm">{{ $listing->description }}</p>
-
-            @if ($errors->any())
-            <p class="text-red-500 text-sm mt-4">{{ $errors->first() }}</p>
-            @endif
-
-            @auth
-                @if($listing->status === 'sold' && $listing->buyer_id === auth()->id())
+        @auth
+            @if($listing->status === 'sold' && $listing->buyer_id === auth()->id())
                 @if($listing->delivery_method === 'ship')
                 <div class="glass-card p-3 mt-6" style="border:1px solid var(--border-color);">
                     @if($listing->shipped_at)
                     <p class="text-sm font-medium flex items-center gap-1"><i data-lucide="truck" class="w-4 h-4"></i> Shipped {{ $listing->shipped_at->diffForHumans() }}</p>
                     @if($listing->shipping_note)
-                    <p class="text-muted text-xs mt-1">{{ $listing->shipping_note }}</p>
+                        <p class="text-muted text-xs mt-1">{{ $listing->shipping_note }}</p>
                     @endif
                     @else
                     <p class="text-sm text-muted flex items-center gap-1"><i data-lucide="clock" class="w-4 h-4"></i> Seller hasn't marked this as shipped yet.</p>
@@ -109,7 +103,7 @@
                 @endif
                 <form method="POST" action="{{ route('marketplace.confirm', $listing->id) }}">
                     @csrf
-                    <button type="submit" class="btn-primary mt-4 w-full justify-center">
+                    <button type="submit" class="mpd-btn-solid mpd-btn-full mt-4">
                         <i data-lucide="check-circle" class="w-4 h-4"></i> Confirm Receipt — Release Payment
                     </button>
                 </form>
@@ -128,7 +122,7 @@
                 @else
                 <p class="text-amber-500 text-xs mt-2 text-center">Complaint submitted — admin is reviewing.</p>
                 @endif
-                @elseif($listing->status === 'sold' && $listing->user_id === auth()->id())
+            @elseif($listing->status === 'sold' && $listing->user_id === auth()->id())
                 @if($listing->delivery_method === 'ship')
                 <div class="glass-card p-4 mt-6">
                     <p class="text-sm font-medium mb-2">This item sold — arrange shipping</p>
@@ -145,41 +139,41 @@
                 @else
                 <p class="text-muted text-sm mt-6 text-center">Sold — awaiting buyer confirmation.</p>
                 @endif
-                @elseif($listing->status === 'completed')
+            @elseif($listing->status === 'completed')
                 <p class="text-accent text-sm mt-6 text-center font-medium">✓ Purchase completed</p>
-                @elseif($listing->status !== 'available')
+            @elseif($listing->status !== 'available')
                 <p class="text-muted text-sm mt-6 text-center">This listing is no longer available.</p>
-                @else
-                @if($listing->user_id === auth()->id())
-                <a href="{{ route('marketplace.edit', $listing->id) }}" class="btn-secondary mt-6 w-full justify-center">
-                    <i data-lucide="pencil" class="w-4 h-4"></i> Edit Listing
-                </a>
-                @else
-                <div class="flex gap-3 mt-6">
-                    <form method="POST" action="{{ route('cart.add', $listing->id) }}" class="flex-1">
-                        @csrf
-                        <button type="submit" class="btn-secondary w-full justify-center">
-                            <i data-lucide="shopping-cart" class="w-4 h-4"></i> Add to Cart
-                        </button>
-                    </form>
-                    <form method="POST" action="{{ route('marketplace.purchase', $listing->id) }}" class="flex-1" onsubmit="return confirm('Buy this item for ₦{{ number_format($listing->amount) }}? The amount will be held in escrow until you confirm delivery.');">
-                        @csrf
-                        <button type="submit" class="btn-primary w-full justify-center">
-                            <i data-lucide="shopping-bag" class="w-4 h-4"></i> Buy Now — ₦{{ number_format($listing->amount) }}
-                        </button>
-                    </form>
-                </div>
-                @endif
-                @endif
             @else
-            <a href="{{ route('register') }}" class="btn-primary mt-6 w-full justify-center">
+                @if($listing->user_id === auth()->id())
+                    <a href="{{ route('marketplace.edit', $listing->id) }}" class="mpd-btn-ghost mpd-btn-full">
+                        <i data-lucide="pencil" class="w-4 h-4"></i> Edit Listing
+                    </a>
+                @else
+                    <div class="mpd-action-row">
+                        <form method="POST" action="{{ route('cart.add', $listing->id) }}" style="flex:1;">
+                            @csrf
+                            <button type="submit" class="mpd-btn-ghost mpd-btn-full">
+                                <i data-lucide="shopping-cart" class="w-4 h-4"></i> Add to Cart
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ route('marketplace.purchase', $listing->id) }}" style="flex:1;" onsubmit="return confirm('Buy this item for ₦{{ number_format($listing->amount) }}? The amount will be held in escrow until you confirm delivery.');">
+                            @csrf
+                            <button type="submit" class="mpd-btn-solid mpd-btn-full">
+                                Buy Now
+                            </button>
+                        </form>
+                    </div>
+                @endif
+            @endif
+        @else
+            <a href="{{ route('register') }}" class="mpd-btn-solid mpd-btn-full mt-6">
                 <i data-lucide="lock" class="w-4 h-4"></i> Sign up to Buy — ₦{{ number_format($listing->amount) }}
             </a>
-            @endif
-        </div>
+        @endauth
     </div>
+</div>
 
-    @auth
+@auth
     @if($seller && !$isOwner)
     <div class="glass-card p-5 mt-6 reveal-on-scroll">
         <h2 class="font-semibold mb-3 flex items-center gap-2"><i data-lucide="message-square" class="w-4 h-4"></i> Chat with Seller</h2>

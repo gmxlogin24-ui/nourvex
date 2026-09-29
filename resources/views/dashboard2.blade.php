@@ -72,7 +72,7 @@
                         <div class="d2-stat-body">
                             <span class="d2-stat-label">Active Gigs</span>
                             <span class="d2-stat-value">{{ $myOpenGigs }}</span>
-                            <div class="d2-stat-liquid-track"><div class="d2-stat-liquid-fill d2-stat-liq-green" style="width: {{ min(100, $myOpenGigs * 10) }}%;"><span class="d2-liquid-shimmer"></span></div></div>
+                            @include('partials.d2-sparkline', ['seed' => $myOpenGigs + 2, 'color' => '#22c55e'])
                         </div>
                     </div>
                     <div class="d2-stat-card d2-stat-blue">
@@ -80,7 +80,7 @@
                         <div class="d2-stat-body">
                             <span class="d2-stat-label">Total Earnings</span>
                             <span class="d2-stat-value">₦{{ number_format($earnings) }}</span>
-                            <div class="d2-stat-liquid-track"><div class="d2-stat-liquid-fill d2-stat-liq-blue" style="width: {{ $earnings > 0 ? min(100, round($earnings / 5000)) : 0 }}%;"><span class="d2-liquid-shimmer"></span></div></div>
+                            @include('partials.d2-sparkline', ['seed' => (int) ($earnings / 1000) + 5, 'color' => '#3b82f6'])
     @if(!($isVerified ?? true))
     <div class="glass-card p-4 mb-4" style="border:1px solid var(--color-accent);">
         <p class="text-sm font-medium">Unverified wallet limit</p>
@@ -94,7 +94,7 @@
                         <div class="d2-stat-body">
                             <span class="d2-stat-label">Success Rate</span>
                             <span class="d2-stat-value">Coming soon</span>
-                            <div class="d2-stat-liquid-track"><div class="d2-stat-liquid-fill d2-stat-liq-orange" style="width: 0%;"></div></div>
+                            @include('partials.d2-sparkline', ['seed' => 7, 'color' => '#fb923c'])
                         </div>
                     </div>
                     <div class="d2-stat-card d2-stat-purple">
@@ -102,7 +102,7 @@
                         <div class="d2-stat-body">
                             <span class="d2-stat-label">Rating</span>
                             <span class="d2-stat-value">{{ $avgRating ? number_format($avgRating,1) : "—" }}</span>
-                            <div class="d2-stat-liquid-track"><div class="d2-stat-liquid-fill d2-stat-liq-purple" style="width: {{ $avgRating ? min(100, round($avgRating*20)) : 0 }}%;"></div></div>
+                            @include('partials.d2-sparkline', ['seed' => (int) (($avgRating ?? 1) * 10) + 1, 'color' => '#8b5cf6'])
                         </div>
                     </div>
                 </div>
@@ -284,15 +284,51 @@
                         @endforelse
                     </div>
 
-                <div class="d2-flow-card">
+                <div class="d2-flow-card d2-flow-card-wave">
+                    <div class="d2-flow-top">
+                        <span class="d2-flow-pill d2-flow-pill-in"><i data-lucide="arrow-down" class="w-3 h-3"></i> In ₦{{ number_format($totalIn ?? 0) }}</span>
+                        <span class="d2-flow-pill d2-flow-pill-out"><i data-lucide="arrow-up" class="w-3 h-3"></i> Out ₦{{ number_format($totalOut ?? 0) }}</span>
+                    </div>
                     <div class="d2-flow-header">
                         <span class="d2-flow-title">Money Flow</span>
-                        <span class="d2-flow-value">₦{{ number_format($netFlow ?? 0) }} net</span>
+                        <span class="d2-flow-value">₦{{ number_format($netFlow ?? 0) }} <small>net</small></span>
                     </div>
-                    <div class="d2-liquid-track">
-                        <div class="d2-liquid-fill" style="width: {{ ($totalIn ?? 0) > 0 ? min(100, round((($netFlow ?? 0) / $totalIn) * 100)) : 0 }}%;">
-                            <span class="d2-liquid-shimmer"></span>
-                        </div>
+                    <div class="d2-wave-wrap">
+                        @php
+                            $d2Seed = max(1, (int) (($netFlow ?? 0) + ($totalIn ?? 0) + ($totalOut ?? 0)));
+                            $d2Pts = [];
+                            for ($i = 0; $i <= 6; $i++) {
+                                $n = sin($i * 1.3 + ($d2Seed % 7)) * 20 + cos($i * 0.7) * 12;
+                                $d2Pts[] = round(50 - $n, 1);
+                            }
+                            $d2LinePath = '';
+                            foreach ($d2Pts as $i => $y) {
+                                $x = $i * 50;
+                                $d2LinePath .= ($i === 0 ? "M{$x},{$y} " : "L{$x},{$y} ");
+                            }
+                            $d2FillPath = "M0,100 L0,{$d2Pts[0]} ";
+                            foreach ($d2Pts as $i => $y) {
+                                if ($i === 0) continue;
+                                $x = $i * 50;
+                                $d2FillPath .= "L{$x},{$y} ";
+                            }
+                            $d2FillPath .= "L300,100 Z";
+                        @endphp
+                        <svg class="d2-wave-svg" viewBox="0 0 300 100" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="d2WaveFill" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#fb923c" stop-opacity="0.45"/>
+                                    <stop offset="100%" stop-color="#fb923c" stop-opacity="0"/>
+                                </linearGradient>
+                                <linearGradient id="d2WaveStroke" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0%" stop-color="#fb923c"/>
+                                    <stop offset="100%" stop-color="#8b5cf6"/>
+                                </linearGradient>
+                            </defs>
+                            <path d="{{ $d2FillPath }}" fill="url(#d2WaveFill)"></path>
+                            <path d="{{ $d2LinePath }}" fill="none" stroke="url(#d2WaveStroke)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <circle cx="{{ 3 * 50 }}" cy="{{ $d2Pts[3] }}" r="4" fill="#fff"></circle>
+                        </svg>
                     </div>
                     <div class="d2-flow-meta">
                         <span>In: ₦{{ number_format($totalIn ?? 0) }}</span>
@@ -306,5 +342,16 @@
 @endif
 </main>
 
+<style>
+.d2-flow-card-wave{padding:18px 18px 14px}
+.d2-flow-top{display:flex;gap:8px;margin-bottom:10px}
+.d2-flow-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.75)}
+.d2-flow-pill-in{color:#4ade80}
+.d2-flow-pill-out{color:#fb923c}
+.d2-flow-value small{font-size:11px;font-weight:500;opacity:.6;margin-left:4px}
+.d2-wave-wrap{width:100%;height:90px;margin:8px 0 4px}
+.d2-wave-svg{width:100%;height:100%;display:block}
+.d2-sparkline{width:70px;height:24px;display:block;margin-top:6px;opacity:.9}
+</style>
 <script src="{{ asset('js/dashboard2-shape.js') }}"></script>
 @endsection

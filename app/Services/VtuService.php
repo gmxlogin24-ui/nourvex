@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class VtuService
 {
@@ -24,8 +25,13 @@ class VtuService
 
     public function __construct()
     {
-        $this->baseUrl = rtrim(env('VTU_BASE_URL', 'https://oseultimate.com/api'), '/');
-        $this->token = env('VTU_TOKEN', '');
+        $this->baseUrl = rtrim(config('services.vtu.base_url', 'https://oseultimate.com/api'), '/');
+        $this->token = config('services.vtu.token', '');
+    }
+
+    public static function marginMultiplier(): float
+    {
+        return 1 + ((float) config('services.vtu.margin_percent', 4) / 100);
     }
 
     protected function client()
@@ -41,21 +47,38 @@ class VtuService
     // there's no separate plans endpoint. That same response also
     // contains the account password hash and bank details, so we
     // deliberately extract and cache ONLY the Dataplans portion, never
-    // the full raw response.
+    // the full raw response. Only a successful, well-formed response is
+    // cached - a provider outage or error no longer poisons the cache
+    // for 15 minutes.
     protected function accountData(): array
     {
-        return Cache::remember('vtu_account_data', now()->addMinutes(15), function () {
-            $response = $this->client()->get("{$this->baseUrl}/user/");
-            if (!$response->successful()) {
-                return ['dataplans' => [], 'cableplans' => []];
-            }
+        $cached = Cache::get('vtu_account_data');
+        if ($cached !== null) return $cached;
 
-            $data = $response->json();
-            return [
-                'dataplans' => $data['Dataplans'] ?? [],
-                'cableplans' => $data['Cableplan'] ?? [],
-            ];
-        });
+        $empty = ['dataplans' => [], 'cableplans' => []];
+
+        try {
+            $response = $this->client()->get("{$this->baseUrl}/user/");
+        } catch (\Throwable $e) {
+            Log::warning('Oseultimate account fetch failed: ' . $e->getMessage());
+            return $empty;
+        }
+
+        if (!$response->successful()) {
+            return $empty;
+        }
+
+        $data = $response->json();
+        $result = [
+            'dataplans' => $data['Dataplans'] ?? [],
+            'cableplans' => $data['Cableplan'] ?? [],
+        ];
+
+        if (!empty($result['dataplans']) || !empty($result['cableplans'])) {
+            Cache::put('vtu_account_data', $result, now()->addMinutes(15));
+        }
+
+        return $result;
     }
 
     protected function networkCode(string $network): ?int
@@ -106,14 +129,19 @@ class VtuService
         $code = $this->networkCode($network);
         if (!$code) return ['success' => false, 'message' => 'Unknown or unavailable network.'];
 
-        $response = $this->client()->post("{$this->baseUrl}/topup/", [
-            'network' => $code,
-            'amount' => (string) $amount,
-            'mobile_number' => $phone,
-            'Ported_number' => true,
-            'airtime_type' => 'VTU',
-            'request_id' => $reference,
-        ]);
+        try {
+            $response = $this->client()->post("{$this->baseUrl}/topup/", [
+                'network' => $code,
+                'amount' => (string) $amount,
+                'mobile_number' => $phone,
+                'Ported_number' => true,
+                'airtime_type' => 'VTU',
+                'request_id' => $reference,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Oseultimate airtime call failed: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Provider connection error.'];
+        }
 
         return $this->parseResponse($response);
     }
@@ -123,13 +151,18 @@ class VtuService
         $code = $this->networkCode($network);
         if (!$code) return ['success' => false, 'message' => 'Unknown or unavailable network.'];
 
-        $response = $this->client()->post("{$this->baseUrl}/data/", [
-            'network' => $code,
-            'mobile_number' => $phone,
-            'plan' => $planId,
-            'Ported_number' => true,
-            'request_id' => $reference,
-        ]);
+        try {
+            $response = $this->client()->post("{$this->baseUrl}/data/", [
+                'network' => $code,
+                'mobile_number' => $phone,
+                'plan' => $planId,
+                'Ported_number' => true,
+                'request_id' => $reference,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Oseultimate data call failed: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Provider connection error.'];
+        }
 
         return $this->parseResponse($response);
     }
@@ -162,14 +195,19 @@ class VtuService
         $providerId = $this->cableProviderId($provider);
         if (!$providerId) return ['success' => false, 'message' => 'Unknown or unavailable cable provider.'];
 
-        // Only the 3 documented fields are sent - request_id is NOT confirmed
-        // for this endpoint (unlike topup/data), so it's deliberately omitted
-        // rather than guessed.
-        $response = $this->client()->post("{$this->baseUrl}/cablesub/", [
-            'cablename' => $providerId,
-            'cableplan' => $planId,
-            'smart_card_number' => $smartCardNumber,
-        ]);
+        try {
+            // Only the 3 documented fields are sent - request_id is NOT confirmed
+            // for this endpoint (unlike topup/data), so it's deliberately omitted
+            // rather than guessed.
+            $response = $this->client()->post("{$this->baseUrl}/cablesub/", [
+                'cablename' => $providerId,
+                'cableplan' => $planId,
+                'smart_card_number' => $smartCardNumber,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Oseultimate cable call failed: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Provider connection error.'];
+        }
 
         return $this->parseResponse($response);
     }

@@ -11,11 +11,15 @@ class BankAccountController extends Controller
 {
     public function edit()
     {
-        $banks = Cache::remember('flutterwave_banks_ng', now()->addDay(), function () {
-            $response = Http::withToken(config('services.flutterwave.secret'))
-                ->get('https://api.flutterwave.com/v3/banks/NG');
+        $banks = Cache::remember('paystack_banks_ng', now()->addDay(), function () {
+            $response = Http::withToken(config('services.paystack.secret'))
+                ->get('https://api.paystack.co/bank', ['country' => 'nigeria']);
             $data = $response->json();
-            return ($data['status'] ?? null) === 'success' ? ($data['data'] ?? []) : [];
+            if (($data['status'] ?? false) !== true) {
+                return [];
+            }
+            // Normalize to the same shape the old Flutterwave list used, so the blade view doesn't need changes.
+            return array_map(fn($b) => ['code' => $b['code'], 'name' => $b['name']], $data['data'] ?? []);
         });
 
         return view('wallet.bank-account', [
@@ -24,7 +28,6 @@ class BankAccountController extends Controller
         ]);
     }
 
-    // AJAX: confirm the account holder's name before the user commits to saving it.
     public function resolve(Request $request)
     {
         $validated = $request->validate([
@@ -32,15 +35,15 @@ class BankAccountController extends Controller
             'bank_code' => 'required|string',
         ]);
 
-        $response = Http::withToken(config('services.flutterwave.secret'))
-            ->post('https://api.flutterwave.com/v3/accounts/resolve', [
+        $response = Http::withToken(config('services.paystack.secret'))
+            ->get('https://api.paystack.co/bank/resolve', [
                 'account_number' => $validated['account_number'],
-                'account_bank' => $validated['bank_code'],
+                'bank_code' => $validated['bank_code'],
             ]);
 
         $data = $response->json();
 
-        if (($data['status'] ?? null) !== 'success') {
+        if (($data['status'] ?? false) !== true) {
             return response()->json(['error' => $data['message'] ?? 'Could not resolve account.'], 422);
         }
 
@@ -55,17 +58,15 @@ class BankAccountController extends Controller
             'bank_name' => 'required|string',
         ]);
 
-        // Re-resolve server-side rather than trusting whatever name the
-        // client displayed - prevents tampering between resolve and save.
-        $response = Http::withToken(config('services.flutterwave.secret'))
-            ->post('https://api.flutterwave.com/v3/accounts/resolve', [
+        $response = Http::withToken(config('services.paystack.secret'))
+            ->get('https://api.paystack.co/bank/resolve', [
                 'account_number' => $validated['account_number'],
-                'account_bank' => $validated['bank_code'],
+                'bank_code' => $validated['bank_code'],
             ]);
 
         $data = $response->json();
 
-        if (($data['status'] ?? null) !== 'success') {
+        if (($data['status'] ?? false) !== true) {
             return back()->withErrors(['account_number' => $data['message'] ?? 'Could not verify account.']);
         }
 

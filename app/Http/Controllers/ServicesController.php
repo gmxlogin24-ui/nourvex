@@ -6,9 +6,11 @@ use App\Models\ServicePurchase;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Services\VtuService;
+use App\Services\VtuNgService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ServicesController extends Controller
@@ -29,7 +31,7 @@ class ServicesController extends Controller
     public function dataPlans(Request $request, VtuService $vtu)
     {
         $validated = $request->validate(['network' => 'required|string']);
-        $margin = 1 + ((float) env('VTU_MARGIN_PERCENT', 4) / 100);
+        $margin = VtuService::marginMultiplier();
 
         $plans = collect($vtu->getDataPlans($validated['network']))
             ->filter(fn($p) => $p['id'] !== null)
@@ -64,7 +66,7 @@ class ServicesController extends Controller
     public function cablePlans(Request $request, VtuService $vtu)
     {
         $validated = $request->validate(['provider' => 'required|string|in:gotv,dstv,startime']);
-        $margin = 1 + ((float) env('VTU_MARGIN_PERCENT', 4) / 100);
+        $margin = VtuService::marginMultiplier();
 
         $plans = collect($vtu->getCablePlans($validated['provider']))
             ->map(fn($plan) => [
@@ -78,7 +80,7 @@ class ServicesController extends Controller
         return response()->json(['plans' => $plans]);
     }
 
-    public function buyAirtime(Request $request, VtuService $vtu)
+    public function buyAirtime(Request $request, VtuService $vtu, VtuNgService $vtuNg)
     {
         $validated = $request->validate([
             'network' => 'required|string|in:mtn,glo,airtel,9mobile',
@@ -90,10 +92,10 @@ class ServicesController extends Controller
 
         $this->saveNumberIfRequested($request, 'airtime', $validated['network'], $validated['phone']);
 
-        return $this->processPurchase($vtu, 'airtime', $validated['network'], $validated['phone'], (float) $validated['amount'], null, $validated['pin'], $validated['idempotency_key'], (float) $validated['amount']);
+        return $this->processPurchase($vtu, $vtuNg, 'airtime', $validated['network'], $validated['phone'], (float) $validated['amount'], null, $validated['pin'], $validated['idempotency_key'], (float) $validated['amount']);
     }
 
-    public function buyData(Request $request, VtuService $vtu)
+    public function buyData(Request $request, VtuService $vtu, VtuNgService $vtuNg)
     {
         $validated = $request->validate([
             'network' => 'required|string|in:mtn,glo,airtel,9mobile',
@@ -105,22 +107,19 @@ class ServicesController extends Controller
 
         $this->saveNumberIfRequested($request, 'data', $validated['network'], $validated['phone']);
 
-        // Never trust a client-supplied price. Recompute it server-side from
-        // plan_id against the live plan list — otherwise a client can submit
-        // an arbitrary 'price' for a real plan_id and pay far less than cost.
-        $margin = 1 + ((float) env('VTU_MARGIN_PERCENT', 4) / 100);
+        $margin = VtuService::marginMultiplier();
         $plan = collect($vtu->getDataPlans($validated['network']))
-            ->first(fn($p) => (string) ($p['id'] ?? $p['data_id'] ?? null) === $validated['plan_id']);
+            ->first(fn($p) => (string) $p['id'] === $validated['plan_id']);
 
         abort_if(!$plan, 422, 'Selected plan is no longer available.');
 
         $cost = (float) ($plan['amount'] ?? $plan['price'] ?? 0);
         $price = round($cost * $margin);
 
-        return $this->processPurchase($vtu, 'data', $validated['network'], $validated['phone'], $price, $validated['plan_id'], $validated['pin'], $validated['idempotency_key'], $cost);
+        return $this->processPurchase($vtu, $vtuNg, 'data', $validated['network'], $validated['phone'], $price, $validated['plan_id'], $validated['pin'], $validated['idempotency_key'], $cost);
     }
 
-    public function buyCable(Request $request, VtuService $vtu)
+    public function buyCable(Request $request, VtuService $vtu, VtuNgService $vtuNg)
     {
         $validated = $request->validate([
             'provider' => 'required|string|in:gotv,dstv,startime',
@@ -134,7 +133,7 @@ class ServicesController extends Controller
 
         // Never trust a client-supplied price - recompute server-side from
         // plan_id against the live cable plan list, same reasoning as buyData().
-        $margin = 1 + ((float) env('VTU_MARGIN_PERCENT', 4) / 100);
+        $margin = VtuService::marginMultiplier();
         $plan = collect($vtu->getCablePlans($validated['provider']))
             ->first(fn($p) => (string) $p['id'] === $validated['plan_id']);
 
@@ -143,7 +142,7 @@ class ServicesController extends Controller
         $cost = (float) $plan['amount'];
         $price = round($cost * $margin);
 
-        return $this->processPurchase($vtu, 'cable', $validated['provider'], $validated['smart_card_number'], $price, $validated['plan_id'], $validated['pin'], $validated['idempotency_key'], $cost);
+        return $this->processPurchase($vtu, $vtuNg, 'cable', $validated['provider'], $validated['smart_card_number'], $price, $validated['plan_id'], $validated['pin'], $validated['idempotency_key'], $cost);
     }
 
     private function saveNumberIfRequested(Request $request, string $type, ?string $provider, string $number): void
@@ -162,7 +161,26 @@ class ServicesController extends Controller
         return view('services.receipt', ['purchase' => $purchase]);
     }
 
-    private function processPurchase(VtuService $vtu, string $type, string $network, string $phone, float $amount, ?string $planId, string $pin, string $idempotencyKey, ?float $cost = null)
+    // Airtime is the one service type where both providers accept the exact
+    // same inputs (network slug, phone, naira amount), so a failed Oseultimate
+    // attempt is retried on vtu.ng before the purchase is treated as failed.
+    // A '-NG' suffix keeps the two providers' request_id namespaces separate.
+    private function buyAirtimeWithFailover(VtuService $vtu, VtuNgService $vtuNg, string $network, string $phone, float $amount, string $reference): array
+    {
+        $primary = $vtu->buyAirtime($network, $phone, $amount, $reference);
+        if ($primary['success']) return $primary;
+
+        Log::warning('Oseultimate airtime failed, trying vtu.ng failover', ['reference' => $reference, 'message' => $primary['message'] ?? null]);
+
+        $secondary = $vtuNg->buyAirtime($network, $phone, $amount, $reference . '-NG');
+        if ($secondary['success']) return $secondary;
+
+        Log::error('vtu.ng airtime failover also failed', ['reference' => $reference, 'message' => $secondary['message'] ?? null]);
+
+        return ['success' => false, 'message' => 'Both airtime providers failed. Your wallet has been refunded.'];
+    }
+
+    private function processPurchase(VtuService $vtu, VtuNgService $vtuNg, string $type, string $network, string $phone, float $amount, ?string $planId, string $pin, string $idempotencyKey, ?float $cost = null)
     {
         $userId = Auth::id();
 
@@ -236,13 +254,20 @@ class ServicesController extends Controller
         }
 
         // External provider call happens outside the DB transaction/lock —
-        // never hold a row lock across a network call.
-        $result = match ($type) {
-            'airtime' => $vtu->buyAirtime($network, $phone, $amount, $reference),
-            'data' => $vtu->buyData($network, $phone, $planId, $reference),
-            'cable' => $vtu->buyCable($network, $phone, $planId, $reference),
-            default => ['success' => false, 'message' => 'Unknown service type.'],
-        };
+        // never hold a row lock across a network call. Wrapped in try/catch
+        // so a thrown exception (timeout, connection drop) can never leave
+        // the wallet debited with no refund and the purchase stuck pending.
+        try {
+            $result = match ($type) {
+                'airtime' => $this->buyAirtimeWithFailover($vtu, $vtuNg, $network, $phone, $amount, $reference),
+                'data' => $vtu->buyData($network, $phone, $planId, $reference),
+                'cable' => $vtu->buyCable($network, $phone, $planId, $reference),
+                default => ['success' => false, 'message' => 'Unknown service type.'],
+            };
+        } catch (\Throwable $e) {
+            Log::error('VTU purchase call threw an exception', ['type' => $type, 'reference' => $reference, 'error' => $e->getMessage()]);
+            $result = ['success' => false, 'message' => 'Provider error. Your wallet has been refunded.'];
+        }
 
         if ($result['success']) {
             $purchase->update(['status' => 'successful']);

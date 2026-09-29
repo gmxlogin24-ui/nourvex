@@ -100,19 +100,32 @@ class WalletActionController extends Controller
         }
 
         try {
-            $response = Http::withToken(config('services.flutterwave.secret'))
-                ->post('https://api.flutterwave.com/v3/transfers', [
-                    'account_bank' => $user->payout_bank_code,
-                    'account_number' => $user->payout_account_number,
-                    'amount' => $validated['amount'],
-                    'currency' => 'NGN',
-                    'debit_currency' => 'NGN',
-                    'reference' => $txRef,
-                    'narration' => 'Qelvo withdrawal',
-                ]);
+            $secret = config('services.paystack.secret');
 
-            $data = $response->json();
-            $initiated = ($data['status'] ?? null) === 'success';
+            // Paystack requires a transfer recipient to exist before you can pay it.
+            $recipientRes = Http::withToken($secret)->post('https://api.paystack.co/transferrecipient', [
+                'type' => 'nuban',
+                'name' => $user->payout_account_name,
+                'account_number' => $user->payout_account_number,
+                'bank_code' => $user->payout_bank_code,
+                'currency' => 'NGN',
+            ]);
+            $recipientData = $recipientRes->json();
+            $recipientCode = $recipientData['data']['recipient_code'] ?? null;
+
+            if (!$recipientCode) {
+                $initiated = false;
+            } else {
+                $response = Http::withToken($secret)->post('https://api.paystack.co/transfer', [
+                    'source' => 'balance',
+                    'amount' => (int) round($validated['amount'] * 100),
+                    'recipient' => $recipientCode,
+                    'reference' => $txRef,
+                    'reason' => 'Qelvo withdrawal',
+                ]);
+                $data = $response->json();
+                $initiated = ($data['status'] ?? false) === true && !in_array($data['data']['status'] ?? '', ['otp', 'failed', 'reversed'], true);
+            }
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('Withdrawal transfer init failed: ' . $e->getMessage());
             $initiated = false;

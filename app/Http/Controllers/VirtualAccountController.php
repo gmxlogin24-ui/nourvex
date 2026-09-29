@@ -11,11 +11,9 @@ class VirtualAccountController extends Controller
     public function create()
     {
         $user = Auth::user();
-
         if ($user->virtual_account_number) {
             return view('wallet.virtual-account', ['user' => $user]);
         }
-
         return view('wallet.virtual-account-setup');
     }
 
@@ -30,30 +28,48 @@ class VirtualAccountController extends Controller
         $nameParts = explode(' ', trim($user->name), 2);
         $firstname = $nameParts[0];
         $lastname = $nameParts[1] ?? $nameParts[0];
+        $secret = config('services.paystack.secret');
 
-        $response = Http::withToken(config('services.flutterwave.secret'))
-            ->post('https://api.flutterwave.com/v3/virtual-account-numbers', [
-                'email' => $user->email,
-                'tx_ref' => 'VA-' . $user->id . '-' . time(),
-                'phonenumber' => $validated['phonenumber'],
-                'is_permanent' => true,
-                'firstname' => $firstname,
-                'lastname' => $lastname,
-                'narration' => 'Qelvo - ' . $user->name,
-                'bvn' => $validated['bvn'],
-            ]);
+        // Step 1: create (or reuse) a Paystack customer
+        $customerRes = Http::withToken($secret)->post('https://api.paystack.co/customer', [
+            'email' => $user->email,
+            'first_name' => $firstname,
+            'last_name' => $lastname,
+            'phone' => $validated['phonenumber'],
+        ]);
+        $customerData = $customerRes->json();
 
-        // $validated (including bvn) goes out of scope here and is never stored - only Flutterwave's response is saved
-        $data = $response->json();
+        $customerCode = $customerData['data']['customer_code'] ?? null;
 
-        if (($data['status'] ?? null) !== 'success') {
-            return back()->withErrors(['bvn' => $data['message'] ?? 'Could not create virtual account. Check your details and try again.']);
+        if (!$customerCode) {
+            return back()->withErrors(['bvn' => $customerData['message'] ?? 'Could not create customer profile. Check your details and try again.']);
+        }
+
+        // Step 2: validate customer with BVN (required by Paystack before DVA can be issued for most banks)
+        Http::withToken($secret)->post("https://api.paystack.co/customer/{$customerCode}/identification", [
+            'country' => 'NG',
+            'type' => 'bvn',
+            'value' => $validated['bvn'],
+            'bvn' => $validated['bvn'],
+            'first_name' => $firstname,
+            'last_name' => $lastname,
+        ]);
+
+        // Step 3: attach a dedicated virtual account to the customer
+        $dvaRes = Http::withToken($secret)->post('https://api.paystack.co/dedicated_account', [
+            'customer' => $customerCode,
+            'preferred_bank' => 'wema-bank',
+        ]);
+        $dvaData = $dvaRes->json();
+
+        if (($dvaData['status'] ?? false) !== true) {
+            return back()->withErrors(['bvn' => $dvaData['message'] ?? 'Could not create virtual account. Check your details and try again.']);
         }
 
         $user->update([
-            'virtual_account_number' => $data['data']['account_number'],
-            'virtual_account_bank' => $data['data']['bank_name'],
-            'virtual_account_ref' => $data['data']['flw_ref'],
+            'virtual_account_number' => $dvaData['data']['account_number'],
+            'virtual_account_bank' => $dvaData['data']['bank']['name'] ?? 'Wema Bank',
+            'virtual_account_ref' => $customerCode,
         ]);
 
         return redirect()->route('wallet.virtual-account')->with('status', 'Virtual account created!');

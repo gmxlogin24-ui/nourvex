@@ -10,9 +10,9 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\FlutterwaveController;
+use App\Http\Controllers\PaystackController;
 use App\Http\Controllers\VirtualAccountController;
-use App\Http\Controllers\FlutterwaveWebhookController;
+use App\Http\Controllers\PaystackWebhookController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MyPostsController;
 use App\Http\Controllers\AdminController;
@@ -47,16 +47,16 @@ Route::get('/', function () {
 })->name('welcome');
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
 Route::get('/plans', [PlanGateController::class, 'choose'])->name('plans.choose');
 
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::get('/register/vendor', [AuthController::class, 'showVendorRegister'])->name('register.vendor');
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/register/vendor', [AuthController::class, 'registerVendor'])->name('register.vendor.store');
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
+Route::post('/register/vendor', [AuthController::class, 'registerVendor'])->name('register.vendor.store')->middleware('throttle:5,1');
 Route::get('/register/invite/{code}', [AuthController::class, 'showInviteRegister'])->name('register.invite');
-Route::post('/register/invite/{code}', [AuthController::class, 'registerInvite'])->name('register.invite.store');
+Route::post('/register/invite/{code}', [AuthController::class, 'registerInvite'])->name('register.invite.store')->middleware('throttle:5,1');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -68,7 +68,7 @@ Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name(
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 
-Route::post('/webhooks/flutterwave', [FlutterwaveWebhookController::class, 'handle']);
+Route::post('/webhooks/flutterwave', [PaystackWebhookController::class, 'handle']);
 
 // Public pages
 Route::get('/features', [FeaturesController::class, 'index'])->name('features');
@@ -97,6 +97,9 @@ Route::middleware(['auth', 'signup.paid'])->group(function () {
     Route::delete('/notifications/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->name('notifications.destroy');
     Route::post('/tour/complete', [\App\Http\Controllers\TourController::class, 'complete'])->middleware('auth')->name('tour.complete');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboard-preview', [DashboardController::class, 'preview'])->middleware('auth')->name('dashboard.preview');
+Route::get('/dashboard-transfer', [DashboardController::class, 'transfer'])->middleware('auth')->name('dashboard.transfer');
+Route::get('/welcome', [\App\Http\Controllers\WelcomeTourController::class, 'show'])->middleware('auth')->name('welcome.show');
 
     Route::get('/q-coin', [\App\Http\Controllers\QCoinController::class, 'index'])->name('qcoin.index');
     Route::post('/q-coin/claim', [\App\Http\Controllers\QCoinController::class, 'claim'])->name('qcoin.claim');
@@ -244,8 +247,8 @@ Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index
     Route::get('/profile/appearance', [ProfileController::class, 'appearance'])->name('profile.appearance');
 
     Route::get('/vendor/activate', function () { return view('auth.vendor-activate'); })->name('vendor.activate');
-    Route::post('/vendor/pay', [FlutterwaveController::class, 'initiateVendor'])->name('vendor.pay');
-    Route::get('/vendor/callback', [FlutterwaveController::class, 'vendorCallback'])->name('vendor.callback');
+    Route::post('/vendor/pay', [PaystackController::class, 'initiateVendor'])->name('vendor.pay');
+    Route::get('/vendor/callback', [PaystackController::class, 'vendorCallback'])->name('vendor.callback');
 
     Route::get('/onboarding/interests', [OnboardingController::class, 'show'])->name('onboarding.interests');
     Route::post('/onboarding/interests', [OnboardingController::class, 'store'])->name('onboarding.interests.store');
@@ -261,7 +264,7 @@ Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index
     Route::post('/services/cable', [ServicesController::class, 'buyCable'])->name('services.cable');
     Route::get('/services/receipt/{purchase}', [ServicesController::class, 'receipt'])->name('services.receipt');
     Route::get('/wallet/pin', [TransactionPinController::class, 'edit'])->name('wallet.pin.edit');
-    Route::post('/wallet/pin', [TransactionPinController::class, 'update'])->name('wallet.pin.update');
+    Route::post('/wallet/pin', [TransactionPinController::class, 'update'])->name('wallet.pin.update')->middleware('throttle:5,1');
     Route::post('/saved-numbers', [SavedNumberController::class, 'store'])->name('saved-numbers.store');
     Route::delete('/saved-numbers/{savedNumber}', [SavedNumberController::class, 'destroy'])->name('saved-numbers.destroy');
 
@@ -278,14 +281,14 @@ Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index
     Route::post('/wallet/send', [WalletController::class, 'sendMoney'])->name('wallet.send');
     Route::get('/wallet/send', [WalletController::class, 'sendMoneyForm'])->name('wallet.send.form');
     Route::post('/wallet/send/resolve', [WalletController::class, 'resolveRecipient'])->name('wallet.send.resolve');
-    Route::post('/wallet/flutterwave/initiate', [FlutterwaveController::class, 'initiate'])->name('flutterwave.initiate');
-    Route::get('/wallet/flutterwave/callback', [FlutterwaveController::class, 'callback'])->name('flutterwave.callback');
+    Route::post('/wallet/flutterwave/initiate', [PaystackController::class, 'initiate'])->name('flutterwave.initiate');
+    Route::get('/wallet/flutterwave/callback', [PaystackController::class, 'callback'])->name('flutterwave.callback');
     Route::get('/wallet/virtual-account', [VirtualAccountController::class, 'create'])->name('wallet.virtual-account');
     Route::post('/wallet/virtual-account', [VirtualAccountController::class, 'store'])->name('wallet.virtual-account.store');
     Route::get('/wallet/bank-account', [App\Http\Controllers\BankAccountController::class, 'edit'])->name('wallet.bank-account.edit');
     Route::post('/wallet/bank-account/resolve', [App\Http\Controllers\BankAccountController::class, 'resolve'])->name('wallet.bank-account.resolve');
     Route::post('/wallet/bank-account', [App\Http\Controllers\BankAccountController::class, 'store'])->name('wallet.bank-account.store');
-    Route::post('/wallet/withdraw', [App\Http\Controllers\WalletActionController::class, 'withdraw'])->name('wallet.withdraw');
+    Route::post('/wallet/withdraw', [App\Http\Controllers\WalletActionController::class, 'withdraw'])->name('wallet.withdraw')->middleware('throttle:5,1');
 
     Route::post('/news', [NewsController::class, 'store'])->name('news.store');
     Route::get('/news/ad/create', [NewsController::class, 'createAd'])->name('news.ad.create');
@@ -309,8 +312,8 @@ Route::post('/gigs/{gig}/withdraw', [App\Http\Controllers\GigController::class, 
 // Signup fee (₦1,000 account activation) - requires login (user exists) but not signup_fee_paid
 Route::middleware('auth')->group(function () {
     Route::get('/activate', function () { return view('auth.signup-fee-activate'); })->name('signup-fee.activate');
-    Route::get('/signup-fee', [App\Http\Controllers\FlutterwaveController::class, 'initiateSignupFee'])->name('signup-fee.initiate');
-    Route::get('/signup-fee/callback', [App\Http\Controllers\FlutterwaveController::class, 'signupFeeCallback'])->name('signup-fee.callback');
+    Route::get('/signup-fee', [App\Http\Controllers\PaystackController::class, 'initiateSignupFee'])->name('signup-fee.initiate');
+    Route::get('/signup-fee/callback', [App\Http\Controllers\PaystackController::class, 'signupFeeCallback'])->name('signup-fee.callback');
 });
 
 use App\Http\Controllers\AppearanceController;

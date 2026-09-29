@@ -16,7 +16,10 @@
         <div class="lp-hero-in">
             <span class="lp-hero-side-label" aria-hidden="true">Work &middot; Sell &middot; Earn</span>
             <div class="lp-hero-word-row lp-rv">
-                <span class="lp-hero-word">QELV<span class="lp-hero-o">O</span></span>
+                <span class="lp-hero-word">QELV<span class="lp-hero-o lp-ai-o"><svg viewBox="0 0 100 116" overflow="visible">
+                    <ellipse cx="50" cy="58" rx="40" ry="49" fill="#ffffff" stroke="#e3b34a" stroke-width="4"/>
+                    <circle class="lp-ai-o-pupil lp-hero-eye-pupil" cx="50" cy="61" r="15" fill="#0b0a08"/>
+                </svg></span></span>
                 <span class="lp-hero-line" aria-hidden="true"></span>
             </div>
             <div class="lp-hero-social lp-rv">

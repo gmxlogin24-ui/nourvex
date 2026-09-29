@@ -2,287 +2,244 @@
     $dqmAvatar = auth()->user()?->avatar_url;
     $dqmName = auth()->user()?->name ?? 'Guest';
     $dqmInitial = strtoupper(substr($dqmName, 0, 1));
-    $dqmHour = now()->hour;
-    $dqmGreeting = $dqmHour < 12 ? 'Good morning' : ($dqmHour < 17 ? 'Good afternoon' : 'Good evening');
-    $dqmMilestone = $nextStreakMilestone ?? 7;
-    $dqmCirc = 2 * pi() * 40;
-    $dqmPct = $dqmMilestone > 0 ? min(100, round((($streakDays ?? 0) / $dqmMilestone) * 100)) : 0;
-    $dqmOffset = $dqmCirc * (1 - $dqmPct / 100);
-    $dqmStackItems = ($topGigs ?? collect())->take(6)->map(function ($g) {
-        return ['title' => $g->title, 'image_url' => $g->image_url ?? null];
-    });
+
+    $dqmMiniStats = [
+        ['label' => 'Earnings', 'value' => '₦' . number_format($earnings ?? 0), 'icon' => 'trending-up', 'tint' => 'green', 'seed' => (int)(($earnings ?? 0)/1000)+5],
+        ['label' => 'Active Gigs', 'value' => (string) ($myOpenGigs ?? 0), 'icon' => 'briefcase', 'tint' => 'purple', 'seed' => ($myOpenGigs ?? 0)+2],
+        ['label' => 'Q Coin', 'value' => number_format($qCoinBalance ?? 0) . ' Q', 'icon' => 'gem', 'tint' => 'gold', 'seed' => (int)(($qCoinBalance ?? 0)/10)+7],
+        ['label' => 'Rating', 'value' => $avgRating ? number_format($avgRating, 1) . ' ★' : '—', 'icon' => 'star', 'tint' => 'blue', 'seed' => (int)(($avgRating ?? 1)*10)+1],
+    ];
+
+    $dqmWaveSeed = max(1, (int) (($netFlow ?? 0) + ($totalIn ?? 0) + ($totalOut ?? 0)));
+    $dqmWavePts = [];
+    for ($i = 0; $i <= 6; $i++) {
+        $n = sin($i * 1.3 + ($dqmWaveSeed % 7)) * 20 + cos($i * 0.7) * 12;
+        $dqmWavePts[] = round(50 - $n, 1);
+    }
+    $dqmWaveLine = '';
+    foreach ($dqmWavePts as $i => $y) {
+        $x = $i * 50;
+        $dqmWaveLine .= ($i === 0 ? "M{$x},{$y} " : "L{$x},{$y} ");
+    }
+    $dqmWaveFillPath = "M0,100 L0,{$dqmWavePts[0]} ";
+    foreach ($dqmWavePts as $i => $y) {
+        if ($i === 0) continue;
+        $x = $i * 50;
+        $dqmWaveFillPath .= "L{$x},{$y} ";
+    }
+    $dqmWaveFillPath .= "L300,100 Z";
+
+    $dqmQuickSend = ($recentConversations ?? collect())->take(6);
 @endphp
 
-
-<div class="dqm-page">
-
+<div class="dqp-page">
 
     @if(!($isVerified ?? true))
-    <div class="dqm-verify-banner">
-        <span>Unverified wallet limit — up to ₦{{ number_format($walletCapRemaining ?? 0) }} more before verifying your BVN.</span>
-        <a href="{{ route('wallet.virtual-account') }}">Verify</a>
-    </div>
+        <div class="dqp-banner dqp-anim" style="--i:0">
+            <span>Unverified wallet limit — up to ₦{{ number_format($walletCapRemaining ?? 0) }} more before verifying your BVN.</span>
+            <a href="{{ route('wallet.virtual-account') }}">Verify</a>
+        </div>
     @else
-    <div class="dqm-verify-banner" style="border-color:var(--color-accent, #7c5cf0);" id="dqmVaBanner">
-        <span>Your virtual account: <b>{{ auth()->user()->virtual_account_number }}</b> ({{ auth()->user()->virtual_account_bank }})</span>
-        <button type="button" id="dqmVaCopyBtn" data-account="{{ auth()->user()->virtual_account_number }}" style="background:none;border:none;color:var(--color-accent, #7c5cf0);font-weight:600;cursor:pointer;">Copy</button>
-    </div>
-    <script>
-    (function(){
-        var btn = document.getElementById('dqmVaCopyBtn');
-        if (!btn) return;
-        btn.addEventListener('click', function(){
-            navigator.clipboard.writeText(btn.dataset.account).then(function(){
-                var original = btn.textContent;
-                btn.textContent = 'Copied!';
-                setTimeout(function(){ btn.textContent = original; }, 1500);
+        <div class="dqp-banner dqp-anim" style="--i:0" id="dqpVaBanner">
+            <span>Virtual account: <b>{{ auth()->user()->virtual_account_number }}</b> ({{ auth()->user()->virtual_account_bank }})</span>
+            <button type="button" id="dqpVaCopyBtn" data-account="{{ auth()->user()->virtual_account_number }}">Copy</button>
+        </div>
+        <script>
+        (function(){
+            var btn = document.getElementById('dqpVaCopyBtn');
+            if (!btn) return;
+            btn.addEventListener('click', function(){
+                navigator.clipboard.writeText(btn.dataset.account).then(function(){
+                    var o = btn.textContent; btn.textContent = 'Copied!';
+                    setTimeout(function(){ btn.textContent = o; }, 1500);
+                });
             });
-        });
-    })();
-    </script>
+        })();
+        </script>
     @endif
 
-    <div class="dqm-grid">
-        <div class="dqm-main">
-
-            <script>
-            (function () {
-                var els = document.querySelectorAll('.dqm-countup');
-                els.forEach(function (el) {
-                    var target = parseFloat(el.dataset.value) || 0;
-                    var prefix = el.dataset.prefix || '';
-                    var suffix = el.dataset.suffix || '';
-                    var duration = 900;
-                    var start = null;
-                    function easeOutQuad(t) { return t * (2 - t); }
-                    function step(ts) {
-                        if (!start) start = ts;
-                        var progress = Math.min((ts - start) / duration, 1);
-                        var current = Math.round(target * easeOutQuad(progress));
-                        el.textContent = prefix + current.toLocaleString() + suffix;
-                        if (progress < 1) requestAnimationFrame(step);
-                    }
-                    requestAnimationFrame(step);
-                });
-            })();
-            </script>
-            <div class="dqm-hero-row">
-            <div class="dqm-balance-card dqm-balance-compact dqm-gsap-in" data-gsap-order="1">
-                <div class="dqm-balance-top">
-                    <span class="dqm-balance-label">Total Balance</span>
-                    <div class="dqm-balance-icon"><i data-lucide="wallet" class="w-4 h-4"></i></div>
-                </div>
-                <div class="dqm-balance-amount">₦<span class="dqm-countup" data-value="{{ ($qCoinBalance ?? 0) + ($earnings ?? 0) }}">0</span></div>
-                <div class="dqm-balance-actions">
-                    <a href="{{ Route::has('wallet.index') ? route('wallet.index') : '#' }}" class="dqm-bal-btn dqm-bal-btn-primary"><i data-lucide="arrow-up-right" class="w-4 h-4"></i> Send</a>
-                    <a href="{{ Route::has('wallet.index') ? route('wallet.index') : '#' }}" class="dqm-bal-btn dqm-bal-btn-outline">Withdraw</a>
-                    <a href="{{ Route::has('wallet.index') ? route('wallet.index') : '#' }}" class="dqm-bal-btn dqm-bal-btn-icon" title="More"><i data-lucide="more-horizontal" class="w-4 h-4"></i></a>
-                </div>
-                <div class="dqm-seg-strip" id="dqmSegStrip">
-                    <div class="dqm-seg-item dqm-seg-active" data-seg="earnings">
-                        <div class="dqm-seg-icon dqm-seg-icon-green"><i class="ph-fill ph-chart-line-up"></i></div>
-                        <span class="dqm-seg-v">₦<span class="dqm-countup" data-value="{{ $earnings ?? 0 }}">0</span></span>
-                        <span class="dqm-seg-l">Earnings</span>
-                    </div>
-                    <div class="dqm-seg-div"></div>
-                    <div class="dqm-seg-item" data-seg="gigs">
-                        <div class="dqm-seg-icon dqm-seg-icon-purple"><i class="ph-fill ph-briefcase"></i></div>
-                        <span class="dqm-seg-v dqm-countup" data-value="{{ $myOpenGigs ?? 0 }}">0</span>
-                        <span class="dqm-seg-l">Gigs</span>
-                    </div>
-                    <div class="dqm-seg-div"></div>
-                    <div class="dqm-seg-item" data-seg="qcoin">
-                        <div class="dqm-seg-icon dqm-seg-icon-gold"><i class="ph-fill ph-coins"></i></div>
-                        <span class="dqm-seg-v dqm-countup" data-value="{{ $qCoinBalance ?? 0 }}" data-suffix=" Q">0 Q</span>
-                        <span class="dqm-seg-l">Q Coin</span>
-                    </div>
-                </div>
-                <div class="dqm-seg-detail" id="dqmSegDetail">
-                    <span>Total In <b class="dqm-seg-up">₦{{ number_format($totalIn ?? 0) }}</b></span>
-                    <span>Total Out <b>₦{{ number_format($totalOut ?? 0) }}</b></span>
-                </div>
-                <script>
-                (function () {
-                    var strip = document.getElementById('dqmSegStrip');
-                    var detail = document.getElementById('dqmSegDetail');
-                    if (!strip || !detail) return;
-                    var data = {
-                        earnings: '<span>Total In <b class="dqm-seg-up">₦{{ number_format($totalIn ?? 0) }}</b></span><span>Total Out <b>₦{{ number_format($totalOut ?? 0) }}</b></span>',
-                        gigs: '<span>Completed <b>{{ $myCompletedGigs ?? 0 }}</b></span><span>Rating <b>{{ $avgRating ? number_format($avgRating,1) : "—" }}</b></span>',
-                        qcoin: '<span>Streak <b>{{ $streakDays ?? 0 }} days</b></span>'
-                    };
-                    strip.querySelectorAll('.dqm-seg-item').forEach(function (item) {
-                        item.addEventListener('click', function () {
-                            strip.querySelectorAll('.dqm-seg-item').forEach(function (i) { i.classList.remove('dqm-seg-active'); });
-                            item.classList.add('dqm-seg-active');
-                            detail.innerHTML = data[item.dataset.seg] || '';
-                            if (window.gsap) {
-                                gsap.fromTo(detail, { opacity: 0, y: -4 }, { opacity: 1, y: 0, duration: 0.25, ease: 'power1.out' });
-                            }
-                        });
-                    });
-                })();
-                </script>
-            </div>
-                <div class="dqm-hero-vactions">
-                    <a href="{{ route('services.index') }}" class="dqm-vaction"><div class="dqm-vaction-icon dqm-vaction-blue"><i data-lucide="smartphone" class="w-4 h-4"></i></div><span>Airtime</span></a>
-                    <a href="{{ route('services.index') }}" class="dqm-vaction"><div class="dqm-vaction-icon dqm-vaction-green"><i data-lucide="wifi" class="w-4 h-4"></i></div><span>Data</span></a>
-                    <a href="{{ route('services.index') }}" class="dqm-vaction"><div class="dqm-vaction-icon dqm-vaction-purple"><i data-lucide="tv" class="w-4 h-4"></i></div><span>Cable TV</span></a>
-                    <a href="{{ route('services.index') }}" class="dqm-vaction"><div class="dqm-vaction-icon dqm-vaction-ai"><i data-lucide="plug-zap" class="w-4 h-4"></i></div><span>Electricity</span></a>
-                </div>
-            </div>
-
-            <div class="dqm-page-card dqm-gsap-in" data-gsap-order="3">
-            <div class="dqm-activity-head"><span>Your Activity</span><a href="{{ route('gigs.index') }}">View all</a></div>
-            <div class="dqm-arow-list">
-                <div class="dqm-arow dqm-arow-green">
-                    <div class="dqm-arow-icon"><i data-lucide="briefcase" class="w-5 h-5"></i></div>
-                    <div class="dqm-arow-body">
-                        <span class="dqm-arow-l">Active Gigs</span>
-                        <span class="dqm-arow-v"><span class="dqm-countup" data-value="{{ $myOpenGigs ?? 0 }}">0</span> <small>this week</small></span>
-                    </div>
-                </div>
-                <div class="dqm-arow dqm-arow-purple">
-                    <div class="dqm-arow-icon"><i data-lucide="store" class="w-5 h-5"></i></div>
-                    <div class="dqm-arow-body">
-                        <span class="dqm-arow-l">Marketplace</span>
-                        <span class="dqm-arow-v"><span class="dqm-countup" data-value="{{ $myListings ?? 0 }}">0</span> <small>listings</small></span>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="dqm-card dqm-marketplace">
-                <div class="dqm-card-head"><span>Marketplace</span><a href="{{ route('marketplace.index') }}">Open</a></div>
-                <div class="dqm-mp-row">
-                    <div class="dqm-mp-item"><span class="v">{{ $myListings }}</span><span class="l">Active Listings</span></div>
-                    <div class="dqm-mp-item dqm-mp-soon"><span class="v">Soon</span><span class="l">Sales</span></div>
-                    <div class="dqm-mp-item dqm-mp-soon"><span class="v">Soon</span><span class="l">Orders</span></div>
-                </div>
-                <div class="dqm-mp-detail">
-                    <p>You have <strong>{{ $myListings }}</strong> active listing{{ $myListings === 1 ? '' : 's' }} on the marketplace. Sales and order tracking are launching soon.</p>
-                </div>
-            </div>
-
-            <div class="dqm-card dqm-gigs">
-                <div class="dqm-card-head"><span>Recent Gigs</span><a href="{{ route('gigs.index') }}">View all</a></div>
-                @forelse($topGigs as $gig)
-                    <a href="{{ route('gigs.show', $gig->id) }}" class="dqm-gig-row">
-                        <span class="dqm-gig-title">{{ $gig->title }}</span>
-                        <span class="dqm-gig-status">{{ ucfirst($gig->status ?? '') }}</span>
-                        <span class="dqm-gig-amount">₦{{ number_format($gig->amount) }}</span>
-                    </a>
-                @empty
-                    <p class="dqm-empty">No gigs yet.</p>
-                @endforelse
-            </div>
-
-            <div class="dqm-card dqm-flow">
-                <div class="dqm-card-head"><span>Money Flow</span><span class="dqm-flow-net">₦{{ number_format($netFlow ?? 0) }} net</span></div>
-                <div class="dqm-flow-track"><div class="dqm-flow-fill" style="width: {{ ($totalIn ?? 0) > 0 ? min(100, round((($netFlow ?? 0) / $totalIn) * 100)) : 0 }}%;"></div></div>
-                <div class="dqm-flow-meta"><span>In: ₦{{ number_format($totalIn ?? 0) }}</span><span>Out: ₦{{ number_format($totalOut ?? 0) }}</span></div>
-            </div>
-            </div>
-
+    <div class="dqp-hero-card dqp-anim" style="--i:1">
+        <div class="dqp-hero-noise"></div>
+        <div class="dqp-shine"></div>
+        <div class="dqp-hero-top">
+            <span class="dqp-hero-label">Total Balance</span>
+            <i data-lucide="wallet" class="w-4 h-4"></i>
         </div>
-
-        <div class="dqm-side dqm-desktop-only">
-            <div class="dqm-profile-card">
-                <div class="dqm-profile-photo">
-                    @if($dqmAvatar)<img src="{{ $dqmAvatar }}" alt="">@else<span>{{ $dqmInitial }}</span>@endif
-                </div>
-                <div class="dqm-profile-scrim"></div>
-                <div class="dqm-profile-info">
-                    <p class="dqm-profile-name">{{ $dqmName }}</p>
-                    <p class="dqm-profile-level">{{ auth()->user()->workerLevel()['label'] }}</p>
-                    <div class="dqm-profile-stats">
-                        <span>{{ $myCompletedGigs }} Gigs</span>
-                        <span>{{ $avgRating ? number_format($avgRating, 1) : '—' }} ({{ $reviewCount }})</span>
-                    </div>
-                    <a href="{{ route('profile.index') }}" class="dqm-profile-edit">Edit Profile</a>
-                </div>
+        <div class="dqp-hero-chip"></div>
+        <div class="dqp-hero-amount">₦<span class="dqm-countup" data-value="{{ $balance ?? 0 }}">0</span></div>
+        @if($user->virtual_account_number ?? false)
+            <div class="dqp-hero-masked">•••• •••• {{ substr($user->virtual_account_number, -4) }}</div>
+            <div class="dqp-hero-holder-row">
+                <span class="dqp-hero-holder">Card holder<b>{{ $dqmName }}</b></span>
+                <span class="dqp-hero-holder">Bank<b>{{ $user->virtual_account_bank }}</b></span>
             </div>
-
-            <div class="dqm-card dqm-activity">
-                <div class="dqm-card-head"><span>Activity</span></div>
-                @forelse($todayFeed->take(5) as $item)
-                    <a href="{{ $item['url'] }}" class="dqm-activity-row">
-                        <span class="dqm-dot dqm-dot-{{ $item['type'] }}"></span>
-                        <span class="dqm-activity-title">{{ $item['title'] }}</span>
-                        <span class="dqm-activity-time">{{ \Carbon\Carbon::parse($item['time'])->diffForHumans() }}</span>
-                    </a>
-                @empty
-                    <p class="dqm-empty">Nothing new yet.</p>
-                @endforelse
-
-                <div class="dqm-activity-msg-head"><span>Messages</span><a href="{{ route('chat.index') }}">Open chat</a></div>
-                @forelse(($recentConversations ?? collect())->take(4) as $conv)
-                    <a href="{{ route('chat.index') }}" class="dqm-chat-row">
-                        <div class="dqm-chat-avatar">
-                            @if($conv['other_avatar'])<img src="{{ $conv['other_avatar'] }}" alt="">@else<span>{{ strtoupper(substr($conv['other_name'],0,1)) }}</span>@endif
-                        </div>
-                        <div class="dqm-chat-body">
-                            <span class="dqm-chat-name">{{ $conv['other_name'] }}</span>
-                            <span class="dqm-chat-snippet">{{ \Illuminate\Support\Str::limit($conv['last_body'], 42) }}</span>
-                        </div>
-                        <div class="dqm-chat-meta">
-                            <span class="dqm-chat-time">{{ $conv['last_at'] ? \Carbon\Carbon::parse($conv['last_at'])->diffForHumans(null, true) : '' }}</span>
-                            @if($conv['unread'] > 0)<span class="dqm-chat-unread">{{ $conv['unread'] }}</span>@endif
-                        </div>
-                    </a>
-                @empty
-                    <p class="dqm-empty">No conversations yet.</p>
-                @endforelse
-            </div>
+        @endif
+        <div class="dqp-hero-actions">
+            <a href="{{ Route::has('wallet.index') ? route('wallet.index') : '#' }}" class="dqp-btn dqp-btn-primary"><i data-lucide="arrow-up-right" class="w-4 h-4"></i> Send</a>
+            <a href="{{ Route::has('wallet.index') ? route('wallet.index') : '#' }}" class="dqp-btn dqp-btn-ghost">Withdraw</a>
+            <a href="{{ Route::has('wallet.index') ? route('wallet.index') : '#' }}" class="dqp-btn dqp-btn-icon"><i data-lucide="more-horizontal" class="w-4 h-4"></i></a>
         </div>
     </div>
 
-    <script>
-    (function () {
-        if (!window.gsap) return;
+    <div class="dqp-mini-row dqp-anim" style="--i:2">
+        @foreach($dqmMiniStats as $stat)
+            <div class="dqp-mini-card dqp-tint-{{ $stat['tint'] }}">
+                <i data-lucide="{{ $stat['icon'] }}" class="w-4 h-4"></i>
+                <span class="v">{{ $stat['value'] }}</span>
+                <span class="l">{{ $stat['label'] }}</span>
+                @php
+                    $sp = [];
+                    for ($j=0;$j<=8;$j++){ $n=sin($j*1.1+$stat['seed'])*8+cos($j*0.6+$stat['seed'])*5; $sp[]=round(20-$n,1); }
+                    $spPath=''; foreach($sp as $j=>$y){ $x=$j*10; $spPath.=($j===0?"M{$x},{$y} ":"L{$x},{$y} "); }
+                @endphp
+                <svg class="dqp-spark" viewBox="0 0 80 28" preserveAspectRatio="none"><path d="{{ $spPath }}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+        @endforeach
+    </div>
 
-        // Entrance: fade + slide up, staggered by data-gsap-order
-        var items = Array.prototype.slice.call(document.querySelectorAll('.dqm-gsap-in'));
-        items.sort(function (a, b) {
-            return (parseInt(a.dataset.gsapOrder) || 0) - (parseInt(b.dataset.gsapOrder) || 0);
-        });
-        gsap.set(items, { opacity: 0, y: 24 });
-        gsap.to(items, {
-            opacity: 1,
-            y: 0,
-            duration: 0.55,
-            ease: 'power2.out',
-            stagger: 0.12,
-            delay: 0.05
-        });
+    <div class="dqp-services-row dqp-anim" style="--i:3">
+        <a href="{{ route('services.index') }}" class="dqp-service"><div class="icon dqp-svc-blue"><i data-lucide="smartphone" class="w-5 h-5"></i></div><span>Airtime</span></a>
+        <a href="{{ route('services.index') }}" class="dqp-service"><div class="icon dqp-svc-green"><i data-lucide="wifi" class="w-5 h-5"></i></div><span>Data</span></a>
+        <a href="{{ route('services.index') }}" class="dqp-service"><div class="icon dqp-svc-purple"><i data-lucide="tv" class="w-5 h-5"></i></div><span>Cable TV</span></a>
+        <a href="{{ route('services.index') }}" class="dqp-service"><div class="icon dqp-svc-orange"><i data-lucide="plug-zap" class="w-5 h-5"></i></div><span>Electricity</span></a>
+    </div>
 
-        // Interaction: balance action buttons press feedback
-        document.querySelectorAll('.dqm-bal-btn').forEach(function (btn) {
-            btn.addEventListener('pointerdown', function () {
-                gsap.to(btn, { scale: 0.95, duration: 0.12, ease: 'power1.out' });
-            });
-            btn.addEventListener('pointerup', function () {
-                gsap.to(btn, { scale: 1, duration: 0.25, ease: 'back.out(2)' });
-            });
-            btn.addEventListener('pointerleave', function () {
-                gsap.to(btn, { scale: 1, duration: 0.25, ease: 'back.out(2)' });
-            });
-        });
+    <div class="dqp-card dqp-chart-card dqp-anim" style="--i:4">
+        <div class="dqp-chart-top">
+            <span class="dqp-flow-pill dqp-flow-pill-in"><i data-lucide="arrow-down" class="w-3 h-3"></i> In ₦{{ number_format($totalIn ?? 0) }}</span>
+            <span class="dqp-flow-pill dqp-flow-pill-out"><i data-lucide="arrow-up" class="w-3 h-3"></i> Out ₦{{ number_format($totalOut ?? 0) }}</span>
+        </div>
+        <div class="dqp-card-head"><span>Money Flow</span><span class="dqp-flow-net">₦{{ number_format($netFlow ?? 0) }} net</span></div>
+        <div class="dqp-wave-wrap">
+            <svg class="dqp-wave-svg" viewBox="0 0 300 100" preserveAspectRatio="none">
+                <defs>
+                    <linearGradient id="dqpWaveFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="var(--user-accent, #7c5cf0)" stop-opacity="0.45"/>
+                        <stop offset="100%" stop-color="var(--user-accent, #7c5cf0)" stop-opacity="0"/>
+                    </linearGradient>
+                    <linearGradient id="dqpWaveStroke" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="var(--user-accent, #7c5cf0)"/>
+                        <stop offset="100%" stop-color="#22c55e"/>
+                    </linearGradient>
+                </defs>
+                <path d="{{ $dqmWaveFillPath }}" fill="url(#dqpWaveFill)"></path>
+                <path class="dqp-wave-line" d="{{ $dqmWaveLine }}" fill="none" stroke="url(#dqpWaveStroke)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                <circle cx="150" cy="{{ $dqmWavePts[3] }}" r="4" fill="#fff"></circle>
+            </svg>
+        </div>
+    </div>
 
-        // Interaction: activity row press feedback
-        document.querySelectorAll('.dqm-arow').forEach(function (row) {
-            row.addEventListener('pointerdown', function () {
-                gsap.to(row, { scale: 0.97, duration: 0.12, ease: 'power1.out' });
-            });
-            row.addEventListener('pointerup', function () {
-                gsap.to(row, { scale: 1, duration: 0.3, ease: 'back.out(2)' });
-            });
-            row.addEventListener('pointerleave', function () {
-                gsap.to(row, { scale: 1, duration: 0.3, ease: 'back.out(2)' });
-            });
-        });
+    @if($dqmQuickSend->count() > 0)
+    <div class="dqp-card dqp-anim" style="--i:5">
+        <div class="dqp-card-head"><span>Quick Send</span><a href="{{ route('chat.index') }}">View all</a></div>
+        <div class="dqp-quick-row">
+            <div class="dqp-quick-item"><a href="{{ route('chat.index') }}" class="dqp-quick-avatar dqp-quick-add"><i data-lucide="plus" class="w-4 h-4"></i></a><span>Add</span></div>
+            @foreach($dqmQuickSend as $conv)
+                <div class="dqp-quick-item">
+                    <a href="{{ route('chat.index') }}" class="dqp-quick-avatar">
+                        @if($conv['other_avatar'])<img src="{{ $conv['other_avatar'] }}" alt="">@else<span>{{ strtoupper(substr($conv['other_name'],0,1)) }}</span>@endif
+                    </a>
+                    <span>{{ \Illuminate\Support\Str::limit($conv['other_name'], 8, '') }}</span>
+                </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
 
-    })();
-    </script>
+    <div class="dqp-card dqp-anim" style="--i:6">
+        <div class="dqp-card-head"><span>Recent Gigs</span><a href="{{ route('gigs.index') }}">View all</a></div>
+        @forelse($topGigs as $gig)
+            <a href="{{ route('gigs.show', $gig->id) }}" class="dqp-tx-row">
+                <div class="dqp-tx-icon"><i data-lucide="briefcase" class="w-4 h-4"></i></div>
+                <div class="dqp-tx-body">
+                    <span class="t">{{ $gig->title }}</span>
+                    <span class="s">{{ ucfirst($gig->status ?? '') }}</span>
+                </div>
+                <span class="dqp-tx-amount">₦{{ number_format($gig->amount) }}</span>
+            </a>
+        @empty
+            <p class="dqp-empty">No gigs yet.</p>
+        @endforelse
+    </div>
+
+    <div class="dqp-card dqp-anim" style="--i:7">
+        <div class="dqp-card-head"><span>Marketplace</span><a href="{{ route('marketplace.index') }}">Open</a></div>
+        <div class="dqp-mp-row">
+            <div class="dqp-mp-item"><span class="v">{{ $myListings }}</span><span class="l">Active Listings</span></div>
+            <div class="dqp-mp-item dqp-mp-soon"><span class="v">Soon</span><span class="l">Sales</span></div>
+            <div class="dqp-mp-item dqp-mp-soon"><span class="v">Soon</span><span class="l">Orders</span></div>
+        </div>
+    </div>
+
+    <div class="dqp-profile-card dqp-anim" style="--i:8">
+        <div class="dqp-profile-photo">
+            @if($dqmAvatar)<img src="{{ $dqmAvatar }}" alt="">@else<span>{{ $dqmInitial }}</span>@endif
+        </div>
+        <div class="dqp-profile-scrim"></div>
+        <div class="dqp-profile-info">
+            <p class="name">{{ $dqmName }}</p>
+            <p class="level">{{ auth()->user()->workerLevel()['label'] }}</p>
+            <div class="stats"><span>{{ $myCompletedGigs }} Gigs</span><span>{{ $avgRating ? number_format($avgRating, 1) : '—' }} ({{ $reviewCount }})</span></div>
+            <a href="{{ route('profile.index') }}" class="edit">Edit Profile</a>
+        </div>
+    </div>
+
+    <div class="dqp-card dqp-anim" style="--i:9">
+        <div class="dqp-card-head"><span>Activity</span></div>
+        @forelse($todayFeed->take(5) as $item)
+            <a href="{{ $item['url'] }}" class="dqp-activity-row">
+                <span class="dqp-dot dqp-dot-{{ $item['type'] }}"></span>
+                <span class="t">{{ $item['title'] }}</span>
+                <span class="time">{{ \Carbon\Carbon::parse($item['time'])->diffForHumans() }}</span>
+            </a>
+        @empty
+            <p class="dqp-empty">Nothing new yet.</p>
+        @endforelse
+    </div>
+
+    <div class="dqp-card dqp-anim" style="--i:10">
+        <div class="dqp-card-head"><span>Messages</span><a href="{{ route('chat.index') }}">Open chat</a></div>
+        @forelse($dqmQuickSend as $conv)
+            <a href="{{ route('chat.index') }}" class="dqp-chat-row">
+                <div class="dqp-chat-avatar">
+                    @if($conv['other_avatar'])<img src="{{ $conv['other_avatar'] }}" alt="">@else<span>{{ strtoupper(substr($conv['other_name'],0,1)) }}</span>@endif
+                </div>
+                <div class="dqp-chat-body">
+                    <span class="name">{{ $conv['other_name'] }}</span>
+                    <span class="snippet">{{ \Illuminate\Support\Str::limit($conv['last_body'], 42) }}</span>
+                </div>
+                <div class="dqp-chat-meta">
+                    <span class="time">{{ $conv['last_at'] ? \Carbon\Carbon::parse($conv['last_at'])->diffForHumans(null, true) : '' }}</span>
+                    @if($conv['unread'] > 0)<span class="unread">{{ $conv['unread'] }}</span>@endif
+                </div>
+            </a>
+        @empty
+            <p class="dqp-empty">No conversations yet.</p>
+        @endforelse
+    </div>
 
 </div>
+
+<script>
+(function () {
+    var els = document.querySelectorAll('.dqm-countup');
+    els.forEach(function (el) {
+        var target = parseFloat(el.dataset.value) || 0;
+        var duration = 900, start = null;
+        function ease(t) { return t * (2 - t); }
+        function step(ts) {
+            if (!start) start = ts;
+            var p = Math.min((ts - start) / duration, 1);
+            el.textContent = Math.round(target * ease(p)).toLocaleString();
+            if (p < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    });
+
+    document.querySelectorAll('.dqp-btn, .dqp-mini-card, .dqp-tx-row, .dqp-service').forEach(function (el) {
+        el.addEventListener('pointerdown', function () { el.style.transform = 'scale(0.96)'; });
+        el.addEventListener('pointerup', function () { el.style.transform = ''; });
+        el.addEventListener('pointerleave', function () { el.style.transform = ''; });
+    });
+})();
+</script>

@@ -26,7 +26,10 @@
         @foreach($navRailLinks as $link)
         <a href="{{ route($link['route']) }}" class="d2-rail-link {{ ($active ?? '') == $link['key'] ? 'active' : '' }}" title="{{ $link['label'] }}"><i data-lucide="{{ $link['icon'] }}" class="w-4 h-4"></i></a>
         @endforeach
-        <button type="button" class="d2-rail-link d2-rail-theme-btn" title="Theme" style="margin-top:auto;"><i data-lucide="sun-moon" class="w-4 h-4"></i></button>
+        <form method="POST" action="{{ route('profile.theme.toggle') }}" style="margin:0;margin-top:auto;">
+            @csrf
+            <button type="submit" class="d2-rail-link d2-rail-theme-btn" title="Theme"><i data-lucide="sun-moon" class="w-4 h-4"></i></button>
+        </form>
         <form method="POST" action="{{ route('logout') }}" style="margin:0;">
             @csrf
             <button type="submit" class="d2-rail-link" title="Log Out"><i data-lucide="log-out" class="w-4 h-4"></i></button>
@@ -44,10 +47,13 @@
             <a href="{{ route($link['route']) }}" class="d2-rail-link-labeled {{ ($active ?? '') == $link['key'] ? 'active' : '' }}"><i data-lucide="{{ $link['icon'] }}" class="w-4 h-4"></i><span>{{ $link['label'] }}</span></a>
             @endforeach
         </nav>
-        <button type="button" class="d2-rail-toggle-row d2-rail-theme-btn" title="Theme">
-            <i data-lucide="sun-moon" class="w-4 h-4"></i><span>Dark mode</span>
-            <span class="d2-rail-toggle-pill"><span class="d2-rail-toggle-dot"></span></span>
-        </button>
+        <form method="POST" action="{{ route('profile.theme.toggle') }}" style="margin:0;">
+            @csrf
+            <button type="submit" class="d2-rail-toggle-row d2-rail-theme-btn" title="Theme">
+                <i data-lucide="sun-moon" class="w-4 h-4"></i><span>Dark mode</span>
+                <span class="d2-rail-toggle-pill {{ (auth()->user()->theme_style ?? 'glass') === 'qelvo-dark' ? 'is-on' : '' }}"><span class="d2-rail-toggle-dot"></span></span>
+            </button>
+        </form>
         <div class="d2-rail-user-row">
             <div class="d2-rail-avatar">
                 @if($navRailAvatar)<img src="{{ $navRailAvatar }}" alt="">@else<span>{{ $navRailInitial }}</span>@endif

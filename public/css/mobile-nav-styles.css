@@ -170,3 +170,109 @@ body:not([data-mobile-nav-style]) .mnav-item-pulse.active .mnav-icon{
 }
 body[data-mobile-nav-style="painted_pill"] .mnav-item-pulse.active,
 body:not([data-mobile-nav-style]) .mnav-item-pulse.active{ color:#ff3b30; }
+
+
+/* ===== plain theme override v3: narrower/taller card, bigger cone,
+   nuclear background removal on every mnav-icon state (kills any
+   lingering purple regardless of source) ===== */
+body[data-theme-style="plain"] .mnav-bar {
+    position: fixed !important;
+    left: 50% !important;
+    bottom: max(6px, env(safe-area-inset-bottom, 0px)) !important;
+    transform: translateX(-50%) !important;
+    border-radius: 999px !important;
+    background: linear-gradient(160deg, #151515, #060606) !important;
+    padding: 10px 9px !important;
+    box-shadow:
+        0 -6px 24px rgba(0,0,0,0.35),
+        0 1px 0 rgba(255,255,255,0.06) inset,
+        0 -1px 4px rgba(0,0,0,0.6) inset,
+        0 8px 18px -6px rgba(0,0,0,0.5) !important;
+    border: 1px solid rgba(255,255,255,0.05) !important;
+    gap: 9px !important;
+    overflow: hidden !important;
+    max-width: 64vw !important;
+    margin: 0 !important;
+}
+body[data-theme-style="plain"] .mnav-item {
+    position: relative !important;
+    overflow: visible !important;
+}
+body[data-theme-style="plain"] .mnav-icon,
+body[data-theme-style="plain"] .mnav-bar .mnav-item .mnav-icon,
+body[data-theme-style="plain"] .mnav-bar .mnav-item.active .mnav-icon,
+body[data-theme-style="plain"] .mnav-item.active .mnav-icon,
+body[data-theme-style="plain"] .mnav-item-pulse.active .mnav-icon {
+    background: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    width: auto !important; height: auto !important;
+    font-size: 20px !important;
+    transition: color 0.2s ease, filter 0.2s ease !important;
+}
+body[data-theme-style="plain"] .mnav-icon { color: rgba(255,255,255,0.85) !important; }
+body[data-theme-style="plain"] .mnav-item,
+body[data-theme-style="plain"] .mnav-item.active,
+body[data-theme-style="plain"] .mnav-item-pulse.active {
+    background: none !important;
+    background-image: none !important;
+    padding: 8px 4px !important;
+}
+body[data-theme-style="plain"] .mnav-label { display: none !important; }
+
+/* light source at the top edge — bigger */
+body[data-theme-style="plain"] .mnav-item.active::before {
+    content: "";
+    position: absolute;
+    top: -9px; left: 50%; transform: translateX(-50%);
+    width: 26px; height: 4px; border-radius: 4px;
+    background: var(--user-accent, #0F9D6E);
+    box-shadow: 0 0 14px 2px var(--user-accent, #0F9D6E);
+    z-index: 2;
+}
+/* bigger cone, widening further down */
+body[data-theme-style="plain"] .mnav-item.active::after {
+    content: "";
+    position: absolute;
+    top: -9px; left: 50%; transform: translateX(-50%);
+    width: 84px; height: 56px;
+    background: linear-gradient(to bottom,
+        color-mix(in srgb, var(--user-accent, #0F9D6E) 42%, transparent) 0%,
+        color-mix(in srgb, var(--user-accent, #0F9D6E) 12%, transparent) 55%,
+        transparent 100%);
+    clip-path: polygon(35% 0%, 65% 0%, 82% 100%, 18% 100%);
+    pointer-events: none;
+    z-index: 1;
+}
+body[data-theme-style="plain"] .mnav-item.active .mnav-icon {
+    position: relative;
+    z-index: 2;
+    color: var(--user-accent, #0F9D6E) !important;
+    filter: drop-shadow(0 0 12px color-mix(in srgb, var(--user-accent, #0F9D6E) 90%, transparent)) !important;
+    transform: none !important;
+    animation: none !important;
+}
+body[data-theme-style="plain"] .mnav-item.active .mnav-icon::after {
+    content: "";
+    position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 50px; height: 50px; border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--user-accent, #0F9D6E) 50%, transparent) 0%, transparent 70%);
+    z-index: -1;
+}
+
+body[data-theme-style="plain"] .mnav-item-pulse.active::before { top: -9px; width: 26px; background: #ff3b30; box-shadow: 0 0 14px 2px #ff3b30; }
+body[data-theme-style="plain"] .mnav-item-pulse.active::after {
+    background: linear-gradient(to bottom, rgba(255,59,48,0.42) 0%, rgba(255,59,48,0.12) 55%, transparent 100%);
+    clip-path: polygon(35% 0%, 65% 0%, 82% 100%, 18% 100%);
+    top: -9px; height: 56px; width: 84px;
+}
+body[data-theme-style="plain"] .mnav-item-pulse.active .mnav-icon {
+    color: #ff3b30 !important;
+    filter: drop-shadow(0 0 12px rgba(255,59,48,0.9)) !important;
+}
+body[data-theme-style="plain"] .mnav-item-pulse.active .mnav-icon::after {
+    background: radial-gradient(circle, rgba(255,59,48,0.5) 0%, transparent 70%);
+}

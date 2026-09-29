@@ -28,7 +28,7 @@
 .lp-hero-scrim{position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(5,5,5,.25) 0%,rgba(5,5,5,.55) 65%,rgba(5,5,5,.9) 100%)}
 .lp-hero-in{position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;max-width:1160px;margin:0 auto;width:100%;padding:110px 64px 48px}
 .lp-hero-word-row{display:flex;align-items:center;justify-content:center;gap:22px}
-.lp-hero-word{color:rgba(255,255,255,.45);font-weight:800;font-size:clamp(3.8rem,13vw,9.5rem);letter-spacing:-.02em;line-height:1;text-align:center;-webkit-text-stroke:1.5px rgba(227,179,74,.95);text-shadow:0 10px 44px rgba(0,0,0,.5)}
+.lp-hero-word{color:rgba(255,255,255,.08);font-weight:800;font-size:clamp(3.8rem,13vw,9.5rem);letter-spacing:-.02em;line-height:1;text-align:center;-webkit-text-stroke:1.5px rgba(227,179,74,.95);text-shadow:0 10px 44px rgba(0,0,0,.5)}
 @media(min-width:1024px){.lp-hero-word{font-size:clamp(6rem,11vw,13rem)}}
 .lp-ai-o{position:relative;display:inline-block;width:.9em;height:.72em;vertical-align:-.04em;margin:0 .02em}
 .lp-ai-o-ring{position:absolute;inset:-8%;border-radius:50%;background:conic-gradient(from 0deg,transparent 0deg,rgba(227,179,74,.95) 45deg,transparent 100deg,transparent 360deg);-webkit-mask:radial-gradient(circle,transparent 60%,#000 61%,#000 100%);mask:radial-gradient(circle,transparent 60%,#000 61%,#000 100%);animation:lpOSpin 3.2s linear infinite}
@@ -249,7 +249,7 @@
   .lp-h-video-wrap{background:linear-gradient(160deg,#1a1006,#0a0705)}
 }
 
-.lp-hero-o{display:inline-block;transform:scaleY(1.22);transform-origin:50% 55%}
+.lp-hero-o{display:inline-block;width:.72em;height:.82em;vertical-align:-.06em}
 
 /* pricing cards: blurred metal-texture photo + tier-tinted gradient */
 .lp-plan-photo{position:relative;overflow:hidden}
@@ -264,3 +264,8 @@
 .lp-hero-tag{background:rgba(255,255,255,.07);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:14px 18px;animation:lpTagBob 18s ease-in-out infinite}
 @keyframes lpTagBob{0%,78%,100%{transform:translateY(0)}86%{transform:translateY(12px)}94%{transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.lp-hero-tag{animation:none}}
+
+/* hero eye: own idle wander (pixel-based, fits the SVG coordinate space) */
+.lp-hero-eye-pupil{animation:lpHeroEyeIdle 6s ease-in-out infinite}
+@keyframes lpHeroEyeIdle{0%,100%{transform:translate(0,0)}20%{transform:translate(-8px,-4px)}45%{transform:translate(6px,5px)}70%{transform:translate(-4px,6px)}90%{transform:translate(5px,-3px)}}
+@media(prefers-reduced-motion:reduce){.lp-hero-eye-pupil{animation:none}}

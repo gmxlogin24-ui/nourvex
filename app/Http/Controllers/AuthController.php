@@ -133,26 +133,40 @@ class AuthController extends Controller
         $lastname = $nameParts[1] ?? $nameParts[0];
 
         try {
-            $response = Http::withToken(config('services.flutterwave.secret'))
-                ->post('https://api.flutterwave.com/v3/virtual-account-numbers', [
-                    'email' => $user->email,
-                    'tx_ref' => 'VA-' . $user->id . '-' . time(),
-                    'phonenumber' => $phonenumber,
-                    'is_permanent' => true,
-                    'firstname' => $firstname,
-                    'lastname' => $lastname,
-                    'narration' => 'Qelvo - ' . $user->name,
-                    'bvn' => $bvn,
-                ]);
-            // $bvn goes out of scope here and is never stored - only Flutterwave's response is saved
+            $secret = config('services.paystack.secret');
 
-            $data = $response->json();
+            $customerRes = Http::withToken($secret)->post('https://api.paystack.co/customer', [
+                'email' => $user->email,
+                'first_name' => $firstname,
+                'last_name' => $lastname,
+                'phone' => $phonenumber,
+            ]);
+            $customerCode = $customerRes->json()['data']['customer_code'] ?? null;
+            if (!$customerCode) {
+                return;
+            }
 
-            if (($data['status'] ?? null) === 'success') {
+            Http::withToken($secret)->post("https://api.paystack.co/customer/{$customerCode}/identification", [
+                'country' => 'NG',
+                'type' => 'bvn',
+                'value' => $bvn,
+                'bvn' => $bvn,
+                'first_name' => $firstname,
+                'last_name' => $lastname,
+            ]);
+            // $bvn goes out of scope here and is never stored - only Paystack's response is saved
+
+            $dvaRes = Http::withToken($secret)->post('https://api.paystack.co/dedicated_account', [
+                'customer' => $customerCode,
+                'preferred_bank' => 'wema-bank',
+            ]);
+            $dvaData = $dvaRes->json();
+
+            if (($dvaData['status'] ?? false) === true) {
                 $user->update([
-                    'virtual_account_number' => $data['data']['account_number'],
-                    'virtual_account_bank' => $data['data']['bank_name'],
-                    'virtual_account_ref' => $data['data']['flw_ref'],
+                    'virtual_account_number' => $dvaData['data']['account_number'],
+                    'virtual_account_bank' => $dvaData['data']['bank']['name'] ?? 'Wema Bank',
+                    'virtual_account_ref' => $customerCode,
                 ]);
             }
         } catch (\Throwable $e) {

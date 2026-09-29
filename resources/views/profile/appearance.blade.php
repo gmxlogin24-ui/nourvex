@@ -58,8 +58,8 @@
                 <div class="flex items-center gap-3 flex-wrap">
                     <input type="color" name="accent_color" id="accentColorInput" value="{{ $user->accent_color ?? '#0F9D6E' }}" style="width:3rem;height:2.6rem;border-radius:0.75rem;border:1px solid var(--border-color);background:none;cursor:pointer;">
                     <div class="flex gap-2">
-                        @foreach(['#0F9D6E','#F472B6','#A78BFA','#FB923C','#4ADE80','#F43F5E'] as $swatch)
-                        <button type="button" onclick="document.getElementById('accentColorInput').value='{{ $swatch }}'; document.getElementById('accentColorInput').dispatchEvent(new Event('input'));" class="w-7 h-7 rounded-full" style="background:{{ $swatch }};border:2px solid var(--border-color);"></button>
+                        @foreach(['#0F9D6E','#F472B6','#A78BFA','#FB923C','#4ADE80','#F43F5E','#FFFFFF'] as $swatch)
+                        <button type="button" onclick="document.getElementById('accentColorInput').value='{{ $swatch }}'; document.getElementById('accentColorInput').dispatchEvent(new Event('input'));" class="w-7 h-7 rounded-full" style="background:{{ $swatch }};border:2px solid {{ strtoupper($swatch) === '#FFFFFF' ? '#94a3b8' : 'var(--border-color)' }};"></button>
                         @endforeach
                     </div>
                 </div>

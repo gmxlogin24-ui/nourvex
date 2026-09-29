@@ -82,7 +82,7 @@
         <h3 class="font-semibold mb-3">Top Up Wallet</h3>
         <form method="POST" action="{{ route('flutterwave.initiate') }}">
             @csrf
-            <input type="number" name="amount" min="100" placeholder="Amount (₦)" required class="input-field !mt-0 mb-3">
+            <input type="number" name="amount" min="100" max="1000000" step="0.01" inputmode="decimal" autocomplete="off" placeholder="Amount (₦)" required class="input-field !mt-0 mb-3">
             <button type="submit" class="btn-primary w-full justify-center">Continue to Payment</button>
         </form>
         <button onclick="document.getElementById('topupModal').classList.remove('open')" class="text-muted text-sm mt-3 w-full text-center">Cancel</button>
@@ -100,7 +100,7 @@
         @endunless
         <form method="POST" action="{{ route('wallet.withdraw') }}" onsubmit="return confirm('Withdraw this amount to your bank account? This cannot be reversed once submitted.');">
             @csrf
-            <input type="number" name="amount" min="100" placeholder="Amount (₦)" required class="input-field !mt-0 mb-3">
+            <input type="number" name="amount" min="100" max="1000000" step="0.01" inputmode="decimal" autocomplete="off" placeholder="Amount (₦)" required class="input-field !mt-0 mb-3">
             <input type="password" name="pin" inputmode="numeric" maxlength="6" placeholder="Transaction PIN" required class="input-field !mt-0 mb-3">
             <button type="submit" class="btn-primary w-full justify-center" {{ (($hasPin ?? false) && ($hasBankAccount ?? false)) ? '' : 'disabled' }}>Confirm Withdraw</button>
         </form>

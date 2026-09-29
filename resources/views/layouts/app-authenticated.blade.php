@@ -28,9 +28,7 @@
     <link rel="stylesheet" href="{{ asset('css/nav-authenticated-green.css') }}?v={{ time() }}">
         <link rel="stylesheet" href="{{ asset('css/dashboard2.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/dashboard2-minimal.css') }}?v={{ time() }}">
-    @if((auth()->user()->theme_style ?? 'glass') === 'qelvo-dark')
-    <link rel="stylesheet" href="{{ asset('css/qelvo-dark.css') }}?v={{ time() }}">
-    @endif
+    <link rel="stylesheet" href="{{ asset('css/dashboard-premium.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/notifications.css') }}?v={{ time() }}">
     <script src="{{ asset('js/push.js') }}?v={{ time() }}" defer></script>
     <link rel="stylesheet" href="{{ asset('css/mobile-nav-styles.css') }}?v={{ time() }}">
@@ -38,6 +36,7 @@
     <link rel="stylesheet" href="{{ asset('css/preloader.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/dashboard-aurora.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/aurora-pages.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/scrollbar.css') }}?v={{ time() }}">
 
     <script>
         if (localStorage.getItem('theme') === 'dark') {

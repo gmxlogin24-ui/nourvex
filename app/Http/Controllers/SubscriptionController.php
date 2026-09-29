@@ -102,20 +102,20 @@ class SubscriptionController extends Controller
             'expires_at' => now(),
         ]);
 
-        $response = Http::withToken(config('services.flutterwave.secret'))
-            ->post('https://api.flutterwave.com/v3/payments', [
-                'tx_ref' => $txRef,
-                'amount' => $cost,
+        $response = Http::withToken(config('services.paystack.secret'))
+            ->post('https://api.paystack.co/transaction/initialize', [
+                'reference' => $txRef,
+                'amount' => (int) round($cost * 100),
                 'currency' => 'NGN',
-                'redirect_url' => route('subscriptions.callback'),
-                'customer' => ['email' => $user->email, 'name' => $user->name],
-                'customizations' => ['title' => 'Qelvo ' . Subscription::PLANS[$target]['label'] . ' Subscription'],
+                'email' => $user->email,
+                'callback_url' => route('subscriptions.callback'),
+                'metadata' => ['title' => 'Qelvo ' . Subscription::PLANS[$target]['label'] . ' Subscription'],
             ]);
 
         $data = $response->json();
 
-        if (($data['status'] ?? null) === 'success') {
-            return redirect($data['data']['link']);
+        if (($data['status'] ?? false) === true) {
+            return redirect($data['data']['authorization_url']);
         }
 
         return back()->withErrors(['tier' => 'Could not start payment. Please try again.']);
@@ -123,8 +123,7 @@ class SubscriptionController extends Controller
 
     public function flutterwaveCallback(Request $request)
     {
-        $txRef = $request->query('tx_ref');
-        $status = $request->query('status');
+        $txRef = $request->query('reference') ?? $request->query('trxref');
 
         $sub = Subscription::where('flutterwave_tx_ref', $txRef)->first();
 
@@ -132,25 +131,14 @@ class SubscriptionController extends Controller
             return redirect()->route('subscriptions.index')->withErrors(['tier' => 'Subscription record not found.']);
         }
 
-        if ($status !== 'successful') {
-            DB::transaction(function () use ($sub) {
-                $locked = Subscription::where('id', $sub->id)->lockForUpdate()->first();
-                if ($locked->status === 'pending_payment') {
-                    $locked->update(['status' => 'cancelled']);
-                }
-            });
-            return redirect()->route('subscriptions.index')->withErrors(['tier' => 'Payment was not completed.']);
-        }
-
-        $transactionId = $request->query('transaction_id');
-        $verify = Http::withToken(config('services.flutterwave.secret'))
-            ->get("https://api.flutterwave.com/v3/transactions/{$transactionId}/verify");
+        $verify = Http::withToken(config('services.paystack.secret'))
+            ->get("https://api.paystack.co/transaction/verify/{$txRef}");
         $verifyData = $verify->json();
 
-        $verified = ($verifyData['status'] ?? null) === 'success'
-            && ($verifyData['data']['status'] ?? null) === 'successful'
-            && ($verifyData['data']['tx_ref'] ?? null) === $txRef
-            && (float) ($verifyData['data']['amount'] ?? 0) >= (float) $sub->amount
+        $verified = ($verifyData['status'] ?? false) === true
+            && ($verifyData['data']['status'] ?? null) === 'success'
+            && ($verifyData['data']['reference'] ?? null) === $txRef
+            && ((float) ($verifyData['data']['amount'] ?? 0)) / 100 >= (float) $sub->amount
             && ($verifyData['data']['currency'] ?? null) === 'NGN';
 
         $result = DB::transaction(function () use ($sub, $verified) {

@@ -589,11 +589,11 @@ body[data-theme-style="plain"] .dqm-page { padding-left: 16px !important; paddin
 /* Topbar redesign: quiet, adaptive (white in light mode, dark card in dark
    mode), no shadow/blur, shorter — replaces the earlier forced-dark version */
 .dqm-topbar-fixed {
-    background: var(--dqm-card) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+    background: rgba(10,10,14,0.22) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
     box-shadow: 0 4px 12px -6px rgba(0,0,0,0.10) !important;
-    border-bottom: none;
+    border: 1.5px solid rgba(255,255,255,0.16) !important;
     padding: 8px 14px !important;
 }
 /* Sidebar (rail) is 84px wide + 20px left margin = ends at 104px — topbar
@@ -1103,3 +1103,212 @@ body.dqm-topbar-open .dqm-page {
     box-shadow: 0 6px 14px -8px rgba(0,0,0,0.5);
 }
 .dqm-seg-item:active { transform: scale(0.96); }
+
+/* ===== Balance card: dedicated account number row (sits between the big
+   amount and the Send/Withdraw actions) ===== */
+.dqm-balance-acct {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: rgba(255,255,255,0.55);
+    margin: -10px 0 14px;
+    position: relative;
+    z-index: 1;
+}
+.dqm-acct-copy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.14);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+}
+.dqm-acct-copy:active { transform: scale(0.9); }
+.dqm-balance-compact .dqm-balance-acct { font-size: 10px; margin: -6px 0 10px; }
+.dqm-balance-compact .dqm-acct-copy { width: 16px; height: 16px; }
+
+/* ============================================================
+   Premium dark mode — plain theme, dark toggle
+   Wired to the real toggle: html[data-theme="dark"]
+   ============================================================ */
+html[data-theme="dark"] body[data-theme-style="plain"] {
+  background: radial-gradient(120% 100% at 50% -10%, #1a1a1f 0%, #000 60%) !important;
+}
+
+html[data-theme="dark"] .dqm-balance-card,
+html[data-theme="dark"] .dqm-hero {
+  background:
+    radial-gradient(120% 140% at 15% 0%, color-mix(in srgb, var(--user-accent, #0a84ff) 50%, #1a1a1a) 0%, #0c0c10 65%),
+    linear-gradient(160deg, #17171d 0%, #08080a 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 24px 60px -20px rgba(0,0,0,0.7), 0 0 40px -10px color-mix(in srgb, var(--user-accent, #0a84ff) 35%, transparent);
+  color: #fff;
+}
+html[data-theme="dark"] .dqm-balance-label,
+html[data-theme="dark"] .dqm-hero-label { color: rgba(255,255,255,0.55); }
+html[data-theme="dark"] .dqm-balance-icon { background: rgba(255,255,255,0.08); border-radius: 10px; }
+
+html[data-theme="dark"] .dqm-card,
+html[data-theme="dark"] .dqm-page-card {
+  background: linear-gradient(160deg, #17171d 0%, #0c0c10 100%);
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+html[data-theme="dark"] .dqm-card-head span:first-child { color: #e6e6ea; }
+html[data-theme="dark"] .dqm-card-head a { color: var(--user-accent, #0a84ff); }
+
+html[data-theme="dark"] .dqm-arow { background: rgba(255,255,255,0.04); border-left: 3px solid var(--user-accent, #0a84ff); }
+html[data-theme="dark"] .dqm-arow-v { color: var(--user-accent, #0a84ff); }
+html[data-theme="dark"] .dqm-gig-title,
+html[data-theme="dark"] .dqm-activity-title,
+html[data-theme="dark"] .dqm-chat-name { color: #f0f0f2; }
+html[data-theme="dark"] .dqm-gig-status,
+html[data-theme="dark"] .dqm-activity-time,
+html[data-theme="dark"] .dqm-empty { color: #6c6c76; }
+html[data-theme="dark"] .dqm-gig-amount,
+html[data-theme="dark"] .dqm-flow-net { color: var(--user-accent, #0a84ff); }
+
+html[data-theme="dark"] .dqm-wave-wrap { filter: drop-shadow(0 0 10px color-mix(in srgb, var(--user-accent, #0a84ff) 35%, transparent)); }
+html[data-theme="dark"] .dqm-flow-pill { background: rgba(255,255,255,0.06); color: #d8d8de; }
+html[data-theme="dark"] .dqm-flow-pill-in { color: #4ade80; }
+html[data-theme="dark"] .dqm-flow-pill-out { color: #fb923c; }
+
+html[data-theme="dark"] .mnav-bar {
+  background: rgba(20,20,24,0.85);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 12px 32px -8px rgba(0,0,0,0.6);
+}
+html[data-theme="dark"] .mnav-item { color: #8b8b93; }
+html[data-theme="dark"] .mnav-item.active {
+  color: #06110c;
+  background: var(--user-accent, #0a84ff);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--user-accent, #0a84ff) 65%, transparent);
+}
+
+
+/* ===== Services redesign (airtime / data / cable) ===== */
+.svc-detect { font-size: 11px; font-weight: 600; margin: -6px 0 12px; color: var(--dqm-text-2, #6b7280); }
+.svc-detect.ok { color: #16a34a; }
+.svc-detect.warn { color: #d97706; }
+
+.svc-plan-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 10px; scrollbar-width: none; }
+.svc-plan-tabs::-webkit-scrollbar { display: none; }
+.svc-plan-tab { flex: 0 0 auto; border: 1px solid var(--dqm-border, rgba(0,0,0,0.08)); background: var(--dqm-bg, #f2f2f7); color: var(--dqm-text, #111); border-radius: 999px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.svc-plan-tab.active { background: var(--dqm-text, #111); color: var(--dqm-bg, #fff); border-color: transparent; }
+.svc-type-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.svc-type-chip { border: 1px solid var(--dqm-border, rgba(0,0,0,0.08)); background: transparent; color: var(--dqm-text-2, #6b7280); border-radius: 999px; padding: 5px 11px; font-size: 11px; font-weight: 600; cursor: pointer; }
+.svc-type-chip.active { color: var(--dqm-text, #111); border-color: var(--dqm-text, #111); }
+
+.svc-plan-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+@media (min-width: 640px) { .svc-plan-cards { grid-template-columns: repeat(3, 1fr); } }
+.svc-plan-btn.svc-plan-card { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: 14px; border-radius: 16px; background: var(--dqm-card, #fff); border: 1px solid var(--dqm-border, rgba(0,0,0,0.08)); cursor: pointer; }
+.svc-plan-card .svc-plan-type { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dqm-text-2, #6b7280); }
+.svc-plan-card .svc-plan-size { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; color: var(--dqm-text, #111); }
+.svc-plan-card .svc-plan-validity { font-size: 10.5px; color: var(--dqm-text-2, #6b7280); }
+.svc-plan-card .svc-plan-price { margin-top: 8px; font-size: 13px; font-weight: 700; color: var(--dqm-text, #111); }
+.svc-plan-btn.svc-plan-card.selected { border-color: transparent; box-shadow: 0 0 0 2px var(--dqm-text, #111); }
+
+/* plain theme: flatten the existing service controls */
+body[data-theme-style="plain"] .svc-wrap .svc-option-btn,
+body[data-theme-style="plain"] .svc-wrap .svc-amount-btn,
+body[data-theme-style="plain"] .svc-wrap .svc-plan-btn {
+    background: var(--dqm-bg) !important; border: 1px solid var(--dqm-border) !important;
+    border-radius: 16px !important; box-shadow: none !important; color: var(--dqm-text) !important;
+}
+body[data-theme-style="plain"] .svc-wrap .svc-option-btn.selected,
+body[data-theme-style="plain"] .svc-wrap .svc-amount-btn.selected,
+body[data-theme-style="plain"] .svc-wrap .svc-plan-btn.selected {
+    background: var(--dqm-card) !important; border-color: transparent !important;
+    box-shadow: 0 0 0 2px var(--dqm-text) !important;
+}
+body[data-theme-style="plain"] .svc-wrap .svc-field {
+    background: var(--dqm-bg) !important; border: 1px solid var(--dqm-border) !important;
+    border-radius: 14px !important; box-shadow: none !important; color: var(--dqm-text) !important;
+}
+body[data-theme-style="plain"] .svc-wrap .svc-tab-btn { border-radius: 999px !important; box-shadow: none !important; }
+body[data-theme-style="plain"] .svc-wrap .svc-tab-btn.active { background: var(--dqm-text) !important; color: var(--dqm-bg) !important; }
+
+/* confirm sheet */
+.svc-sheet-overlay { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.45); display: flex; align-items: flex-end; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0.25s ease; }
+.svc-sheet-overlay.open { opacity: 1; visibility: visible; }
+.svc-sheet { width: 100%; max-width: 480px; background: var(--dqm-card, #fff); color: var(--dqm-text, #111); border-radius: 24px 24px 0 0; padding: 10px 20px calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateY(100%); transition: transform 0.35s cubic-bezier(.22,1,.36,1); box-sizing: border-box; }
+.svc-sheet-overlay.open .svc-sheet { transform: translateY(0); }
+@media (min-width: 901px) { .svc-sheet-overlay { align-items: center; } .svc-sheet { border-radius: 24px; } }
+.svc-sheet-grab { width: 38px; height: 4px; border-radius: 4px; background: var(--dqm-border, rgba(0,0,0,0.15)); margin: 0 auto 14px; }
+.svc-sheet-title { text-align: center; font-size: 13px; font-weight: 600; color: var(--dqm-text-2, #6b7280); }
+.svc-sheet-amount { text-align: center; font-size: 32px; font-weight: 800; letter-spacing: -0.02em; margin: 4px 0 14px; }
+.svc-sheet-rows { background: var(--dqm-bg, #f2f2f7); border-radius: 16px; padding: 4px 14px; margin-bottom: 14px; }
+.svc-sheet-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; font-size: 12.5px; border-top: 1px solid var(--dqm-border, rgba(0,0,0,0.08)); }
+.svc-sheet-row:first-child { border-top: none; }
+.svc-sheet-row span { color: var(--dqm-text-2, #6b7280); }
+.svc-sheet-warn { display: none; color: #dc2626; font-size: 12px; font-weight: 600; margin-bottom: 10px; text-align: center; }
+.svc-sheet-label { display: block; font-size: 11px; font-weight: 600; color: var(--dqm-text-2, #6b7280); margin-bottom: 6px; }
+.svc-sheet-pin { width: 100%; box-sizing: border-box; text-align: center; letter-spacing: 8px; font-size: 22px; font-weight: 700; padding: 12px; border-radius: 14px; border: 1px solid var(--dqm-border, rgba(0,0,0,0.08)); background: var(--dqm-bg, #f2f2f7); color: var(--dqm-text, #111); margin-bottom: 14px; }
+.svc-sheet-confirm { width: 100%; padding: 14px; border-radius: 999px; border: none; background: var(--dqm-text, #111); color: var(--dqm-bg, #fff); font-size: 14px; font-weight: 700; cursor: pointer; }
+.svc-sheet-confirm:disabled { opacity: 0.45; }
+.svc-sheet-cancel { width: 100%; padding: 12px; border: none; background: transparent; color: var(--dqm-text-2, #6b7280); font-size: 13px; font-weight: 600; cursor: pointer; }
+.svc-toast { position: fixed; left: 50%; bottom: 110px; transform: translateX(-50%) translateY(20px); background: #111; color: #fff; padding: 10px 16px; border-radius: 999px; font-size: 12px; font-weight: 600; z-index: 2100; opacity: 0; pointer-events: none; transition: opacity 0.25s ease, transform 0.25s ease; }
+.svc-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+
+/* ===== Wallet balance card: fix white-text-on-light-card contrast.
+   .balance-card was built for a purple gradient bg (white text). Under
+   the plain theme it gets .dqm-card added, which swaps the background
+   to a light card — but the base rules still force white text, so the
+   number/label disappeared into the background. Force dark text here. ===== */
+body[data-theme-style="plain"] .balance-card.dqm-card {
+    background: var(--dqm-card) !important;
+    box-shadow: 0 10px 24px -16px rgba(0,0,0,0.16) !important;
+}
+body[data-theme-style="plain"] .balance-card.dqm-card .balance-label {
+    color: var(--dqm-text-2) !important;
+    opacity: 1 !important;
+}
+body[data-theme-style="plain"] .balance-card.dqm-card .balance-amount {
+    color: var(--dqm-text) !important;
+    text-shadow: none !important;
+}
+body[data-theme-style="plain"] .balance-card.dqm-card .balance-chip {
+    background: var(--dqm-bg) !important;
+    color: var(--dqm-text) !important;
+    opacity: 1 !important;
+    backdrop-filter: none !important;
+    border: 1px solid var(--dqm-border) !important;
+}
+body[data-theme-style="plain"] .balance-card.dqm-card .balance-chip.primary {
+    background: var(--dqm-text) !important;
+    color: var(--dqm-bg) !important;
+}
+
+/* ===== Services balance strip: match the dashboard's Total Balance
+   card look (light card, dark bold number) instead of the purple
+   gradient ===== */
+body[data-theme-style="plain"] .svc-balance-strip {
+    background: var(--dqm-card) !important;
+    color: var(--dqm-text) !important;
+    box-shadow: 0 10px 24px -16px rgba(0,0,0,0.16) !important;
+    border-radius: 22px !important;
+}
+body[data-theme-style="plain"] .svc-balance-label {
+    color: var(--dqm-text-2) !important;
+    opacity: 1 !important;
+}
+body[data-theme-style="plain"] .svc-balance-amount {
+    color: var(--dqm-text) !important;
+    font-size: 1.6rem !important;
+}
+body[data-theme-style="plain"] .svc-balance-strip i[data-lucide="wallet"] {
+    color: var(--dqm-text-2) !important;
+    opacity: 1 !important;
+}
