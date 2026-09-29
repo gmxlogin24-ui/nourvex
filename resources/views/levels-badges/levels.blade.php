@@ -3,7 +3,7 @@
 @section('content')
 <div class="container mx-auto px-4 py-6">
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">QELVO Levels</h1>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">NOURVEX Levels</h1>
         <p class="text-gray-600 dark:text-gray-400 mt-2">Progress through levels to unlock benefits</p>
     </div>
 

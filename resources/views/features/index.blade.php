@@ -6,7 +6,7 @@
 <div class="ft-page">
 
 <section class="ft-hero reveal-on-scroll">
-    <span class="ft-eyebrow">What Qelvo is</span>
+    <span class="ft-eyebrow">What NOURVEX is</span>
     <h1>Everything your campus hustle needs, <span class="text-accent">in one app.</span></h1>
     <p>A live feed, a job board, a campus market, and a wallet — built for students, not adapted from something else.</p>
 </section>
@@ -108,7 +108,7 @@
 
 @if($feed->count())
 <section class="ft-live reveal-on-scroll">
-    <div class="ft-live-head"><h3>Live on Qelvo right now</h3></div>
+    <div class="ft-live-head"><h3>Live on NOURVEX right now</h3></div>
     <div class="ft-live-track" id="ftLiveTrack">
         @foreach($feed->take(12) as $item)
         <a href="{{ $item['link'] }}" class="ft-live-card">

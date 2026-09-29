@@ -296,7 +296,7 @@ body[data-page="marketplace"] {
             <a href="{{ route('register') }}" class="mg-promo-tile">
                 <div>
                     <p class="mg-promo-eyebrow">Featured</p>
-                    <p class="mg-promo-title">Sign up to sell on Qelvo</p>
+                    <p class="mg-promo-title">Sign up to sell on NOURVEX</p>
                 </div>
                 <span class="mg-promo-cta">Get Started</span>
             </a>

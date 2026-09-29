@@ -45,7 +45,7 @@ class PaystackController extends Controller
 
         WalletTopup::create(['user_id' => $user->id, 'tx_ref' => $txRef, 'amount' => $amount, 'status' => 'pending']);
 
-        $data = $this->initializeTransaction($txRef, $amount, $user->email, route('vendor.callback'), ['title' => 'Qelvo Vendor Registration']);
+        $data = $this->initializeTransaction($txRef, $amount, $user->email, route('vendor.callback'), ['title' => 'NOURVEX Vendor Registration']);
 
         if (($data['status'] ?? false) === true) {
             return redirect($data['data']['authorization_url']);
@@ -111,7 +111,7 @@ class PaystackController extends Controller
         WalletTopup::create(['user_id' => $user->id, 'tx_ref' => $txRef, 'amount' => $amount, 'status' => 'pending']);
 
         try {
-            $data = $this->initializeTransaction($txRef, $amount, $user->email, route('signup-fee.callback'), ['title' => 'Qelvo Account Activation']);
+            $data = $this->initializeTransaction($txRef, $amount, $user->email, route('signup-fee.callback'), ['title' => 'NOURVEX Account Activation']);
             if (($data['status'] ?? false) === true) {
                 return redirect($data['data']['authorization_url']);
             }
@@ -191,7 +191,7 @@ class PaystackController extends Controller
 
         $data = [];
         try {
-            $data = $this->initializeTransaction($txRef, $validated['amount'], $user->email, route('flutterwave.callback'), ['title' => 'Qelvo Wallet Top Up']);
+            $data = $this->initializeTransaction($txRef, $validated['amount'], $user->email, route('flutterwave.callback'), ['title' => 'NOURVEX Wallet Top Up']);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('Wallet top-up init failed: ' . $e->getMessage());
         }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Qelvo - @yield('title', 'Account')</title>
+    <title>NOURVEX - @yield('title', 'Account')</title>
     @include('partials.favicons')
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ asset('css/design-tokens.css') }}">
@@ -32,7 +32,7 @@
                         <g transform="rotate(120 50 50)"><rect x="46" y="10" width="8" height="38" rx="4" fill="#fff"></rect><circle cx="50" cy="10" r="7" fill="#fff"></circle></g>
                         <g transform="rotate(240 50 50)"><rect x="46" y="10" width="8" height="38" rx="4" fill="#fff"></rect><circle cx="50" cy="10" r="7" fill="#fff"></circle></g>
                     </svg>
-                    Qelvo
+                    NOURVEX
                 </div>
                 <div class="auth-visual-nav-pills">
                     <a href="{{ route('login') }}" class="{{ request()->routeIs('login') ? 'active' : '' }}">Log In</a>
@@ -41,7 +41,7 @@
             </div>
             <div class="auth-visual-tagline">
                 <h2>Work. Sell. Get Paid.</h2>
-                <p>Qelvo connects gig workers, sellers, and buyers on one trusted platform — verified, secured, and built for speed.</p>
+                <p>NOURVEX connects gig workers, sellers, and buyers on one trusted platform — verified, secured, and built for speed.</p>
             </div>
         </div>
 

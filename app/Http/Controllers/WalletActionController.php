@@ -121,7 +121,7 @@ class WalletActionController extends Controller
                     'amount' => (int) round($validated['amount'] * 100),
                     'recipient' => $recipientCode,
                     'reference' => $txRef,
-                    'reason' => 'Qelvo withdrawal',
+                    'reason' => 'NOURVEX withdrawal',
                 ]);
                 $data = $response->json();
                 $initiated = ($data['status'] ?? false) === true && !in_array($data['data']['status'] ?? '', ['otp', 'failed', 'reversed'], true);

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Qelvo - @yield('title', 'Dashboard')</title>
+    <title>NOURVEX - @yield('title', 'Dashboard')</title>
     @include('partials.favicons')
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="manifest" href="{{ asset('manifest.json') }}">

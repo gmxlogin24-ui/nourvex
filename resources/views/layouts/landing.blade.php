@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Qelvo - @yield('title', 'Work, sell, get paid')</title>
+    <title>NOURVEX - @yield('title', 'Work, sell, get paid')</title>
     @include('partials.favicons')
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>

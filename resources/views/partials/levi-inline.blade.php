@@ -3,7 +3,7 @@
     <div id="leviTourTrigger" data-seen="{{ auth()->user()->has_seen_tour ? '1' : '0' }}" hidden></div>
     <div class="levi-inline-header">
         <span class="levi-inline-badge">✦ LEVI</span>
-        <span class="levi-inline-sub">Ask me anything about QELVO</span>
+        <span class="levi-inline-sub">Ask me anything about NOURVEX</span>
     </div>
     <div class="levi-messages levi-inline-messages">
         <div class="levi-msg levi-msg-ai">Hey{{ auth()->user()->name ? ', ' . explode(' ', auth()->user()->name)[0] : '' }} — what do you need? I can find gigs, check your balance, or take you somewhere.</div>

@@ -2,10 +2,10 @@
 @section('content')
     <div class="flex items-center gap-3 mb-5">
         <div class="logo-badge"></div>
-        <h1 class="text-lg font-semibold">Qelvo</h1>
+        <h1 class="text-lg font-semibold">NOURVEX</h1>
     </div>
 
-    <p class="text-sm mb-6" style="opacity:0.75;">You've been invited to join the Qelvo Customer Care team.</p>
+    <p class="text-sm mb-6" style="opacity:0.75;">You've been invited to join the NOURVEX Customer Care team.</p>
 
     @if ($errors->any())
     <div class="bg-red-500/10 text-red-500 text-sm rounded-lg p-3 mb-4">{{ $errors->first() }}</div>
@@ -55,7 +55,7 @@
     </form>
 
     <p class="auth-footnote mt-6">
-        🔒 This link is single-use and will expire. It was generated specifically for you by a Qelvo admin.
+        🔒 This link is single-use and will expire. It was generated specifically for you by a NOURVEX admin.
     </p>
 
     <p class="text-sm text-center mt-4" style="opacity:0.75;">

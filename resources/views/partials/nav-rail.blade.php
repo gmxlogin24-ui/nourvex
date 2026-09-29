@@ -39,7 +39,7 @@
     {{-- Card 2: icon + label, plain theme only --}}
     <aside class="d2-rail-labels">
         <div class="d2-rail-header-slot" style="flex-direction:column;align-items:stretch;gap:8px;">
-            <div class="d2-rail-brand"><img src="{{ asset('images/qelvo-mark.png') }}" alt="Qelvo" class="d2-rail-logo"><span>Qelvo</span></div>
+            <div class="d2-rail-brand"><img src="{{ asset('images/qelvo-mark.png') }}" alt="NOURVEX" class="d2-rail-logo"><span>NOURVEX</span></div>
             <a href="{{ route('gigs.create') }}" class="d2-rail-create"><i data-lucide="plus" class="w-4 h-4"></i><span>Post a Hustle</span></a>
         </div>
         <nav class="d2-rail-nav">

@@ -109,6 +109,6 @@ class ProfileController extends Controller
         $user = $request->user();
         $user->theme_style = ($user->theme_style ?? 'glass') === 'qelvo-dark' ? 'glass' : 'qelvo-dark';
         $user->save();
-        return back()->with('status', $user->theme_style === 'qelvo-dark' ? 'Qelvo Dark enabled' : 'Qelvo Dark disabled');
+        return back()->with('status', $user->theme_style === 'qelvo-dark' ? 'NOURVEX Dark enabled' : 'NOURVEX Dark disabled');
     }
 }

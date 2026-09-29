@@ -2,7 +2,7 @@
 @section('content')
     <div class="flex items-center gap-3 mb-5">
         <div class="logo-badge"></div>
-        <h1 class="text-lg font-semibold">Qelvo</h1>
+        <h1 class="text-lg font-semibold">NOURVEX</h1>
     </div>
 
     <p class="text-sm mb-6" style="opacity:0.75;">Create your account. Free to join — you only earn or spend when you're ready.</p>

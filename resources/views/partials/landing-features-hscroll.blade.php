@@ -32,7 +32,7 @@
                 <circle class="lp-draw" cx="44" cy="38" r="4" stroke="currentColor" stroke-width="3"/>
             </svg></div>
             <h3>Wallet</h3>
-            <p>One balance for everything you do on Qelvo. Top up by card or transfer, watch every credit and debit land in real time, and confirm anything that moves money with your own PIN.</p>
+            <p>One balance for everything you do on NOURVEX. Top up by card or transfer, watch every credit and debit land in real time, and confirm anything that moves money with your own PIN.</p>
             <ol class="lp-h-steps"><li>Top up by card or transfer</li><li>Spend, get paid, track it live</li></ol>
             <a href="{{ route('register') }}" class="lp-link">Open a wallet <i data-lucide="arrow-right" style="width:16px;height:16px"></i></a>
         </article>
@@ -72,7 +72,7 @@
                 <path class="lp-draw" d="M10 20a34 34 0 0 1 10-11" stroke="currentColor" stroke-width="2.2"/>
             </svg></div>
             <h3>VTU services</h3>
-            <p>Buy airtime and data bundles for any network, paid straight out of your Qelvo wallet, no card details re-entered every time.</p>
+            <p>Buy airtime and data bundles for any network, paid straight out of your NOURVEX wallet, no card details re-entered every time.</p>
             <ol class="lp-h-steps"><li>Pick a network and amount</li><li>Confirm with PIN — credited instantly</li></ol>
             <a href="{{ route('register') }}" class="lp-link">Get started <i data-lucide="arrow-right" style="width:16px;height:16px"></i></a>
         </article>

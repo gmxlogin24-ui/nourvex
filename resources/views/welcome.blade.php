@@ -29,7 +29,7 @@
             </div>
             <div class="lp-hero-bottom">
                 <div class="lp-hero-tag lp-rv">
-                    <b>About Qelvo</b>
+                    <b>About NOURVEX</b>
                     Work, sell and get paid — all in one campus app.
                 </div>
                 <a href="{{ route('register') }}" class="lp-hero-cta lp-rv">Get Started <i data-lucide="arrow-right"></i></a>
@@ -149,7 +149,7 @@
     <section class="lp-wrap">
         <div class="lp-final lp-rv">
             <h2>Your campus hustle <span class="lp-grad">starts here.</span></h2>
-            <p>Join Qelvo and put your skills, your stuff and your money to work.</p>
+            <p>Join NOURVEX and put your skills, your stuff and your money to work.</p>
             <a href="{{ route('register') }}" class="lp-btn lp-btn-primary">Create your free account <i data-lucide="arrow-right"></i></a>
         </div>
     </section>
@@ -159,7 +159,7 @@
         <div class="lp-wrap">
             <div class="lp-foot-grid">
                 <div>
-                    <div class="lp-foot-brand">Qelvo</div>
+                    <div class="lp-foot-brand">NOURVEX</div>
                     <p class="lp-foot-note">Work, sell and get paid, all in one campus app.</p>
                 </div>
                 <div>
@@ -185,7 +185,7 @@
                     </ul>
                 </div>
             </div>
-            <div class="lp-copy">&copy; {{ date('Y') }} Qelvo. All rights reserved.</div>
+            <div class="lp-copy">&copy; {{ date('Y') }} NOURVEX. All rights reserved.</div>
         </div>
     </footer>
 </main>
