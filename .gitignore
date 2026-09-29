@@ -34,3 +34,11 @@ _*_headers.txt
 _*_cookies.txt
 _*_body.html
 _*_response.html
+
+# local junk, never deploy
+*.bak*
+/_*
+/page_check.html
+/setup_*.sh
+/scripts_patch_*
+/{*
