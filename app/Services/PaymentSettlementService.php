@@ -132,7 +132,7 @@ class PaymentSettlementService
             if ($user->referred_by) {
                 $referrer = User::where('id', $user->referred_by)->lockForUpdate()->first();
                 if ($referrer && !$referrer->wallet_restricted) {
-                    $pct = $referrer->tier === 'tier2' ? 0.15 : 0;
+                    $pct = in_array($referrer->tier, ['tier2', 'tier3'], true) ? 0.15 : 0;
                     $bonus = $fee * $pct;
                     if ($bonus > 0) {
                         $referrer->increment('wallet_balance', $bonus);
