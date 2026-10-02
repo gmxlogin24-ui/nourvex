@@ -120,3 +120,356 @@ body[data-theme-style="plain"] {
 body[data-theme-style="plain"] .mnav-bar { position: fixed; left: 50%; bottom: max(14px, env(safe-area-inset-bottom,0px)); transform: translateX(-50%); width: calc(100% - 32px); max-width: 420px; display: flex; justify-content: space-between; align-items: center; background: rgba(20,20,24,0.88); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,0.08); border-radius: 999px; padding: 8px 10px; box-shadow: 0 12px 32px -8px rgba(0,0,0,0.6); z-index: 40; }
 body[data-theme-style="plain"] .mnav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 10px; border-radius: 999px; color: #8b8b93; text-decoration: none; transition: transform .12s ease; }
 body[data-theme-style="plain"] .mnav-item.active { color: #06110c; background: var(--user-accent, #7c5cf0); }
+
+/* ============================================================
+   Profile page — plain theme, Kuda-style redesign
+   Scoped only to body[data-theme-style="plain"], structure untouched
+   ============================================================ */
+body[data-theme-style="plain"] .profile-shell {
+  background: radial-gradient(120% 100% at 50% -10%, #1a1a1f 0%, #000 55%) !important;
+  padding: 16px 14px 100px !important;
+  max-width: 480px;
+  margin: 0 auto;
+}
+body[data-theme-style="plain"] .profile-shell h1,
+body[data-theme-style="plain"] .profile-shell > p.text-muted {
+  color: #fff;
+}
+body[data-theme-style="plain"] .profile-shell > p.text-muted { color: #8b8b93; }
+
+/* Hero — full photo background card */
+body[data-theme-style="plain"] .profile-hero-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 26px;
+  padding: 24px 20px 90px;
+  min-height: 260px;
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.75) 75%, rgba(0,0,0,0.92) 100%),
+    var(--hero-photo, linear-gradient(160deg,#2a2a32,#0c0c10)) center/cover no-repeat;
+  box-shadow: 0 24px 60px -20px rgba(0,0,0,0.7);
+  color: #fff;
+}
+body[data-theme-style="plain"] .profile-hero-top { position: relative; z-index: 2; }
+body[data-theme-style="plain"] .profile-hero-avatar {
+  width: 64px; height: 64px; border-radius: 50%; overflow: hidden;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.25);
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.1); font-weight: 700; font-size: 22px;
+}
+body[data-theme-style="plain"] .profile-hero-avatar img { width: 100%; height: 100%; object-fit: cover; }
+body[data-theme-style="plain"] .profile-hero-name { font-size: 19px; font-weight: 800; margin-top: 12px; color: #fff; }
+body[data-theme-style="plain"] .merchant-badge {
+  font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  background: rgba(124,92,240,0.9); color: #fff; padding: 3px 8px; border-radius: 999px; margin-left: 6px; vertical-align: middle;
+}
+body[data-theme-style="plain"] .profile-hero-top a[href*="levels-badges"] {
+  background: rgba(255,255,255,0.1) !important;
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(8px);
+}
+body[data-theme-style="plain"] .profile-hero-top a[href*="levels-badges"] span,
+body[data-theme-style="plain"] .profile-hero-top a[href*="levels-badges"] i { color: #fff !important; }
+body[data-theme-style="plain"] .profile-hero-tier { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 8px; }
+body[data-theme-style="plain"] .profile-hero-ref { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+
+/* Stats row — floating pill over the photo bottom */
+body[data-theme-style="plain"] .profile-hero-stats {
+  position: absolute; left: 20px; right: 20px; bottom: 20px; z-index: 2;
+  display: flex; justify-content: space-between;
+  background: rgba(20,20,24,0.75); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; padding: 14px 10px;
+}
+body[data-theme-style="plain"] .profile-hero-stats > div { flex: 1; text-align: center; }
+body[data-theme-style="plain"] .profile-hero-stat-val { color: #fff; font-size: 16px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 3px; }
+body[data-theme-style="plain"] .profile-hero-stat-lbl { color: #9a9aa5; font-size: 10px; display: flex; align-items: center; justify-content: center; gap: 3px; margin-top: 2px; }
+body[data-theme-style="plain"] .profile-hero-curve { display: none; }
+
+/* Accordion → individual dark rounded cards, Kuda product-row style */
+body[data-theme-style="plain"] .pfl-accordion {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  display: flex; flex-direction: column; gap: 10px;
+  margin-top: 14px;
+}
+body[data-theme-style="plain"] .pfl-item {
+  background: linear-gradient(160deg, #17171d 0%, #0c0c10 100%);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+  overflow: hidden;
+}
+body[data-theme-style="plain"] .profile-list-row {
+  display: flex; align-items: center; gap: 12px; padding: 14px 14px; text-decoration: none;
+}
+body[data-theme-style="plain"] .profile-list-row-icon {
+  width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0;
+  background: rgba(124,92,240,0.18); color: #a78bfa;
+  display: flex; align-items: center; justify-content: center;
+}
+body[data-theme-style="plain"] .profile-list-row-title { color: #f0f0f2; font-size: 13.5px; font-weight: 600; }
+body[data-theme-style="plain"] .profile-list-row-sub { color: #6c6c76; font-size: 11px; }
+body[data-theme-style="plain"] .profile-list-row-chevron { color: #6c6c76; }
+
+body[data-theme-style="plain"] .pfl-panel { padding: 0 14px; }
+body[data-theme-style="plain"] .pfl-item.pfl-open .pfl-panel { padding: 0 14px 14px; }
+body[data-theme-style="plain"] .pfl-stat { background: rgba(255,255,255,0.05); }
+body[data-theme-style="plain"] .pfl-stat .v { color: #fff; }
+body[data-theme-style="plain"] .pfl-stat .l { color: #8b8b93; }
+body[data-theme-style="plain"] .pfl-kv .l { color: #8b8b93; }
+body[data-theme-style="plain"] .pfl-kv .v { color: #f0f0f2; }
+body[data-theme-style="plain"] .pfl-note { color: #8b8b93; }
+body[data-theme-style="plain"] .pfl-open-link { color: var(--user-accent, #7c5cf0); }
+body[data-theme-style="plain"] .pfl-item { border-bottom: none; }
+
+/* Give each list row icon its own accent color, cycling by position */
+body[data-theme-style="plain"] .pfl-item:nth-child(1) .profile-list-row-icon { background: rgba(96,165,250,0.18); color: #60a5fa; }
+body[data-theme-style="plain"] .pfl-item:nth-child(2) .profile-list-row-icon { background: rgba(74,222,128,0.18); color: #4ade80; }
+body[data-theme-style="plain"] .pfl-item:nth-child(3) .profile-list-row-icon { background: rgba(251,146,60,0.18); color: #fb923c; }
+body[data-theme-style="plain"] .pfl-item:nth-child(4) .profile-list-row-icon { background: rgba(124,92,240,0.18); color: #a78bfa; }
+body[data-theme-style="plain"] .pfl-item:nth-child(5) .profile-list-row-icon { background: rgba(251,191,36,0.18); color: #fbbf24; }
+body[data-theme-style="plain"] .pfl-item:nth-child(6) .profile-list-row-icon { background: rgba(248,113,113,0.18); color: #f87171; }
+body[data-theme-style="plain"] .pfl-item:nth-child(7) .profile-list-row-icon { background: rgba(45,212,191,0.18); color: #2dd4bf; }
+body[data-theme-style="plain"] .pfl-item:nth-child(8) .profile-list-row-icon { background: rgba(217,70,239,0.18); color: #d946ef; }
+body[data-theme-style="plain"] .pfl-item:nth-child(9) .profile-list-row-icon { background: rgba(234,179,8,0.18); color: #eab308; }
+body[data-theme-style="plain"] .pfl-item:nth-child(10) .profile-list-row-icon { background: rgba(59,130,246,0.18); color: #3b82f6; }
+body[data-theme-style="plain"] .pfl-item:nth-child(11) .profile-list-row-icon { background: rgba(34,197,94,0.18); color: #22c55e; }
+
+/* ============================================================
+   Profile page — plain theme, LIGHT redesign (flat cards)
+   ============================================================ */
+body[data-theme-style="plain"] .profile-shell {
+  background: linear-gradient(180deg, #f7f8fb 0%, #eef1f7 100%) !important;
+  padding: 16px 14px 100px !important;
+  max-width: 480px;
+  margin: 0 auto;
+}
+body[data-theme-style="plain"] .profile-shell h1 { color: #1a1a2e; }
+body[data-theme-style="plain"] .profile-shell > p.text-muted { color: #7a7a8a; }
+
+body[data-theme-style="plain"] .profile-hero-card {
+  position: relative; overflow: hidden; border-radius: 26px; padding: 24px 20px 90px; min-height: 260px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.65) 75%, rgba(0,0,0,0.85) 100%),
+    var(--hero-photo, linear-gradient(160deg,#1b4b8f,#17b9a8)) center/cover no-repeat;
+  box-shadow: 0 20px 44px -16px rgba(15,47,94,0.3);
+  color: #fff;
+}
+body[data-theme-style="plain"] .profile-hero-avatar {
+  width: 64px; height: 64px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 3px rgba(255,255,255,0.4);
+  display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.15); font-weight: 700; font-size: 22px; color: #fff;
+}
+body[data-theme-style="plain"] .profile-hero-avatar img { width: 100%; height: 100%; object-fit: cover; }
+body[data-theme-style="plain"] .profile-hero-name { font-size: 19px; font-weight: 800; margin-top: 12px; color: #fff; }
+body[data-theme-style="plain"] .merchant-badge { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; background: rgba(23,185,168,0.95); color: #fff; padding: 3px 8px; border-radius: 999px; margin-left: 6px; vertical-align: middle; }
+body[data-theme-style="plain"] .profile-hero-top a[href*="levels-badges"] { background: rgba(255,255,255,0.15) !important; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(8px); }
+body[data-theme-style="plain"] .profile-hero-top a[href*="levels-badges"] span, body[data-theme-style="plain"] .profile-hero-top a[href*="levels-badges"] i { color: #fff !important; }
+body[data-theme-style="plain"] .profile-hero-tier { font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 8px; }
+body[data-theme-style="plain"] .profile-hero-ref { font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 2px; }
+body[data-theme-style="plain"] .profile-hero-stats {
+  position: absolute; left: 20px; right: 20px; bottom: 20px; z-index: 2; display: flex; justify-content: space-between;
+  background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); border-radius: 18px; padding: 14px 10px;
+  box-shadow: 0 10px 24px -10px rgba(0,0,0,0.25);
+}
+body[data-theme-style="plain"] .profile-hero-stats > div { flex: 1; text-align: center; }
+body[data-theme-style="plain"] .profile-hero-stat-val { color: #1a1a2e; font-size: 16px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 3px; }
+body[data-theme-style="plain"] .profile-hero-stat-lbl { color: #7a7a8a; font-size: 10px; display: flex; align-items: center; justify-content: center; gap: 3px; margin-top: 2px; }
+body[data-theme-style="plain"] .profile-hero-curve { display: none; }
+
+/* Flat card list */
+body[data-theme-style="plain"] .pfl-flat-list { display: flex; flex-direction: column; gap: 10px; margin-top: 2px; }
+body[data-theme-style="plain"] .pfl-hero-stats-card { margin-bottom: 4px !important; }
+body[data-theme-style="plain"] .pfl-flat-card {
+  display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 16px; padding: 14px;
+  box-shadow: 0 8px 20px -10px rgba(15,47,94,0.15);
+}
+body[data-theme-style="plain"] .pfl-flat-icon { width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+body[data-theme-style="plain"] .pfl-flat-blue { background: rgba(59,130,246,0.12); color: #2563eb; }
+body[data-theme-style="plain"] .pfl-flat-green { background: rgba(34,197,94,0.12); color: #16a34a; }
+body[data-theme-style="plain"] .pfl-flat-purple { background: rgba(124,58,237,0.12); color: #7c3aed; }
+body[data-theme-style="plain"] .pfl-flat-orange { background: rgba(251,146,60,0.12); color: #ea580c; }
+body[data-theme-style="plain"] .pfl-flat-gold { background: rgba(217,119,6,0.12); color: #d97706; }
+body[data-theme-style="plain"] .pfl-flat-teal { background: rgba(20,184,166,0.12); color: #0d9488; }
+body[data-theme-style="plain"] .pfl-flat-pink { background: rgba(219,39,119,0.12); color: #db2777; }
+body[data-theme-style="plain"] .pfl-flat-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+body[data-theme-style="plain"] .pfl-flat-title { font-size: 13.5px; font-weight: 700; color: #1a1a2e; }
+body[data-theme-style="plain"] .pfl-flat-sub { font-size: 11.5px; color: #8a8a95; margin-top: 1px; }
+body[data-theme-style="plain"] .pfl-flat-chevron { color: #b0b0bd; flex-shrink: 0; }
+body[data-theme-style="plain"] .pfl-flat-copy-btn { background: #eef1f7; border: none; border-radius: 10px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; color: #1c8b9e; flex-shrink: 0; cursor: pointer; }
+
+/* Section labels + fully-inline cards (Wallet/Reputation/Referrals) */
+body[data-theme-style="plain"] .pfl-section-label { font-size: 12px; font-weight: 700; color: #7a7a8a; text-transform: uppercase; letter-spacing: .04em; margin: 4px 2px -2px; }
+body[data-theme-style="plain"] .pfl-inline-card { background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 8px 20px -10px rgba(15,47,94,0.15); }
+body[data-theme-style="plain"] .pfl-inline-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+body[data-theme-style="plain"] .pfl-inline-top-text { display: flex; flex-direction: column; flex: 1; }
+body[data-theme-style="plain"] .pfl-inline-amount { font-size: 20px; font-weight: 800; color: #1a1a2e; }
+body[data-theme-style="plain"] .pfl-inline-row { display: flex; justify-content: space-between; font-size: 12px; padding: 6px 0; border-top: 1px solid #eceef3; }
+body[data-theme-style="plain"] .pfl-inline-row .l { color: #8a8a95; } body[data-theme-style="plain"] .pfl-inline-row .v { color: #1a1a2e; font-weight: 600; }
+body[data-theme-style="plain"] .pfl-inline-actions { display: flex; gap: 8px; margin-top: 12px; }
+body[data-theme-style="plain"] .pfl-inline-btn { flex: 1; text-align: center; font-size: 12px; font-weight: 700; padding: 10px; border-radius: 999px; background: #eef1f7; color: #1a1a2e; text-decoration: none; }
+body[data-theme-style="plain"] .pfl-inline-btn-primary { background: #1c8b9e; color: #fff; }
+body[data-theme-style="plain"] .pfl-review-row { padding: 8px 0; border-top: 1px solid #eceef3; display: flex; flex-direction: column; gap: 2px; }
+body[data-theme-style="plain"] .pfl-review-name { font-size: 12.5px; font-weight: 700; color: #1a1a2e; }
+body[data-theme-style="plain"] .pfl-review-stars { font-size: 11px; color: #d97706; }
+body[data-theme-style="plain"] .pfl-review-comment { font-size: 11.5px; color: #7a7a8a; margin: 2px 0 0; }
+body[data-theme-style="plain"] .pfl-stat { background: #eef1f7; }
+body[data-theme-style="plain"] .pfl-stat .v { color: #1a1a2e; } body[data-theme-style="plain"] .pfl-stat .l { color: #8a8a95; }
+body[data-theme-style="plain"] .pfl-open-link { color: #1c8b9e; margin-top: 10px; display: flex; }
+body[data-theme-style="plain"] .pfl-note { color: #8a8a95; font-size: 12px; margin: 6px 0; }
+
+/* Hero — full-bleed banner, 20% page height, compact avatar row */
+body[data-theme-style="plain"] .profile-shell { padding-left: 0 !important; padding-right: 0 !important; }
+body[data-theme-style="plain"] .profile-home-grid { padding-left: 14px; padding-right: 14px; }
+body[data-theme-style="plain"] .profile-hero-card {
+  border-radius: 0 !important;
+  margin: -16px -14px 14px !important;
+  width: calc(100% + 28px);
+  height: 20vh;
+  min-height: 150px;
+  max-height: 220px;
+  padding: 16px 18px !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+body[data-theme-style="plain"] .profile-hero-top { display: flex; align-items: center; gap: 10px; }
+body[data-theme-style="plain"] .profile-hero-avatar {
+  width: 46px; height: 46px; border-radius: 50%; overflow: hidden; flex-shrink: 0;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.5);
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.2); font-weight: 700; font-size: 16px; color: #fff;
+  position: relative; z-index: 3;
+}
+body[data-theme-style="plain"] .profile-hero-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+body[data-theme-style="plain"] .profile-hero-name { font-size: 15px; font-weight: 800; margin: 0; color: #fff; }
+body[data-theme-style="plain"] .profile-hero-top a[href*="levels-badges"] { display: none; }
+body[data-theme-style="plain"] .profile-hero-tier,
+body[data-theme-style="plain"] .profile-hero-ref { display: none; }
+body[data-theme-style="plain"] .profile-hero-stats { display: none; }
+
+/* Stats moved to their own card right after the hero */
+body[data-theme-style="plain"] .pfl-hero-stats-card {
+  display: flex; justify-content: space-between; background: #fff; border-radius: 16px; padding: 14px 10px;
+  box-shadow: 0 8px 20px -10px rgba(15,47,94,0.15); margin-bottom: 10px;
+}
+body[data-theme-style="plain"] .pfl-hero-stats-card > div { flex: 1; text-align: center; }
+body[data-theme-style="plain"] .pfl-hero-stats-card .v { color: #1a1a2e; font-size: 16px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 3px; }
+body[data-theme-style="plain"] .pfl-hero-stats-card .l { color: #8a8a95; font-size: 10px; margin-top: 2px; }
+
+body[data-theme-style="plain"] .pfl-swatch-lg { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 2px #fff, 0 0 0 3px #eceef3; }
+
+/* Hero — remove shadow entirely (buttons keep their own curve, no card-level curve/shadow needed since it's full-bleed) */
+body[data-theme-style="plain"] .profile-hero-card { box-shadow: none !important; }
+body[data-theme-style="plain"] .profile-hero-top a[href*="levels-badges"] { display: none; } /* already hidden, keep */
+
+/* Logout button */
+body[data-theme-style="plain"] .pfl-logout-form { margin-top: 4px; }
+body[data-theme-style="plain"] .pfl-logout-btn {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: #fff; color: #dc2626; border: 1px solid #fde2e2; border-radius: 16px;
+  padding: 14px; font-size: 13.5px; font-weight: 700; cursor: pointer;
+  box-shadow: 0 8px 20px -10px rgba(220,38,38,0.15);
+}
+
+/* ============================================================
+   Hero text arrangement polish
+   ============================================================ */
+body[data-theme-style="plain"] .profile-hero-card { position: relative; }
+body[data-theme-style="plain"] .profile-hero-top { align-items: center; }
+body[data-theme-style="plain"] .profile-hero-name {
+  font-size: 16px; font-weight: 800; line-height: 1.2;
+  display: flex; flex-direction: column; gap: 2px;
+}
+body[data-theme-style="plain"] .profile-hero-name .merchant-badge {
+  align-self: flex-start; margin-left: 0; margin-top: 2px;
+}
+
+/* ============================================================
+   Embossed vibrant icons — every icon chip across the page
+   ============================================================ */
+body[data-theme-style="plain"] .pfl-flat-icon,
+body[data-theme-style="plain"] .profile-list-row-icon {
+  position: relative;
+  box-shadow:
+    inset 0 1.5px 0 rgba(255,255,255,0.5),
+    inset 0 -1.5px 2px rgba(0,0,0,0.08),
+    0 4px 10px -4px rgba(0,0,0,0.25);
+}
+body[data-theme-style="plain"] .pfl-flat-blue { background: linear-gradient(160deg, #60a5fa, #2563eb); color: #fff; }
+body[data-theme-style="plain"] .pfl-flat-green { background: linear-gradient(160deg, #4ade80, #16a34a); color: #fff; }
+body[data-theme-style="plain"] .pfl-flat-purple { background: linear-gradient(160deg, #a78bfa, #7c3aed); color: #fff; }
+body[data-theme-style="plain"] .pfl-flat-orange { background: linear-gradient(160deg, #fb923c, #ea580c); color: #fff; }
+body[data-theme-style="plain"] .pfl-flat-gold { background: linear-gradient(160deg, #fbbf24, #d97706); color: #fff; }
+body[data-theme-style="plain"] .pfl-flat-teal { background: linear-gradient(160deg, #2dd4bf, #0d9488); color: #fff; }
+body[data-theme-style="plain"] .pfl-flat-pink { background: linear-gradient(160deg, #f472b6, #db2777); color: #fff; }
+
+/* swatch (accent color dot) gets the same embossed ring */
+body[data-theme-style="plain"] .pfl-swatch-lg {
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.5), inset 0 -1.5px 2px rgba(0,0,0,0.15), 0 0 0 2px #fff, 0 0 0 3px #eceef3, 0 4px 10px -4px rgba(0,0,0,0.2);
+}
+
+/* copy button on referral card — embossed teal */
+body[data-theme-style="plain"] .pfl-flat-copy-btn {
+  background: linear-gradient(160deg, #2dd4bf, #0d9488); color: #fff;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.4), inset 0 -1.5px 2px rgba(0,0,0,0.1), 0 4px 10px -4px rgba(13,148,136,0.4);
+}
+
+/* chevrons get a soft circular embossed backing instead of floating bare */
+body[data-theme-style="plain"] .pfl-flat-chevron {
+  width: 26px; height: 26px; border-radius: 50%; background: #f2f4f8;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -1px 2px rgba(0,0,0,0.04);
+}
+
+/* ============================================================
+   Hero card v2 — merged dark card + glow strip concept
+   ============================================================ */
+body[data-theme-style="plain"] .profile-hero-card {
+  border-radius: 26px !important;
+  margin: 0 0 14px !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: unset !important;
+  max-height: unset !important;
+  padding: 18px 20px !important;
+  background:
+    radial-gradient(120% 100% at 20% 0%, rgba(23,185,168,0.25), transparent 55%),
+    repeating-radial-gradient(circle at 0 0, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 14px),
+    linear-gradient(165deg, #1b1f24 0%, #0a0c0e 100%) !important;
+  border: 3px solid rgba(255,255,255,0.9) !important;
+  box-shadow: 0 8px 18px -8px rgba(0,0,0,0.45) !important;
+  overflow: hidden;
+}
+body[data-theme-style="plain"] .pfl-hero-time { position: absolute; top: 16px; right: 18px; font-size: 11px; color: rgba(255,255,255,0.45); display: flex; align-items: center; gap: 4px; }
+body[data-theme-style="plain"] .profile-hero-avatar {
+  width: 48px; height: 48px; box-shadow: 0 0 0 2px rgba(255,255,255,0.15);
+}
+body[data-theme-style="plain"] .profile-hero-name { color: #fff; font-size: 16px; }
+body[data-theme-style="plain"] .pfl-hero-status { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: rgba(255,255,255,0.55); margin-top: 3px; }
+body[data-theme-style="plain"] .pfl-status-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 8px #4ade80; }
+
+body[data-theme-style="plain"] .pfl-hero-pills { display: flex; gap: 8px; margin-top: 16px; }
+body[data-theme-style="plain"] .pfl-hero-pill {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);
+  color: #f0f0f2; font-size: 12.5px; font-weight: 600; padding: 11px; border-radius: 999px; text-decoration: none;
+}
+
+body[data-theme-style="plain"] .pfl-hero-strip {
+  margin: 16px -20px -18px;
+  color: #052e16; font-size: 12px; font-weight: 700;
+  padding: 12px 20px; display: flex; align-items: center; gap: 6px;
+  box-shadow: 0 -6px 16px -8px rgba(0,0,0,0.25);
+}
+
+body[data-theme-style="plain"] .profile-hero-stats { display: none; }
+
+/* ============================================================
+   Global accent color fix — dock/nav bar was stuck on a
+   hardcoded --color-accent from app-v2.css. This makes
+   --color-accent always follow the saved --user-accent,
+   everywhere on the site, regardless of theme.
+   ============================================================ */
+[style*="--user-accent"] {
+  --color-accent: var(--user-accent) !important;
+}

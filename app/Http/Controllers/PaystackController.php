@@ -177,6 +177,121 @@ class PaystackController extends Controller
         return redirect()->route('onboarding.interests')->with('status', $msg);
     }
 
+    public function initiateRegistrationFee(Request $request)
+    {
+        $encrypted = $request->session()->get('pending_registration');
+        if (!$encrypted) {
+            return redirect()->route('register')->withErrors(['email' => 'Your registration session expired. Please fill the form again.']);
+        }
+        try {
+            $pending = unserialize(\Illuminate\Support\Facades\Crypt::decryptString($encrypted));
+        } catch (\Throwable $e) {
+            return redirect()->route('register')->withErrors(['email' => 'Your registration session expired. Please fill the form again.']);
+        }
+
+        $amount = 2000;
+        $txRef = 'REGFEE-' . $request->session()->getId() . '-' . time();
+        $request->session()->put('pending_registration_txref', $txRef);
+
+        try {
+            $data = $this->initializeTransaction($txRef, $amount, $pending['email'], route('register.pay.callback'), ['title' => 'Campulsy Account Activation']);
+            if (($data['status'] ?? false) === true) {
+                return redirect($data['data']['authorization_url']);
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Registration fee payment init failed: ' . $e->getMessage());
+        }
+
+        return back()->withErrors(['payment' => 'Could not start payment. Please try again.']);
+    }
+
+    public function registrationFeeCallback(Request $request)
+    {
+        $txRef = $request->query('reference') ?? $request->query('trxref');
+
+        $encrypted = $request->session()->get('pending_registration');
+        $expectedTxRef = $request->session()->get('pending_registration_txref');
+
+        if (!$encrypted || !$expectedTxRef || $txRef !== $expectedTxRef || !str_starts_with((string) $txRef, 'REGFEE-')) {
+            return redirect()->route('register')->withErrors(['email' => 'Your registration session expired or the payment reference did not match. Please fill the form again.']);
+        }
+
+        try {
+            $pending = unserialize(\Illuminate\Support\Facades\Crypt::decryptString($encrypted));
+        } catch (\Throwable $e) {
+            return redirect()->route('register')->withErrors(['email' => 'Your registration session expired. Please fill the form again.']);
+        }
+
+        $verifyData = $this->verifyTransaction($txRef);
+        $verified = ($verifyData['status'] ?? false) === true
+            && ($verifyData['data']['status'] ?? null) === 'success'
+            && ($verifyData['data']['reference'] ?? null) === $txRef
+            && ((float) ($verifyData['data']['amount'] ?? 0)) / 100 >= 2000
+            && ($verifyData['data']['currency'] ?? null) === 'NGN';
+
+        if (!$verified) {
+            return redirect()->route('register.pay')->withErrors(['payment' => 'Payment not confirmed yet. If you were charged, try refreshing this page in a minute before registering again.']);
+        }
+
+        if (User::where('email', $pending['email'])->exists()) {
+            $request->session()->forget(['pending_registration', 'pending_registration_txref']);
+            return redirect()->route('register')->withErrors(['email' => 'That email was registered by someone else while your payment was processing. Please register again — you have not been charged for this attempt without an account, contact support if needed.']);
+        }
+
+        $referrer = null;
+        if (!empty($pending['referral_code_used'])) {
+            $referrer = User::where('referral_code', $pending['referral_code_used'])->first();
+        }
+
+        $user = User::create([
+            'name' => $pending['name'],
+            'email' => $pending['email'],
+            'password' => $pending['password'],
+            'gender' => $pending['gender'],
+            'spoken_language' => $pending['spoken_language'],
+            'referral_code' => strtoupper(\Illuminate\Support\Str::random(6)),
+            'referred_by' => $referrer?->id,
+            'account_type' => 'guest',
+            'signup_fee_paid' => true,
+            'badge_tier' => 'bronze',
+            'tier' => 'tier1',
+            'tier_upgraded_at' => now(),
+        ]);
+
+        $auth = $verifyData['data']['authorization'] ?? null;
+        if ($auth && !empty($auth['authorization_code'])) {
+            $user->update([
+                'card_token' => $auth['authorization_code'],
+                'card_last4' => $auth['last4'] ?? null,
+                'card_type' => $auth['card_type'] ?? null,
+            ]);
+        }
+
+        Auth::login($user);
+
+        WalletTopup::create(['user_id' => $user->id, 'tx_ref' => $txRef, 'amount' => 2000, 'status' => 'successful']);
+        Transaction::create(['user_id' => $user->id, 'type' => 'signup_fee', 'amount' => -((float) ($verifyData['data']['amount'] ?? 200000)) / 100, 'description' => 'Account activation via Paystack']);
+
+        if (!empty($pending['bvn']) && !empty($pending['phonenumber'])) {
+            app(AuthController::class)->trySetupVirtualAccountPublic($user, $pending['phonenumber'], $pending['bvn']);
+        }
+
+        if ($pending['intended_plan']) {
+            $request->session()->put('intended_plan_after_onboarding', $pending['intended_plan']);
+        }
+
+        $settledCount = 0;
+        $guestToken = $request->cookie('qelvo_guest_token');
+        if ($guestToken) {
+            $settledCount = app(\App\Http\Controllers\GigController::class)->settleGuestGigs($user, $guestToken);
+        }
+
+        $request->session()->forget(['pending_registration', 'pending_registration_txref']);
+
+        $msg = 'Welcome to Campulsy! Your account is active.' . ($settledCount > 0 ? ' ' . $settledCount . ' held gig payment(s) released to your wallet.' : '');
+        return redirect()->route('onboarding.interests')->with('status', $msg);
+    }
+
     public function initiate(Request $request)
     {
         $validated = $request->validate(

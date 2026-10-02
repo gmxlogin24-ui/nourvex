@@ -93,37 +93,58 @@ class AuthController extends Controller
             'bvn' => 'nullable|string|size:11|required_with:phonenumber',
         ]);
 
-        $referrer = null;
-        if (!empty($validated['referral_code'])) {
-            $referrer = \App\Models\User::where('referral_code', $validated['referral_code'])->first();
-        }
+        // No account is created yet. We hold the submitted details (encrypted)
+        // in the session until payment is confirmed, so nobody ends up with a
+        // half-registered account they feel entitled to before they've paid.
+        $intendedPlan = $request->input('intended_plan');
 
-        $user = \App\Models\User::create([
+        $pending = [
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => $validated['password'],
             'gender' => $validated['gender'],
             'spoken_language' => $validated['spoken_language'],
-            'referral_code' => strtoupper(Str::random(6)),
-            'referred_by' => $referrer?->id,
-            'account_type' => 'guest',
-        ]);
+            'referral_code_used' => $validated['referral_code'] ?? null,
+            'phonenumber' => $validated['phonenumber'] ?? null,
+            'bvn' => $validated['bvn'] ?? null,
+            'intended_plan' => in_array($intendedPlan, ['tier1', 'tier2', 'tier3'], true) ? $intendedPlan : null,
+        ];
 
-        Auth::login($user);
+        $request->session()->put(
+            'pending_registration',
+            \Illuminate\Support\Facades\Crypt::encryptString(serialize($pending))
+        );
+        $request->session()->forget('pending_registration_txref');
 
-        // Optional: if they supplied BVN + phone, set up their virtual account immediately.
-        // Never fails registration itself - just silently skips on any error, same as leaving it blank.
-        if (!empty($validated['bvn']) && !empty($validated['phonenumber'])) {
-            $this->trySetupVirtualAccount($user, $validated['phonenumber'], $validated['bvn']);
+        return redirect()->route('register.pay');
+    }
+
+    public function showRegistrationPay(Request $request)
+    {
+        $pending = $this->getPendingRegistration($request);
+        if (!$pending) {
+            return redirect()->route('register')->withErrors(['email' => 'Your registration session expired. Please fill the form again.']);
         }
 
-        $intendedPlan = $request->input('intended_plan');
-        if (in_array($intendedPlan, ['tier1', 'tier2', 'tier3'], true)) {
-            $request->session()->put('intended_plan_after_onboarding', $intendedPlan);
-        }
+        return view('auth.register-pay', ['pendingName' => $pending['name']]);
+    }
 
-        return redirect()->route('signup-fee.activate')
-            ->with('status', 'Welcome! One last step to activate your account.');
+    protected function getPendingRegistration(Request $request): ?array
+    {
+        $encrypted = $request->session()->get('pending_registration');
+        if (!$encrypted) {
+            return null;
+        }
+        try {
+            return unserialize(\Illuminate\Support\Facades\Crypt::decryptString($encrypted));
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    public function trySetupVirtualAccountPublic($user, string $phonenumber, string $bvn): void
+    {
+        $this->trySetupVirtualAccount($user, $phonenumber, $bvn);
     }
 
     private function trySetupVirtualAccount($user, string $phonenumber, string $bvn): void

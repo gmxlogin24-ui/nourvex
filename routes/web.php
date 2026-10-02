@@ -57,6 +57,9 @@ Route::post('/register', [AuthController::class, 'register'])->middleware('throt
 Route::post('/register/vendor', [AuthController::class, 'registerVendor'])->name('register.vendor.store')->middleware('throttle:5,1');
 Route::get('/register/invite/{code}', [AuthController::class, 'showInviteRegister'])->name('register.invite');
 Route::post('/register/invite/{code}', [AuthController::class, 'registerInvite'])->name('register.invite.store')->middleware('throttle:5,1');
+Route::get('/register/pay', [AuthController::class, 'showRegistrationPay'])->name('register.pay');
+Route::get('/register/pay/initiate', [App\Http\Controllers\PaystackController::class, 'initiateRegistrationFee'])->name('register.pay.initiate')->middleware('throttle:5,1');
+Route::get('/register/pay/callback', [App\Http\Controllers\PaystackController::class, 'registrationFeeCallback'])->name('register.pay.callback');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -98,6 +101,7 @@ Route::middleware(['auth', 'signup.paid'])->group(function () {
     Route::post('/tour/complete', [\App\Http\Controllers\TourController::class, 'complete'])->middleware('auth')->name('tour.complete');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/dashboard-preview', [DashboardController::class, 'preview'])->middleware('auth')->name('dashboard.preview');
+Route::get('/profile-preview', [ProfileController::class, 'preview'])->middleware('auth')->name('profile.preview');
 Route::get('/dashboard-transfer', [DashboardController::class, 'transfer'])->middleware('auth')->name('dashboard.transfer');
 Route::get('/welcome', [\App\Http\Controllers\WelcomeTourController::class, 'show'])->middleware('auth')->name('welcome.show');
 

@@ -10,4 +10,5 @@ Artisan::command('inspire', function () {
 
 Schedule::command('subscriptions:expire')->daily();
 Schedule::command('gigs:remind-pending-payments')->daily();
+Schedule::command('qcoin:remind-unclaimed')->dailyAt('20:00');
 Schedule::command('marketplace:release-escrow')->daily();

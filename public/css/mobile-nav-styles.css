@@ -32,7 +32,7 @@ body[data-mobile-nav-style="painted_pill"] .mnav-bar,
 body:not([data-mobile-nav-style]) .mnav-bar{
   border-radius: 30px;
   background: #0a0a0a;
-  padding: 8px 18px;
+  padding: 8px 32px;
   box-shadow: 0 -6px 24px rgba(0,0,0,0.35);
   border: none;
 }

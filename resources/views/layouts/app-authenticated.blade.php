@@ -63,9 +63,9 @@
     $routeName = request()->route() ? request()->route()->getName() : '';
     $pageKey = $routeName ? explode('.', $routeName)[0] : '';
 @endphp
-<body data-page="{{ $pageKey }}" data-theme-style="{{ auth()->user()->theme_style ?? 'glass' }}" style="@if(auth()->user()?->background_url)--au-bg-image: url('{{ auth()->user()->background_url }}');@endif"
+<body data-page="{{ $pageKey }}" data-theme-style="{{ auth()->user()->theme_style ?? 'glass' }}" style="--user-accent: {{ auth()->user()->accent_color ?? '#0F9D6E' }};@if(auth()->user()?->background_url)--au-bg-image: url('{{ auth()->user()->background_url }}');@endif"
     data-sidebar-style="{{ auth()->user()->sidebar_style ?? 'rail' }}"
-    data-mobile-nav-style="{{ auth()->user()->mobile_nav_style ?? 'painted_pill' }}" style="--user-accent: {{ auth()->user()->accent_color ?? '#0F9D6E' }};">
+    data-mobile-nav-style="{{ auth()->user()->mobile_nav_style ?? 'painted_pill' }}">
     @include('partials.preloader')
     @if((auth()->user()->theme_style ?? 'glass') === 'plain')
         @include('partials.dqm-topbar')
