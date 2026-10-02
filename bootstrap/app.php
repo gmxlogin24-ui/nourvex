@@ -24,7 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
         $middleware->appendToGroup('web', \App\Http\Middleware\TrackStreak::class);
         $middleware->validateCsrfTokens(except: [
-            'webhooks/flutterwave',
+            'webhooks/paystack',
         ]);
         $middleware->redirectGuestsTo(fn (Request $request) => route('plans.choose'));
     })

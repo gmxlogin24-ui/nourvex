@@ -28,7 +28,7 @@ class SubscriptionController extends Controller
     {
         $validated = $request->validate([
             'target_tier' => 'required|in:tier1,tier2,tier3',
-            'payment_method' => 'required|in:wallet,flutterwave',
+            'payment_method' => 'required|in:wallet,paystack',
         ]);
 
         $user = Auth::user();
@@ -43,8 +43,8 @@ class SubscriptionController extends Controller
 
         $cost = Subscription::PLANS[$target]['price'];
 
-        if ($method === 'flutterwave') {
-            return $this->initiateFlutterwave($user, $target, $cost);
+        if ($method === 'paystack') {
+            return $this->initiatePaystack($user, $target, $cost);
         }
 
         $result = DB::transaction(function () use ($user, $target, $cost) {
@@ -87,7 +87,7 @@ class SubscriptionController extends Controller
         return redirect()->route('dashboard')->with('status', 'Subscribed to ' . Subscription::PLANS[$sub->plan]['label'] . '! Renews ' . $sub->expires_at->format('M j, Y') . '.');
     }
 
-    private function initiateFlutterwave($user, $target, $cost)
+    private function initiatePaystack($user, $target, $cost)
     {
         $txRef = 'SUBSCRIBE-' . $target . '-' . $user->id . '-' . time();
 
@@ -95,8 +95,8 @@ class SubscriptionController extends Controller
             'user_id' => $user->id,
             'plan' => $target,
             'amount' => $cost,
-            'payment_method' => 'flutterwave',
-            'flutterwave_tx_ref' => $txRef,
+            'payment_method' => 'paystack',
+            'paystack_tx_ref' => $txRef,
             'status' => 'pending_payment',
             'starts_at' => now(),
             'expires_at' => now(),
@@ -121,11 +121,11 @@ class SubscriptionController extends Controller
         return back()->withErrors(['tier' => 'Could not start payment. Please try again.']);
     }
 
-    public function flutterwaveCallback(Request $request)
+    public function paystackCallback(Request $request)
     {
         $txRef = $request->query('reference') ?? $request->query('trxref');
 
-        $sub = Subscription::where('flutterwave_tx_ref', $txRef)->first();
+        $sub = Subscription::where('paystack_tx_ref', $txRef)->first();
 
         if (!$sub) {
             return redirect()->route('subscriptions.index')->withErrors(['tier' => 'Subscription record not found.']);

@@ -45,7 +45,7 @@
                 <input type="hidden" name="target_tier" value="tier1">
                 <select name="payment_method" class="input-field !mt-0 text-sm">
                     <option value="wallet">Pay from Wallet (₦{{ number_format($user->wallet_balance) }} available)</option>
-                    <option value="flutterwave">Pay by Card/Bank</option>
+                    <option value="paystack">Pay by Card/Bank</option>
                 </select>
                 <button type="submit" class="btn-primary w-full justify-center">Subscribe to Plus</button>
             </form>
@@ -72,7 +72,7 @@
                 <input type="hidden" name="target_tier" value="tier2">
                 <select name="payment_method" class="input-field !mt-0 text-sm">
                     <option value="wallet">Pay from Wallet (₦{{ number_format($user->wallet_balance) }} available)</option>
-                    <option value="flutterwave">Pay by Card/Bank</option>
+                    <option value="paystack">Pay by Card/Bank</option>
                 </select>
                 <button type="submit" class="btn-primary w-full justify-center">Subscribe to Pro</button>
             </form>

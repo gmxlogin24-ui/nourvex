@@ -24,7 +24,7 @@
             <div>
                 <label class="text-sm text-muted">BVN</label>
                 <input type="text" name="bvn" required maxlength="11" placeholder="11-digit BVN" class="input-field !mt-1">
-                <p class="text-xs text-muted mt-1">Required by Flutterwave for permanent accounts. We never store your BVN.</p>
+                <p class="text-xs text-muted mt-1">Required by Paystack for permanent accounts. We never store your BVN.</p>
             </div>
             <button type="submit" class="btn-primary w-full justify-center">Create Virtual Account</button>
         </form>

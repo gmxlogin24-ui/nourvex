@@ -75,7 +75,7 @@ class AdminController extends Controller
             'subExpired' => $subStatusCounts['expired'] ?? 0,
             'subCancelled' => $subStatusCounts['cancelled'] ?? 0,
             'subWalletRevenue' => $subMethodRevenue['wallet'] ?? 0,
-            'subFlutterwaveRevenue' => $subMethodRevenue['flutterwave'] ?? 0,
+            'subPaystackRevenue' => $subMethodRevenue['paystack'] ?? 0,
             'expiringSoon' => Subscription::active()
                 ->whereBetween('expires_at', [now(), now()->addDays(14)])
                 ->with('user')->orderBy('expires_at')->take(10)->get(),

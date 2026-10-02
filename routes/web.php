@@ -71,7 +71,7 @@ Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name(
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 
-Route::post('/webhooks/flutterwave', [PaystackWebhookController::class, 'handle']);
+Route::post('/webhooks/paystack', [PaystackWebhookController::class, 'handle']);
 
 // Public pages
 Route::get('/features', [FeaturesController::class, 'index'])->name('features');
@@ -274,7 +274,7 @@ Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index
 
     Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
     Route::post('/subscriptions/subscribe', [SubscriptionController::class, 'subscribe'])->name('subscriptions.subscribe');
-    Route::get('/subscriptions/callback', [SubscriptionController::class, 'flutterwaveCallback'])->name('subscriptions.callback');
+    Route::get('/subscriptions/callback', [SubscriptionController::class, 'paystackCallback'])->name('subscriptions.callback');
 
     // Old links to /tier still work
     Route::redirect('/tier', '/subscriptions')->name('tier.index');
@@ -285,8 +285,8 @@ Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index
     Route::post('/wallet/send', [WalletController::class, 'sendMoney'])->name('wallet.send');
     Route::get('/wallet/send', [WalletController::class, 'sendMoneyForm'])->name('wallet.send.form');
     Route::post('/wallet/send/resolve', [WalletController::class, 'resolveRecipient'])->name('wallet.send.resolve');
-    Route::post('/wallet/flutterwave/initiate', [PaystackController::class, 'initiate'])->name('flutterwave.initiate');
-    Route::get('/wallet/flutterwave/callback', [PaystackController::class, 'callback'])->name('flutterwave.callback');
+    Route::post('/wallet/paystack/initiate', [PaystackController::class, 'initiate'])->name('paystack.initiate');
+    Route::get('/wallet/paystack/callback', [PaystackController::class, 'callback'])->name('paystack.callback');
     Route::get('/wallet/virtual-account', [VirtualAccountController::class, 'create'])->name('wallet.virtual-account');
     Route::post('/wallet/virtual-account', [VirtualAccountController::class, 'store'])->name('wallet.virtual-account.store');
     Route::get('/wallet/bank-account', [App\Http\Controllers\BankAccountController::class, 'edit'])->name('wallet.bank-account.edit');

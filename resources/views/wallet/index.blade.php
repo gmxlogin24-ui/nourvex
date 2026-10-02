@@ -80,7 +80,7 @@
 <div id="topupModal" class="modal-overlay">
     <div class="glass-card p-6 max-w-sm mx-auto mt-24">
         <h3 class="font-semibold mb-3">Top Up Wallet</h3>
-        <form method="POST" action="{{ route('flutterwave.initiate') }}">
+        <form method="POST" action="{{ route('paystack.initiate') }}">
             @csrf
             <input type="number" name="amount" min="100" max="1000000" step="0.01" inputmode="decimal" autocomplete="off" placeholder="Amount (₦)" required class="input-field !mt-0 mb-3">
             <button type="submit" class="btn-primary w-full justify-center">Continue to Payment</button>

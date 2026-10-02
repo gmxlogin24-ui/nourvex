@@ -306,7 +306,7 @@ class PaystackController extends Controller
 
         $data = [];
         try {
-            $data = $this->initializeTransaction($txRef, $validated['amount'], $user->email, route('flutterwave.callback'), ['title' => 'NOURVEX Wallet Top Up']);
+            $data = $this->initializeTransaction($txRef, $validated['amount'], $user->email, route('paystack.callback'), ['title' => 'NOURVEX Wallet Top Up']);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('Wallet top-up init failed: ' . $e->getMessage());
         }

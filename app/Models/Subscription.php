@@ -17,7 +17,7 @@ class Subscription extends Model
 
     protected $fillable = [
         'user_id', 'plan', 'amount', 'payment_method',
-        'flutterwave_tx_ref', 'status', 'starts_at', 'expires_at',
+        'paystack_tx_ref', 'status', 'starts_at', 'expires_at',
     ];
 
     protected $casts = [
@@ -48,7 +48,7 @@ class Subscription extends Model
     /**
      * Activate a pending subscription: mark it active, update the user's tier,
      * log the transaction, and pay any referral bonus. Safe to call from both
-     * the wallet-payment path and the Flutterwave callback — only acts if
+     * the wallet-payment path and the Paystack callback — only acts if
      * still pending, and is the single source of truth for what "activating"
      * a subscription means so the two payment paths can't drift apart.
      */

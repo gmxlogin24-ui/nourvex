@@ -18,7 +18,7 @@ class BankAccountController extends Controller
             if (($data['status'] ?? false) !== true) {
                 return [];
             }
-            // Normalize to the same shape the old Flutterwave list used, so the blade view doesn't need changes.
+            // Normalize to the same shape the old Paystack list used, so the blade view doesn't need changes.
             return array_map(fn($b) => ['code' => $b['code'], 'name' => $b['name']], $data['data'] ?? []);
         });
 

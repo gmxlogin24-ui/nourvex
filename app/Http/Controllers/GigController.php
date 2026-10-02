@@ -761,7 +761,7 @@ class GigController extends Controller
         return redirect()->route('gigs.show', $gig->id)->with('status', 'Sent back for revisions.');
     }
 
-    // Called from FlutterwaveController once a former guest pays the signup fee.
+    // Called from PaystackController once a former guest pays the signup fee.
     // The poster already paid the full amount at complete() time, so this only
     // pays the worker — it never touches the poster's wallet.
     public function settleGuestGigs(User $user, string $guestToken): int

@@ -55,7 +55,7 @@
         </form>
 
         <p class="text-xs text-muted text-center mt-5 flex items-center justify-center gap-1">
-            <i data-lucide="lock" class="w-3.5 h-3.5"></i> Secure payment via Flutterwave. One-time fee, no subscriptions.
+            <i data-lucide="lock" class="w-3.5 h-3.5"></i> Secure payment via Paystack. One-time fee, no subscriptions.
         </p>
 
         <p class="text-sm text-center text-muted mt-4">Already have an account? <a href="{{ route('login') }}" class="text-accent font-medium">Log in</a></p>

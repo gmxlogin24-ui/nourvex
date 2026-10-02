@@ -41,7 +41,7 @@ class WalletActionController extends Controller
         $txRef = 'WD-' . $user->id . '-' . time();
 
         // Debit immediately so the funds can't be double-spent while the
-        // transfer is in flight. If the Flutterwave call fails to even
+        // transfer is in flight. If the Paystack call fails to even
         // initiate, we reverse this below. If it initiates but the bank
         // payout later fails, the transfer.completed webhook reverses it.
         $debited = DB::transaction(function () use ($user, $validated, $fee, $totalDebit, $txRef) {

@@ -54,7 +54,7 @@ class PaystackWebhookController extends Controller
 
         if ($txRef && str_starts_with($txRef, 'SUBSCRIBE-')) {
             DB::transaction(function () use ($txRef, $amount) {
-                $sub = Subscription::where('flutterwave_tx_ref', $txRef)->lockForUpdate()->first();
+                $sub = Subscription::where('paystack_tx_ref', $txRef)->lockForUpdate()->first();
                 if ($sub && $sub->status === 'pending_payment' && $amount >= (float) $sub->amount) {
                     $sub->activate();
                 }

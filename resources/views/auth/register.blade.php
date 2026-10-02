@@ -69,7 +69,7 @@
 
             <label class="text-xs mt-3 block" style="opacity:0.7;">BVN</label>
             <input type="text" name="bvn" value="{{ old('bvn') }}" maxlength="11" placeholder="optional, 11 digits" class="glass-input">
-            <p class="text-xs mt-1" style="opacity:0.55;">Required by Flutterwave to issue a permanent account number. We never store your BVN.</p>
+            <p class="text-xs mt-1" style="opacity:0.55;">Required by Paystack to issue a permanent account number. We never store your BVN.</p>
         </div>
 
         <div class="flex items-center gap-3 mt-2">
