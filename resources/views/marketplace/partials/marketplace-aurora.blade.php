@@ -63,7 +63,7 @@
     <div class="au-page-section">
         <div class="au-section-header au-section-header-loose">
             <span>All Listings</span>
-            @auth<a href="{{ route('marketplace.create') }}">Sell</a>@else<a href="{{ route('register') }}">Sign Up</a>@endauth
+            @auth@if(auth()->user()->planAllows('market_sell'))<a href="{{ route('marketplace.create') }}">Sell</a>@endif@else<a href="{{ route('register') }}">Sign Up</a>@endauth
         </div>
         <div class="au-listing-grid">
             @forelse($listings as $item)

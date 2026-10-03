@@ -182,7 +182,7 @@
                     <span class="pfl-swatch-lg" style="background:{{ $user->accent_color ?? '#0F9D6E' }};"></span>
                 </div>
                 <div class="pfl-inline-row"><span class="l">Accent Color</span><span class="v">{{ $user->accent_color ?? '#0F9D6E' }}</span></div>
-                <div class="pfl-inline-row"><span class="l">Nav Style</span><span class="v">{{ ($user->mobile_nav_style ?? 'painted_pill') === 'edge_dock' ? 'Edge Dock' : 'Painted Pill' }}</span></div>
+                <div class="pfl-inline-row"><span class="l">Nav Style</span><span class="v">{{ ['edge_dock' => 'Edge Dock', 'halo_dock' => 'Halo Dock'][$user->mobile_nav_style ?? ''] ?? 'Painted Pill' }}</span></div>
                 <a href="{{ route('profile.appearance') }}" class="pfl-open-link">Customize appearance <i class="ph ph-arrow-right w-3.5 h-3.5"></i></a>
             </div>
 

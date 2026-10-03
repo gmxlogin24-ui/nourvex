@@ -45,8 +45,8 @@ class SocialAuthController extends Controller
         // activation step normal signups hit, instead of straight to dashboard.
         // Existing unpaid users get caught by the signup.paid middleware automatically.
         if ($isNewUser) {
-            return redirect()->route('signup-fee.activate')
-                ->with('status', 'Welcome! One last step to activate your account.');
+            return redirect()->route('area.show')
+                ->with('status', 'Welcome! Tell us where you are based to finish setting up.');
         }
 
         return redirect()->route('dashboard');

@@ -5,7 +5,7 @@
         <h1 class="text-lg font-semibold">NOURVEX</h1>
     </div>
 
-    <p class="text-sm mb-6" style="opacity:0.75;">Create your account. Free to join — you only earn or spend when you're ready.</p>
+    <p class="text-sm mb-6" style="opacity:0.75;">Create your account. Free to join — upgrade any time.</p>
 
     @if ($errors->any())
     <div class="bg-red-500/10 text-red-500 text-sm rounded-lg p-3 mb-4">{{ $errors->first() }}</div>
@@ -13,12 +13,23 @@
 
     <form method="POST" action="{{ route('register') }}" class="space-y-4">
         @csrf
-        <input type="hidden" name="intended_plan" value="{{ request('plan', 'tier1') }}">
-        @if(request('plan') && request('plan') !== 'free')
-        <div class="bg-accent/10 text-sm rounded-lg p-3" style="background:color-mix(in srgb, var(--color-accent) 12%, transparent);">
-            You're signing up for the <strong>{{ \App\Models\Subscription::PLANS[request('plan')]['label'] ?? '' }}</strong> plan — you'll pay right after this step.
+        @php
+            $allPlans = array_merge(['free' => ['label' => 'Free', 'price' => 0]], \App\Models\Subscription::PLANS);
+            $pickPlan = array_key_exists((string) request('plan'), $allPlans) ? request('plan') : (old('intended_plan') ?: 'free');
+        @endphp
+        <div>
+            <label class="text-xs" style="opacity:0.7;">Choose your plan (paid plans billed yearly)</label>
+            <div class="reg-plans">
+                @foreach ($allPlans as $k => $p)
+                    <label class="reg-plan">
+                        <input type="radio" name="intended_plan" value="{{ $k }}" {{ $pickPlan === $k ? 'checked' : '' }}>
+                        <span class="reg-plan-body"><strong>{{ $p['label'] }}</strong><span>{{ $p['price'] ? '₦' . number_format($p['price']) : 'Free' }}</span></span>
+                    </label>
+                @endforeach
+            </div>
+            <p class="text-xs" style="opacity:0.65;margin-top:.4rem;">Paid plans: you pay after setting up your account. Skip it and you stay on Free.</p>
+            <style>.reg-plans{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem;margin-top:.4rem}.reg-plan{position:relative}.reg-plan input{position:absolute;opacity:0}.reg-plan-body{display:flex;flex-direction:column;align-items:center;gap:.15rem;padding:.7rem .3rem;border:1.5px solid rgba(128,128,128,.35);border-radius:.8rem;font-size:.8rem;cursor:pointer}.reg-plan input:checked+.reg-plan-body{border-color:var(--color-accent);background:color-mix(in srgb,var(--color-accent) 12%,transparent)}</style>
         </div>
-        @endif
         <div>
             <label class="text-xs" style="opacity:0.7;">Full Name</label>
             <input type="text" name="name" required value="{{ old('name') }}" placeholder="Your full name" class="glass-input">
@@ -30,6 +41,16 @@
         <div>
             <label class="text-xs" style="opacity:0.7;">Password</label>
             <input type="password" name="password" required placeholder="password" class="glass-input">
+        </div>
+
+        <div>
+            <label class="text-xs" style="opacity:0.7;">Where are you based?</label>
+            <select name="area" required class="glass-input">
+                <option value="" disabled selected>Select your area</option>
+                @foreach (config('areas.list') as $k => $label)
+                    <option value="{{ $k }}" {{ old('area') == $k ? 'selected' : '' }}>{{ $label }}</option>
+                @endforeach
+            </select>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -58,18 +79,6 @@
         <div>
             <label class="text-xs" style="opacity:0.7;">Referral Code (optional)</label>
             <input type="text" name="referral_code" value="{{ old('referral_code') }}" placeholder="optional" class="glass-input">
-        </div>
-
-        <div class="border-t border-base pt-4 mt-2">
-            <p class="text-xs font-medium mb-1">Get a personal virtual account (optional)</p>
-            <p class="text-xs mb-3" style="opacity:0.6;">Skip this and add it later from your wallet if you prefer — you can still send and receive money by manual transfer either way.</p>
-
-            <label class="text-xs" style="opacity:0.7;">Phone Number</label>
-            <input type="text" name="phonenumber" value="{{ old('phonenumber') }}" placeholder="optional" class="glass-input">
-
-            <label class="text-xs mt-3 block" style="opacity:0.7;">BVN</label>
-            <input type="text" name="bvn" value="{{ old('bvn') }}" maxlength="11" placeholder="optional, 11 digits" class="glass-input">
-            <p class="text-xs mt-1" style="opacity:0.55;">Required by Paystack to issue a permanent account number. We never store your BVN.</p>
         </div>
 
         <div class="flex items-center gap-3 mt-2">

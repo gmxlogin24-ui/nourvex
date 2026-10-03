@@ -100,12 +100,22 @@ class PaystackController extends Controller
         return redirect()->route('onboarding.interests')->with('status', 'Vendor account activated!');
     }
 
+    protected function planPrice(Request $request, ?array $pending = null): float
+    {
+        $plan = $pending['intended_plan'] ?? $request->query('plan');
+        if (! in_array($plan, ['tier1', 'tier2', 'tier3'], true)) {
+            $plan = 'tier1';
+        }
+
+        return (float) \App\Models\Subscription::PLANS[$plan]['price'];
+    }
+
     public function initiateSignupFee(Request $request)
     {
         $user = Auth::user();
         if ($user->signup_fee_paid) return redirect()->route('dashboard');
 
-        $amount = 2000;
+        $amount = $this->planPrice($request, $pending ?? null);
         $txRef = 'SIGNUPFEE-' . $user->id . '-' . time();
 
         WalletTopup::create(['user_id' => $user->id, 'tx_ref' => $txRef, 'amount' => $amount, 'status' => 'pending']);
@@ -189,7 +199,7 @@ class PaystackController extends Controller
             return redirect()->route('register')->withErrors(['email' => 'Your registration session expired. Please fill the form again.']);
         }
 
-        $amount = 2000;
+        $amount = $this->planPrice($request, $pending ?? null);
         $txRef = 'REGFEE-' . $request->session()->getId() . '-' . time();
         $request->session()->put('pending_registration_txref', $txRef);
 
@@ -226,7 +236,7 @@ class PaystackController extends Controller
         $verified = ($verifyData['status'] ?? false) === true
             && ($verifyData['data']['status'] ?? null) === 'success'
             && ($verifyData['data']['reference'] ?? null) === $txRef
-            && ((float) ($verifyData['data']['amount'] ?? 0)) / 100 >= 2000
+            && ((float) ($verifyData['data']['amount'] ?? 0)) / 100 >= $this->planPrice($request, $pending)
             && ($verifyData['data']['currency'] ?? null) === 'NGN';
 
         if (!$verified) {
@@ -269,14 +279,14 @@ class PaystackController extends Controller
 
         Auth::login($user);
 
-        WalletTopup::create(['user_id' => $user->id, 'tx_ref' => $txRef, 'amount' => 2000, 'status' => 'successful']);
+        WalletTopup::create(['user_id' => $user->id, 'tx_ref' => $txRef, 'amount' => $this->planPrice($request, $pending), 'status' => 'successful']);
         Transaction::create(['user_id' => $user->id, 'type' => 'signup_fee', 'amount' => -((float) ($verifyData['data']['amount'] ?? 200000)) / 100, 'description' => 'Account activation via Paystack']);
 
         if (!empty($pending['bvn']) && !empty($pending['phonenumber'])) {
             app(AuthController::class)->trySetupVirtualAccountPublic($user, $pending['phonenumber'], $pending['bvn']);
         }
 
-        if ($pending['intended_plan']) {
+        if (false && $pending['intended_plan']) {
             $request->session()->put('intended_plan_after_onboarding', $pending['intended_plan']);
         }
 

@@ -149,6 +149,7 @@
                         <i data-lucide="pencil" class="w-4 h-4"></i> Edit Listing
                     </a>
                 @else
+@if(auth()->user()->planAllows('market_buy'))
                     <div class="mpd-action-row">
                         <form method="POST" action="{{ route('cart.add', $listing->id) }}" style="flex:1;">
                             @csrf
@@ -163,6 +164,9 @@
                             </button>
                         </form>
                     </div>
+@else
+<a href="{{ route('subscriptions.index') }}" class="mpd-btn-solid mpd-btn-full"><i data-lucide="lock" class="w-4 h-4"></i> Upgrade to Silver to buy</a>
+@endif
                 @endif
             @endif
         @else

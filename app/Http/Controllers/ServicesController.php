@@ -271,6 +271,16 @@ class ServicesController extends Controller
 
         if ($result['success']) {
             $purchase->update(['status' => 'successful']);
+            try {
+                $buyer = \App\Models\User::find($purchase->user_id);
+                if ($buyer) {
+                    $pts = (int) config('ranking.points.service_purchase', 0)
+                        + min(intdiv((int) $amount, 100) * (int) config('ranking.service_per_100', 1), (int) config('ranking.service_cap', 25));
+                    app(\App\Services\RankingService::class)->award($buyer, 'service_purchase', $pts, 'svc:' . $purchase->id);
+                }
+            } catch (\Throwable $e) {
+                report($e);
+            }
             $margin = $purchase->cost !== null ? round($amount - $purchase->cost, 2) : 0;
             if ($margin > 0) {
                 \App\Models\PlatformRevenue::record('vtu', $margin, ucfirst($type) . ' margin — ' . strtoupper($network), 'service_purchase', $purchase->id);

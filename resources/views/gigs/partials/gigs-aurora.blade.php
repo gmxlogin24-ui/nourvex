@@ -60,7 +60,7 @@
     <div class="au-page-section">
         <div class="au-section-header au-section-header-loose">
             <span>Available Hustles</span>
-            @auth<a href="{{ route('gigs.create') }}">Post Hustle</a>@else<a href="{{ route('register') }}">Sign Up</a>@endauth
+            @auth@if(auth()->user()->planAllows('gigs_post'))<a href="{{ route('gigs.create') }}">Post Hustle</a>@endif@else<a href="{{ route('register') }}">Sign Up</a>@endauth
         </div>
         <div class="au-card-grid">
             @forelse($gigs as $i => $gig)

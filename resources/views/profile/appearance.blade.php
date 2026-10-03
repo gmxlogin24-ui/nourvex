@@ -72,6 +72,7 @@
                     @foreach([
                         'painted_pill' => ['label' => 'Painted Pill', 'desc' => 'Rounded bottom, painted icon badges'],
                         'edge_dock' => ['label' => 'Edge Dock', 'desc' => 'Draggable floating handle'],
+                        'halo_dock' => ['label' => 'Halo Dock', 'desc' => 'Notched bar, floating center button'],
                     ] as $style => $meta)
                     <label class="theme-style-option" style="cursor:pointer;">
                         <input type="radio" name="mobile_nav_style" value="{{ $style }}" {{ ($user->mobile_nav_style ?? 'painted_pill') === $style ? 'checked' : '' }} class="dock-style-radio" style="display:none;" onchange="previewDockStyle('{{ $style }}')">

@@ -83,10 +83,12 @@
             @endauth
         </nav>
 
+@if(auth()->user()->planAllows('gigs_post'))
         <a href="{{ route('gigs.create') }}" class="sidebar-fab" title="Post a Hustle">
             <i data-lucide="plus" class="w-5 h-5"></i>
             <span class="sidebar-fab-label">Post a Hustle</span>
         </a>
+@endif
     </div>
 </aside>
 
@@ -100,9 +102,11 @@
         <i data-lucide="briefcase" class="w-5 h-5"></i>
         <span class="mnav-label">Hustles</span>
     </a>
+@if(auth()->user()->planAllows('gigs_post'))
     <a href="{{ route('gigs.create') }}" class="mnav-fab" aria-label="Post a Hustle">
         <i data-lucide="sparkles" class="w-5 h-5"></i>
     </a>
+@endif
     <a href="{{ route('marketplace.index') }}" class="mnav-item {{ ($active ?? '') == 'marketplace' ? 'active' : '' }}">
         <i data-lucide="shopping-bag" class="w-5 h-5"></i>
         @if($cartCount)<span class="mnav-badge">{{ $cartCount }}</span>@endif

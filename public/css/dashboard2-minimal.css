@@ -1312,3 +1312,149 @@ body[data-theme-style="plain"] .svc-balance-strip i[data-lucide="wallet"] {
     color: var(--dqm-text-2) !important;
     opacity: 1 !important;
 }
+
+/* ── top bar: never fully hidden, ~10% stays visible ── */
+body .dqm-topbar-fixed.dqm-topbar-hidden { transform: translateY(-90%) !important; }
+
+/* ── thinner card shadows (tight, small spread) ── */
+body, body[data-theme-style="plain"], .dqm-page {
+    --dqm-shadow-sm: 0 1px 3px -1px rgba(0,0,0,0.10);
+    --dqm-shadow-md: 0 2px 6px -3px rgba(0,0,0,0.12);
+    --dqm-shadow-lg: 0 6px 14px -8px rgba(0,0,0,0.20);
+}
+body[data-theme-style="plain"] .dqm-stat,
+body[data-theme-style="plain"] .dqm-card,
+body[data-theme-style="plain"] .dqm-vstat,
+body[data-theme-style="plain"] .dqm-vaction,
+body[data-theme-style="plain"] .dqm-service,
+body[data-theme-style="plain"] .dqm-arow,
+body[data-theme-style="plain"] .dqm-acc-detail-content,
+body[data-theme-style="plain"] .dqm-side-btn-ghost,
+body[data-theme-style="plain"] .d2-rail-icons,
+body[data-theme-style="plain"] .dqm-page .kpi-tile,
+body[data-theme-style="plain"] .dqm-page .profile-tile-grid.dqm-card {
+    box-shadow: 0 2px 6px -3px rgba(0,0,0,0.12) !important;
+}
+body[data-theme-style="plain"] .dqm-acc-qcoin,
+body[data-theme-style="plain"] .dqm-acc-earnings,
+body[data-theme-style="plain"] .dqm-acc-gigs,
+body[data-theme-style="plain"] .dqm-acc-card2,
+body[data-theme-style="plain"] .dqm-acc-card2.expanded {
+    box-shadow: 0 6px 12px -8px rgba(0,0,0,0.35) !important;
+}
+body[data-theme-style="plain"] .dqm-deck-fan,
+body[data-theme-style="plain"] .dqm-deck-fan-center {
+    box-shadow: 0 8px 14px -8px rgba(0,0,0,0.4) !important;
+}
+
+/* ── top bar: no tab button, 5% peek, glassy, tap to open ── */
+.dqm-topbar-tab,
+.dqm-topbar-tab.visible { display: none !important; }
+
+body .dqm-topbar-fixed.dqm-topbar-hidden,
+body[data-theme-style="plain"] .dqm-topbar-fixed.dqm-topbar-hidden {
+    transform: translateY(-95%) !important;
+}
+body .dqm-topbar-fixed,
+body[data-theme-style="plain"] .dqm-topbar-fixed {
+    background: rgba(255,255,255,0.07) !important;
+    backdrop-filter: blur(18px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    box-shadow: none !important;
+}
+/* invisible extra tap area under the thin visible strip */
+.dqm-topbar-fixed.dqm-topbar-hidden::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 34px;
+}
+
+/* ── lighter, tighter shadows: balance cards + services buttons ── */
+body .dqm-acc-card2,
+body .dqm-acc-card2.expanded,
+body .dqm-acc-qcoin,
+body .dqm-acc-earnings,
+body .dqm-acc-gigs,
+body .dqm-hero,
+body .dqm-bal-btn-primary {
+    box-shadow: 0 4px 8px -6px rgba(0,0,0,0.22) !important;
+}
+body .dqm-service,
+body .dqm-vaction,
+body .dqm-vstat,
+body .svc-wrap .svc-plan-btn,
+body .svc-wrap .svc-option-btn,
+body .svc-wrap .svc-tab-btn,
+body .svc-wrap .svc-plan-card,
+body .dqm-page .svc-option-btn,
+body .dqm-page .svc-option-btn.selected {
+    box-shadow: 0 1px 3px -1px rgba(0,0,0,0.08) !important;
+}
+body .svc-wrap .svc-plan-btn.svc-plan-card.selected {
+    box-shadow: 0 0 0 2px var(--dqm-text, #111) !important;
+}
+
+/* ── dashboard: no shadows under cards / balance / services ── */
+body[data-page="dashboard"] .app-push-content *:not(.selected):not(.dqm-ai-fab):not(:focus-visible),
+body[data-page="dashboard"] .app-push-content *::before,
+body[data-page="dashboard"] .app-push-content *::after {
+    box-shadow: none !important;
+    filter: none !important;
+}
+
+/* ── tiny, cheap shadows back on dashboard cards and buttons ── */
+body[data-page="dashboard"] .app-push-content .dqp-page .dqp-card:not(.zz):not(.zy):not(.zx),
+body[data-page="dashboard"] .app-push-content .dqp-page .dqp-mini-card:not(.zz):not(.zy):not(.zx),
+body[data-page="dashboard"] .app-push-content .dqp-page .dqp-profile-card:not(.zz):not(.zy):not(.zx),
+body[data-page="dashboard"] .app-push-content .dqp-page .dqp-banner:not(.zz):not(.zy):not(.zx),
+body[data-page="dashboard"] .app-push-content .dqp-page .dqp-service:not(.zz):not(.zy):not(.zx),
+body[data-page="dashboard"] .app-push-content .dqp-page .dqp-btn:not(.zz):not(.zy):not(.zx),
+body[data-page="dashboard"] .app-push-content .dqp-page .dqp-quick-avatar:not(.zz):not(.zy):not(.zx) {
+    box-shadow: 0 1px 2px rgba(0,0,0,0.10) !important;
+}
+body[data-page="dashboard"] .app-push-content .dqp-page .dqp-hero-card:not(.zz):not(.zy):not(.zx) {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.18) !important;
+}
+
+/* ── small shadow back (visible on dark too) ── */
+body[data-page="dashboard"] .app-push-content .dqp-card:not(.selected):not(.dqm-ai-fab):not(:focus-visible),
+body[data-page="dashboard"] .app-push-content .dqp-mini-card:not(.selected):not(.dqm-ai-fab):not(:focus-visible),
+body[data-page="dashboard"] .app-push-content .dqp-profile-card:not(.selected):not(.dqm-ai-fab):not(:focus-visible),
+body[data-page="dashboard"] .app-push-content .dqp-banner:not(.selected):not(.dqm-ai-fab):not(:focus-visible),
+body[data-page="dashboard"] .app-push-content .dqp-service:not(.selected):not(.dqm-ai-fab):not(:focus-visible),
+body[data-page="dashboard"] .app-push-content .dqp-btn:not(.selected):not(.dqm-ai-fab):not(:focus-visible),
+body[data-page="dashboard"] .app-push-content .dqp-quick-avatar:not(.selected):not(.dqm-ai-fab):not(:focus-visible) {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.22) !important;
+}
+body[data-page="dashboard"] .app-push-content .dqp-hero-card:not(.selected):not(.dqm-ai-fab):not(:focus-visible) {
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3) !important;
+}
+
+/* ── top bar: more transparent, bigger, wider ── */
+body .dqm-topbar-fixed,
+body[data-theme-style="plain"] .dqm-topbar-fixed {
+    background: rgba(255,255,255,0.03) !important;
+    backdrop-filter: blur(14px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(150%) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    padding: 12px 18px !important;
+    min-height: 68px;
+}
+body .dqm-topbar-fixed .dqm-topbar-avatar { width: 44px !important; height: 44px !important; }
+body .dqm-topbar-fixed .dqm-topbar-name { font-size: 17px !important; }
+body .dqm-topbar-fixed .dqm-topbar-greeting { font-size: 12px !important; }
+body .dqm-topbar-fixed .dqm-icon-btn { width: 42px !important; height: 42px !important; }
+body .dqm-topbar-fixed .dqm-topbar-wallet { font-size: 14px !important; padding: 8px 14px !important; }
+@media (max-width: 768px) {
+    body .dqm-topbar-fixed,
+    body[data-theme-style="plain"] .dqm-topbar-fixed {
+        left: 6px !important;
+        right: 6px !important;
+        width: auto !important;
+        max-width: none !important;
+    }
+}

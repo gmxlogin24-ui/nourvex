@@ -16,7 +16,14 @@ class SendQCoinClaimReminders extends Command
     {
         $today = now()->toDateString();
 
-        $users = User::where(function ($q) use ($today) {
+        // Only plans that actually include daily Q Coins get reminded.
+        $tiers = collect(config('plans'))
+            ->filter(fn ($rules) => (int) ($rules['qcoin_daily'] ?? 0) > 0)
+            ->keys()
+            ->all();
+
+        $users = User::whereIn('tier', $tiers)
+            ->where(function ($q) use ($today) {
                 $q->whereNull('q_coin_last_claim_date')
                   ->orWhere('q_coin_last_claim_date', '!=', $today);
             })

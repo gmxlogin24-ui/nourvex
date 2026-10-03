@@ -23,11 +23,7 @@ class GigPayoutService
     {
         $baseAmount = $overrideAmount ?? $gig->amount;
 
-        $rate = match ($worker->tier) {
-            'tier2', 'tier3' => 0,
-            'tier1' => 0.03,
-            default => 0.05,
-        };
+        $rate = (float) $worker->planRule('gigs_commission', 0.05);
         $commission = round($baseAmount * $rate, 2);
         $payout = $baseAmount - $commission;
 
@@ -40,10 +36,16 @@ class GigPayoutService
         ]);
         \App\Models\PlatformRevenue::record('gigs', $commission, 'Commission: ' . $gig->title, 'gig', $gig->id);
 
+        try {
+            app(\App\Services\RankingService::class)->award($worker, 'gig_completed', null, 'gig:' . $gig->id);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
         if ($worker->referred_by) {
             $referrer = User::where('id', $worker->referred_by)->lockForUpdate()->first();
             if ($referrer && !$referrer->wallet_restricted) {
-                $pct = in_array($referrer->tier, ['tier2', 'tier3'], true) ? 0.15 : 0;
+                $pct = (float) $referrer->planRule('referral_pct', 0);
                 $bonus = $payout * $pct;
                 if ($bonus > 0) {
                     $referrer->increment('wallet_balance', $bonus);

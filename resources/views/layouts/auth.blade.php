@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="{{ asset('css/neumorphic-auth.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/preloader.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/auth-split.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/auth-lamp-effect.css') }}?v={{ time() }}">
     <script>
         if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
@@ -21,7 +22,7 @@
     $authBg = \App\Models\AppSetting::get('auth_background_image', asset('images/auth-bg-abstract.svg'));
     $authAnimated = \App\Models\AppSetting::get('auth_animated_elements', '1') === '1';
 @endphp
-<body class="auth-body" style="--user-accent: #38D9E8; --auth-bg-image: url('{{ $authBg }}');">
+<body class="auth-body" style="--user-accent: #38D9E8; --auth-bg-image: url('{{ $authBg }}'); --lamp-off: url('{{ asset('images/auth/lamp-off.png') }}'); --lamp-on: url('{{ asset('images/auth/lamp-on.png') }}');">
     @include('partials.preloader')
     <div class="auth-split-shell">
         <div class="auth-visual-panel">
@@ -60,6 +61,7 @@
         </div>
     </div>
     <script src="{{ asset('js/preloader.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/auth-lamp-effect.js') }}?v={{ time() }}"></script>
     @yield('scripts')
 </body>
 </html>

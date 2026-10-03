@@ -19,8 +19,8 @@
                 <path class="lp-draw" d="M22 36l7 7 13-15" stroke="currentColor" stroke-width="3"/>
             </svg></div>
             <h3>Hustles</h3>
-            <p>Post a task with your budget, or browse open ones and apply. Funds sit in escrow the moment a hustle is accepted and only release to the doer once the poster marks it delivered.</p>
-            <ol class="lp-h-steps"><li>Post the task with a budget</li><li>Doer accepts — funds move to escrow</li></ol>
+            <p>Post a task or pick one up. Pay is held safely until the work is done.</p>
+            
             <a href="{{ route('gigs.index') }}" class="lp-link">See open hustles <i data-lucide="arrow-right" style="width:16px;height:16px"></i></a>
         </article>
 
@@ -32,8 +32,8 @@
                 <circle class="lp-draw" cx="44" cy="38" r="4" stroke="currentColor" stroke-width="3"/>
             </svg></div>
             <h3>Wallet</h3>
-            <p>One balance for everything you do on NOURVEX. Top up by card or transfer, watch every credit and debit land in real time, and confirm anything that moves money with your own PIN.</p>
-            <ol class="lp-h-steps"><li>Top up by card or transfer</li><li>Spend, get paid, track it live</li></ol>
+            <p>One balance for everything. Top up, spend and track it all in one place.</p>
+            
             <a href="{{ route('register') }}" class="lp-link">Open a wallet <i data-lucide="arrow-right" style="width:16px;height:16px"></i></a>
         </article>
 
@@ -45,8 +45,8 @@
                 <path class="lp-draw" d="M22 22v-4a10 10 0 0 1 20 0v4" stroke="currentColor" stroke-width="3"/>
             </svg></div>
             <h3>Campus Market</h3>
-            <p>List textbooks, gadgets, services or rentals for other students to find. Buyers confirm delivery before funds release, and support is one tap away if something goes wrong.</p>
-            <ol class="lp-h-steps"><li>List the item with photos &amp; price</li><li>Buyer confirms delivery to release funds</li></ol>
+            <p>Buy and sell textbooks, gadgets and services with other students.</p>
+            
             <a href="{{ route('marketplace.index') }}" class="lp-link">Browse listings <i data-lucide="arrow-right" style="width:16px;height:16px"></i></a>
         </article>
 
@@ -58,8 +58,8 @@
                 <path class="lp-draw" d="M12 32h8l4-9 6 16 4-11 4 4h10" stroke="currentColor" stroke-width="2.6"/>
             </svg></div>
             <h3>Pulse</h3>
-            <p>A live feed of what's actually happening on campus — announcements, buzz, sponsored posts and updates from people you follow, all in one place instead of five WhatsApp groups.</p>
-            <ol class="lp-h-steps"><li>Follow people and topics you care about</li><li>See campus buzz the moment it happens</li></ol>
+            <p>Live campus news, updates and buzz in one feed.</p>
+            
             <a href="{{ route('pulse.index') }}" class="lp-link">Check the feed <i data-lucide="arrow-right" style="width:16px;height:16px"></i></a>
         </article>
 
@@ -72,8 +72,8 @@
                 <path class="lp-draw" d="M10 20a34 34 0 0 1 10-11" stroke="currentColor" stroke-width="2.2"/>
             </svg></div>
             <h3>VTU services</h3>
-            <p>Buy airtime and data bundles for any network, paid straight out of your NOURVEX wallet, no card details re-entered every time.</p>
-            <ol class="lp-h-steps"><li>Pick a network and amount</li><li>Confirm with PIN — credited instantly</li></ol>
+            <p>Buy airtime and data for any network, straight from your wallet.</p>
+            
             <a href="{{ route('register') }}" class="lp-link">Get started <i data-lucide="arrow-right" style="width:16px;height:16px"></i></a>
         </article>
 
@@ -86,8 +86,8 @@
                 <path class="lp-draw" d="M32 38v8m-8 6h16l-2-6H26l-2 6z" stroke="currentColor" stroke-width="3"/>
             </svg></div>
             <h3>Levels &amp; badges</h3>
-            <p>Every hustle you finish and every good review you get pushes your level up. Higher levels unlock visible badges buyers and sellers can see before they deal with you.</p>
-            <ol class="lp-h-steps"><li>Finish hustles, collect good reviews</li><li>Level up, unlock a visible badge</li></ol>
+            <p>Finish hustles, earn good reviews and unlock badges people can see.</p>
+            
             <a href="{{ route('features') }}" class="lp-link">Explore features <i data-lucide="arrow-right" style="width:16px;height:16px"></i></a>
         </article>
 
@@ -96,8 +96,8 @@
             <span class="lp-h-num">07</span>
             <div class="lp-visual lp-visual-ai" aria-hidden="true"><span class="lp-ai-o lp-ai-o--sm"><span class="lp-ai-o-ring"></span><span class="lp-ai-o-core"></span><span class="lp-ai-o-pupil"></span></span></div>
             <h3>Levi, your AI concierge</h3>
-            <p>Ask Levi to find you a hustle, check a wallet transaction, or explain how something works — in plain chat, any time, without digging through menus.</p>
-            <ol class="lp-h-steps"><li>Ask Levi in plain chat</li><li>Get an instant answer or action</li></ol>
+            <p>Ask Levi, your AI concierge, anything, any time.</p>
+            
             <a href="{{ route('register') }}" class="lp-link">Meet Levi <i data-lucide="arrow-right" style="width:16px;height:16px"></i></a>
         </article>
 
@@ -124,7 +124,7 @@
     var bar = section.querySelector('.lp-h-bar i');
     var mm = gsap.matchMedia();
 
-    mm.add('(prefers-reduced-motion: no-preference)', function () {
+    mm.add('(min-width: 1px)', function () {
         section.classList.add('lp-h-on');
 
         function dist() { return Math.max(0, track.scrollWidth - window.innerWidth); }

@@ -10,8 +10,8 @@ class Subscription extends Model
     use HasFactory;
 
     const PLANS = [
-        'tier1' => ['label' => 'Basic',   'price' => 5000],
-        'tier2' => ['label' => 'Pro',     'price' => 8000],
+        'tier1' => ['label' => 'Silver',   'price' => 5000],
+        'tier2' => ['label' => 'Gold',     'price' => 8000],
         'tier3' => ['label' => 'Premium', 'price' => 15000],
     ];
 
@@ -88,7 +88,7 @@ class Subscription extends Model
         if ($user->referred_by) {
             $referrer = \App\Models\User::find($user->referred_by);
             if ($referrer && !$referrer->wallet_restricted) {
-                $pct = in_array($referrer->tier, ['tier2', 'tier3'], true) ? 0.15 : 0;
+                $pct = (float) config('referral.signup_fee_bonus.' . ($referrer->tier ?: 'free'), 0);
                 $bonus = $this->amount * $pct;
                 if ($bonus > 0) {
                     $referrer->increment('wallet_balance', $bonus);

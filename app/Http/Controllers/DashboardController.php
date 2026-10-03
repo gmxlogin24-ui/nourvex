@@ -77,7 +77,7 @@ class DashboardController extends Controller
         $nextStreakMilestone = collect($streakMilestones)->first(fn($m) => $m > (auth()->user()->streak_days ?? 0));
 
         $referralEarnings = \App\Models\Transaction::where('user_id', $userId)->where('type', 'referral_bonus')->sum('amount');
-        $canEarnReferralBonus = in_array(auth()->user()->tier, ['tier2', 'tier3'], true);
+        $canEarnReferralBonus = (float) auth()->user()->planRule('referral_pct', 0) > 0;
 
         $leaderboardRank = null;
         if (auth()->user()->leaderboard_opt_in) {

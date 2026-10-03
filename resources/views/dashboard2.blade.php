@@ -108,6 +108,7 @@
                 </div>
 
                 <div class="d2-quick-actions">
+@if(auth()->user()->planAllows('gigs_post'))
                     <a href="{{ route('gigs.create') }}" class="d2-qa-item d2-qa-green">
                         <span class="d2-qa-icon"><i data-lucide="briefcase" class="w-5 h-5"></i></span>
                         <span class="d2-qa-text">
@@ -116,6 +117,8 @@
                         </span>
                         <i data-lucide="arrow-right" class="w-4 h-4 d2-qa-arrow"></i>
                     </a>
+@endif
+@if(auth()->user()->planAllows('market_sell'))
                     <a href="{{ route('marketplace.create') }}" class="d2-qa-item d2-qa-orange">
                         <span class="d2-qa-icon"><i data-lucide="tag" class="w-5 h-5"></i></span>
                         <span class="d2-qa-text">
@@ -124,6 +127,7 @@
                         </span>
                         <i data-lucide="arrow-right" class="w-4 h-4 d2-qa-arrow"></i>
                     </a>
+@endif
                     <a href="{{ route('services.index') }}" class="d2-qa-item d2-qa-blue">
                         <span class="d2-qa-icon"><i data-lucide="smartphone" class="w-5 h-5"></i></span>
                         <span class="d2-qa-text">
@@ -160,7 +164,7 @@
                                     <span class="d2-spotlight-eyebrow">No hustles posted yet</span>
                                     <div class="d2-spotlight-orb"><i data-lucide="briefcase" class="w-8 h-8"></i></div>
                                     <p class="d2-spotlight-amount">Check back soon</p>
-                                    <a href="{{ route('gigs.create') }}" class="d2-spotlight-cta">Post the First One</a>
+                                    @if(auth()->user()->planAllows('gigs_post'))<a href="{{ route('gigs.create') }}" class="d2-spotlight-cta">Post the First One</a>@endif
                                 @endif
                             </div>
                         </div>
@@ -180,7 +184,7 @@
                                                 <span class="d2-mini-streak-num">{{ $streakDays ?? 0 }}</span>
                                             </div>
                                         </div>
-                                        <a href="{{ route('gigs.create') }}" class="d2-mini-cta">Post a Hustle</a>
+                                        @if(auth()->user()->planAllows('gigs_post'))<a href="{{ route('gigs.create') }}" class="d2-mini-cta">Post a Hustle</a>@endif
                                     </div>
                                 </div>
                             </div>

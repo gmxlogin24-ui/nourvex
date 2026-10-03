@@ -9,6 +9,8 @@ use RuntimeException;
 
 class QCoinService
 {
+    // Kept for older code that may still reference it. Daily claims now come from
+    // config/plans.php (qcoin_daily) plus the personal streak bonus (config/qcoin.php).
     public const DAILY_CLAIM_AMOUNT = 50;
 
     /**
@@ -79,16 +81,29 @@ class QCoinService
         });
     }
 
+    // Base daily claim for the user's plan (admins get the top plan's amount).
+    public function baseFor(User $user): int
+    {
+        if ($user->isAdmin()) {
+            return (int) config('plans.tier3.qcoin_daily', 0);
+        }
+        return (int) $user->planRule('qcoin_daily', 0);
+    }
+
+    // Personal streak bonus: grows by step_bonus every step_days consecutive days, capped.
+    public function streakBonusFor(int $streakDays): int
+    {
+        $stepDays = max(1, (int) config('qcoin.streak_step_days', 7));
+        $stepBonus = (int) config('qcoin.streak_step_bonus', 5);
+        $max = (int) config('qcoin.streak_max_bonus', 25);
+
+        return min(intdiv(max($streakDays, 0), $stepDays) * $stepBonus, $max);
+    }
+
     /**
      * Daily claim, with the "already claimed today" check done INSIDE the
      * lock so two simultaneous requests can't both succeed.
      */
-    // Streak bonus: +5 Q per consecutive day, capped at +100 (day 20+).
-    protected function streakBonus(int $streakDays): int
-    {
-        return min($streakDays * 5, 100);
-    }
-
     public function claimDaily(User $user): QCoinTransaction
     {
         $today = now()->toDateString();
@@ -101,12 +116,17 @@ class QCoinService
                 throw new RuntimeException('Already claimed today.');
             }
 
+            $base = $this->baseFor($locked);
+            if ($base <= 0) {
+                throw new RuntimeException('Your plan does not include daily Q Coins.');
+            }
+
             $newStreak = ($locked->q_coin_last_claim_date === $yesterday)
                 ? $locked->q_coin_streak_days + 1
                 : 1;
 
-            $bonus = $this->streakBonus($newStreak);
-            $total = self::DAILY_CLAIM_AMOUNT + $bonus;
+            $bonus = $this->streakBonusFor($newStreak);
+            $total = $base + $bonus;
 
             $locked->q_coin_balance += $total;
             $locked->q_coin_last_claim_date = $today;

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\RankingService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,6 +26,20 @@ class TrackStreak
                     'streak_days' => $newStreak,
                     'last_active_date' => $today,
                 ]);
+
+                try {
+                    $ranking = app(RankingService::class);
+                    $day = $today->toDateString();
+                    $ranking->award($user, 'daily_login', null, 'login:' . $day);
+                    if ($newStreak === 7) {
+                        $ranking->award($user, 'streak_7', null, 'streak7:' . $day);
+                    }
+                    if ($newStreak === 30) {
+                        $ranking->award($user, 'streak_30', null, 'streak30:' . $day);
+                    }
+                } catch (\Throwable $e) {
+                    report($e);
+                }
             }
         }
 

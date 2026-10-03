@@ -33,7 +33,7 @@
             <h1 class="text-2xl font-bold hoverfade-text">Available Hustles</h1>
             <p class="text-muted text-sm">Sorted for you — hustles you open most stay near the top</p>
         </div>
-        @auth<a href="{{ route('gigs.create') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Post a Hustle</a>@else<a href="{{ route('register') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Sign Up to Post</a>@endauth
+        @auth@if(auth()->user()->planAllows('gigs_post'))<a href="{{ route('gigs.create') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Post a Hustle</a>@endif@else<a href="{{ route('register') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Sign Up to Post</a>@endauth
     </div>
 
     <form method="GET" class="reveal-on-scroll flex flex-wrap gap-2" style="margin-bottom:0.75rem;">

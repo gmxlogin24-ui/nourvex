@@ -83,9 +83,11 @@
             @endauth
         </nav>
 
+@if(auth()->user()->planAllows('gigs_post'))
         <a href="{{ route('gigs.create') }}" class="sidebar-fab" title="Post a Hustle">
             <i data-lucide="plus" class="w-5 h-5"></i>
             <span class="sidebar-fab-label">Post a Hustle</span>
         </a>
+@endif
     </div>
 </aside>

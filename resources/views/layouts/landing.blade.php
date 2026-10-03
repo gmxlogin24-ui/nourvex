@@ -25,7 +25,7 @@
 @endphp
 <body data-page="{{ $pageKey }}" class="bg-white">
     @include('partials.preloader')
-    @include('partials.site-nav')
+    <div class="lpxm-oldnav-wrap">@include('partials.site-nav')</div>
 
     <div id="snPushContent">
         @yield('content')

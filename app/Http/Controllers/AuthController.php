@@ -126,7 +126,7 @@ class AuthController extends Controller
             return redirect()->route('register')->withErrors(['email' => 'Your registration session expired. Please fill the form again.']);
         }
 
-        return view('auth.register-pay', ['pendingName' => $pending['name']]);
+        return view('auth.register-pay', ['pendingName' => $pending['name'], 'planLabel' => \App\Models\Subscription::PLANS[$pending['intended_plan'] ?? 'tier1']['label'], 'planPrice' => \App\Models\Subscription::PLANS[$pending['intended_plan'] ?? 'tier1']['price']]);
     }
 
     protected function getPendingRegistration(Request $request): ?array

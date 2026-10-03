@@ -1,0 +1,22 @@
+/* small shadows on dashboard cards (beats the no-shadow rule) */
+html body[data-page="dashboard"] .app-push-content .dqp-page :is(.dqp-card,.dqp-mini-card,.dqp-profile-card,.dqp-banner,.dqp-service,.dqp-btn,.dqp-quick-avatar):not(.zz):not(.zy):not(.zx) {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.18) !important;
+}
+html body[data-page="dashboard"] .app-push-content .dqp-page .dqp-hero-card:not(.zz):not(.zy):not(.zx) {
+    box-shadow: 0 3px 10px rgba(0,0,0,0.28) !important;
+}
+
+/* top bar: slightly smaller, draggable */
+html body .dqm-topbar-fixed,
+html body[data-theme-style="plain"] .dqm-topbar-fixed {
+    padding: 9px 14px !important;
+    min-height: 58px !important;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+html body .dqm-topbar-fixed .dqm-topbar-avatar { width: 38px !important; height: 38px !important; }
+html body .dqm-topbar-fixed .dqm-topbar-name { font-size: 15px !important; }
+html body .dqm-topbar-fixed .dqm-topbar-greeting { font-size: 11px !important; }
+html body .dqm-topbar-fixed .dqm-icon-btn { width: 36px !important; height: 36px !important; }
+html body .dqm-topbar-fixed .dqm-topbar-wallet { font-size: 13px !important; padding: 6px 12px !important; }

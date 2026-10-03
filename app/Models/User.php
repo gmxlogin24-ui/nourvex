@@ -23,13 +23,13 @@ use App\Events\TierUpgraded;
     'is_admin', 'role', 'level_id', 'has_seen_tour',
     'signup_fee_paid', 'badge_tier', 'card_token', 'card_last4', 'card_type',
     'is_banned', 'subscription_expires_at', 'skills',
-    'notif_style', 'navbar_style', 'topbar_style', 'card_style',
+    'notif_style', 'navbar_style', 'topbar_style', 'card_style', 'area', 'area_verified_at',
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasPushSubscriptions;
+    use HasFactory, Notifiable, HasPushSubscriptions, HasPlanRules;
 
     protected function casts(): array
     {
@@ -43,7 +43,7 @@ class User extends Authenticatable
             'leaderboard_opt_in' => 'boolean',
             'wallet_restricted' => 'boolean',
             'is_vendor_active' => 'boolean',
-            'tier_upgraded_at' => 'datetime',
+            'tier_upgraded_at' => 'datetime', 'area_verified_at' => 'datetime',
         ];
     }
 

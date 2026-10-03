@@ -181,6 +181,7 @@
             <p class="level">{{ auth()->user()->workerLevel()['label'] }}</p>
             <div class="stats"><span>{{ $myCompletedGigs }} Gigs</span><span>{{ $avgRating ? number_format($avgRating, 1) : '—' }} ({{ $reviewCount }})</span></div>
             <a href="{{ route('profile.index') }}" class="edit">Edit Profile</a>
+            <a href="{{ route('kyc.show') }}" class="edit">Verify account</a>
         </div>
     </div>
 

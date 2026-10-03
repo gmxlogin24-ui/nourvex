@@ -14,7 +14,7 @@
             <h1 class="text-2xl font-semibold hoverfade-text">Campus Market</h1>
             <p class="text-muted text-sm">Buy, sell, rent, or hire other students</p>
         </div>
-        @auth<a href="{{ route('marketplace.create') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Post to Campus Market</a>@else<a href="{{ route('register') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Sign Up to Sell</a>@endauth
+        @auth@if(auth()->user()->planAllows('market_sell'))<a href="{{ route('marketplace.create') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Post to Campus Market</a>@endif@else<a href="{{ route('register') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Sign Up to Sell</a>@endauth
     </div>
 
     <!-- Search -->

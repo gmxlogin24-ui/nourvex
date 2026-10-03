@@ -108,7 +108,7 @@
         <div class="dqm-stat dqm-tint-purple"><i data-lucide="user" class="w-4 h-4"></i><span class="v">{{ $gmMyPosted }}</span><span class="l">Posted by You</span></div>
     </div>
 
-    <div class="dqm-card-head"><span>Available Hustles</span>@auth<a href="{{ route('gigs.create') }}">Post</a>@else<a href="{{ route('register') }}">Sign Up</a>@endauth</div>
+    <div class="dqm-card-head"><span>Available Hustles</span>@auth@if(auth()->user()->planAllows('gigs_post'))<a href="{{ route('gigs.create') }}">Post</a>@endif@else<a href="{{ route('register') }}">Sign Up</a>@endauth</div>
     <div class="dqm-grid dqm-listing-grid" style="grid-template-columns:1fr;gap:8px;">
         @forelse($gigs as $gig)
         <a href="{{ route('gigs.show', $gig->id) }}" class="dqm-card dqm-gig-row" style="padding:10px;border-top:none;{{ $gig->status !== 'open' ? 'opacity:0.6;' : '' }}">

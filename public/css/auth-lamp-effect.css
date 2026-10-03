@@ -1,0 +1,62 @@
+/* Lamp-off / lamp-on photographic effect for login + register (all variants
+   sharing layouts/auth.blade.php). Loaded after auth-split.css so these
+   rules cascade on top of it. --lamp-intensity is set at runtime by
+   js/auth-lamp-effect.js (0 = dark, 1 = fully lit), based on the password
+   field strength. */
+
+.auth-visual-panel {
+  background-image: var(--lamp-off);
+  background-size: cover;
+}
+.auth-visual-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: var(--lamp-on);
+  background-size: cover;
+  background-position: 30% 25%;
+  opacity: var(--lamp-intensity, 0);
+  transition: opacity 1.6s ease;
+}
+.auth-visual-topnav, .auth-visual-tagline { position: relative; z-index: 2; }
+
+/* Light readability gradient, desktop (original design had none here) */
+@media (min-width: 901px) {
+  .auth-visual-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(5,10,20,.25), rgba(5,10,20,0) 30%, rgba(5,10,20,0) 62%, rgba(5,10,20,.35));
+  }
+}
+/* Soften the existing mobile gradient from auth-split.css — it was too dark */
+@media (max-width: 900px) {
+  .auth-visual-panel::before {
+    background: linear-gradient(180deg, rgba(5,10,20,.1), rgba(5,10,20,.05) 35%, rgba(5,10,20,.3)) !important;
+  }
+}
+
+/* Glow spilling from the lamp onto the form card itself */
+.auth-form-panel::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; bottom: 0; width: 280px;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at left, rgba(255,176,74, calc(var(--lamp-intensity, 0) * .85)), transparent 80%);
+  transition: opacity 1.6s ease;
+}
+.auth-visual-panel::after {
+  box-shadow: inset 0 0 120px rgba(255,176,74, calc(var(--lamp-intensity, 0) * .6));
+}
+@media (max-width: 900px) {
+  .auth-form-panel::before {
+    left: 0; right: 0; top: 0; bottom: auto; width: auto; height: 200px;
+    background: radial-gradient(ellipse at top, rgba(255,176,74, calc(var(--lamp-intensity, 0) * .8)), transparent 85%);
+  }
+}
+.auth-form-card { position: relative; z-index: 1; }

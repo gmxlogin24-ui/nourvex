@@ -13,9 +13,9 @@
 
     <form method="POST" action="{{ route('qcoin.claim') }}" style="margin-bottom:16px;">
         @csrf
-        <button type="submit" class="btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;" {{ $canClaimToday ? '' : 'disabled' }}>
+        <button type="submit" class="btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;" {{ ($canClaimToday && ! $qcoinLocked) ? '' : 'disabled' }}>
             <i data-lucide="gift" class="w-4 h-4"></i>
-            {{ $canClaimToday ? 'Claim Daily Bonus (+' . (50 + $nextStreakBonus) . ' Q)' : 'Already Claimed Today' }}
+            {{ $qcoinLocked ? 'Upgrade to Silver to claim daily Q' : ($canClaimToday ? 'Claim Daily Bonus (+' . ($dailyBase + $nextStreakBonus) . ' Q)' : 'Already Claimed Today') }}
         </button>
     </form>
 

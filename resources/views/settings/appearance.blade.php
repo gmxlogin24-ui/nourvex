@@ -28,6 +28,7 @@
             @foreach([
                 'painted_pill' => 'Painted Pill',
                 'edge_dock' => 'Edge Dock',
+                'halo_dock' => 'Halo Dock',
             ] as $val => $label)
             <button type="button" class="mnav-style-choice" data-value="{{ $val }}"
                 style="padding:0.5rem 1rem;border-radius:999px;border:1.5px solid var(--border-color,#e2e2e2);background:var(--color-card,#fff);cursor:pointer;font-size:0.8rem;font-weight:600;">

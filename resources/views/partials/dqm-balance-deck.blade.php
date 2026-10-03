@@ -7,7 +7,7 @@
 @endphp
 <div class="dqm-balance-wrap" id="dqmBalanceWrap">
     <div class="dqm-balance-side-actions">
-        <a href="{{ Route::has('gigs.create') ? route('gigs.create') : '#' }}" class="dqm-side-btn">Post a Hustle</a>
+        @if(auth()->user()->planAllows('gigs_post'))<a href="{{ Route::has('gigs.create') ? route('gigs.create') : '#' }}" class="dqm-side-btn">Post a Hustle</a>@endif
         @if($qCoinClaimedToday ?? false)
             <span class="dqm-side-btn dqm-side-btn-static">Claimed</span>
         @else

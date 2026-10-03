@@ -61,7 +61,7 @@
     </div>
     @endif
 
-    <div class="dqm-card-head"><span>All Listings</span>@auth<a href="{{ route('marketplace.create') }}">Sell</a>@else<a href="{{ route('register') }}">Sign Up</a>@endauth</div>
+    <div class="dqm-card-head"><span>All Listings</span>@auth@if(auth()->user()->planAllows('market_sell'))<a href="{{ route('marketplace.create') }}">Sell</a>@endif@else<a href="{{ route('register') }}">Sign Up</a>@endauth</div>
     <div class="dqm-grid dqm-listing-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;">
         @forelse($listings as $item)
         <a href="{{ route('marketplace.show', $item->id) }}" class="dqm-card" style="padding:0;overflow:hidden;">

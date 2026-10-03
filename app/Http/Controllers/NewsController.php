@@ -31,14 +31,14 @@ class NewsController extends Controller
 
     public function createAd()
     {
-        abort_if(Auth::user()->tier === 'tier1', 403, 'Ads aren\'t available on the Plus plan — upgrade to Pro to post one.');
+        abort_if(Auth::user()->tier === 'tier1', 403, 'Ads aren\'t available on the Silver plan — upgrade to Gold to post one.');
         return view('news.create-ad', ['pricing' => self::AD_PRICING]);
     }
 
     public function storeAd(Request $request)
     {
         $user = Auth::user();
-        abort_if($user->tier === 'tier1', 403, 'Ads aren\'t available on the Plus plan — upgrade to Pro to post one.');
+        abort_if($user->tier === 'tier1', 403, 'Ads aren\'t available on the Silver plan — upgrade to Gold to post one.');
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',

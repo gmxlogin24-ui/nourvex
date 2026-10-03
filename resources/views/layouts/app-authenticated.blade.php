@@ -17,6 +17,9 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ asset('css/dash-tweaks.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/holo-balance.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/halo-dock.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/design-tokens.css') }}">
     <link rel="stylesheet" href="{{ asset('css/app-v2.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/app-enhance.css') }}?v={{ time() }}">
@@ -79,6 +82,7 @@
         @endif
         @include('partials.nav-mobile-bar', ['active' => $pageKey])
         @include('partials.nav-edge-dock', ['active' => $pageKey])
+        @include('partials.nav-halo-dock', ['active' => $pageKey])
             <div class="auth-page-shell">
                 <div class="app-push-content auth-reveal-content" id="appPushContent">
                     @unless(($pageKey ?? '') === 'dashboard')
@@ -139,6 +143,7 @@
     @yield('scripts')
 <!-- levi.js removed: duplicate of levi-bubble.js, was causing double message submission -->
 <script src="{{ asset('js/edge-dock.js') }}?v={{ time() }}"></script>
+<script src="{{ asset('js/holo-balance.js') }}?v={{ time() }}"></script>
 <script src="{{ asset('js/mnav-scroll-transparency.js') }}?v={{ time() }}"></script>
 </body>
 </html>

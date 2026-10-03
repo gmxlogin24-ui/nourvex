@@ -34,7 +34,7 @@ class OnboardingController extends Controller
                 ->with('status', 'You\'re all set — complete payment below to activate your plan.');
         }
 
-        return redirect()->route('plans.choose')
-            ->with('status', 'You\'re all set! Now pick a plan to finish setting up your account.');
+        return redirect()->route('dashboard')
+            ->with('status', 'You\'re all set! Upgrade any time from the Plans page.');
     }
 }

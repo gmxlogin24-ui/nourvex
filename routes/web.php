@@ -53,7 +53,6 @@ Route::get('/plans', [PlanGateController::class, 'choose'])->name('plans.choose'
 
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::get('/register/vendor', [AuthController::class, 'showVendorRegister'])->name('register.vendor');
-Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
 Route::post('/register/vendor', [AuthController::class, 'registerVendor'])->name('register.vendor.store')->middleware('throttle:5,1');
 Route::get('/register/invite/{code}', [AuthController::class, 'showInviteRegister'])->name('register.invite');
 Route::post('/register/invite/{code}', [AuthController::class, 'registerInvite'])->name('register.invite.store')->middleware('throttle:5,1');
@@ -120,23 +119,23 @@ Route::get('/welcome', [\App\Http\Controllers\WelcomeTourController::class, 'sho
     Route::post('/gigs/{gig}/review', [ReviewController::class, 'storeForGig'])->name('gigs.review');
 
     // Gigs - posting requires Tier 1+
-    Route::middleware('tier')->group(function () {
+    Route::middleware('plan:gigs_post')->group(function () {
         Route::get('/gigs/create', [GigController::class, 'create'])->name('gigs.create');
         Route::post('/gigs', [GigController::class, 'store'])->name('gigs.store');
         Route::get('/gigs/{gig}/edit', [GigController::class, 'edit'])->name('gigs.edit');
         Route::put('/gigs/{gig}', [GigController::class, 'update'])->name('gigs.update');
     });
 
-    Route::post('/marketplace/{listing}/purchase', [MarketplaceController::class, 'purchase'])->name('marketplace.purchase');
+    Route::post('/marketplace/{listing}/purchase', [MarketplaceController::class, 'purchase'])->name('marketplace.purchase')->middleware('plan:market_buy');
     Route::post('/marketplace/{listing}/confirm', [MarketplaceController::class, 'confirmDelivery'])->name('marketplace.confirm');
     Route::post('/marketplace/{listing}/dispute', [App\Http\Controllers\ListingDisputeController::class, 'store'])->name('marketplace.dispute');
     Route::post('/marketplace/{listing}/ship', [MarketplaceController::class, 'markShipped'])->name('marketplace.ship');
     Route::post('/marketplace/orders/{order}/confirm', [MarketplaceController::class, 'confirmOrderDelivery'])->name('marketplace.order.confirm');
 
     Route::get('/cart', [App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
-    Route::post('/cart/add/{listing}', [App\Http\Controllers\CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/add/{listing}', [App\Http\Controllers\CartController::class, 'add'])->name('cart.add')->middleware('plan:market_buy');
     Route::post('/cart/remove/{listing}', [App\Http\Controllers\CartController::class, 'remove'])->name('cart.remove');
-    Route::post('/cart/checkout', [App\Http\Controllers\CartController::class, 'checkout'])->name('cart.checkout');
+    Route::post('/cart/checkout', [App\Http\Controllers\CartController::class, 'checkout'])->name('cart.checkout')->middleware('plan:market_buy');
     Route::post('/marketplace/{listing}/review', [ReviewController::class, 'storeForListing'])->name('marketplace.review');
     Route::post('/marketplace/{listing}/message', [MarketplaceController::class, 'sendMessage'])->name('marketplace.message');
     Route::get('/marketplace/{listing}/messages', [MarketplaceController::class, 'messages'])->name('marketplace.messages');
@@ -147,7 +146,7 @@ Route::get('/welcome', [\App\Http\Controllers\WelcomeTourController::class, 'sho
     Route::get('/marketplace/orders', [MarketplaceController::class, 'myOrders'])->name('marketplace.orders');
 
     // Marketplace - posting requires Tier 1+
-    Route::middleware('tier')->group(function () {
+    Route::middleware('plan:market_sell')->group(function () {
         Route::get('/marketplace/create', [MarketplaceController::class, 'create'])->name('marketplace.create');
         Route::post('/marketplace', [MarketplaceController::class, 'store'])->name('marketplace.store');
         Route::get('/marketplace/{listing}/edit', [MarketplaceController::class, 'edit'])->name('marketplace.edit');
@@ -368,3 +367,19 @@ Route::middleware(['auth','admin'])->group(function () {
     Route::post('/admin/concierge-misses/{miss}/resolve', [\App\Http\Controllers\Admin\ConciergeMissController::class, 'resolve'])->name('admin.concierge-misses.resolve');
 });
 
+
+Route::middleware('auth')->prefix('kyc')->name('kyc.')->group(function () {
+    Route::get('/', [App\Http\Controllers\KycController::class, 'show'])->name('show');
+    Route::post('/submit', [App\Http\Controllers\KycController::class, 'submit'])->name('submit');
+    Route::post('/{step}', [App\Http\Controllers\KycController::class, 'save'])->name('save');
+});
+
+Route::get('/dash-holo', function () { return view('dash-holo'); })->middleware('auth')->name('dash-holo');
+
+// ---- Free signup, area, plan gates ----
+Route::aliasMiddleware('plan', \App\Http\Middleware\EnsurePlanAllows::class);
+Route::post('/register', [\App\Http\Controllers\FreeRegisterController::class, 'store'])->middleware('throttle:5,1');
+Route::middleware('auth')->group(function () {
+    Route::get('/area', [\App\Http\Controllers\AreaController::class, 'show'])->name('area.show');
+    Route::post('/area', [\App\Http\Controllers\AreaController::class, 'update'])->name('area.update');
+});

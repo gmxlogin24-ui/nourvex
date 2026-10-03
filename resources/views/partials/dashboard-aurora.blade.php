@@ -97,14 +97,18 @@
     <div class="au-page-section">
         <div class="au-section-header au-section-header-loose"><span>Quick Actions</span></div>
         <div class="au-quick-row">
+@if(auth()->user()->planAllows('gigs_post'))
             <a href="{{ route('gigs.create') }}" class="au-quick-item">
                 <span class="au-quick-icon au-vibrant-green"><i class="bi bi-briefcase-fill"></i></span>
                 <span>Post Gig</span>
             </a>
+@endif
+@if(auth()->user()->planAllows('market_sell'))
             <a href="{{ route('marketplace.create') }}" class="au-quick-item">
                 <span class="au-quick-icon au-vibrant-orange"><i class="bi bi-tag-fill"></i></span>
                 <span>List Item</span>
             </a>
+@endif
             <a href="{{ route('services.index') }}" class="au-quick-item">
                 <span class="au-quick-icon au-vibrant-blue"><i class="bi bi-phone-fill"></i></span>
                 <span>Airtime</span>
@@ -174,6 +178,7 @@
                     <span>{{ $avgRating ? number_format($avgRating, 1) : '—' }} ({{ $reviewCount }})</span>
                 </div>
                 <a href="{{ route('profile.index') }}" class="au-profile-btn">Edit Profile</a>
+                <a href="{{ route('kyc.show') }}" class="au-profile-btn">Verify account</a>
             </div>
         </div>
     </div>

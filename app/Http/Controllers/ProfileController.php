@@ -125,7 +125,7 @@ class ProfileController extends Controller
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'accent_color' => 'nullable|string|max:7',
             'theme_style' => 'nullable|string|in:glass,neumorphic,plain,aurora',
-            'mobile_nav_style' => 'nullable|string|in:painted_pill,edge_dock',
+            'mobile_nav_style' => 'nullable|string|in:painted_pill,edge_dock,halo_dock',
             'sidebar_style' => 'nullable|string|in:classic,rail',
             'avatar' => 'nullable|image|max:4096',
             'background' => 'nullable|image|max:8192',

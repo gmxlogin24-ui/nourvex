@@ -21,9 +21,9 @@
     </div>
 
     <div class="mb-6" id="qcClaimWrap" style="position:relative;">
-        <button type="button" id="qcClaimBtn" class="btn-primary w-full flex items-center justify-center gap-2" data-claiming="0" {{ $canClaimToday ? '' : 'disabled' }}>
+        <button type="button" id="qcClaimBtn" class="btn-primary w-full flex items-center justify-center gap-2" data-claiming="0" {{ ($canClaimToday && ! $qcoinLocked) ? '' : 'disabled' }}>
             <i data-lucide="gift" class="w-4 h-4"></i>
-            <span id="qcClaimLabel">{{ $canClaimToday ? 'Claim Daily Bonus (+' . (50 + $nextStreakBonus) . ' Q)' : 'Already Claimed Today' }}</span>
+            <span id="qcClaimLabel">{{ $qcoinLocked ? 'Upgrade to Silver to claim daily Q' : ($canClaimToday ? 'Claim Daily Bonus (+' . ($dailyBase + $nextStreakBonus) . ' Q)' : 'Already Claimed Today') }}</span>
         </button>
         <div id="qcBurstLayer" style="position:absolute;inset:0;pointer-events:none;overflow:visible;"></div>
     </div>

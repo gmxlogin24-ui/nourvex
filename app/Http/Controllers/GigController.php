@@ -249,11 +249,7 @@ class GigController extends Controller
     // at once - not how many they post. Posting is uncapped for gigs.
     private function claimCap(string $tier): ?int
     {
-        return match ($tier) {
-            'tier2', 'tier3' => null,
-            'tier1' => 5,
-            default => 2,
-        };
+        return config('plans.' . $tier . '.gigs_claim_cap', 2);
     }
 
     public function create()

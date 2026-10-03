@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Subscription;
 use App\Models\Transaction;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 
 class ReferralServiceProvider extends ServiceProvider
@@ -13,55 +13,60 @@ class ReferralServiceProvider extends ServiceProvider
     {
     }
 
+    // A paid signup now buys a plan. Whenever a signup_fee transaction is recorded
+    // (registration, Google signup, webhook), turn it into an active subscription so
+    // the plan, expiry, verified badge and referral bonus are handled in one place.
     public function boot(): void
     {
-        // Runs whenever a signup fee is recorded, on any payment path.
         Transaction::created(function (Transaction $t) {
             if ($t->type !== 'signup_fee') {
                 return;
             }
 
-            $fee = abs((float) $t->amount);
-            $fee = min($fee, (float) config('qelvo.signup_fee', $fee));
-            if ($fee <= 0) {
+            $paid = abs((float) $t->amount);
+            $plan = null;
+            foreach (Subscription::PLANS as $key => $p) {
+                if (abs($paid - (float) $p['price']) < 0.01) {
+                    $plan = $key;
+                    break;
+                }
+            }
+            if (! $plan) {
                 return;
             }
 
             $user = User::find($t->user_id);
-            if (! $user || ! $user->referred_by || (int) $user->referred_by === (int) $user->id) {
+            if (! $user) {
                 return;
             }
 
-            $tag = '[REG-' . $user->id . ']';
+            $recent = Subscription::where('user_id', $user->id)
+                ->where('plan', $plan)
+                ->where('status', 'active')
+                ->where('starts_at', '>', now()->subMinutes(10))
+                ->exists();
+            if ($recent) {
+                return;
+            }
 
-            DB::transaction(function () use ($user, $fee, $tag) {
-                $referrer = User::where('id', $user->referred_by)->lockForUpdate()->first();
-                if (! $referrer || $referrer->wallet_restricted) {
-                    return;
-                }
+            $sub = Subscription::create([
+                'user_id' => $user->id,
+                'plan' => $plan,
+                'amount' => $paid,
+                'payment_method' => 'paystack',
+                'status' => 'pending_payment',
+                'starts_at' => now(),
+                'expires_at' => now(),
+            ]);
+            $sub->activate();
 
-                $pct = (float) config('referral.signup_fee_bonus.' . ($referrer->tier ?: 'free'), 0);
-                $bonus = round($fee * $pct, 2);
-                if ($bonus <= 0) {
-                    return;
-                }
+            $dup = Transaction::where('user_id', $user->id)->where('type', 'tier_upgrade')->orderByDesc('id')->first();
+            if ($dup) {
+                $dup->delete();
+            }
 
-                $already = Transaction::where('user_id', $referrer->id)
-                    ->where('type', 'referral_bonus')
-                    ->where('description', 'like', '%' . $tag . '%')
-                    ->exists();
-                if ($already) {
-                    return;
-                }
-
-                $referrer->increment('wallet_balance', $bonus);
-                Transaction::create([
-                    'user_id' => $referrer->id,
-                    'type' => 'referral_bonus',
-                    'amount' => $bonus,
-                    'description' => 'Referral bonus from ' . $user->name . ' registering ' . $tag,
-                ]);
-            });
+            $t->description = 'Subscribed to ' . Subscription::PLANS[$plan]['label'] . ' (1 year)';
+            $t->saveQuietly();
         });
     }
 }

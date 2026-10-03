@@ -15,7 +15,7 @@ class MarketplaceController extends Controller
     {
         $query = Listing::leftJoin('users', 'listings.user_id', '=', 'users.id')
             ->select('listings.*')
-            ->orderByRaw("CASE WHEN users.tier = 'tier2' THEN 0 ELSE 1 END")
+            ->orderByRaw("CASE WHEN users.tier IN ('tier2', 'tier3') THEN 0 ELSE 1 END")
             ->latest('listings.created_at');
 
         if ($request->filled('category')) {
