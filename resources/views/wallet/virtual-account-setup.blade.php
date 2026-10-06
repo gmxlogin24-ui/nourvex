@@ -8,8 +8,8 @@
     </a>
 
     <div class="glass-card p-6">
-        <h1 class="text-xl font-semibold mb-1">Get Your Virtual Account</h1>
-        <p class="text-muted text-sm mb-6">Get a personal bank account number. Any transfer to it automatically funds your wallet.</p>
+        <h1 class="text-xl font-semibold mb-1">Activate NOURVEX Pay</h1>
+        
 
         @if ($errors->any())
         <div class="bg-red-500/10 text-red-500 text-sm rounded-lg p-3 mb-4">{{ $errors->first() }}</div>
@@ -24,9 +24,9 @@
             <div>
                 <label class="text-sm text-muted">BVN</label>
                 <input type="text" name="bvn" required maxlength="11" placeholder="11-digit BVN" class="input-field !mt-1">
-                <p class="text-xs text-muted mt-1">Required by Paystack for permanent accounts. We never store your BVN.</p>
+                <p class="text-xs text-muted mt-1">Required to activate your NOURVEX Pay account. We never store your BVN.</p>
             </div>
-            <button type="submit" class="btn-primary w-full justify-center">Create Virtual Account</button>
+            <button type="submit" class="btn-primary w-full justify-center">Activate NOURVEX Pay</button>
         </form>
     </div>
 </main>

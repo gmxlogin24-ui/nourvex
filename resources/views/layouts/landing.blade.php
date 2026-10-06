@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NOURVEX - @yield('title', 'Work, sell, get paid')</title>
+@include('partials.seo-head')
     @include('partials.favicons')
+@include('partials.nv-theme-global')
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
@@ -26,6 +28,7 @@
 <body data-page="{{ $pageKey }}" class="bg-white">
     @include('partials.preloader')
     <div class="lpxm-oldnav-wrap">@include('partials.site-nav')</div>
+@include('partials.mobile-topbar')
 
     <div id="snPushContent">
         @yield('content')

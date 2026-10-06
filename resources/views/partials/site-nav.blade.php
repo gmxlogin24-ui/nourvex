@@ -10,7 +10,8 @@
             <a href="{{ route('gigs.index') }}">Hustles</a>
             <a href="{{ route('marketplace.index') }}">Campus Market</a>
             <a href="{{ route('pulse.index') }}">Pulse</a>
-            <a href="{{ route('features') }}">Features</a>
+            <a href="{{ route('about') }}">About</a>
+            <a href="{{ route('faq') }}">FAQ</a>
         </div>
 
         <div class="sn-actions">
@@ -35,7 +36,8 @@
         <a href="{{ route('gigs.index') }}" class="sn-item"><span class="sn-item-icon"><i data-lucide="briefcase" class="w-4 h-4"></i></span><span>Hustles</span></a>
         <a href="{{ route('marketplace.index') }}" class="sn-item"><span class="sn-item-icon"><i data-lucide="shopping-bag" class="w-4 h-4"></i></span><span>Campus Market</span></a>
         <a href="{{ route('pulse.index') }}" class="sn-item"><span class="sn-item-icon"><i data-lucide="activity" class="w-4 h-4"></i></span><span>Pulse</span></a>
-        <a href="{{ route('features') }}" class="sn-item"><span class="sn-item-icon"><i data-lucide="sparkles" class="w-4 h-4"></i></span><span>Features</span></a>
+        <a href="{{ route('about') }}" class="sn-item"><span class="sn-item-icon"><i data-lucide="info" class="w-4 h-4"></i></span><span>About</span></a>
+        <a href="{{ route('faq') }}" class="sn-item"><span class="sn-item-icon"><i data-lucide="message-circle" class="w-4 h-4"></i></span><span>FAQ</span></a>
     </nav>
     <div class="sn-divider"></div>
     <a href="{{ route('login') }}" class="sn-item"><span class="sn-item-icon"><i data-lucide="log-in" class="w-4 h-4"></i></span><span>Log In</span></a>

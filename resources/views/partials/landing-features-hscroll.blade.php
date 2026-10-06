@@ -88,7 +88,7 @@
             <h3>Levels &amp; badges</h3>
             <p>Finish hustles, earn good reviews and unlock badges people can see.</p>
             
-            <a href="{{ route('features') }}" class="lp-link">Explore features <i data-lucide="arrow-right" style="width:16px;height:16px"></i></a>
+            <a href="{{ route('faq') }}" class="lp-link">Read the FAQ <i data-lucide="arrow-right" style="width:16px;height:16px"></i></a>
         </article>
 
         <article class="lp-h-card lp-c-silver lp-h-video">

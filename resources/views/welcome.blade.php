@@ -7,12 +7,14 @@
     $feed = collect($adsFeed ?? [])->map(fn($a) => $a + ['tag' => 'Sponsored'])->concat(collect($newsFeed ?? []))->take(6);
 @endphp
 
-<main class="lp">
+<main class="lp lp-light">
+<script>try{if(localStorage.getItem("nvTheme")==="dark")document.querySelector("main.lp").classList.remove("lp-light")}catch(e){}</script>
 
     {{-- ===== HERO ===== --}}
 @include('partials.landing-hero')
 @include('partials.landing-hero-mobile')
 @include('partials.landing-trust-marquee')
+@include('partials.landing-theme')
 
     {{-- ===== TRUST STRIP ===== --}}
     <section class="lp-trust">

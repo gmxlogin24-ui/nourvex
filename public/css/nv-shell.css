@@ -1,0 +1,35 @@
+/* NOURVEX shell: theme variables, drawer colours, phone top bar, light skin for other pages */
+html{--nvn-bg:#000;--nvn-fg:#fff;--nvn-muted:rgba(255,255,255,.68);--nvn-line:rgba(255,255,255,.14);--nvn-hover:rgba(255,255,255,.08);--nvn-cta-bg:#fff;--nvn-cta-fg:#000}
+html.nv-light{--nvn-bg:#fff;--nvn-fg:#0b0d14;--nvn-muted:#4b5163;--nvn-line:rgba(10,12,20,.12);--nvn-hover:rgba(10,12,20,.06);--nvn-cta-bg:#0b0d14;--nvn-cta-fg:#fff}
+
+/* old drawer: purple -> black (dark) / white (light) */
+html .sn-backdrop{background:rgba(0,0,0,.5) !important}
+html .sn-drawer{background:var(--nvn-bg) !important;background-image:none !important;border-color:var(--nvn-line) !important;color:var(--nvn-fg) !important}
+html .sn-drawer-brand,html .sn-drawer-brand span{color:var(--nvn-fg) !important}
+html .sn-reveal-heading{color:var(--nvn-muted) !important}
+html .sn-item{background:transparent !important;color:var(--nvn-fg) !important;border-color:var(--nvn-line) !important}
+html .sn-item:hover,html .sn-item:focus-visible{background:var(--nvn-hover) !important}
+html .sn-item-icon{background:var(--nvn-hover) !important;color:var(--nvn-fg) !important}
+html .sn-item-icon *,html .sn-item svg{color:var(--nvn-fg) !important}
+html .sn-divider{background:var(--nvn-line) !important}
+html .sn-cta{background:var(--nvn-cta-bg) !important;background-image:none !important;color:var(--nvn-cta-fg) !important;box-shadow:none !important}
+html .sn-cta svg,html .sn-cta i{color:var(--nvn-cta-fg) !important}
+
+/* phone top bar */
+.lpxb-bar{display:none}
+@media(max-width:640px){
+  html body:has(#lpxbBar) #snBar{display:none !important}
+  .lpxb-bar{display:flex;position:fixed;top:0;left:0;right:0;z-index:60;align-items:center;justify-content:space-between;height:calc(64px + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) 20px 0;background:transparent;transition:background .25s ease}
+  .lpxb-bar.scrolled{background:var(--nvn-bg);border-bottom:1px solid var(--nvn-line)}
+  .lpxb-logo{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:15px;letter-spacing:.04em;text-decoration:none}
+  #lpxbBar .lpxb-logo,#lpxbBar .lpxb-logo span{color:var(--nvn-fg) !important}
+  .lpxb-burger{position:relative;width:30px;height:18px;padding:0;border:0;background:none;cursor:pointer}
+  .lpxb-burger i{position:absolute;right:0;height:2px;border-radius:2px;background:var(--nvn-fg)}
+  .lpxb-burger i:nth-child(1){top:4px;width:30px}
+  .lpxb-burger i:nth-child(2){top:12px;width:20px}
+}
+
+/* light skin for pages that have no light design yet (not the landing page): dark pages are inverted */
+html.nv-skin-off:not(:has(main.lp)){filter:invert(1) hue-rotate(180deg);background:#050505}
+html.nv-skin-off:not(:has(main.lp)) :is(img,video,picture,canvas,iframe,[style*="background-image"]){filter:invert(1) hue-rotate(180deg)}
+html.nv-skin-off:not(:has(main.lp)) :is(#lpxbBar,.sn-drawer,.sn-backdrop){filter:invert(1) hue-rotate(180deg)}

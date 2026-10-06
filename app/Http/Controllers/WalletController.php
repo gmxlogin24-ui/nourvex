@@ -78,16 +78,16 @@ class WalletController extends Controller
             $lockedSender = User::where('id', $sender->id)->lockForUpdate()->first();
 
             if ($lockedSender->wallet_restricted) {
-                return 'restricted';
+                return ['status' => 'restricted'];
             }
             if ($lockedSender->wallet_balance < $validated['amount']) {
-                return 'insufficient';
+                return ['status' => 'insufficient'];
             }
 
             $lockedRecipient = User::where('id', $recipient->id)->lockForUpdate()->first();
 
             if ($lockedRecipient->wouldExceedNoBvnCap($validated['amount'])) {
-                return 'recipient_capped';
+                return ['status' => 'recipient_capped'];
             }
 
             $lockedSender->decrement('wallet_balance', $validated['amount']);
@@ -95,12 +95,19 @@ class WalletController extends Controller
 
             $note = $validated['note'] ?? '';
 
-            Transaction::create([
+            // Internal wallet-to-wallet transfer - no bank/Paystack is involved,
+            // so NOURVEX generates its own reference, shared by both legs of
+            // the transfer (same convention banks use between debit/credit legs).
+            $reference = 'NRX' . now()->format('ymd') . strtoupper(substr(bin2hex(random_bytes(4)), 0, 6));
+
+            $senderTxn = Transaction::create([
                 'user_id' => $lockedSender->id,
                 'related_user_id' => $lockedRecipient->id,
                 'type' => 'transfer_sent',
                 'amount' => -$validated['amount'],
                 'description' => 'Sent to ' . $lockedRecipient->name . ($note ? ': ' . $note : ''),
+                'reference' => $reference,
+                'status' => 'successful',
             ]);
             Transaction::create([
                 'user_id' => $lockedRecipient->id,
@@ -108,18 +115,27 @@ class WalletController extends Controller
                 'type' => 'transfer_received',
                 'amount' => $validated['amount'],
                 'description' => 'Received from ' . $lockedSender->name . ($note ? ': ' . $note : ''),
+                'reference' => $reference,
+                'status' => 'successful',
             ]);
             $lockedRecipient->notify(new \App\Notifications\MoneyReceived($lockedSender, $validated['amount'], $note ?: null));
 
-            return 'ok';
+            return ['status' => 'ok', 'txn_id' => $senderTxn->id];
         });
 
-        return match ($result) {
+        return match ($result['status']) {
             'restricted' => back()->withErrors(['amount' => 'Your wallet is restricted due to an unresolved payment issue.'])->withInput(),
             'insufficient' => back()->withErrors(['amount' => 'Insufficient wallet balance.'])->withInput(),
             'recipient_capped' => back()->withErrors(['recipient_identifier' => 'This recipient has an unverified wallet and cannot receive that much right now.'])->withInput(),
-            default => redirect()->route('wallet.index')->with('status', 'Sent ₦' . number_format($validated['amount']) . ' to ' . $recipient->name),
+            default => redirect()->route('wallet.transaction.show', $result['txn_id']),
         };
+    }
+
+    public function showTransaction($id)
+    {
+        $transaction = Transaction::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+
+        return view('wallet.receipt', ['tx' => $transaction]);
     }
 
     public function index()

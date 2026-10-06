@@ -24,7 +24,7 @@
         <div class="flex items-center gap-3">
             <div class="icon-badge"><i data-lucide="landmark" class="w-5 h-5"></i></div>
             <div>
-                <p class="text-sm font-medium">Get Your Virtual Account</p>
+                <p class="text-sm font-medium">Activate NOURVEX Pay</p>
                 <p class="text-muted text-xs">Fund your wallet by bank transfer, anytime</p>
             </div>
         </div>
@@ -62,15 +62,15 @@
         @else
         <div class="space-y-3">
             @foreach($transactions as $tx)
-            <div class="list-row">
+            <a href="{{ route('wallet.transaction.show', $tx->id) }}" class="list-row" style="text-decoration:none;">
                 <div>
                     <p class="text-sm font-medium">{{ $tx->description }}</p>
-                    <p class="text-muted text-xs">{{ $tx->created_at->diffForHumans() }}</p>
+                    <p class="text-muted text-xs">{{ $tx->created_at->diffForHumans() }}{{ $tx->reference ? ' · ' . $tx->reference : '' }}</p>
                 </div>
                 <p class="font-semibold text-sm {{ $tx->amount >= 0 ? 'text-accent' : '' }}">
                     {{ $tx->amount >= 0 ? '+' : '' }}₦{{ number_format($tx->amount, 2) }}
                 </p>
-            </div>
+            </a>
             @endforeach
         </div>
         @endif

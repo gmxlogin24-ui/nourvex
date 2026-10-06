@@ -34,30 +34,6 @@
 
 <div class="dqp-page">
 
-    @if(!($isVerified ?? true))
-        <div class="dqp-banner dqp-anim" style="--i:0">
-            <span>Unverified wallet limit — up to ₦{{ number_format($walletCapRemaining ?? 0) }} more before verifying your BVN.</span>
-            <a href="{{ route('wallet.virtual-account') }}">Verify</a>
-        </div>
-    @else
-        <div class="dqp-banner dqp-anim" style="--i:0" id="dqpVaBanner">
-            <span>Virtual account: <b>{{ auth()->user()->virtual_account_number }}</b> ({{ auth()->user()->virtual_account_bank }})</span>
-            <button type="button" id="dqpVaCopyBtn" data-account="{{ auth()->user()->virtual_account_number }}">Copy</button>
-        </div>
-        <script>
-        (function(){
-            var btn = document.getElementById('dqpVaCopyBtn');
-            if (!btn) return;
-            btn.addEventListener('click', function(){
-                navigator.clipboard.writeText(btn.dataset.account).then(function(){
-                    var o = btn.textContent; btn.textContent = 'Copied!';
-                    setTimeout(function(){ btn.textContent = o; }, 1500);
-                });
-            });
-        })();
-        </script>
-    @endif
-
     <div class="dqp-hero-card dqp-anim" style="--i:1">
         <div class="dqp-hero-noise"></div>
         <div class="dqp-shine"></div>
@@ -71,7 +47,10 @@
             <div class="dqp-hero-masked">•••• •••• {{ substr($user->virtual_account_number, -4) }}</div>
             <div class="dqp-hero-holder-row">
                 <span class="dqp-hero-holder">Card holder<b>{{ $dqmName }}</b></span>
-                <span class="dqp-hero-holder">Bank<b>{{ $user->virtual_account_bank }}</b></span>
+            </div>
+        @else
+            <div class="dqp-hero-holder-row">
+                <a href="{{ route('wallet.virtual-account') }}" class="dqp-hero-holder" style="text-decoration:none;">Activate NOURVEX Pay to fund your wallet</a>
             </div>
         @endif
         <div class="dqp-hero-actions">

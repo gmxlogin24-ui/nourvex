@@ -282,6 +282,7 @@ Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index
     Route::get('/money-tracker', [WalletController::class, 'moneyTracker'])->name('money-tracker.index');
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
     Route::post('/wallet/send', [WalletController::class, 'sendMoney'])->name('wallet.send');
+    Route::get('/wallet/transactions/{id}', [WalletController::class, 'showTransaction'])->name('wallet.transaction.show');
     Route::get('/wallet/send', [WalletController::class, 'sendMoneyForm'])->name('wallet.send.form');
     Route::post('/wallet/send/resolve', [WalletController::class, 'resolveRecipient'])->name('wallet.send.resolve');
     Route::post('/wallet/paystack/initiate', [PaystackController::class, 'initiate'])->name('paystack.initiate');
@@ -383,3 +384,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/area', [\App\Http\Controllers\AreaController::class, 'show'])->name('area.show');
     Route::post('/area', [\App\Http\Controllers\AreaController::class, 'update'])->name('area.update');
 });
+
+// ===== NOURVEX SEO pages =====
+Route::view('/about', 'about')->name('about');
+Route::view('/faq', 'faq')->name('faq');
+Route::get('/robots.txt', [\App\Http\Controllers\SeoController::class, 'robots']);
+Route::get('/sitemap.xml', [\App\Http\Controllers\SeoController::class, 'sitemap']);
+Route::redirect('/features', '/#features');

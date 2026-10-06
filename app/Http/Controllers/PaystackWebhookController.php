@@ -148,7 +148,7 @@ class PaystackWebhookController extends Controller
             $lockedTopup->update(['status' => 'successful']);
             $user->increment('wallet_balance', $lockedTopup->amount);
 
-            Transaction::create(['user_id' => $user->id, 'type' => 'wallet_topup', 'amount' => $lockedTopup->amount, 'description' => 'Wallet top up via Paystack']);
+            Transaction::create(['user_id' => $user->id, 'type' => 'wallet_topup', 'amount' => $lockedTopup->amount, 'description' => 'Wallet top up via Paystack', 'reference' => $txRef, 'status' => 'successful']);
             $notifyUser = $user;
         });
 
@@ -181,7 +181,7 @@ class PaystackWebhookController extends Controller
                 return;
             }
             $lockedUser->increment('wallet_balance', $amount);
-            Transaction::create(['user_id' => $lockedUser->id, 'type' => 'wallet_topup', 'amount' => $amount, 'description' => 'Wallet funded via Paystack']);
+            Transaction::create(['user_id' => $lockedUser->id, 'type' => 'wallet_topup', 'amount' => $amount, 'description' => 'Wallet funded via Paystack', 'reference' => $ref, 'status' => 'successful']);
             $notifyUser = $lockedUser;
         });
 

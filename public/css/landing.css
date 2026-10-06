@@ -520,7 +520,6 @@ main.lp a.lp-hero-cta,main.lp a.lp-hero-cta *,main.lp a.lp-st-cta,main.lp a.lp-s
 
 /* ===== NOURVEX nav and marquee ===== */
 .lpxm-oldnav-wrap{display:contents}
-@media(max-width:640px){body:has(#lpxmHero) .lpxm-oldnav-wrap{display:none !important}}
 
 .lp-trust-mq .lp-trust-in{display:block !important;max-width:none !important;padding-left:0 !important;padding-right:0 !important;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
 .lp-trust-track{display:flex;width:max-content;animation:lpTrustMove 30s linear infinite}
@@ -529,3 +528,6 @@ main.lp a.lp-hero-cta,main.lp a.lp-hero-cta *,main.lp a.lp-st-cta,main.lp a.lp-s
 .lp-trust-mq:hover .lp-trust-track{animation-play-state:paused}
 @keyframes lpTrustMove{to{transform:translateX(-50%)}}
 @media(prefers-reduced-motion:reduce){.lp-trust-track{animation-duration:80s}}
+
+
+
