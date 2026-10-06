@@ -7,8 +7,6 @@
 
         <div class="sn-links-center">
             <a href="{{ route('welcome') }}">Home</a>
-            <a href="{{ route('gigs.index') }}">Hustles</a>
-            <a href="{{ route('marketplace.index') }}">Campus Market</a>
             <a href="{{ route('pulse.index') }}">Pulse</a>
             <a href="{{ route('about') }}">About</a>
             <a href="{{ route('faq') }}">FAQ</a>
@@ -33,8 +31,6 @@
     <div class="sn-reveal-heading">Menu</div>
     <nav class="sn-item-list">
         <a href="{{ route('welcome') }}" class="sn-item"><span class="sn-item-icon"><i data-lucide="home" class="w-4 h-4"></i></span><span>Home</span></a>
-        <a href="{{ route('gigs.index') }}" class="sn-item"><span class="sn-item-icon"><i data-lucide="briefcase" class="w-4 h-4"></i></span><span>Hustles</span></a>
-        <a href="{{ route('marketplace.index') }}" class="sn-item"><span class="sn-item-icon"><i data-lucide="shopping-bag" class="w-4 h-4"></i></span><span>Campus Market</span></a>
         <a href="{{ route('pulse.index') }}" class="sn-item"><span class="sn-item-icon"><i data-lucide="activity" class="w-4 h-4"></i></span><span>Pulse</span></a>
         <a href="{{ route('about') }}" class="sn-item"><span class="sn-item-icon"><i data-lucide="info" class="w-4 h-4"></i></span><span>About</span></a>
         <a href="{{ route('faq') }}" class="sn-item"><span class="sn-item-icon"><i data-lucide="message-circle" class="w-4 h-4"></i></span><span>FAQ</span></a>

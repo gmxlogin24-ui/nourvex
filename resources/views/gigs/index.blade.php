@@ -1,131 +1,111 @@
 @extends('layouts.app-authenticated')
 
 @section('content')
+<link rel="stylesheet" href="{{ asset('css/gigs-hero.css') }}?v={{ time() }}">
+<link rel="stylesheet" href="{{ asset('css/sponsor-stack.css') }}?v={{ time() }}">
+<script src="{{ asset('js/sponsor-stack.js') }}?v={{ time() }}" defer></script>
 
-@if((auth()->user()->theme_style ?? 'glass') === 'plain')
-    @include('gigs.partials.gigs-minimal')
-@elseif((auth()->user()->theme_style ?? 'glass') === 'aurora')
-    @include('gigs.partials.gigs-aurora')
-@else
+@php
+    $openCount = $gigs->where('status', 'open')->count();
+
+    // TODO: replace with a real sponsored-gigs query once that controller/method is built.
+    $sponsoredItems = collect([
+        ['title' => 'Sponsored Spot 1', 'image_url' => null, 'video_url' => null],
+        ['title' => 'Sponsored Spot 2', 'image_url' => null, 'video_url' => null],
+        ['title' => 'Sponsored Spot 3', 'image_url' => null, 'video_url' => null],
+        ['title' => 'Sponsored Spot 4', 'image_url' => null, 'video_url' => null],
+    ]);
+
+    $categoryIcons = [
+        'Typing & Printing' => 'printer', 'Hair & Beauty' => 'scissors', 'Repairs' => 'wrench',
+        'Errands & Delivery' => 'truck', 'Tutoring' => 'graduation-cap', 'Photography' => 'camera',
+    ];
+    $badgeColors = ['#16181d', '#2563eb', '#f97316', '#16a34a', '#7c3aed', '#0ea5e9'];
+
+    // Default sample gigs shown until real ones are posted — purely visual, not saved anywhere.
+    $displayGigs = $gigs->isNotEmpty() ? $gigs : collect([
+        (object)['category' => 'Typing & Printing', 'title' => 'Type and bind my 40-page project', 'status' => 'open', 'amount' => 3000, 'poster_name' => 'Sample Student', 'created_at' => now()],
+        (object)['category' => 'Tutoring', 'title' => 'Tutor me for my calculus exam', 'status' => 'open', 'amount' => 2000, 'poster_name' => 'Sample Student', 'created_at' => now()],
+        (object)['category' => 'Repairs', 'title' => 'Fix my laptop WiFi issue', 'status' => 'open', 'amount' => 2500, 'poster_name' => 'Sample Student', 'created_at' => now()],
+        (object)['category' => 'Errands & Delivery', 'title' => 'Deliver package across campus', 'status' => 'open', 'amount' => 1500, 'poster_name' => 'Sample Student', 'created_at' => now()],
+    ]);
+@endphp
+
+<section class="gigs-hero-band">
+    <div class="max-w-6xl mx-auto gigs-hero-inner">
+        <div>
+            <h1 class="gigs-hero-title">Find hustles that pay,<br>posted by students like you</h1>
+            <p class="gigs-hero-sub">{{ $openCount }} open hustles right now — sign up to apply or post your own.</p>
+            <form method="GET" class="gigs-hero-search">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search hustles...">
+                <button type="submit"><i data-lucide="search" class="w-4 h-4"></i></button>
+            </form>
+            <div class="gigs-hero-tags">
+                @foreach($categoryIcons as $cat => $icon)
+                <a href="{{ route('gigs.index', ['category' => $cat]) }}" class="gigs-hero-tag">{{ $cat }}</a>
+                @endforeach
+            </div>
+        </div>
+        <div>
+            @include('partials.sponsor-stack', ['items' => $sponsoredItems])
+        </div>
+    </div>
+</section>
+<div class="gigs-hero-curve"></div>
 
 <main class="max-w-6xl mx-auto p-6">
-    @php
-        $openCount = $gigs->where('status', 'open')->count();
-        $avgReward = $gigs->count() ? $gigs->avg('amount') : 0;
-        $myPosted = $gigs->where('user_id', auth()->id())->count();
-    @endphp
 
-    @php
-        $myStackSource = $gigs->where('user_id', auth()->id())->count() >= 2
-            ? $gigs->where('user_id', auth()->id())
-            : $gigs;
-        $myStackItems = $myStackSource->take(6)->map(fn($g) => ['title' => $g->title, 'image_url' => $g->image_url ?? null]);
-    @endphp
-    <link rel="stylesheet" href="{{ asset('css/sponsor-stack.css') }}?v={{ time() }}">
-    <script src="{{ asset('js/sponsor-stack.js') }}?v={{ time() }}" defer></script>
-    <div style="margin-bottom:1.25rem;">
-        <p class="text-sm font-semibold text-muted" style="margin-bottom:0.5rem;">Your Hustles</p>
-        @include('partials.sponsor-stack', ['items' => $myStackItems, 'tagLabel' => 'Your Hustle'])
-    </div>
-
-    <div class="flex justify-between items-center mb-4 flex-wrap gap-3 reveal-on-scroll">
+    {{-- Search by Category --}}
+    <div class="gigs-section-head">
         <div>
-            <h1 class="text-2xl font-bold hoverfade-text">Available Hustles</h1>
-            <p class="text-muted text-sm">Sorted for you — hustles you open most stay near the top</p>
+            <p class="gigs-section-title">Search by Category</p>
+            <p class="gigs-section-sub">Find hustles by what you're good at</p>
         </div>
-        @auth@if(auth()->user()->planAllows('gigs_post'))<a href="{{ route('gigs.create') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Post a Hustle</a>@endif@else<a href="{{ route('register') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Sign Up to Post</a>@endauth
+        <a href="{{ route('gigs.index') }}" class="gigs-section-link">All Categories <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></a>
+    </div>
+    <div class="category-grid">
+        @foreach($categoryIcons as $cat => $icon)
+        @php $count = $gigs->where('category', $cat)->count(); @endphp
+        <a href="{{ route('gigs.index', ['category' => $cat]) }}" class="category-card">
+            <div class="category-card-icon">
+                <i data-lucide="{{ $icon }}" class="w-5 h-5"></i>
+            </div>
+            <p class="category-card-label">{{ $cat }}</p>
+            <p class="category-card-count">{{ $count > 0 ? $count . ' open gigs' : 'Be the first to post' }}</p>
+        </a>
+        @endforeach
     </div>
 
-    <form method="GET" class="reveal-on-scroll flex flex-wrap gap-2" style="margin-bottom:0.75rem;">
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search hustles..." class="input-field" style="max-width:320px;">
-        <input type="number" name="min_price" value="{{ request('min_price') }}" placeholder="Min ₦" class="input-field" style="max-width:110px;">
-        <input type="number" name="max_price" value="{{ request('max_price') }}" placeholder="Max ₦" class="input-field" style="max-width:110px;">
-        <button type="submit" class="btn-secondary text-sm">Filter</button>
-    </form>
-
-    <div class="flex flex-wrap items-center justify-between gap-3 reveal-on-scroll" style="margin-bottom:0.75rem;">
-        <div class="gig-filter-bar" style="margin:0;">
-            <a href="{{ route('gigs.index') }}" class="gig-filter-chip {{ !request('category') ? 'active' : '' }}">All</a>
-            @foreach($categories as $cat)
-            <a href="{{ route('gigs.index', ['category' => $cat]) }}" class="gig-filter-chip {{ request('category') === $cat ? 'active' : '' }}">{{ $cat }}</a>
+    {{-- Featured Gigs --}}
+    <div class="gigs-section-head">
+        <div>
+            <p class="gigs-section-title">Featured Gigs</p>
+            <p class="gigs-section-sub">Sign up to apply — new gigs added daily</p>
+        </div>
+        <a href="{{ route('gigs.index') }}" class="gigs-section-link">All Gigs <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></a>
+    </div>
+    <div class="featured-gigs-wrap">
+        <div class="grid md:grid-cols-4 gap-4">
+            @foreach($displayGigs as $i => $gig)
+            <a href="{{ $gigs->isNotEmpty() ? route('gigs.show', $gig->id) : route('gigs.index') }}" class="jobster-card">
+                <div class="jc-top">
+                    <span class="jc-cat"><i data-lucide="{{ $categoryIcons[$gig->category] ?? 'briefcase' }}" class="w-3.5 h-3.5"></i> {{ $gig->category }}</span>
+                    <span class="jc-badge" style="background:{{ $badgeColors[$i % count($badgeColors)] }};">
+                        <i data-lucide="briefcase" class="w-4 h-4"></i>
+                    </span>
+                </div>
+                <p class="jc-title">{{ $gig->title }}</p>
+                <p class="jc-meta">
+                    <i data-lucide="{{ $gig->status === 'open' ? 'circle-check' : 'circle-x' }}" class="w-3.5 h-3.5"></i>
+                    {{ $gig->status === 'open' ? 'Open' : 'Taken' }} · ₦{{ number_format($gig->amount) }}
+                </p>
+                <div class="jc-footer">
+                    <span class="jc-date">{{ $gig->created_at->format('M j, Y') }} by</span>
+                    <span class="jc-poster">{{ $gig->poster_name }}</span>
+                </div>
+            </a>
             @endforeach
         </div>
-        <select onchange="window.location.href=this.value" class="input-field" style="width:auto;max-width:160px;">
-            <option value="{{ request()->fullUrlWithQuery(['sort' => null]) }}" {{ !request('sort') ? 'selected' : '' }}>Relevance</option>
-            <option value="{{ request()->fullUrlWithQuery(['sort' => 'newest']) }}" {{ request('sort') === 'newest' ? 'selected' : '' }}>Newest</option>
-            <option value="{{ request()->fullUrlWithQuery(['sort' => 'highest']) }}" {{ request('sort') === 'highest' ? 'selected' : '' }}>Highest Pay</option>
-        </select>
-    </div>
-
-    <div class="kpi-row reveal-on-scroll">
-        <div class="kpi-tile featured">
-            <div class="kpi-tile-top"><div class="kpi-tile-icon" data-face-cursor><i data-lucide="briefcase" class="w-4 h-4"></i></div></div>
-            <p class="kpi-tile-value">{{ $openCount }}</p>
-            <p class="kpi-tile-label">Open Hustles</p>
-        </div>
-        <div class="kpi-tile">
-            <div class="kpi-tile-top"><div class="kpi-tile-icon" data-face-cursor><i data-lucide="banknote" class="w-4 h-4"></i></div></div>
-            <p class="kpi-tile-value">₦{{ number_format($avgReward) }}</p>
-            <p class="kpi-tile-label">Average Reward</p>
-        </div>
-        <div class="kpi-tile">
-            <div class="kpi-tile-top"><div class="kpi-tile-icon" data-face-cursor><i data-lucide="user" class="w-4 h-4"></i></div></div>
-            <p class="kpi-tile-value">{{ $myPosted }}</p>
-            <p class="kpi-tile-label">Posted by You</p>
-        </div>
-    </div>
-
-
-    <div class="grid md:grid-cols-3 gap-4 reveal-on-scroll">
-        @forelse($gigsPage as $gig)
-        <a href="{{ route('gigs.show', $gig->id) }}" class="gig-card-v2 reveal-on-scroll" style="{{ $gig->status !== 'open' ? 'opacity:0.6;' : '' }}">
-            <div class="gig-card-v2-top">
-                <span class="gig-card-category">{{ $gig->category }}</span>
-                <span class="gig-card-status {{ $gig->status === 'open' ? 'open' : 'taken' }}">{{ $gig->status === 'open' ? 'Open' : 'Taken' }}</span>
-            </div>
-            <p class="gig-card-title">{{ $gig->title }}</p>
-            @if($gig->description)
-            <p class="text-muted text-xs" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ $gig->description }}</p>
-            @endif
-            <div class="gig-card-poster">
-                <span class="gig-card-poster-avatar">{{ substr($gig->poster_name, 0, 1) }}</span>
-                {{ $gig->poster_name }}
-                @if($gig->poster_verified)
-                <i data-lucide="badge-check" class="w-3.5 h-3.5" style="color:#4f7bff;"></i>
-                @endif
-                @if($gig->poster_level && $gig->poster_level['key'] !== 'new')
-                <span class="text-xs text-accent">· {{ $gig->poster_level['label'] }}</span>
-                @endif
-                @if($gig->poster_badge_tier === 'bronze')
-                <span class="member-badge member-badge-bronze" style="padding:1px 7px 1px 5px;font-size:0.6rem;"><i data-lucide="medal" style="width:9px;height:9px;"></i></span>
-                @endif
-                <span>· {{ $gig->created_at->diffForHumans() }}</span>
-            </div>
-            @if($gig->avg_rating)
-            <div class="gig-card-rating">
-                <span class="stars">★</span> {{ $gig->avg_rating }} <span class="text-muted">({{ $gig->review_count }})</span>
-            </div>
-            @endif
-            @if($gig->status !== 'open' && $gig->accepted_by_name)
-            <p class="text-xs text-muted">Taken by {{ $gig->accepted_by_name }}</p>
-            @endif
-            <div class="gig-card-footer">
-                <span class="gig-card-price">₦{{ number_format($gig->amount) }}</span>
-                @if($gig->views_count)
-                <span class="gig-card-views"><i data-lucide="eye" class="w-3.5 h-3.5"></i> {{ $gig->views_count }}</span>
-                @endif
-            </div>
-        </a>
-        @empty
-        <p class="text-muted text-sm col-span-full">No hustles match — try a different search or category.</p>
-        @endforelse
-    </div>
-
-    <div class="mt-6 reveal-on-scroll">
-        {{ $gigsPage->links() }}
     </div>
 </main>
-
-@endif
-
 @endsection

@@ -44,7 +44,7 @@ class MarketplaceController extends Controller
             }
         }
 
-        if (!Auth::check()) {
+        if (true) {
             $allListings = $query->get();
 
             $justArrived = $allListings->take(4);
@@ -81,7 +81,7 @@ class MarketplaceController extends Controller
                 ];
             })->values()->all();
 
-            return view('marketplace.guest', [
+            return view('marketplace.index', [
                 'listings' => $allListings,
                 'justArrived' => $justArrived,
                 'secondFeatured' => $secondFeatured,

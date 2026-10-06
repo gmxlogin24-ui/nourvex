@@ -84,13 +84,14 @@ Route::get('/buzz', function () {
     return app(NewsController::class)->index(request());
 })->name('news.index');
 Route::get('/pulse', [PulseController::class, 'index'])->name('pulse.index');
-Route::get('/gigs', [GigController::class, 'index'])->name('gigs.index');
-Route::get('/gigs/{gig}', [GigController::class, 'show'])->name('gigs.show')->where('gig', '[0-9]+');
-Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
-Route::get('/marketplace/{listing}', [MarketplaceController::class, 'show'])->name('marketplace.show')->where('listing', '[0-9]+');
 
 
 Route::middleware(['auth', 'signup.paid'])->group(function () {
+
+    Route::get('/gigs', [GigController::class, 'index'])->name('gigs.index');
+    Route::get('/gigs/{gig}', [GigController::class, 'show'])->name('gigs.show')->where('gig', '[0-9]+');
+    Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
+    Route::get('/marketplace/{listing}', [MarketplaceController::class, 'show'])->name('marketplace.show')->where('listing', '[0-9]+');
     Route::post('/push/subscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'store'])->name('push.subscribe');
     Route::post('/push/unsubscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
     Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');

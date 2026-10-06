@@ -81,8 +81,6 @@
                 <div>
                     <h5>Explore</h5>
                     <ul>
-                        <li><a href="{{ route('gigs.index') }}">Hustles</a></li>
-                        <li><a href="{{ route('marketplace.index') }}">Campus Market</a></li>
                         <li><a href="{{ route('pulse.index') }}">Pulse</a></li>
                     </ul>
                 </div>

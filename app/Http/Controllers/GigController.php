@@ -91,7 +91,7 @@ class GigController extends Controller
 
         $categories = Gig::select('category')->distinct()->pluck('category')->filter()->values();
 
-        return view(Auth::check() ? 'gigs.index' : 'gigs.guest', [
+        return view('gigs.index', [
             'gigs' => $gigs,
             'gigsPage' => $gigsPage,
             'categories' => $categories,
