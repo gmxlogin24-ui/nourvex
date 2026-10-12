@@ -1,0 +1,1214 @@
+=== ROUTES 1-231 ===
+
+  GET|HEAD  / ............... welcome › routes/web.php:30
+  GET|HEAD  about ................................. about
+  GET|HEAD  activate signup-fee.activate › routes/web.ph…
+  GET|HEAD  admin ... admin.index › AdminController@index
+  GET|HEAD  admin/badges admin.badges.index › AdminLevel…
+  POST      admin/badges admin.badges.store › AdminLevel…
+  GET|HEAD  admin/badges/create admin.badges.create › Ad…
+  PUT       admin/badges/{badge} admin.badges.update › A…
+  DELETE    admin/badges/{badge} admin.badges.destroy › …
+  GET|HEAD  admin/badges/{badge}/edit admin.badges.edit …
+  GET|HEAD  admin/blog admin.blog › AdminController@blog
+  DELETE    admin/blog/{blog} admin.blog.delete › AdminC…
+  GET|HEAD  admin/concierge-misses admin.concierge-misse…
+  POST      admin/concierge-misses/{miss}/resolve admin.…
+  GET|HEAD  admin/conversations admin.conversations.inde…
+  GET|HEAD  admin/conversations/{conversation} admin.con…
+  DELETE    admin/conversations/{conversation}/messages/{message} admin.conversations.messages.delete › Admin\ConversationController@dest…
+  GET|HEAD  admin/disputes admin.disputes.index › GigDis…
+  POST      admin/disputes/assign admin.disputes.assign …
+  POST      admin/disputes/{dispute}/dismiss admin.dispu…
+  POST      admin/disputes/{dispute}/partial admin.dispu…
+  POST      admin/disputes/{dispute}/pay admin.disputes.…
+  GET|HEAD  admin/feature-gates admin.feature-gates.inde…
+  PUT       admin/feature-gates/{featureGate} admin.feat…
+  POST      admin/feature-gates/{featureGate}/toggle adm…
+  GET|HEAD  admin/gigs admin.gigs › AdminController@gigs
+  DELETE    admin/gigs/{gig} admin.gigs.delete › AdminCo…
+  GET|HEAD  admin/grant-access admin.grant-access › Admi…
+  POST      admin/grant-access admin.grant-access.store …
+  GET|HEAD  admin/invites admin.invites › AdminControlle…
+  POST      admin/invites admin.invites.store › AdminCon…
+  DELETE    admin/invites/{invite} admin.invites.revoke …
+  GET|HEAD  admin/levels admin.levels.index › AdminLevel…
+  POST      admin/levels admin.levels.store › AdminLevel…
+  GET|HEAD  admin/levels/create admin.levels.create › Ad…
+  PUT       admin/levels/{level} admin.levels.update › A…
+  DELETE    admin/levels/{level} admin.levels.destroy › …
+  GET|HEAD  admin/levels/{level}/edit admin.levels.edit …
+  GET|HEAD  admin/listings admin.listings › AdminControl…
+  DELETE    admin/listings/{listing} admin.listings.dele…
+  GET|HEAD  admin/marketplace-disputes admin.marketplace…
+  POST      admin/marketplace-disputes/{dispute}/dismiss admin.marketplace-disputes.dismiss › ListingDisputeController@dismis…
+  POST      admin/marketplace-disputes/{dispute}/pay adm…
+  POST      admin/marketplace-disputes/{dispute}/refund …
+  GET|HEAD  admin/news admin.news › AdminController@news
+  DELETE    admin/news/{news} admin.news.delete › AdminC…
+  GET|HEAD  admin/revenue admin.revenue › AdminControlle…
+  GET|HEAD  admin/settings/appearance admin.settings.app…
+  POST      admin/settings/appearance/animations admin.s…
+  POST      admin/settings/appearance/background admin.s…
+  POST      admin/settings/appearance/background/reset a…
+  GET|HEAD  admin/subscriptions admin.subscriptions › Ad…
+  POST      admin/subscriptions/{subscription}/cancel ad…
+  GET|HEAD  admin/transactions admin.transactions › Admi…
+  GET|HEAD  admin/users admin.users › AdminController@us…
+  POST      admin/users/{user}/adjust-balance admin.adju…
+  PUT       admin/users/{user}/cc-permissions admin.user…
+  POST      admin/users/{user}/refresh-badges admin.user…
+  POST      admin/users/{user}/toggle-admin admin.toggle…
+  POST      admin/users/{user}/toggle-ban admin.toggle-b…
+  POST      admin/users/{user}/toggle-customer-care admi…
+  GET|HEAD  area ........ area.show › AreaController@show
+  POST      area .... area.update › AreaController@update
+  GET|HEAD  auth/google auth.google › SocialAuthControll…
+  GET|HEAD  auth/google/callback auth.google.callback › …
+  GET|HEAD  blog ...... blog.index › BlogController@index
+  POST      blog ...... blog.store › BlogController@store
+  GET|HEAD  blog/create blog.create › BlogController@cre…
+  GET|HEAD  blog/{blog} . blog.show › BlogController@show
+  GET|HEAD  buzz ......... news.index › routes/web.php:80
+  GET|HEAD  cart ...... cart.index › CartController@index
+  POST      cart/add/{listing} cart.add › CartController…
+  POST      cart/checkout cart.checkout › CartController…
+  POST      cart/remove/{listing} cart.remove › CartCont…
+  GET|HEAD  chat ...... chat.index › ChatController@index
+  GET|HEAD  concierge concierge.show › ConciergeControll…
+  POST      concierge/message concierge.message › Concie…
+  GET|HEAD  customer-care customer-care.index › Customer…
+  POST      customer-care/flag customer-care.flag › Cust…
+  GET|HEAD  customer-care/gig-disputes customer-care.gig…
+  POST      customer-care/gig-disputes/{dispute}/escalate customer-care.gig-disputes.escalate › CustomerCareController@escalateGigDispu…
+  POST      customer-care/gig-disputes/{dispute}/note cu…
+  POST      customer-care/gigs/{gig}/message customer-ca…
+  GET|HEAD  customer-care/gigs/{gig}/thread customer-car…
+  GET|HEAD  customer-care/listing-disputes customer-care…
+  POST      customer-care/listing-disputes/{dispute}/escalate customer-care.listing-disputes.escalate › CustomerCareController@escalateListingD…
+  POST      customer-care/listing-disputes/{dispute}/note customer-care.listing-disputes.note › CustomerCareController@addListingDisputeNo…
+  POST      customer-care/listings/{listing}/message cus…
+  GET|HEAD  customer-care/listings/{listing}/thread cust…
+  GET|HEAD  customer-care/orders customer-care.orders › …
+  POST      customer-care/orders/{order}/confirm-delivery customer-care.orders.confirm-delivery › CustomerCareController@confirmDelive…
+  GET|HEAD  customer-care/user-lookup customer-care.user…
+  GET|HEAD  dash-holo .... dash-holo › routes/web.php:379
+  GET|HEAD  dashboard dashboard › DashboardController@in…
+  GET|HEAD  dashboard-preview dashboard.preview › Dashbo…
+  GET|HEAD  dashboard-transfer dashboard.transfer › Dash…
+  GET|HEAD  faq ..................................... faq
+  GET|HEAD  features features › FeaturesController@index
+  ANY       features Illuminate\Routing › RedirectContro…
+  GET|HEAD  forgot-password password.request › AuthContr…
+  POST      forgot-password password.email › AuthControl…
+  GET|HEAD  gigs ....... gigs.index › GigController@index
+  POST      gigs ....... gigs.store › GigController@store
+  GET|HEAD  gigs/create gigs.create › GigController@crea…
+  GET|HEAD  gigs/{gig} ... gigs.show › GigController@show
+  PUT       gigs/{gig} gigs.update › GigController@update
+  POST      gigs/{gig}/accept gigs.accept › GigControlle…
+  POST      gigs/{gig}/complete gigs.complete › GigContr…
+  POST      gigs/{gig}/deliver gigs.deliver › GigControl…
+  POST      gigs/{gig}/dispute gigs.dispute.store › GigD…
+  GET|HEAD  gigs/{gig}/edit gigs.edit › GigController@ed…
+  POST      gigs/{gig}/message gigs.message › GigControl…
+  GET|HEAD  gigs/{gig}/messages gigs.messages › GigContr…
+  POST      gigs/{gig}/reject gigs.reject › GigControlle…
+  POST      gigs/{gig}/review gigs.review › ReviewContro…
+  POST      gigs/{gig}/withdraw gigs.withdraw › GigContr…
+  GET|HEAD  kyc ........... kyc.show › KycController@show
+  POST      kyc/submit kyc.submit › KycController@submit
+  POST      kyc/{step} .... kyc.save › KycController@save
+  GET|HEAD  leaderboard leaderboard.index › LeaderboardC…
+  POST      leaderboard/toggle leaderboard.toggle › Lead…
+  GET|HEAD  levels-badges levels-badges.show › LevelBadg…
+  GET|HEAD  levels-badges/badges levels-badges.badges › …
+  GET|HEAD  levels-badges/levels levels-badges.levels › …
+  GET|HEAD  login ...... login › AuthController@showLogin
+  POST      login .................. AuthController@login
+  POST      logout ....... logout › AuthController@logout
+  GET|HEAD  marketplace marketplace.index › MarketplaceC…
+  POST      marketplace marketplace.store › MarketplaceC…
+  GET|HEAD  marketplace/create marketplace.create › Mark…
+  GET|HEAD  marketplace/favorites marketplace.favorites …
+  GET|HEAD  marketplace/orders marketplace.orders › Mark…
+  POST      marketplace/orders/{order}/confirm marketpla…
+  GET|HEAD  marketplace/{listing} marketplace.show › Mar…
+  PUT       marketplace/{listing} marketplace.update › M…
+  POST      marketplace/{listing}/confirm marketplace.co…
+  POST      marketplace/{listing}/dispute marketplace.di…
+  GET|HEAD  marketplace/{listing}/edit marketplace.edit …
+  POST      marketplace/{listing}/favorite marketplace.f…
+  POST      marketplace/{listing}/meetup-propose marketp…
+  POST      marketplace/{listing}/meetup-respond/{message} marketplace.meetup.respond › MarketplaceController@respondMee…
+  POST      marketplace/{listing}/message marketplace.me…
+  GET|HEAD  marketplace/{listing}/messages marketplace.m…
+  POST      marketplace/{listing}/purchase marketplace.p…
+  POST      marketplace/{listing}/review marketplace.rev…
+  POST      marketplace/{listing}/ship marketplace.ship …
+  GET|HEAD  money-tracker money-tracker.index › WalletCo…
+  GET|HEAD  my-posts posts.index › MyPostsController@ind…
+  DELETE    my-posts/gigs/{gig} posts.gigs.delete › MyPo…
+  DELETE    my-posts/listings/{listing} posts.listings.d…
+  POST      news ...... news.store › NewsController@store
+  POST      news/ad news.ad.store › NewsController@store…
+  GET|HEAD  news/ad/create news.ad.create › NewsControll…
+  GET|HEAD  notifications notifications.index › Notifica…
+  POST      notifications/mark-all-read notifications.re…
+  DELETE    notifications/{id} notifications.destroy › N…
+  POST      notifications/{id}/read notifications.read  …
+  GET|HEAD  onboarding/interests onboarding.interests › …
+  POST      onboarding/interests onboarding.interests.st…
+  GET|HEAD  plans plans.choose › PlanGateController@choo…
+  GET|HEAD  profile profile.index › ProfileController@in…
+  POST      profile profile.update › ProfileController@u…
+  GET|HEAD  profile-preview profile.preview › ProfileCon…
+  GET|HEAD  profile/account profile.account › ProfileCon…
+  GET|HEAD  profile/appearance profile.appearance › Prof…
+  POST      profile/password profile.password › ProfileC…
+  GET|HEAD  profile/reputation profile.reputation › Prof…
+  POST      profile/theme-toggle profile.theme.toggle › …
+  GET|HEAD  pulse ... pulse.index › PulseController@index
+  POST      push/subscribe push.subscribe › PushSubscrip…
+  POST      push/unsubscribe push.unsubscribe › PushSubs…
+  GET|HEAD  q-coin .. qcoin.index › QCoinController@index
+  POST      q-coin/claim qcoin.claim › QCoinController@c…
+  GET|HEAD  referrals referrals.index › ReferralControll…
+  GET|HEAD  register register › AuthController@showRegis…
+  POST      register ....... FreeRegisterController@store
+  GET|HEAD  register/invite/{code} register.invite › Aut…
+  POST      register/invite/{code} register.invite.store…
+  GET|HEAD  register/pay register.pay › AuthController@s…
+  GET|HEAD  register/pay/callback register.pay.callback …
+  GET|HEAD  register/pay/initiate register.pay.initiate …
+  GET|HEAD  register/vendor register.vendor › AuthContro…
+  POST      register/vendor register.vendor.store › Auth…
+  POST      reset-password password.update › AuthControl…
+  GET|HEAD  reset-password/{token} password.reset › Auth…
+  GET|HEAD  robots.txt ............. SeoController@robots
+  GET|HEAD  safety ............................... safety
+  POST      saved-numbers saved-numbers.store › SavedNum…
+  DELETE    saved-numbers/{savedNumber} saved-numbers.de…
+  GET|HEAD  search ..... search › SearchController@search
+  GET|HEAD  services services.index › ServicesController…
+  POST      services/airtime services.airtime › Services…
+  POST      services/cable services.cable › ServicesCont…
+  GET|HEAD  services/cable-plans services.cable-plans › …
+  POST      services/data services.data › ServicesContro…
+  GET|HEAD  services/data-plans services.data-plans › Se…
+  GET|HEAD  services/receipt/{purchase} services.receipt…
+  POST      settings/appearance appearance.update › Appe…
+  GET|HEAD  settings/appearance appearance.edit › routes…
+  GET|HEAD  signup-fee signup-fee.initiate › PaystackCon…
+  GET|HEAD  signup-fee/callback signup-fee.callback › Pa…
+  GET|HEAD  sitemap.xml ........... SeoController@sitemap
+  GET|HEAD  subscriptions subscriptions.index › Subscrip…
+  GET|HEAD  subscriptions/callback subscriptions.callbac…
+  POST      subscriptions/subscribe subscriptions.subscr…
+  ANY       tier tier.index › Illuminate\Routing › Redir…
+  POST      tour/complete tour.complete › TourController…
+  GET|HEAD  vendor/activate vendor.activate › routes/web…
+  GET|HEAD  vendor/callback vendor.callback › PaystackCo…
+  POST      vendor/pay vendor.pay › PaystackController@i…
+  GET|HEAD  wallet wallet.index › WalletController@index
+  GET|HEAD  wallet/bank-account wallet.bank-account.edit…
+  POST      wallet/bank-account wallet.bank-account.stor…
+  POST      wallet/bank-account/resolve wallet.bank-acco…
+  GET|HEAD  wallet/paystack/callback paystack.callback  …
+  POST      wallet/paystack/initiate paystack.initiate  …
+  GET|HEAD  wallet/pin wallet.pin.edit › TransactionPinC…
+  POST      wallet/pin wallet.pin.update › TransactionPi…
+  POST      wallet/send wallet.send › WalletController@s…
+  GET|HEAD  wallet/send wallet.send.form › WalletControl…
+  POST      wallet/send/resolve wallet.send.resolve › Wa…
+  GET|HEAD  wallet/transactions/{id} wallet.transaction.…
+  GET|HEAD  wallet/virtual-account wallet.virtual-accoun…
+  POST      wallet/virtual-account wallet.virtual-accoun…
+  POST      wallet/withdraw wallet.withdraw › WalletActi…
+  POST      webhooks/paystack PaystackWebhookController@…
+  GET|HEAD  welcome welcome.show › WelcomeTourController…
+
+                                     Showing [227] routes
+
+
+=== routes/web.php ===
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\GigController;
+use App\Http\Controllers\MarketplaceController;
+use App\Http\Controllers\ReferralController;
+use App\Http\Controllers\WalletController;
+use App\Http\Controllers\NewsController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PaystackController;
+use App\Http\Controllers\VirtualAccountController;
+use App\Http\Controllers\PaystackWebhookController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MyPostsController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CustomerCareController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\LeaderboardController;
+use App\Http\Controllers\ServicesController;
+use App\Http\Controllers\TransactionPinController;
+use App\Http\Controllers\SavedNumberController;
+use App\Http\Controllers\FeaturesController;
+use App\Http\Controllers\PulseController;
+use App\Http\Controllers\PlanGateController;
+
+Route::get('/', function () {
+    $allNews = \App\Models\News::latest('published_at')->take(20)->get();
+
+    $adsFeed = $allNews->where('type', 'ad')->filter(fn($n) => !$n->expires_at || $n->expires_at->isFuture())->sortByDesc('is_featured')->take(6)->map(fn($n) => [
+        'title' => $n->title,
+        'body' => $n->body,
+        'image_url' => $n->image_url ?? null,
+    ])->values();
+
+    $newsFeed = $allNews->where('type', '!=', 'ad')->take(10)->map(fn($n) => [
+        'title' => $n->title,
+        'body' => $n->body,
+        'tag' => 'Campus Buzz',
+        'time' => $n->published_at,
+    ])->values();
+
+    return view('welcome', ['newsFeed' => $newsFeed, 'adsFeed' => $adsFeed]);
+})->name('welcome');
+
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+
+Route::get('/plans', [PlanGateController::class, 'choose'])->name('plans.choose');
+
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::get('/register/vendor', [AuthController::class, 'showVendorRegister'])->name('register.vendor');
+Route::post('/register/vendor', [AuthController::class, 'registerVendor'])->name('register.vendor.store')->middleware('throttle:5,1');
+Route::get('/register/invite/{code}', [AuthController::class, 'showInviteRegister'])->name('register.invite');
+Route::post('/register/invite/{code}', [AuthController::class, 'registerInvite'])->name('register.invite.store')->middleware('throttle:5,1');
+Route::get('/register/pay', [AuthController::class, 'showRegistrationPay'])->name('register.pay');
+Route::get('/register/pay/initiate', [App\Http\Controllers\PaystackController::class, 'initiateRegistrationFee'])->name('register.pay.initiate')->middleware('throttle:5,1');
+Route::get('/register/pay/callback', [App\Http\Controllers\PaystackController::class, 'registrationFeeCallback'])->name('register.pay.callback');
+
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::get('/auth/google', [App\Http\Controllers\SocialAuthController::class, 'redirect'])->name('auth.google');
+Route::get('/auth/google/callback', [App\Http\Controllers\SocialAuthController::class, 'callback'])->name('auth.google.callback');
+
+Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+
+Route::post('/webhooks/paystack', [PaystackWebhookController::class, 'handle']);
+
+// Public pages
+Route::get('/features', [FeaturesController::class, 'index'])->name('features');
+Route::view('/safety', 'safety')->name('safety');
+
+// Public browsing — guests can look, not act
+Route::get('/buzz', function () {
+    if (!auth()->check() || !auth()->user()->is_admin) {
+        return redirect()->route('pulse.index');
+    }
+    return app(NewsController::class)->index(request());
+})->name('news.index');
+Route::get('/pulse', [PulseController::class, 'index'])->name('pulse.index');
+
+
+Route::middleware(['auth', 'signup.paid'])->group(function () {
+
+    Route::get('/gigs', [GigController::class, 'index'])->name('gigs.index');
+    Route::get('/gigs/{gig}', [GigController::class, 'show'])->name('gigs.show')->where('gig', '[0-9]+');
+    Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
+    Route::get('/marketplace/{listing}', [MarketplaceController::class, 'show'])->name('marketplace.show')->where('listing', '[0-9]+');
+    Route::post('/push/subscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'store'])->name('push.subscribe');
+    Route::post('/push/unsubscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.readAll');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::delete('/notifications/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->name('notifications.destroy');
+    Route::post('/tour/complete', [\App\Http\Controllers\TourController::class, 'complete'])->middleware('auth')->name('tour.complete');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboard-preview', [DashboardController::class, 'preview'])->middleware('auth')->name('dashboard.preview');
+Route::get('/profile-preview', [ProfileController::class, 'preview'])->middleware('auth')->name('profile.preview');
+Route::get('/dashboard-transfer', [DashboardController::class, 'transfer'])->middleware('auth')->name('dashboard.transfer');
+Route::get('/welcome', [\App\Http\Controllers\WelcomeTourController::class, 'show'])->middleware('auth')->name('welcome.show');
+
+    Route::get('/q-coin', [\App\Http\Controllers\QCoinController::class, 'index'])->name('qcoin.index');
+    Route::post('/q-coin/claim', [\App\Http\Controllers\QCoinController::class, 'claim'])->name('qcoin.claim');
+    Route::post('/concierge/message', [\App\Http\Controllers\ConciergeController::class, 'sendMessage'])->name('concierge.message');
+    Route::get('/concierge', [\App\Http\Controllers\ConciergeController::class, 'show'])->name('concierge.show');
+    Route::get('/chat', [\App\Http\Controllers\ChatController::class, 'index'])->name('chat.index');
+
+
+    Route::post('/gigs/{gig}/complete', [GigController::class, 'complete'])->name('gigs.complete');
+    Route::post('/gigs/{gig}/reject', [GigController::class, 'rejectDelivery'])->name('gigs.reject');
+    Route::post('/gigs/{gig}/dispute', [App\Http\Controllers\GigDisputeController::class, 'store'])->name('gigs.dispute.store');
+    Route::post('/gigs/{gig}/message', [GigController::class, 'sendMessage'])->name('gigs.message');
+    Route::get('/gigs/{gig}/messages', [GigController::class, 'messages'])->name('gigs.messages');
+    Route::post('/gigs/{gig}/review', [ReviewController::class, 'storeForGig'])->name('gigs.review');
+
+    // Gigs - posting requires Tier 1+
+    Route::middleware('plan:gigs_post')->group(function () {
+        Route::get('/gigs/create', [GigController::class, 'create'])->name('gigs.create');
+        Route::post('/gigs', [GigController::class, 'store'])->name('gigs.store');
+        Route::get('/gigs/{gig}/edit', [GigController::class, 'edit'])->name('gigs.edit');
+        Route::put('/gigs/{gig}', [GigController::class, 'update'])->name('gigs.update');
+    });
+
+    Route::post('/marketplace/{listing}/purchase', [MarketplaceController::class, 'purchase'])->name('marketplace.purchase')->middleware('plan:market_buy');
+    Route::post('/marketplace/{listing}/confirm', [MarketplaceController::class, 'confirmDelivery'])->name('marketplace.confirm');
+    Route::post('/marketplace/{listing}/dispute', [App\Http\Controllers\ListingDisputeController::class, 'store'])->name('marketplace.dispute');
+    Route::post('/marketplace/{listing}/ship', [MarketplaceController::class, 'markShipped'])->name('marketplace.ship');
+    Route::post('/marketplace/orders/{order}/confirm', [MarketplaceController::class, 'confirmOrderDelivery'])->name('marketplace.order.confirm');
+
+    Route::get('/cart', [App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add/{listing}', [App\Http\Controllers\CartController::class, 'add'])->name('cart.add')->middleware('plan:market_buy');
+    Route::post('/cart/remove/{listing}', [App\Http\Controllers\CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/cart/checkout', [App\Http\Controllers\CartController::class, 'checkout'])->name('cart.checkout')->middleware('plan:market_buy');
+    Route::post('/marketplace/{listing}/review', [ReviewController::class, 'storeForListing'])->name('marketplace.review');
+    Route::post('/marketplace/{listing}/message', [MarketplaceController::class, 'sendMessage'])->name('marketplace.message');
+    Route::get('/marketplace/{listing}/messages', [MarketplaceController::class, 'messages'])->name('marketplace.messages');
+    Route::post('/marketplace/{listing}/meetup-propose', [MarketplaceController::class, 'proposeMeetup'])->name('marketplace.meetup.propose');
+    Route::post('/marketplace/{listing}/meetup-respond/{message}', [MarketplaceController::class, 'respondMeetup'])->name('marketplace.meetup.respond');
+    Route::post('/marketplace/{listing}/favorite', [MarketplaceController::class, 'toggleFavorite'])->name('marketplace.favorite');
+    Route::get('/marketplace/favorites', [MarketplaceController::class, 'favorites'])->name('marketplace.favorites');
+    Route::get('/marketplace/orders', [MarketplaceController::class, 'myOrders'])->name('marketplace.orders');
+
+    // Marketplace - posting requires Tier 1+
+    Route::middleware('plan:market_sell')->group(function () {
+        Route::get('/marketplace/create', [MarketplaceController::class, 'create'])->name('marketplace.create');
+        Route::post('/marketplace', [MarketplaceController::class, 'store'])->name('marketplace.store');
+        Route::get('/marketplace/{listing}/edit', [MarketplaceController::class, 'edit'])->name('marketplace.edit');
+        Route::put('/marketplace/{listing}', [MarketplaceController::class, 'update'])->name('marketplace.update');
+    });
+
+    Route::get('/my-posts', [MyPostsController::class, 'index'])->name('posts.index');
+    Route::delete('/my-posts/gigs/{gig}', [MyPostsController::class, 'deleteGig'])->name('posts.gigs.delete');
+    Route::delete('/my-posts/listings/{listing}', [MyPostsController::class, 'deleteListing'])->name('posts.listings.delete');
+
+    Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
+        Route::get('/disputes', [App\Http\Controllers\GigDisputeController::class, 'index'])->name('disputes.index');
+        Route::post('/disputes/{dispute}/pay', [App\Http\Controllers\GigDisputeController::class, 'resolvePaid'])->name('disputes.pay');
+        Route::post('/disputes/{dispute}/partial', [App\Http\Controllers\GigDisputeController::class, 'resolvePartial'])->name('disputes.partial');
+        Route::post('/disputes/{dispute}/dismiss', [App\Http\Controllers\GigDisputeController::class, 'dismiss'])->name('disputes.dismiss');
+
+        Route::get('/marketplace-disputes', [App\Http\Controllers\ListingDisputeController::class, 'index'])->name('marketplace-disputes.index');
+        Route::post('/marketplace-disputes/{dispute}/pay', [App\Http\Controllers\ListingDisputeController::class, 'resolvePaid'])->name('marketplace-disputes.pay');
+        Route::post('/marketplace-disputes/{dispute}/refund', [App\Http\Controllers\ListingDisputeController::class, 'resolveRefunded'])->name('marketplace-disputes.refund');
+        Route::post('/marketplace-disputes/{dispute}/dismiss', [App\Http\Controllers\ListingDisputeController::class, 'dismiss'])->name('marketplace-disputes.dismiss');
+        Route::post('/disputes/assign', [App\Http\Controllers\Admin\DisputeAssignmentController::class, 'assign'])->name('disputes.assign');
+
+        Route::get('/', [AdminController::class, 'index'])->name('index');
+
+        Route::get('/users', [AdminController::class, 'users'])->name('users');
+        Route::post('/users/{user}/toggle-admin', [AdminController::class, 'toggleAdmin'])->name('toggle-admin');
+        Route::post('/users/{user}/toggle-ban', [AdminController::class, 'toggleBan'])->name('toggle-ban');
+        Route::post('/users/{user}/toggle-customer-care', [AdminController::class, 'toggleCustomerCare'])->name('toggle-customer-care');
+        Route::put('/users/{user}/cc-permissions', [App\Http\Controllers\Admin\CustomerCarePermissionController::class, 'update'])->name('users.cc-permissions');
+        Route::get('/invites', [AdminController::class, 'invites'])->name('invites');
+        Route::post('/invites', [AdminController::class, 'invitesStore'])->name('invites.store');
+        Route::delete('/invites/{invite}', [AdminController::class, 'invitesRevoke'])->name('invites.revoke');
+        Route::post('/users/{user}/adjust-balance', [AdminController::class, 'adjustBalance'])->name('adjust-balance');
+
+        Route::get('/grant-access', [AdminController::class, 'grantAccess'])->name('grant-access');
+        Route::post('/grant-access', [AdminController::class, 'grantAccessStore'])->name('grant-access.store');
+
+        Route::get('/gigs', [AdminController::class, 'gigs'])->name('gigs');
+        Route::get('/conversations', [\App\Http\Controllers\Admin\ConversationController::class, 'index'])->name('conversations.index');
+        Route::get('/conversations/{conversation}', [\App\Http\Controllers\Admin\ConversationController::class, 'show'])->name('conversations.show');
+        Route::delete('/conversations/{conversation}/messages/{message}', [\App\Http\Controllers\Admin\ConversationController::class, 'destroyMessage'])->name('conversations.messages.delete');
+        Route::delete('/gigs/{gig}', [AdminController::class, 'deleteGig'])->name('gigs.delete');
+
+        Route::get('/listings', [AdminController::class, 'listings'])->name('listings');
+        Route::delete('/listings/{listing}', [AdminController::class, 'deleteListing'])->name('listings.delete');
+
+        Route::get('/transactions', [AdminController::class, 'transactions'])->name('transactions');
+        Route::get('/revenue', [AdminController::class, 'revenue'])->name('revenue');
+
+        Route::get('/subscriptions', [AdminController::class, 'subscriptions'])->name('subscriptions');
+        Route::post('/subscriptions/{subscription}/cancel', [AdminController::class, 'cancelSubscription'])->name('subscriptions.cancel');
+
+        Route::get('/news', [AdminController::class, 'news'])->name('news');
+        Route::delete('/news/{news}', [AdminController::class, 'deleteNews'])->name('news.delete');
+
+        Route::get('/blog', [AdminController::class, 'blog'])->name('blog');
+        Route::delete('/blog/{blog}', [AdminController::class, 'deleteBlog'])->name('blog.delete');
+
+        // Feature gates - admin on/off toggle + tier requirement per feature
+        Route::get('/feature-gates', [App\Http\Controllers\Admin\FeatureGateController::class, 'index'])->name('feature-gates.index');
+        Route::post('/feature-gates/{featureGate}/toggle', [App\Http\Controllers\Admin\FeatureGateController::class, 'toggle'])->name('feature-gates.toggle');
+        Route::put('/feature-gates/{featureGate}', [App\Http\Controllers\Admin\FeatureGateController::class, 'update'])->name('feature-gates.update');
+
+        Route::get('/settings/appearance', [App\Http\Controllers\Admin\SiteSettingsController::class, 'index'])->name('settings.appearance');
+        Route::post('/settings/appearance/background', [App\Http\Controllers\Admin\SiteSettingsController::class, 'updateBackground'])->name('settings.appearance.background');
+        Route::post('/settings/appearance/background/reset', [App\Http\Controllers\Admin\SiteSettingsController::class, 'resetBackground'])->name('settings.appearance.background.reset');
+        Route::post('/settings/appearance/animations', [App\Http\Controllers\Admin\SiteSettingsController::class, 'updateAnimations'])->name('settings.appearance.animations');
+    });
+
+        Route::prefix('customer-care')->name('customer-care.')->middleware('customer_care')->group(function () {
+        Route::get('/', [CustomerCareController::class, 'index'])->name('index');
+
+        Route::get('/orders', [CustomerCareController::class, 'orders'])->name('orders');
+        Route::post('/orders/{order}/confirm-delivery', [CustomerCareController::class, 'confirmDelivery'])->name('orders.confirm-delivery');
+
+        Route::get('/gig-disputes', [CustomerCareController::class, 'gigDisputes'])->name('gig-disputes');
+        Route::post('/gig-disputes/{dispute}/note', [CustomerCareController::class, 'addGigDisputeNote'])->name('gig-disputes.note');
+        Route::post('/gig-disputes/{dispute}/escalate', [CustomerCareController::class, 'escalateGigDispute'])->name('gig-disputes.escalate');
+
+        Route::get('/listing-disputes', [CustomerCareController::class, 'listingDisputes'])->name('listing-disputes');
+        Route::post('/listing-disputes/{dispute}/note', [CustomerCareController::class, 'addListingDisputeNote'])->name('listing-disputes.note');
+        Route::post('/listing-disputes/{dispute}/escalate', [CustomerCareController::class, 'escalateListingDispute'])->name('listing-disputes.escalate');
+
+        Route::get('/gigs/{gig}/thread', [CustomerCareController::class, 'gigThread'])->name('gigs.thread');
+        Route::post('/gigs/{gig}/message', [CustomerCareController::class, 'sendGigMessage'])->name('gigs.message');
+
+        Route::get('/listings/{listing}/thread', [CustomerCareController::class, 'listingThread'])->name('listings.thread');
+        Route::post('/listings/{listing}/message', [CustomerCareController::class, 'sendListingMessage'])->name('listings.message');
+
+        Route::post('/flag', [CustomerCareController::class, 'flag'])->name('flag');
+
+        Route::get('/user-lookup', [CustomerCareController::class, 'userLookup'])->name('user-lookup');
+    });
+
+Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/theme-toggle', [ProfileController::class, 'toggleThemeStyle'])->name('profile.theme.toggle');
+    Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::get('/profile/reputation', [ProfileController::class, 'reputation'])->name('profile.reputation');
+    Route::get('/profile/account', [ProfileController::class, 'account'])->name('profile.account');
+    Route::get('/profile/appearance', [ProfileController::class, 'appearance'])->name('profile.appearance');
+
+    Route::get('/vendor/activate', function () { return view('auth.vendor-activate'); })->name('vendor.activate');
+    Route::post('/vendor/pay', [PaystackController::class, 'initiateVendor'])->name('vendor.pay');
+    Route::get('/vendor/callback', [PaystackController::class, 'vendorCallback'])->name('vendor.callback');
+
+    Route::get('/onboarding/interests', [OnboardingController::class, 'show'])->name('onboarding.interests');
+    Route::post('/onboarding/interests', [OnboardingController::class, 'store'])->name('onboarding.interests.store');
+
+    Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
+    Route::post('/leaderboard/toggle', [LeaderboardController::class, 'toggleOptIn'])->name('leaderboard.toggle');
+
+    Route::get('/services', [ServicesController::class, 'index'])->name('services.index');
+    Route::get('/services/data-plans', [ServicesController::class, 'dataPlans'])->name('services.data-plans');
+    Route::post('/services/airtime', [ServicesController::class, 'buyAirtime'])->name('services.airtime');
+    Route::post('/services/data', [ServicesController::class, 'buyData'])->name('services.data');
+    Route::get('/services/cable-plans', [ServicesController::class, 'cablePlans'])->name('services.cable-plans');
+    Route::post('/services/cable', [ServicesController::class, 'buyCable'])->name('services.cable');
+    Route::get('/services/receipt/{purchase}', [ServicesController::class, 'receipt'])->name('services.receipt');
+    Route::get('/wallet/pin', [TransactionPinController::class, 'edit'])->name('wallet.pin.edit');
+    Route::post('/wallet/pin', [TransactionPinController::class, 'update'])->name('wallet.pin.update')->middleware('throttle:5,1');
+    Route::post('/saved-numbers', [SavedNumberController::class, 'store'])->name('saved-numbers.store');
+    Route::delete('/saved-numbers/{savedNumber}', [SavedNumberController::class, 'destroy'])->name('saved-numbers.destroy');
+
+    Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+    Route::post('/subscriptions/subscribe', [SubscriptionController::class, 'subscribe'])->name('subscriptions.subscribe');
+    Route::get('/subscriptions/callback', [SubscriptionController::class, 'paystackCallback'])->name('subscriptions.callback');
+
+    // Old links to /tier still work
+    Route::redirect('/tier', '/subscriptions')->name('tier.index');
+
+    Route::get('/referrals', [ReferralController::class, 'index'])->name('referrals.index');
+    Route::get('/money-tracker', [WalletController::class, 'moneyTracker'])->name('money-tracker.index');
+    Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
+    Route::post('/wallet/send', [WalletController::class, 'sendMoney'])->name('wallet.send');
+    Route::get('/wallet/transactions/{id}', [WalletController::class, 'showTransaction'])->name('wallet.transaction.show');
+    Route::get('/wallet/send', [WalletController::class, 'sendMoneyForm'])->name('wallet.send.form');
+    Route::post('/wallet/send/resolve', [WalletController::class, 'resolveRecipient'])->name('wallet.send.resolve');
+    Route::post('/wallet/paystack/initiate', [PaystackController::class, 'initiate'])->name('paystack.initiate');
+    Route::get('/wallet/paystack/callback', [PaystackController::class, 'callback'])->name('paystack.callback');
+    Route::get('/wallet/virtual-account', [VirtualAccountController::class, 'create'])->name('wallet.virtual-account');
+    Route::post('/wallet/virtual-account', [VirtualAccountController::class, 'store'])->name('wallet.virtual-account.store');
+    Route::get('/wallet/bank-account', [App\Http\Controllers\BankAccountController::class, 'edit'])->name('wallet.bank-account.edit');
+    Route::post('/wallet/bank-account/resolve', [App\Http\Controllers\BankAccountController::class, 'resolve'])->name('wallet.bank-account.resolve');
+    Route::post('/wallet/bank-account', [App\Http\Controllers\BankAccountController::class, 'store'])->name('wallet.bank-account.store');
+    Route::post('/wallet/withdraw', [App\Http\Controllers\WalletActionController::class, 'withdraw'])->name('wallet.withdraw')->middleware('throttle:5,1');
+
+    Route::post('/news', [NewsController::class, 'store'])->name('news.store');
+    Route::get('/news/ad/create', [NewsController::class, 'createAd'])->name('news.ad.create');
+    Route::post('/news/ad', [NewsController::class, 'storeAd'])->name('news.ad.store');
+
+    // Blogging
+    Route::get('/blog', [App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');
+    Route::get('/blog/create', [App\Http\Controllers\BlogController::class, 'create'])->name('blog.create');
+    Route::post('/blog', [App\Http\Controllers\BlogController::class, 'store'])->name('blog.store');
+    Route::get('/blog/{blog}', [App\Http\Controllers\BlogController::class, 'show'])->name('blog.show');
+
+    Route::get('/search', [SearchController::class, 'search'])->name('search');
+});
+
+// Gig accept/deliver/withdraw: work for both logged-in users and guests (guest identity via qelvo_guest_token cookie, checked inside the controller).
+// Only 'web' middleware here - 'auth'/'signup.paid' would block guests entirely, defeating the guest-claim feature the controller implements.
+Route::post('/gigs/{gig}/accept', [App\Http\Controllers\GigController::class, 'accept'])->name('gigs.accept')->middleware(['web']);
+Route::post('/gigs/{gig}/deliver', [App\Http\Controllers\GigController::class, 'deliver'])->name('gigs.deliver')->middleware(['web']);
+Route::post('/gigs/{gig}/withdraw', [App\Http\Controllers\GigController::class, 'withdraw'])->name('gigs.withdraw')->middleware(['web']);
+
+// Signup fee (₦1,000 account activation) - requires login (user exists) but not signup_fee_paid
+Route::middleware('auth')->group(function () {
+    Route::get('/activate', function () { return view('auth.signup-fee-activate'); })->name('signup-fee.activate');
+    Route::get('/signup-fee', [App\Http\Controllers\PaystackController::class, 'initiateSignupFee'])->name('signup-fee.initiate');
+    Route::get('/signup-fee/callback', [App\Http\Controllers\PaystackController::class, 'signupFeeCallback'])->name('signup-fee.callback');
+});
+
+use App\Http\Controllers\AppearanceController;
+Route::middleware('auth')->group(function () {
+    Route::post('/settings/appearance', [AppearanceController::class, 'update'])->name('appearance.update');
+    Route::get('/settings/appearance', function () {
+        return view('settings.appearance');
+    })->name('appearance.edit');
+});
+
+// Level & Badge routes
+Route::middleware(['auth', 'signup.paid'])->group(function () {
+    Route::prefix('levels-badges')->name('levels-badges.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\LevelBadgeController::class, 'show'])->name('show');
+        Route::get('/badges', [\App\Http\Controllers\LevelBadgeController::class, 'badges'])->name('badges');
+        Route::get('/levels', [\App\Http\Controllers\LevelBadgeController::class, 'levels'])->name('levels');
+    });
+});
+
+// Admin Level & Badge Management Routes
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Levels
+    Route::prefix('levels')->name('levels.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\AdminLevelBadgeController::class, 'levels'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\AdminLevelBadgeController::class, 'createLevel'])->name('create');
+        Route::post('/', [\App\Http\Controllers\AdminLevelBadgeController::class, 'storeLevel'])->name('store');
+        Route::get('/{level}/edit', [\App\Http\Controllers\AdminLevelBadgeController::class, 'editLevel'])->name('edit');
+        Route::put('/{level}', [\App\Http\Controllers\AdminLevelBadgeController::class, 'updateLevel'])->name('update');
+        Route::delete('/{level}', [\App\Http\Controllers\AdminLevelBadgeController::class, 'deleteLevel'])->name('destroy');
+    });
+
+    // Badges
+    Route::prefix('badges')->name('badges.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\AdminLevelBadgeController::class, 'badges'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\AdminLevelBadgeController::class, 'createBadge'])->name('create');
+        Route::post('/', [\App\Http\Controllers\AdminLevelBadgeController::class, 'storeBadge'])->name('store');
+        Route::get('/{badge}/edit', [\App\Http\Controllers\AdminLevelBadgeController::class, 'editBadge'])->name('edit');
+        Route::put('/{badge}', [\App\Http\Controllers\AdminLevelBadgeController::class, 'updateBadge'])->name('update');
+        Route::delete('/{badge}', [\App\Http\Controllers\AdminLevelBadgeController::class, 'deleteBadge'])->name('destroy');
+    });
+
+    // Refresh user levels/badges
+    Route::post('/users/{user}/refresh-badges', [\App\Http\Controllers\AdminLevelBadgeController::class, 'refreshUser'])->name('users.refresh-badges');
+});
+
+Route::middleware(['auth','admin'])->group(function () {
+    Route::get('/admin/concierge-misses', [\App\Http\Controllers\Admin\ConciergeMissController::class, 'index'])->name('admin.concierge-misses.index');
+    Route::post('/admin/concierge-misses/{miss}/resolve', [\App\Http\Controllers\Admin\ConciergeMissController::class, 'resolve'])->name('admin.concierge-misses.resolve');
+});
+
+
+Route::middleware('auth')->prefix('kyc')->name('kyc.')->group(function () {
+    Route::get('/', [App\Http\Controllers\KycController::class, 'show'])->name('show');
+    Route::post('/submit', [App\Http\Controllers\KycController::class, 'submit'])->name('submit');
+    Route::post('/{step}', [App\Http\Controllers\KycController::class, 'save'])->name('save');
+});
+
+Route::get('/dash-holo', function () { return view('dash-holo'); })->middleware('auth')->name('dash-holo');
+
+// ---- Free signup, area, plan gates ----
+Route::aliasMiddleware('plan', \App\Http\Middleware\EnsurePlanAllows::class);
+Route::post('/register', [\App\Http\Controllers\FreeRegisterController::class, 'store'])->middleware('throttle:5,1');
+Route::middleware('auth')->group(function () {
+    Route::get('/area', [\App\Http\Controllers\AreaController::class, 'show'])->name('area.show');
+    Route::post('/area', [\App\Http\Controllers\AreaController::class, 'update'])->name('area.update');
+});
+
+// ===== NOURVEX SEO pages =====
+Route::view('/about', 'about')->name('about');
+Route::view('/faq', 'faq')->name('faq');
+Route::get('/robots.txt', [\App\Http\Controllers\SeoController::class, 'robots']);
+Route::get('/sitemap.xml', [\App\Http\Controllers\SeoController::class, 'sitemap']);
+Route::redirect('/features', '/#features');
+
+=== RankingService ===
+<?php
+
+namespace App\Services;
+
+use App\Models\RankPoint;
+use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
+
+class RankingService
+{
+    // $ref makes an award one-time (e.g. "login:2026-10-03"). Same ref twice = ignored.
+    public function award(User $user, string $source, ?int $points = null, ?string $ref = null): ?RankPoint
+    {
+        $base = $points ?? (int) config("ranking.points.$source", 0);
+        if ($base <= 0) {
+            return null;
+        }
+
+        if ($ref !== null && RankPoint::where('user_id', $user->id)->where('source', $source)->where('ref', $ref)->exists()) {
+            return null;
+        }
+
+        $mult = (float) config('ranking.plan_multiplier.' . $user->planKey(), 1);
+
+        try {
+            return RankPoint::create([
+                'user_id' => $user->id,
+                'source' => $source,
+                'points' => (int) round($base * $mult),
+                'ref' => $ref,
+            ]);
+        } catch (UniqueConstraintViolationException $e) {
+            return null;
+        }
+    }
+
+    public function since(string $period)
+    {
+        return match ($period) {
+            'week' => now()->startOfWeek(),
+            'month' => now()->startOfMonth(),
+            default => null,
+        };
+    }
+
+    public function total(User $user, string $period = 'all'): int
+    {
+        $q = RankPoint::where('user_id', $user->id);
+        if ($since = $this->since($period)) {
+            $q->where('created_at', '>=', $since);
+        }
+        return (int) $q->sum('points');
+    }
+
+    // $period: week | month | all. $area: null = everyone.
+    public function board(string $period = 'week', ?string $area = null, int $limit = 20)
+    {
+        $q = RankPoint::query()
+            ->join('users', 'users.id', '=', 'rank_points.user_id')
+            ->where('users.leaderboard_opt_in', true)
+            ->selectRaw('users.id, users.name, users.avatar_url, users.area, users.tier, SUM(rank_points.points) as total')
+            ->groupBy('users.id', 'users.name', 'users.avatar_url', 'users.area', 'users.tier')
+            ->orderByDesc('total')
+            ->limit($limit);
+
+        if ($since = $this->since($period)) {
+            $q->where('rank_points.created_at', '>=', $since);
+        }
+        if ($area) {
+            $q->where('users.area', $area);
+        }
+
+        return $q->get();
+    }
+}
+
+=== RankPoint ===
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class RankPoint extends Model
+{
+    protected $fillable = ['user_id', 'source', 'points', 'ref'];
+}
+
+=== LeaderboardController ===
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Transaction;
+use App\Services\RankingService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class LeaderboardController extends Controller
+{
+    public function index(Request $request, RankingService $ranking)
+    {
+        $user = Auth::user();
+        $areas = config('areas.list');
+
+        $type = $request->query('type') === 'earnings' ? 'earnings' : 'points';
+        $period = in_array($request->query('period'), ['week', 'month', 'all'], true) ? $request->query('period') : 'week';
+        $area = array_key_exists((string) $request->query('area'), $areas) ? $request->query('area') : null;
+
+        if ($type === 'earnings') {
+            $q = Transaction::query()
+                ->where('transactions.amount', '>', 0)
+                ->whereIn('transactions.type', ['gig_earning', 'marketplace_sale', 'referral_bonus'])
+                ->join('users', 'transactions.user_id', '=', 'users.id')
+                ->where('users.leaderboard_opt_in', true)
+                ->selectRaw('users.id, users.name, users.area, SUM(transactions.amount) as total')
+                ->groupBy('users.id', 'users.name', 'users.area')
+                ->orderByDesc('total')
+                ->take(50);
+
+            if ($since = $ranking->since($period)) {
+                $q->where('transactions.created_at', '>=', $since);
+            }
+            if ($area) {
+                $q->where('users.area', $area);
+            }
+            $rows = $q->get();
+        } else {
+            $rows = $ranking->board($period, $area, 50);
+        }
+
+        $myRank = null;
+        foreach ($rows as $i => $row) {
+            if ((int) $row->id === (int) $user->id) {
+                $myRank = $i + 1;
+                break;
+            }
+        }
+
+        return view('leaderboard.index', [
+            'rows' => $rows,
+            'type' => $type,
+            'period' => $period,
+            'area' => $area,
+            'areas' => $areas,
+            'optedIn' => $user->leaderboard_opt_in,
+            'myPoints' => $ranking->total($user, $period),
+            'myRank' => $myRank,
+        ]);
+    }
+
+    public function toggleOptIn(Request $request)
+    {
+        $user = Auth::user();
+        $user->update(['leaderboard_opt_in' => !$user->leaderboard_opt_in]);
+
+        return back()->with('status', $user->leaderboard_opt_in ? 'You\'re now on the leaderboard!' : 'You\'ve been removed from the leaderboard.');
+    }
+}
+
+=== Concierge dir ===
+total 52
+drwx------. 2 u0_a720 u0_a720 4096 Oct 12 15:01 .
+drwx------. 3 u0_a720 u0_a720 4096 Oct 12 15:01 ..
+-rw-------. 1 u0_a720 u0_a720 7407 Oct 12 15:01 ConciergeService.php
+-rw-------. 1 u0_a720 u0_a720 6868 Oct 12 15:01 ConciergeToolRegistry.php
+-rw-------. 1 u0_a720 u0_a720 7962 Oct 12 15:01 KeywordConciergeService.php
+  187 app/Services/Concierge/ConciergeService.php
+  193 app/Services/Concierge/ConciergeToolRegistry.php
+  166 app/Services/Concierge/KeywordConciergeService.php
+   51 app/Http/Controllers/ConciergeController.php
+  597 total
+
+=== DashboardController ===
+<?php
+
+namespace App\Http\Controllers;
+
+class DashboardController extends Controller
+{
+    public function index()
+    {
+        if (!auth()->user()->has_seen_tour) {
+            return redirect()->route('welcome.show');
+        }
+        return view('dashboard-v3', $this->getData());
+    }
+
+    public function preview()
+    {
+        return view('dashboard-preview', $this->getData());
+    }
+
+    public function transfer()
+    {
+        return view('dashboard-transfer', $this->getData());
+    }
+
+    protected function getData()
+    {
+        $weekStart = now()->startOfWeek();
+
+        $gigs = \App\Models\Gig::leftJoin('gig_views', function ($join) {
+                $join->on('gigs.id', '=', 'gig_views.gig_id')
+                     ->where('gig_views.user_id', '=', auth()->id());
+            })
+            ->select('gigs.*', 'gig_views.views_count')
+            ->orderByDesc('gig_views.views_count')
+            ->orderByDesc('gigs.created_at')
+            ->take(3)
+            ->get();
+
+        $userId = auth()->id();
+
+        $earnings = \App\Models\Transaction::where('user_id', $userId)
+            ->where('type', 'gig_earning')
+            ->sum('amount');
+
+        $allReferrals = \App\Models\User::where('referred_by', $userId)->get();
+        $activeReferrals = $allReferrals->where('tier', '!=', 'free');
+        $inactiveReferrals = $allReferrals->where('tier', '=', 'free');
+
+        $totalIn = \App\Models\Transaction::where('user_id', $userId)->where('amount', '>', 0)->sum('amount');
+        $totalOut = abs(\App\Models\Transaction::where('user_id', $userId)->where('amount', '<', 0)->sum('amount'));
+
+        $myOpenGigs = \App\Models\Gig::where('user_id', $userId)->where('status', 'open')->count();
+        $myCompletedGigs = \App\Models\Gig::where('accepted_by', $userId)->where('status', 'completed')->count();
+        $myListings = \App\Models\Listing::where('user_id', $userId)->count();
+
+        $recentTx = \App\Models\Transaction::where('user_id', $userId)->latest()->take(6)->get();
+
+        $categoryTotals = \App\Models\Transaction::where('user_id', $userId)
+            ->selectRaw('type, SUM(ABS(amount)) as total')
+            ->groupBy('type')
+            ->pluck('total', 'type');
+
+        $userInterests = auth()->user()->interests;
+        $userInterests = is_array($userInterests) ? $userInterests : [];
+        $feedGigs = \App\Models\Gig::where('status', 'open')
+            ->when(count($userInterests) > 0, fn($q) => $q->whereIn('category', $userInterests))
+            ->latest()->take(4)->get()->map(fn($g) => ['type' => 'gig', 'title' => $g->title, 'meta' => '₦' . number_format($g->amount), 'url' => route('gigs.show', $g->id), 'time' => $g->created_at]);
+        $feedNews = \App\Models\News::latest('published_at')->take(3)->get()->map(fn($n) => ['type' => 'news', 'title' => $n->title, 'meta' => $n->category, 'url' => route('news.index'), 'time' => $n->published_at]);
+        $feedListings = \App\Models\Listing::where('status', 'available')->latest()->take(3)->get()->map(fn($l) => ['type' => 'listing', 'title' => $l->title, 'meta' => '₦' . number_format($l->amount), 'url' => route('marketplace.show', $l->id), 'time' => $l->created_at]);
+        $todayFeed = $feedGigs->concat($feedNews)->concat($feedListings)->sortByDesc('time')->take(8)->values();
+
+        $myReviews = \App\Models\Review::with(['reviewer', 'reviewable'])->where('reviewed_user_id', $userId)->latest()->take(5)->get();
+        $avgRating = \App\Models\Review::where('reviewed_user_id', $userId)->avg('rating');
+        $reviewCount = \App\Models\Review::where('reviewed_user_id', $userId)->count();
+
+        $streakMilestones = [7, 30, 100, 365];
+        $nextStreakMilestone = collect($streakMilestones)->first(fn($m) => $m > (auth()->user()->streak_days ?? 0));
+
+        $referralEarnings = \App\Models\Transaction::where('user_id', $userId)->where('type', 'referral_bonus')->sum('amount');
+        $canEarnReferralBonus = (float) auth()->user()->planRule('referral_pct', 0) > 0;
+
+        $leaderboardRank = null;
+        if (auth()->user()->leaderboard_opt_in) {
+            $rankedUsers = \App\Models\Transaction::where('transactions.created_at', '>=', $weekStart)
+                ->where('amount', '>', 0)
+                ->whereIn('type', ['gig_earning', 'marketplace_sale', 'referral_bonus'])
+                ->join('users', 'transactions.user_id', '=', 'users.id')
+                ->where('users.leaderboard_opt_in', true)
+                ->selectRaw('users.id, SUM(transactions.amount) as total')
+                ->groupBy('users.id')
+                ->orderByDesc('total')
+                ->pluck('users.id')
+                ->values();
+            $rankIndex = $rankedUsers->search($userId);
+            $leaderboardRank = $rankIndex === false ? null : $rankIndex + 1;
+        }
+
+        $currentSubscription = \App\Models\Subscription::currentFor(auth()->user());
+
+        $recentConversations = \App\Models\Conversation::whereHas('participants', fn($q) => $q->where('user_id', $userId))
+            ->where('type', 'business')
+            ->with(['participants.user', 'latestMessage'])
+            ->orderByDesc('last_message_at')
+            ->take(5)
+            ->get()
+            ->map(function ($conv) use ($userId) {
+                $other = $conv->participants->pluck('user')->filter(fn($u) => $u && $u->id !== $userId)->first();
+                return [
+                    'other_name' => $other->name ?? 'Unknown',
+                    'other_avatar' => $other->avatar_url ?? null,
+                    'last_body' => $conv->latestMessage->body ?? '',
+                    'last_at' => $conv->last_message_at,
+                    'unread' => $conv->unreadCountFor($userId),
+                ];
+            });
+
+        return [
+            'isVerified' => (bool) auth()->user()->virtual_account_number,
+            'walletCapRemaining' => auth()->user()->virtual_account_number ? null : max(0, \App\Models\User::NO_BVN_WALLET_CAP - auth()->user()->wallet_balance),
+            'user' => auth()->user(),
+            'balance' => auth()->user()->wallet_balance,
+            'qCoinBalance' => auth()->user()->q_coin_balance,
+            'qCoinClaimedToday' => auth()->user()->q_coin_last_claim_date === now()->toDateString(),
+            'currentSubscription' => $currentSubscription,
+            'earnings' => $earnings,
+            'todayFeed' => $todayFeed,
+            'recentConversations' => $recentConversations,
+            'streakDays' => auth()->user()->streak_days,
+            'latestNews' => \App\Models\News::latest('published_at')->take(6)->get(),
+            'gigCount' => \App\Models\Gig::where('status', 'open')->count(),
+            'listingCount' => \App\Models\Listing::count(),
+            'referralCount' => $activeReferrals->count(),
+            'referralTotal' => $allReferrals->count(),
+            'referralActive' => $activeReferrals->values(),
+            'referralInactive' => $inactiveReferrals->values(),
+            'totalIn' => $totalIn,
+            'totalOut' => $totalOut,
+            'netFlow' => $totalIn - $totalOut,
+            'myOpenGigs' => $myOpenGigs,
+            'myCompletedGigs' => $myCompletedGigs,
+            'myListings' => $myListings,
+            'recentTx' => $recentTx,
+            'categoryTotals' => $categoryTotals,
+            'topGigs' => $gigs,
+            'topListings' => \App\Models\Listing::latest()->take(4)->get(),
+            'trend' => [4000, 6500, 5200, 8100, 7300, 9200],
+            'breakdown' => [55, 30, 15],
+            'myReviews' => $myReviews,
+            'avgRating' => $avgRating,
+            'reviewCount' => $reviewCount,
+            'nextStreakMilestone' => $nextStreakMilestone,
+            'referralEarnings' => $referralEarnings,
+            'canEarnReferralBonus' => $canEarnReferralBonus,
+            'leaderboardRank' => $leaderboardRank,
+        ];
+    }
+}
+
+=== layouts/app-authenticated (head) ===
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOURVEX - @yield('title', 'Dashboard')</title>
+    @include('partials.favicons')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="#7c5cf0">
+    <meta name="vapid-public-key" content="{{ config('webpush.vapid.public_key') }}">
+    <meta name="tour-endpoint" content="{{ route('tour.complete') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ asset('css/dash-tweaks.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/holo-balance.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/halo-dock.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/design-tokens.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/app-v2.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/app-enhance.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/balance-ledger.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/neumorphic-auth.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/theme-presets.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/glass-dashboard.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/profile-glass.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/nav-authenticated-green.css') }}?v={{ time() }}">
+        <link rel="stylesheet" href="{{ asset('css/dashboard2.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/dashboard2-minimal.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/dashboard-premium.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/dashboard-v3.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/notifications.css') }}?v={{ time() }}">
+    <script src="{{ asset('js/push.js') }}?v={{ time() }}" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/mobile-nav-styles.css') }}?v={{ time() }}">
+    <!-- old levi.css removed -->
+    <link rel="stylesheet" href="{{ asset('css/preloader.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/dashboard-aurora.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/aurora-pages.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/scrollbar.css') }}?v={{ time() }}">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+        if (localStorage.getItem('sidebarCollapsed') === '1') {
+            document.documentElement.setAttribute('data-sidebar', 'collapsed');
+        }
+    </script>
+    <style>
+    @media (max-width: 900px) {
+      .neu-sidebar { display: none !important; }
+      .d2-global-rail { display: none !important; }
+    }
+    @media (min-width: 901px) {
+      .mnav-bar { display: none !important; }
+    }
+    @media (max-width: 900px) {
+      .auth-page-shell, .app-push-content { margin-left: 0 !important; }
+    }
+    </style>
+</head>
+@php
+    $routeName = request()->route() ? request()->route()->getName() : '';
+    $pageKey = $routeName ? explode('.', $routeName)[0] : '';
+@endphp
+<body data-page="{{ $pageKey }}" data-theme-style="{{ auth()->user()->theme_style ?? 'glass' }}" style="--user-accent: {{ auth()->user()->accent_color ?? '#0F9D6E' }};@if(auth()->user()?->background_url)--au-bg-image: url('{{ auth()->user()->background_url }}');@endif"
+    data-sidebar-style="{{ auth()->user()->sidebar_style ?? 'rail' }}"
+    data-mobile-nav-style="{{ auth()->user()->mobile_nav_style ?? 'painted_pill' }}">
+    @include('partials.preloader')
+    @if((auth()->user()->theme_style ?? 'glass') === 'plain')
+        @include('partials.dqm-topbar')
+    @endif
+
+<div class="app-shell-flex">
+        @if((auth()->user()->sidebar_style ?? 'rail') === 'rail')
+        @include('partials.nav-rail', ['active' => $pageKey])
+        @else
+        @include('partials.nav-sidebar-classic', ['active' => $pageKey])
+        @endif
+        @include('partials.nav-mobile-bar', ['active' => $pageKey])
+        @include('partials.nav-edge-dock', ['active' => $pageKey])
+        @include('partials.nav-halo-dock', ['active' => $pageKey])
+            <div class="auth-page-shell">
+                <div class="app-push-content auth-reveal-content" id="appPushContent">
+                    @unless(($pageKey ?? '') === 'dashboard')
+                        @if((auth()->user()->theme_style ?? 'glass') !== 'plain')
+                            @include('partials.nav-icons')
+                            @endif
+                        @unless(($pageKey ?? '') === 'dashboard')
+                            @include('partials.levi-bubble-v2')
+                        @endunless
+                    @endunless
+                    @yield('content')
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ asset('js/charts.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/reveal.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/quick-actions-tilt.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/balance-tile-alive.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/app-enhance.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/balance-ledger.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/mobile-settings-menu.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/auth-shell.js') }}?v={{ time() }}"></script>
+    <!-- old levi-bubble.js removed -->
+    <script src="{{ asset('js/levi-tour.js') }}?v={{ time() }}"></script>
+    <script>
+        lucide.createIcons();
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        if (sidebarToggle) {
+            const icon = sidebarToggle.querySelector('i');
+            function syncSidebarIcon() {
+                const collapsed = document.documentElement.getAttribute('data-sidebar') === 'collapsed';
+                icon.setAttribute('data-lucide', collapsed ? 'chevron-right' : 'chevron-left');
+                lucide.createIcons();
+            }
+            syncSidebarIcon();
+            sidebarToggle.addEventListener('click', function () {
+                const collapsed = document.documentElement.getAttribute('data-sidebar') === 'collapsed';
+                if (collapsed) {
+                    document.documentElement.removeAttribute('data-sidebar');
+                    localStorage.setItem('sidebarCollapsed', '0');
+                } else {
+                    document.documentElement.setAttribute('data-sidebar', 'collapsed');
+                    localStorage.setItem('sidebarCollapsed', '1');
+                }
+                syncSidebarIcon();
+            });
+        }
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.getAttribute('data-theme') === 'dark';
+            html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        }
+    </script>
+        <script src="{{ asset('js/preloader.js') }}?v={{ time() }}"></script>
+    @yield('scripts')
+<!-- levi.js removed: duplicate of levi-bubble.js, was causing double message submission -->
+<script src="{{ asset('js/edge-dock.js') }}?v={{ time() }}"></script>
+<script src="{{ asset('js/holo-balance.js') }}?v={{ time() }}"></script>
+<script src="{{ asset('js/mnav-scroll-transparency.js') }}?v={{ time() }}"></script>
+</body>
+</html>
+
+=== VIEWS (rest) ===
+resources/views/partials/landing-features-hscroll.blade.php
+resources/views/partials/landing-hero-mobile.blade.php
+resources/views/partials/landing-hero.blade.php
+resources/views/partials/landing-plans.blade.php
+resources/views/partials/landing-steps-stack.blade.php
+resources/views/partials/landing-theme.blade.php
+resources/views/partials/landing-trust-marquee.blade.php
+resources/views/partials/lazy-mode-bar.blade.php
+resources/views/partials/levi-bubble-v2.blade.php
+resources/views/partials/levi-bubble.blade.php
+resources/views/partials/levi-inline.blade.php
+resources/views/partials/mobile-topbar.blade.php
+resources/views/partials/nav-admin.blade.php
+resources/views/partials/nav-authenticated.blade.php
+resources/views/partials/nav-edge-dock.blade.php
+resources/views/partials/nav-halo-dock.blade.php
+resources/views/partials/nav-icons.blade.php
+resources/views/partials/nav-mobile-bar.blade.php
+resources/views/partials/nav-rail.blade.php
+resources/views/partials/nav-sidebar-classic.blade.php
+resources/views/partials/nv-footer.blade.php
+resources/views/partials/nv-theme-global.blade.php
+resources/views/partials/preloader.blade.php
+resources/views/partials/seo-head.blade.php
+resources/views/partials/site-nav.blade.php
+resources/views/partials/sponsor-stack.blade.php
+resources/views/posts/index.blade.php
+resources/views/profile/account.blade.php
+resources/views/profile/appearance.blade.php
+resources/views/profile/index.blade.php
+resources/views/profile/reputation.blade.php
+resources/views/pulse.blade.php
+resources/views/q-coin/index.blade.php
+resources/views/q-coin/partials/q-coin-minimal.blade.php
+resources/views/referrals/index.blade.php
+resources/views/rewards/achievements.blade.php
+resources/views/safety.blade.php
+resources/views/services/index.blade.php
+resources/views/services/receipt.blade.php
+resources/views/settings/appearance.blade.php
+resources/views/subscriptions/index.blade.php
+resources/views/vendor/mail/html/button.blade.php
+resources/views/vendor/mail/html/footer.blade.php
+resources/views/vendor/mail/html/header.blade.php
+resources/views/vendor/mail/html/layout.blade.php
+resources/views/vendor/mail/html/message.blade.php
+resources/views/vendor/mail/html/panel.blade.php
+resources/views/vendor/mail/html/subcopy.blade.php
+resources/views/vendor/mail/html/table.blade.php
+resources/views/vendor/mail/html/themes/default.css
+resources/views/vendor/mail/text/button.blade.php
+resources/views/vendor/mail/text/footer.blade.php
+resources/views/vendor/mail/text/header.blade.php
+resources/views/vendor/mail/text/layout.blade.php
+resources/views/vendor/mail/text/message.blade.php
+resources/views/vendor/mail/text/panel.blade.php
+resources/views/vendor/mail/text/subcopy.blade.php
+resources/views/vendor/mail/text/table.blade.php
+resources/views/wallet/bank-account.blade.php
+resources/views/wallet/index.blade.php
+resources/views/wallet/pin.blade.php
+resources/views/wallet/receipt.blade.php
+resources/views/wallet/send.blade.php
+resources/views/wallet/virtual-account-setup.blade.php
+resources/views/wallet/virtual-account.blade.php
+resources/views/welcome-tour.blade.php
+resources/views/welcome.blade.php
+
+=== deploy.sh ===
+#!/bin/bash
+set -e
+SSH_USER=sspxqmqp
+HOST=198.187.29.251
+PORT=21098
+PHPBIN=/opt/alt/php84/usr/bin/php
+composer install --no-dev --optimize-autoloader
+rsync -az --delete --chmod=D755,F644 -e "ssh -p $PORT" \
+  --exclude=.git --exclude=node_modules --exclude=tests --exclude=.env \
+  --exclude=storage/logs --exclude=storage/framework --exclude=storage/app/public \
+  --exclude=public/hot --exclude=deploy.sh ./ $SSH_USER@$HOST:~/campulsy/
+ssh -p $PORT $SSH_USER@$HOST "PHPBIN=$PHPBIN bash -s" <<'REMOTE'
+cd ~/campulsy
+mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs storage/app/public bootstrap/cache
+chmod -R 775 storage bootstrap/cache
+rsync -a --chmod=D755,F644 --exclude=.htaccess public/ ~/public_html/
+sed -i "s#__DIR__.'/../#__DIR__.'/../campulsy/#g" ~/public_html/index.php
+[ -L ~/public_html/storage ] || ln -s ~/campulsy/storage/app/public ~/public_html/storage
+$PHPBIN artisan migrate --force
+$PHPBIN artisan optimize:clear
+$PHPBIN artisan optimize
+REMOTE
+composer install
+echo "DEPLOYED"
+
+=== GIT STATUS ===
+ M package-lock.json
+?? overview.txt
+?? overview2.txt
+?? routes.txt
