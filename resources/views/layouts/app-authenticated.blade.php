@@ -32,6 +32,7 @@
         <link rel="stylesheet" href="{{ asset('css/dashboard2.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/dashboard2-minimal.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/dashboard-premium.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/dashboard-v3.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/notifications.css') }}?v={{ time() }}">
     <script src="{{ asset('js/push.js') }}?v={{ time() }}" defer></script>
     <link rel="stylesheet" href="{{ asset('css/mobile-nav-styles.css') }}?v={{ time() }}">

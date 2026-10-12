@@ -9,7 +9,7 @@ class DashboardController extends Controller
         if (!auth()->user()->has_seen_tour) {
             return redirect()->route('welcome.show');
         }
-        return view('dashboard-transfer', $this->getData());
+        return view('dashboard-v3', $this->getData());
     }
 
     public function preview()
