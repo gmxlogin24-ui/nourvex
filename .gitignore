@@ -47,3 +47,6 @@ overview2.txt
 theme_audit.txt
 world_audit.txt
 routes.txt
+storage/backups/
+*.sqlite
+.env
