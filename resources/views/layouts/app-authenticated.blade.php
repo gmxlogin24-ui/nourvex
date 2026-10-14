@@ -86,11 +86,11 @@
         @include('partials.nav-halo-dock', ['active' => $pageKey])
             <div class="auth-page-shell">
                 <div class="app-push-content auth-reveal-content" id="appPushContent">
-                    @unless(($pageKey ?? '') === 'dashboard')
+                    @unless(($pageKey ?? '') === 'dashboard' || ($pageKey ?? '') === 'overview')
                         @if((auth()->user()->theme_style ?? 'glass') !== 'plain')
                             @include('partials.nav-icons')
                             @endif
-                        @unless(($pageKey ?? '') === 'dashboard')
+                        @unless(($pageKey ?? '') === 'dashboard' || ($pageKey ?? '') === 'overview')
                             @include('partials.levi-bubble-v2')
                         @endunless
                     @endunless

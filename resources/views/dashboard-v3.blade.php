@@ -113,7 +113,7 @@
   var el = document.getElementById('v3Ring');
   if (el && window.Chart) {
     new Chart(el, { type: 'doughnut',
-      data: { datasets: [{ data: @json($cats->values()), backgroundColor: @json(array_slice($palette, 0, max(1, $cats->count()))), borderWidth: 0, borderRadius: 10, spacing: 4 }] },
+      data: { datasets: [{ data: {!! json_encode($cats->values()) !!}, backgroundColor: {!! json_encode(array_slice($palette, 0, max(1, $cats->count()))) !!}, borderWidth: 0, borderRadius: 10, spacing: 4 }] },
       options: { cutout: '78%', plugins: { legend: { display: false }, tooltip: { enabled: false } } } });
   }
   document.querySelectorAll('#v3Filter a').forEach(function (a) {

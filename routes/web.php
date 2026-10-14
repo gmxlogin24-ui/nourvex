@@ -392,3 +392,5 @@ Route::view('/faq', 'faq')->name('faq');
 Route::get('/robots.txt', [\App\Http\Controllers\SeoController::class, 'robots']);
 Route::get('/sitemap.xml', [\App\Http\Controllers\SeoController::class, 'sitemap']);
 Route::redirect('/features', '/#features');
+
+Route::middleware(['auth', 'signup.paid'])->get('/overview', [\App\Http\Controllers\OverviewController::class, 'index'])->name('overview');
