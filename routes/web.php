@@ -99,10 +99,8 @@ Route::middleware(['auth', 'signup.paid'])->group(function () {
     Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markRead'])->name('notifications.read');
     Route::delete('/notifications/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->name('notifications.destroy');
     Route::post('/tour/complete', [\App\Http\Controllers\TourController::class, 'complete'])->middleware('auth')->name('tour.complete');
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-Route::get('/dashboard-preview', [DashboardController::class, 'preview'])->middleware('auth')->name('dashboard.preview');
+    Route::get('/dashboard', [\App\Http\Controllers\OverviewController::class, 'index'])->name('dashboard');
 Route::get('/profile-preview', [ProfileController::class, 'preview'])->middleware('auth')->name('profile.preview');
-Route::get('/dashboard-transfer', [DashboardController::class, 'transfer'])->middleware('auth')->name('dashboard.transfer');
 Route::get('/welcome', [\App\Http\Controllers\WelcomeTourController::class, 'show'])->middleware('auth')->name('welcome.show');
 
     Route::get('/q-coin', [\App\Http\Controllers\QCoinController::class, 'index'])->name('qcoin.index');
@@ -376,7 +374,6 @@ Route::middleware('auth')->prefix('kyc')->name('kyc.')->group(function () {
     Route::post('/{step}', [App\Http\Controllers\KycController::class, 'save'])->name('save');
 });
 
-Route::get('/dash-holo', function () { return view('dash-holo'); })->middleware('auth')->name('dash-holo');
 
 // ---- Free signup, area, plan gates ----
 Route::aliasMiddleware('plan', \App\Http\Middleware\EnsurePlanAllows::class);
@@ -393,4 +390,4 @@ Route::get('/robots.txt', [\App\Http\Controllers\SeoController::class, 'robots']
 Route::get('/sitemap.xml', [\App\Http\Controllers\SeoController::class, 'sitemap']);
 Route::redirect('/features', '/#features');
 
-Route::middleware(['auth', 'signup.paid'])->get('/overview', [\App\Http\Controllers\OverviewController::class, 'index'])->name('overview');
+Route::redirect('/overview', '/dashboard');

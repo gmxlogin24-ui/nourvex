@@ -5,18 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\Gig;
 use App\Models\Listing;
 use App\Models\Transaction;
-use App\Services\RankingService;
 use Illuminate\Support\Facades\Auth;
 
 class OverviewController extends Controller
 {
-    public function index(RankingService $ranking)
+    public function index()
     {
         $user = Auth::user();
         $id = $user->id;
 
-        $totalIn = (float) Transaction::where('user_id', $id)->where('amount', '>', 0)->sum('amount');
-        $totalOut = abs((float) Transaction::where('user_id', $id)->where('amount', '<', 0)->sum('amount'));
+        if (!$user->has_seen_tour) {
+            return redirect()->route('welcome.show');
+        }
 
         $from = now()->subDays(6)->startOfDay();
         $rows = Transaction::where('user_id', $id)->where('created_at', '>=', $from)->get(['amount', 'created_at']);
@@ -30,20 +30,17 @@ class OverviewController extends Controller
             $labels[] = substr($day->format('D'), 0, 1);
         }
 
+        $parts = explode(' ', trim((string) $user->name));
+
         return view('overview', [
+            'firstName' => $parts[0] !== '' ? $parts[0] : 'there',
             'balance' => (float) $user->wallet_balance,
-            'totalIn' => $totalIn,
-            'totalOut' => $totalOut,
             'weekIn' => (float) $rows->where('amount', '>', 0)->sum('amount'),
             'weekOut' => abs((float) $rows->where('amount', '<', 0)->sum('amount')),
             'flow' => $flow,
             'labels' => $labels,
-            'qCoin' => (int) $user->q_coin_balance,
-            'streak' => (int) $user->streak_days,
-            'rankPoints' => $ranking->total($user, 'month'),
-            'openGigs' => Gig::where('user_id', $id)->where('status', 'open')->count(),
-            'completedGigs' => Gig::where('accepted_by', $id)->where('status', 'completed')->count(),
-            'listings' => Listing::where('user_id', $id)->count(),
+            'gigCount' => Gig::where('status', 'open')->count(),
+            'listingCount' => Listing::where('status', 'available')->count(),
         ]);
     }
 }

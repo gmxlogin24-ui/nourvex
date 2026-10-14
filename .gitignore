@@ -42,3 +42,8 @@ _*_response.html
 /setup_*.sh
 /scripts_patch_*
 /{*
+overview.txt
+overview2.txt
+theme_audit.txt
+world_audit.txt
+routes.txt

@@ -1,0 +1,6 @@
+/* Neutral page background for the Hustles and Market pages. World colours are accents only (see world-pages.css). */
+body[data-page="marketplace"], body[data-page="gigs"],
+body[data-page="marketplace"] .app-shell-flex, body[data-page="gigs"] .app-shell-flex,
+body[data-page="marketplace"] .auth-page-shell, body[data-page="gigs"] .auth-page-shell,
+body[data-page="marketplace"] .app-push-content, body[data-page="gigs"] .app-push-content { background:#F5F6F8 !important; }
+html:has(body[data-page="marketplace"]), html:has(body[data-page="gigs"]) { background:#F5F6F8; }

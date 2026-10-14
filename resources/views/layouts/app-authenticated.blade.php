@@ -41,6 +41,7 @@
     <link rel="stylesheet" href="{{ asset('css/dashboard-aurora.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/aurora-pages.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/scrollbar.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/worlds.css') }}?v={{ time() }}">
 
     <script>
         if (localStorage.getItem('theme') === 'dark') {
