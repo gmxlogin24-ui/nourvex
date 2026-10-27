@@ -26,3 +26,12 @@
 @media (max-width:767px){
   .lpxm-hero{height:auto !important;min-height:520px !important;padding-top:calc(96px + env(safe-area-inset-top,0px)) !important}
 }
+
+/* drawerfix: the mobile drawer must not take space in the page */
+#snDrawer,.sn-drawer{position:fixed !important;top:0 !important;right:0 !important;height:100% !important;max-height:100vh !important;width:min(86vw,340px) !important;transform:translateX(105%);transition:transform .28s ease;z-index:80 !important;overflow-y:auto}
+#snDrawer.open,#snDrawer.sn-open,.sn-drawer.open,.sn-drawer.sn-open,.sn-open #snDrawer,html.sn-open .sn-drawer,body.sn-open .sn-drawer{transform:translateX(0)}
+#snBackdrop,.sn-backdrop{position:fixed !important;inset:0 !important;z-index:70 !important}
+@media (max-width:767px){
+  .lpxb-burger i{background:#fff !important;height:3px !important}
+  .lpxb-bar{background:#000}
+}
