@@ -20,6 +20,7 @@
             document.documentElement.setAttribute('data-theme', 'dark');
         }
     </script>
+<link rel="stylesheet" href="{{ asset('css/land-fix.css') }}?v={{ time() }}">
 </head>
 @php
     $routeName = request()->route() ? request()->route()->getName() : '';

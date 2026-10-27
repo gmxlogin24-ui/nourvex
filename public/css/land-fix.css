@@ -1,0 +1,28 @@
+@media (max-width:767px){
+  .lpxb-burger{position:relative !important;width:36px !important;height:36px !important;display:block !important;opacity:1 !important}
+  .lpxb-burger i{position:absolute !important;left:7px !important;right:7px !important;width:auto !important;height:2px !important;border-radius:2px;background:#fff !important;opacity:1 !important}
+  .lpxb-burger i:nth-child(1){top:13px !important}
+  .lpxb-burger i:nth-child(2){top:21px !important}
+  .lpxb-bar.scrolled .lpxb-burger i{background:var(--nvn-fg,#0b0d14) !important}
+}
+
+/* landgap: phones, remove the full-screen black hero gap */
+@media (max-width:767px){
+  .lpxm-hero{height:auto !important;min-height:0 !important;padding-top:calc(96px + env(safe-area-inset-top,0px)) !important;padding-bottom:56px !important}
+  .lpxm-copy,.lpxm-copy *{opacity:1 !important;visibility:visible !important;transform:none !important}
+  #lpxHero{display:none !important}
+}
+
+/* landgap2: apply the mobile hero to all phone widths (641-767px) */
+@media (min-width:641px) and (max-width:767px){
+  .lpxm-hero{display:flex !important;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;isolation:isolate;padding:0 20px 80px;background:#050505}
+  .lpxm-bg{position:absolute;inset:0;z-index:-2;background:url('/images/hero-mind.jpg') 70% 30%/cover no-repeat}
+  .lpxm-scrim{position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(5,5,5,.5) 0%,rgba(5,5,5,0) 26%),linear-gradient(180deg,rgba(5,5,5,.25) 0%,rgba(5,5,5,.55) 65%,rgba(5,5,5,.92) 100%)}
+  .lpxm-meta,.lpxm-meta span{color:#fff}
+  .lpxm-h,.lpxm-sub,.lpxm-sub b{color:#fff !important}
+  .lpxm-btn{color:#111}
+  .lp-hero.lpx-hero{display:none !important}
+}
+@media (max-width:767px){
+  .lpxm-hero{height:auto !important;min-height:520px !important;padding-top:calc(96px + env(safe-area-inset-top,0px)) !important}
+}
