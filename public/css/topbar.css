@@ -1,0 +1,8 @@
+.ovm-bar{ display:flex; align-items:center; gap:6px; padding:6px 8px; border-radius:99px; margin:0 0 10px; }
+.ovm-bar .dg-av{ width:32px; height:32px; border-radius:50%; overflow:hidden; display:grid; place-items:center; flex:none; background:rgba(128,128,128,.18); color:var(--ink,#0A0A0A); font-weight:800; font-size:13px; text-decoration:none; }
+.ovm-bar .dg-av img{ width:100%; height:100%; object-fit:cover; }
+.ovm-search{ flex:1; min-width:0; display:flex; align-items:center; gap:7px; height:32px; padding:0 12px; border-radius:99px; font-size:12px; font-weight:600; color:var(--mute,#6B6B6B); text-decoration:none; background:rgba(128,128,128,.14); }
+.ovm-search svg{ width:14px; height:14px; flex:none; }
+.ovm-ic{ position:relative; width:32px; height:32px; display:grid; place-items:center; flex:none; color:var(--ink,#0A0A0A); text-decoration:none; }
+.ovm-ic svg{ width:18px; height:18px; }
+.ovm-bell .nv-badge{ position:absolute; top:-2px; right:-4px; }

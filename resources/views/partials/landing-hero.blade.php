@@ -28,7 +28,7 @@ setTimeout(function () { document.documentElement.classList.remove('lpx-pre'); }
 
     <div class="lp-hero-in lpx-in">
         <span class="lp-hero-side-label" aria-hidden="true">Work &middot; Sell &middot; Earn</span>
-        <div class="lpx-word" role="img" aria-label="NOURVEX">
+        <div class="lpx-word" role="img" aria-label="NAURVEX">
             <span class="lpx-g lpx-l" aria-hidden="true">N</span><span class="lpx-g lpx-e" aria-hidden="true"><span class="lp-hero-o lp-ai-o"><svg viewBox="0 0 100 116" overflow="visible">
                 <defs>
                     <radialGradient id="lpEyeSclera" cx="50%" cy="46%" r="62%"><stop offset="0" stop-color="#fdfdfe"/><stop offset=".6" stop-color="#f1f2f7"/><stop offset=".88" stop-color="#d6d9e5"/><stop offset="1" stop-color="#b3b8cb"/></radialGradient>
@@ -73,7 +73,7 @@ setTimeout(function () { document.documentElement.classList.remove('lpx-pre'); }
 
     <div class="lpx-bottom">
         <div class="lpx-card">
-            <div class="lpx-card-top"><span class="lpx-card-label">NOURVEX LTD</span><i data-lucide="shield-check"></i></div>
+            <div class="lpx-card-top"><span class="lpx-card-label">NAURVEX LTD</span><i data-lucide="shield-check"></i></div>
             <span class="lpx-cut" aria-hidden="true"></span>
             <p class="lpx-card-text">Work, sell and get paid, all in one campus app.</p>
             <p class="lpx-card-sub">Escrow-held payments and PIN-confirmed transfers keep your money safe.</p>

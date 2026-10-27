@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NOURVEX - @yield('title', 'Work, sell, get paid')</title>
+    <title>NAURVEX - @yield('title', 'Work, sell, get paid')</title>
 @include('partials.seo-head')
     @include('partials.favicons')
 @include('partials.nv-theme-global')
@@ -45,5 +45,7 @@
     </script>
         <script src="{{ asset('js/preloader.js') }}?v={{ @filemtime(public_path('js/preloader.js')) }}"></script>
     @yield('scripts')
+<script src="/js/auto-contrast.js?v=3" defer></script>
+<script src="/js/auto-dark.js?v=8" defer></script>
 </body>
 </html>

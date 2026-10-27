@@ -32,7 +32,7 @@ class OverviewController extends Controller
 
         $parts = explode(' ', trim((string) $user->name));
 
-        return view('overview', [
+        return view('dashboard-glass', [
             'firstName' => $parts[0] !== '' ? $parts[0] : 'there',
             'balance' => (float) $user->wallet_balance,
             'weekIn' => (float) $rows->where('amount', '>', 0)->sum('amount'),

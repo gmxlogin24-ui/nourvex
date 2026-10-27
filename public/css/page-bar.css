@@ -1,0 +1,21 @@
+.pb-bar{ position:fixed; top:calc(8px + env(safe-area-inset-top,0px)); left:10px; right:10px; z-index:1700; display:flex; align-items:center; gap:8px; height:52px; padding:0 8px; border-radius:26px; overflow:hidden;
+  background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.7);
+  -webkit-backdrop-filter:blur(14px) saturate(190%) brightness(1.04); backdrop-filter:blur(14px) saturate(190%) brightness(1.04);
+  transition:background .25s ease, border-color .25s ease; }
+.pb-bar.pb-scrolling{ background:rgba(255,255,255,.04); border-color:rgba(255,255,255,.35); }
+html[data-theme="dark"] .pb-bar{ background:rgba(20,22,28,.28); border-color:rgba(255,255,255,.18); }
+html[data-theme="dark"] .pb-bar.pb-scrolling{ background:rgba(20,22,28,.08); border-color:rgba(255,255,255,.1); }
+.pb-av{ width:36px; height:36px; border-radius:50%; overflow:hidden; display:grid; place-items:center; flex:none; background:rgba(128,128,128,.2); color:var(--ink,#0A0A0A); font-weight:800; font-size:14px; text-decoration:none; }
+.pb-av img{ width:100%; height:100%; object-fit:cover; }
+.pb-search{ flex:1; min-width:0; height:36px; display:flex; align-items:center; gap:8px; padding:0 14px; border-radius:99px; font-size:13px; font-weight:600; text-decoration:none; color:var(--mute,#6B6B6B); background:rgba(128,128,128,.14); }
+.pb-search svg{ width:15px; height:15px; flex:none; }
+.pb-ic{ position:relative; width:36px; height:36px; display:grid; place-items:center; flex:none; color:var(--ink,#0A0A0A); text-decoration:none; }
+.pb-ic svg{ width:19px; height:19px; }
+.pb-ic .nv-badge{ position:absolute; top:-2px; right:-3px; }
+body.pb-on{ padding-top:calc(72px + env(safe-area-inset-top,0px)); }
+body.pb-on .dg > .dg-in{ padding-top:calc(72px + env(safe-area-inset-top,0px)) !important; }
+.dqm-topbar, .dqm-topbar-tab, .dqm-topbar-fixed, .ovm-bar, .mk-cart, .hw-top, .hw-market{ display:none !important; }
+@media (min-width:901px){
+  .pb-bar{ left:50%; right:auto; width:min(1100px,calc(100% - 48px)); transform:translateX(-50%); }
+}
+html body a.hw-q.hw-q{ position:fixed !important; top:auto !important; left:auto !important; right:26px !important; bottom:172px !important; transform:none !important; z-index:60 !important; }

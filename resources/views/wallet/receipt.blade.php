@@ -52,7 +52,7 @@
     var btn = document.getElementById('shareReceiptBtn');
     if (!btn) return;
     btn.addEventListener('click', function(){
-        var text = @json("NOURVEX Pay Receipt\nRef: " . ($tx->reference ?? '-') . "\n" . $tx->description . "\nAmount: ₦" . number_format(abs($tx->amount), 2) . "\nStatus: " . ($tx->status ?? 'successful') . "\nDate: " . $tx->created_at->format('d M Y, h:ia'));
+        var text = @json("NAURVEX Pay Receipt\nRef: " . ($tx->reference ?? '-') . "\n" . $tx->description . "\nAmount: ₦" . number_format(abs($tx->amount), 2) . "\nStatus: " . ($tx->status ?? 'successful') . "\nDate: " . $tx->created_at->format('d M Y, h:ia'));
         if (navigator.share) {
             navigator.share({ text: text }).catch(function(){});
         } else if (navigator.clipboard) {

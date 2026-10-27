@@ -1,0 +1,43 @@
+/* hover-fix-q15 */
+.hw-top,.hw-market,.hw-q{transition:transform .38s cubic-bezier(.22,1,.36,1)}
+
+/* Q-Coin: 3D spinning coin, top-right */
+.hw-coin{display:none !important}
+.hw-qc{display:block;position:relative;width:46px;height:46px;flex:none;pointer-events:none}
+.hw-qc .qc{position:absolute;left:50%;top:50%;width:210px;height:210px;margin:-105px 0 0 -105px;transform:scale(.21)}
+.hw-qc .qc-halo,.hw-qc .qc-shadow{display:none}
+.hw-qc .qc-float{animation:none !important}
+.hw-qc .qc-spin{animation:qcSpin 3.2s linear infinite !important}
+.hw-q{top:calc(env(safe-area-inset-top,0px) + 10px) !important;right:10px !important;left:auto !important;bottom:auto !important;transform:none;z-index:60 !important}
+
+/* Hustles: glass button, top-left */
+.hw-top{top:calc(env(safe-area-inset-top,0px) + 10px) !important;left:10px !important;right:auto !important;bottom:auto !important;z-index:60 !important}
+.hw-top .hw-cord{display:none !important}
+.hw-top .hw-3d{width:46px;height:46px;border-radius:16px}
+.hw-top .hw-3d svg{width:17px;height:17px}
+
+/* Market: glass button, bottom-left (mobile only) */
+.hw-market{top:auto !important;left:10px !important;bottom:calc(122px + env(safe-area-inset-bottom,0px)) !important}
+
+@media(min-width:901px){
+  .hw-q{top:8px !important;left:50% !important;right:auto !important;transform:translateX(-50%)}
+  .hw-top{top:14px !important;left:100px !important}
+  body[data-theme-style="plain"] .hw-top{left:292px !important}
+}
+
+/* Tucked state: top buttons slide up, Market slides left */
+.hw-away .hw-bal{display:none}
+.hw-q.hw-away{transform:translateY(calc(-100% + 14px))}
+.hw-top.hw-away{transform:translateY(-32px)}
+.hw-market.hw-away{transform:translateX(calc(-100% + 14px))}
+@media(min-width:901px){
+  .hw-q.hw-away{transform:translate(-50%,calc(-100% + 12px))}
+  .hw-top.hw-away{transform:translateY(-32px)}
+}
+@media (prefers-reduced-motion: reduce){
+  .hw-qc .qc-spin{animation:none !important}
+}
+
+/* hustles-peek-q22 */
+.hw-tag{transition:opacity .3s}
+.hw-top.hw-away .hw-tag{opacity:0}

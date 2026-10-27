@@ -1,0 +1,41 @@
+/* wp page: inner pages (post, edit, detail, orders, saved, my posts) in the Hustles / Market format */
+.wp-page{ --ink:#111418; --mute:#7A8594; --line:#E7EAF0; max-width:640px; margin:0 auto; padding:14px 14px 150px; color:var(--ink); font-size:13px; line-height:1.4; overflow-x:clip; }
+.wp-page.wp-wide{ max-width:1100px; }
+.wp-page *, .wp-page *::before, .wp-page *::after{ box-sizing:border-box; }
+.wp-page .grid > *, .wp-page .flex > *{ min-width:0; }
+.wp-page a{ text-decoration:none; }
+.wp-page h1{ margin:0; font-size:20px; font-weight:800; letter-spacing:-.02em; line-height:1.15; color:var(--ink); }
+.wp-page h2{ font-size:14px; font-weight:800; color:var(--ink); }
+.wp-page .text-muted{ color:var(--mute) !important; }
+.wp-page .text-accent{ color:var(--w-dark) !important; }
+.wp-page > a:first-child{ display:inline-flex !important; align-items:center; gap:6px; height:34px; padding:0 12px; margin-bottom:14px !important; border-radius:99px; background:#fff; border:1px solid var(--line); color:var(--ink) !important; font-size:12px !important; font-weight:700; }
+.wp-page .glass-card, .wp-page .bg-card{ background:#fff !important; border:1px solid var(--line) !important; border-radius:18px !important; box-shadow:none !important; -webkit-backdrop-filter:none !important; backdrop-filter:none !important; color:var(--ink); }
+.wp-page .glass-card{ padding:16px; }
+.wp-page .input-field, .wp-page input[type=text], .wp-page input[type=number], .wp-page input[type=date], .wp-page input[type=email], .wp-page input[type=tel], .wp-page select, .wp-page textarea{
+  display:block; width:100% !important; max-width:100%; min-width:0; height:44px; padding:0 14px; border-radius:12px !important; border:1px solid var(--line) !important;
+  background-color:#fff !important; color:var(--ink) !important; font:inherit; font-size:16px; outline:0; box-shadow:none !important; -webkit-appearance:none; appearance:none; text-align:left; }
+.wp-page textarea{ height:auto; min-height:104px; padding:12px 14px; line-height:1.45; }
+.wp-page select{ padding-right:34px; background-image:linear-gradient(45deg,transparent 50%,#7A8594 50%),linear-gradient(135deg,#7A8594 50%,transparent 50%); background-position:calc(100% - 19px) 19px,calc(100% - 13px) 19px; background-size:6px 6px; background-repeat:no-repeat; }
+.wp-page input[type=date]::-webkit-date-and-time-value{ text-align:left; min-height:1.3em; }
+.wp-page input[type=file]{ display:block; width:100%; max-width:100%; font-size:12.5px; padding:9px 10px; border:1px dashed var(--line); border-radius:12px; background:#fff; color:var(--ink); }
+.wp-page .input-field:focus, .wp-page input:focus, .wp-page select:focus, .wp-page textarea:focus{ border-color:var(--w) !important; box-shadow:0 0 0 3px var(--w-tint) !important; }
+.wp-page ::placeholder{ color:#9AA3AF; }
+.wp-page input[type=checkbox]{ width:18px; height:18px; flex:none; accent-color:var(--w); }
+.wp-page .btn-primary{ display:inline-flex; align-items:center; justify-content:center; gap:8px; height:46px; padding:0 20px; border:0 !important; border-radius:12px !important; background:var(--w) !important; color:#fff !important; font-weight:700; font-size:13.5px; box-shadow:0 8px 16px -8px var(--w) !important; cursor:pointer; }
+.wp-page .btn-primary.w-full{ width:100%; }
+.wp-page .btn-secondary{ display:inline-flex; align-items:center; gap:6px; height:38px; padding:0 14px; border:1px solid var(--line) !important; border-radius:12px !important; background:#fff !important; color:var(--ink) !important; font-weight:700; font-size:12.5px; box-shadow:none !important; cursor:pointer; }
+.wp-page .icon-badge{ width:44px; height:44px; border-radius:14px; display:grid; place-items:center; background:var(--w-tint) !important; color:var(--w-dark) !important; }
+.wp-page .tx-status{ display:inline-block; padding:3px 10px; border-radius:99px; font-size:10.5px; font-weight:700; background:#EEF0F4; color:var(--mute); }
+.wp-page .tx-status.done{ background:var(--w-tint); color:var(--w-dark); }
+.wp-page .tx-table-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid var(--line); }
+.wp-page .tx-table-row:last-child{ border-bottom:0; }
+@media (prefers-reduced-motion: reduce){ .wp-page *{ animation:none !important; } }
+
+/* wp subnav: switcher + page chips on the inner Market / Hustles pages */
+.wpn{ --ink:#111418; --mute:#7A8594; --line:#E7EAF0; margin:0 0 14px; }
+.wpn .wsw{ margin:0; }
+.wpn .wp-chips{ margin:10px -14px 0; padding:0 14px 2px; }
+.wp-page > .wpn + a{ display:none !important; }
+.wpn-out{ max-width:640px; margin:0 auto; padding:12px 16px 0; }
+.wpn-out .wpn{ margin:0; }
+.wpn-out .wpn .wp-chips{ margin:10px -16px 0; padding:0 16px 2px; }

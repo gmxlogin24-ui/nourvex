@@ -1,0 +1,60 @@
+/* ovm: arrangement and sizing only. Looks come from dashboard-glass.css */
+.ovm{ padding-bottom:96px; }
+.ovm-bar{ display:flex; align-items:center; gap:6px; padding:6px 8px; border-radius:99px; margin-bottom:10px; }
+.ovm-bar .dg-av{ width:32px; height:32px; border-radius:50%; overflow:hidden; display:grid; place-items:center; flex:none; background:rgba(63,91,255,.12); color:var(--blue); font-weight:800; font-size:13px; text-decoration:none; }
+.ovm-bar .dg-av img{ width:100%; height:100%; object-fit:cover; }
+.ovm-search{ flex:1; min-width:0; display:flex; align-items:center; gap:7px; height:32px; padding:0 12px; border-radius:99px; font-size:12px; font-weight:600; color:var(--mute); text-decoration:none; background:rgba(255,255,255,.5); }
+.ovm-search svg{ width:14px; height:14px; flex:none; }
+.ovm-ic{ width:32px; height:32px; display:grid; place-items:center; flex:none; color:var(--ink); text-decoration:none; }
+.ovm-ic svg{ width:18px; height:18px; }
+.ovm-assets{ padding:12px 14px; border-radius:24px; margin-bottom:10px; color:var(--ink); }
+.ovm-assets small{ font-size:11px; color:var(--mute); }
+.ovm-amt{ display:flex; align-items:center; gap:8px; margin-top:2px; }
+.ovm-amt b{ font-size:26px; font-weight:800; letter-spacing:-.02em; }
+.ovm-dep{ margin-left:auto; padding:8px 18px; border-radius:99px; background:#F59E0B; color:#111; font-weight:700; font-size:13px; text-decoration:none; }
+.ovm-pl{ margin:4px 0 0; font-size:11.5px; color:var(--mute); }
+.ovm-pl .pos{ color:#16A34A; font-weight:700; }
+.ovm-pl .neg{ color:#E8590C; font-weight:700; }
+.ovm-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:10px; padding-top:10px; border-top:1px solid rgba(18,22,43,.08); }
+.ovm-stats a{ display:flex; flex-direction:column; gap:1px; text-decoration:none; color:var(--mute); font-size:10px; font-weight:700; }
+.ovm-stats a b{ font-size:14px; font-weight:800; color:var(--ink); letter-spacing:-.02em; }
+.ovm-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:10px 4px; margin:0 0 10px; }
+.ovm-grid .dg-it{ align-items:center; text-align:center; gap:4px; }
+.ovm-grid .dg-tile{ width:42px; height:42px; border-radius:15px; }
+.ovm-grid .dg-tile svg{ width:19px; height:19px; }
+.ovm-grid .dg-it b{ font-size:10px; line-height:1.15; }
+.ovm-slide{ display:flex; align-items:center; gap:8px; padding:8px 14px; border-radius:18px; margin-bottom:10px; overflow:hidden; font-size:12px; font-weight:700; color:var(--ink); }
+.ovm-slide > svg{ width:14px; height:14px; flex:none; color:var(--blue); }
+.ovm-track{ flex:1; min-width:0; overflow:hidden; white-space:nowrap; }
+.ovm-track span{ display:inline-block; padding-left:100%; animation:ovmSlide 18s linear infinite; }
+@keyframes ovmSlide{ to{ transform:translateX(-100%); } }
+@media (prefers-reduced-motion: reduce){ .ovm-track span{ animation:none; padding-left:0; } }
+.ovm-tabs{ display:flex; gap:18px; overflow-x:auto; padding:8px 4px; margin-bottom:6px; white-space:nowrap; scrollbar-width:none; }
+.ovm-tabs::-webkit-scrollbar{ display:none; }
+.ovm-tabs a{ font-size:12px; font-weight:700; color:var(--mute); text-decoration:none; }
+.ovm-tabs a:first-child{ color:var(--ink); }
+.dg .ovm .dg-hlh{ margin:4px 2px 8px; }
+.dg .ovm .dg-hlh h4{ font-size:15px; }
+.dg .ovm .dg-hlh p{ font-size:11px; }
+.dg .ovm .dg-cards{ gap:8px; margin-bottom:10px; }
+.dg .ovm .dg-cards .dg-card{ height:118px; border-radius:20px; }
+@media (max-width:900px){
+  .dg .ovm .dg-grid{ display:flex; gap:8px; align-items:stretch; margin:0 0 10px; }
+  .dg .ovm .dg-grid > .dg-stage-row{ flex:1; min-width:0; display:block; }
+  .dg .ovm .dg-grid .dg-stage{ margin:0; padding:0; }
+  .dg .ovm .dg-grid .dg-deck{ height:176px; min-height:0; }
+  .dg .ovm .dg-grid > .dg-quick{ flex:none; width:54px; margin:0; padding:8px 3px; gap:4px; justify-content:space-around; max-height:none !important; overflow:visible !important; border-radius:22px; }
+  .dg .ovm .dg-grid > .dg-quick .dg-tile{ width:36px; height:36px; border-radius:13px; }
+  .dg .ovm .dg-grid > .dg-quick .dg-tile svg{ width:16px; height:16px; }
+  .dg .ovm .dg-grid > .dg-quick .dg-it b{ font-size:8px; }
+}
+@media (min-width:901px){
+  .ovm-grid{ grid-template-columns:repeat(10,1fr); }
+  .dg .ovm .dg-cards{ gap:16px; }
+  .dg .ovm .dg-cards .dg-card{ height:200px; }
+}
+.ovm-panel[hidden]{ display:none; }
+.ovm-loading{ padding:18px; border-radius:20px; text-align:center; font-size:12px; color:var(--mute); }
+.ovm-tabs a:first-child:not(.on){ color:var(--mute); }
+.ovm-tabs a.on{ color:var(--ink); box-shadow:inset 0 -2px 0 var(--blue); }
+.ovm .dgf-tabs{ display:none; }

@@ -1,0 +1,75 @@
+/* black and white UI. Photos untouched. Glass, blur, shadows, animation untouched. Remove the link to undo. */
+:root{ --m-bg:#FFFFFF; --m-fg:#000000; --m-mute:#5C5C5C; }
+html[data-theme="dark"]{ --m-bg:#000000; --m-fg:#FFFFFF; --m-mute:#A8A8A8; }
+
+/* accent colours become black (white in dark mode) */
+.dg, .ovm, .wp, .hub-bar, .hub-nav{ --blue:var(--m-fg); --acc:0,0,0; --ink:var(--m-fg); --mute:var(--m-mute); }
+html[data-theme="dark"] .dg, html[data-theme="dark"] .wp{ --acc:255,255,255; }
+body{ --user-accent:#000000 !important; }
+
+/* coloured gradient tiles: black to very dark gray, white icons */
+.dg-tile{ background-image:linear-gradient(145deg,#2B2B2B,#000000) !important; background-color:#000 !important; color:#fff !important; }
+.dg-tile svg{ color:#fff !important; stroke:#fff !important; }
+html[data-theme="dark"] .dg-tile{ box-shadow:inset 0 0 0 1px rgba(255,255,255,.22) !important; }
+.hub-nav .dg-it.on .dg-tile{ box-shadow:0 0 0 2px var(--m-bg), 0 0 0 4px var(--m-fg) !important; }
+
+/* buttons, chips, badges, active states */
+.ovm-dep, .wp .wp-btn, .dgf-post, .dgf-tab.on, .wp .gc-ic, .wp .mc-v, .nv-badge{ background:var(--m-fg) !important; background-image:none !important; color:var(--m-bg) !important; border-color:var(--m-fg) !important; }
+.wp .wp-chip.on{ background:var(--m-fg) !important; color:var(--m-bg) !important; border-color:var(--m-fg) !important; }
+.wp .gc-p, .wp .mc-p, .ovm-pl .pos, .ovm-pl .neg, .ovm-stats a b{ color:var(--m-fg) !important; }
+.wp .wp-sort a.on, .ovm-tabs a.on{ color:var(--m-fg) !important; box-shadow:inset 0 -2px 0 var(--m-fg) !important; }
+.hub-back, .hub-bell, .ovm-ic, .hub-title b, .dg-it b{ color:var(--m-fg) !important; }
+
+/* embossed buttons: background only. No shadow, border, outline or dock changes. */
+.wp .wp-btn, .dgf-post, .dgf-tab.on, .wp .wp-chip.on, .ovm-dep, .wp .mc-v{
+  background-image:linear-gradient(180deg,rgba(255,255,255,.28) 0%,rgba(255,255,255,0) 50%),linear-gradient(145deg,#454545 0%,#141414 60%,#000000 100%) !important;
+  background-color:#000 !important;
+  color:#fff !important;
+}
+html[data-theme="dark"] .wp .wp-btn, html[data-theme="dark"] .dgf-post, html[data-theme="dark"] .dgf-tab.on,
+html[data-theme="dark"] .wp .wp-chip.on, html[data-theme="dark"] .ovm-dep, html[data-theme="dark"] .wp .mc-v{
+  background-image:linear-gradient(180deg,rgba(255,255,255,.7) 0%,rgba(255,255,255,0) 50%),linear-gradient(145deg,#FFFFFF 0%,#D9D9D9 60%,#A0A0A0 100%) !important;
+  background-color:#fff !important;
+  color:#000 !important;
+}
+
+/* purple tiles: the 8-button grids only (Overview, Hustles, Market). Remove this block to undo. */
+.ovm-grid .dg-tile{
+  background-image:linear-gradient(180deg,rgba(255,255,255,.2) 0%,rgba(255,255,255,0) 45%),linear-gradient(145deg,#7C4DDB 0%,#43208F 45%,#14082F 100%) !important;
+  background-color:#14082F !important;
+}
+/* BEGIN dark tiles */
+html body{ --bt:linear-gradient(145deg,#4A4A4A 0%,#1C1C1C 48%,#000000 100%); --bt-hi:linear-gradient(180deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,0) 45%); --ti:#111111; }
+html[data-theme="dark"] body{ --ti:#FFFFFF; }
+html body[data-page="gigs"]{ --bt:linear-gradient(145deg,#1FB57C 0%,#2A2A2A 42%,#000000 100%); --ti:#0B7A55; }
+html body[data-page="marketplace"]{ --bt:linear-gradient(145deg,#FF8A2B 0%,#2A2A2A 42%,#000000 100%); --ti:#C2410C; }
+html[data-theme="dark"] body[data-page="gigs"]{ --ti:#4ADE80; }
+html[data-theme="dark"] body[data-page="marketplace"]{ --ti:#FB923C; }
+html:is(html,html[data-theme="dark"]) body :is(.hi-fire,.ovm-dep,.dgf-post,.dgf-tab.on,.nv-badge,.wp .wp-btn,.wp .wp-chip.on,.wp .gc-ic,.wp .mc-v){
+  background-image:var(--bt-hi),var(--bt) !important;
+  background-color:#000000 !important;
+  color:#fff !important;
+}
+html:is(html,html[data-theme="dark"]) body :is(.hi-fire,.ovm-dep,.wp .wp-btn,.wp .gc-ic) svg{ color:#fff !important; stroke:#fff !important; }
+html:is(html,html[data-theme="dark"]) body :is(.dg-tile,.as-tile){
+  background-image:linear-gradient(180deg,rgba(255,255,255,.6) 0%,rgba(255,255,255,.14) 100%) !important;
+  background-color:rgba(255,255,255,.2) !important;
+  -webkit-backdrop-filter:blur(14px) saturate(1.5) !important;
+  backdrop-filter:blur(14px) saturate(1.5) !important;
+  border:1px solid rgba(255,255,255,.65) !important;
+  box-shadow:0 10px 20px -12px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.9) !important;
+}
+html:is(html[data-theme="dark"]) body :is(.dg-tile,.as-tile){
+  background-image:linear-gradient(180deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,.05) 100%) !important;
+  background-color:rgba(255,255,255,.06) !important;
+  border:1px solid rgba(255,255,255,.2) !important;
+  box-shadow:0 10px 20px -12px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.25) !important;
+}
+html:is(html,html[data-theme="dark"]) body :is(.dg-tile,.as-tile) svg{ color:var(--ti,#111) !important; stroke:var(--ti,#111) !important; }
+html:is(html,html[data-theme="dark"]) body .dg-it.on .dg-tile{
+  background-image:var(--bt-hi),var(--bt) !important;
+  background-color:#000000 !important;
+  border-color:transparent !important;
+}
+html:is(html,html[data-theme="dark"]) body .dg-it.on .dg-tile svg{ color:#fff !important; stroke:#fff !important; }
+/* END dark tiles */

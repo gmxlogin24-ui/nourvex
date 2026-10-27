@@ -12,7 +12,7 @@
     @endif
 
     <div class="glass-card p-6 text-center">
-        <p class="text-muted text-sm mb-2">Your NOURVEX Pay Number</p>
+        <p class="text-muted text-sm mb-2">Your NAURVEX Pay Number</p>
         <p class="text-2xl font-bold text-accent">{{ $user->virtual_account_number }}</p>
         <p class="text-muted text-sm mt-1">{{ $user->virtual_account_bank }}</p>
         <button type="button" id="vaCopyBtn" data-account="{{ $user->virtual_account_number }}" class="btn-primary mt-4" style="padding:8px 20px;">Copy Account Number</button>

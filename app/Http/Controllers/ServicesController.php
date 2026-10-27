@@ -15,9 +15,19 @@ use Illuminate\Support\Str;
 
 class ServicesController extends Controller
 {
-    public function index()
+    public function index(Request $request)
+    {
+        $t = $request->query('tab');
+        if (in_array($t, ['airtime', 'data', 'cable'], true)) {
+            return redirect()->route('services.show', $t);
+        }
+        return view('services.hub', ['balance' => Auth::user()->wallet_balance]);
+    }
+
+    public function show(string $service)
     {
         return view('services.index', [
+            'service' => $service,
             'balance' => Auth::user()->wallet_balance,
             'networks' => VtuService::NETWORKS,
             'hasPin' => Auth::user()->hasTransactionPin(),

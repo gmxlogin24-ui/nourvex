@@ -2,6 +2,7 @@
    To change a world's accent colour, edit the three values on .wp-gigs or .wp-market. */
 .wp-gigs   { --w:#12B886; --w-dark:#0B7A5A; --w-tint:#E2F8F0; }
 .wp-market { --w:#FF7A1A; --w-dark:#C2540A; --w-tint:#FFEFE2; }
+.wp-profile { --w:#8B7CFA; --w-dark:#6C5CE7; --w-tint:#EFECFF; }
 
 .wp { --ink:#111418; --mute:#7A8594; --line:#E7EAF0; max-width:1100px; margin:0 auto; padding:14px 14px 150px; color:var(--ink); font-size:12px; line-height:1.35; }
 .wp *, .wp *::before, .wp *::after { box-sizing:border-box; }
@@ -58,3 +59,16 @@
 .wp-empty { grid-column:1 / -1; margin-top:8px; text-align:center; color:var(--mute); padding:38px 12px; background:#fff; border:1px dashed var(--line); border-radius:18px; }
 .wp-empty b { display:block; color:var(--ink); font-size:14px; margin-bottom:4px; }
 .wp-pages { margin-top:16px; }
+
+/* wp enter: arriving in a world, settle in from a slight zoom */
+@keyframes wpEnter{ from{ opacity:0; transform:scale(1.08); filter:blur(10px); } to{ opacity:1; transform:none; filter:none; } }
+.wp{ animation:wpEnter .8s cubic-bezier(.22,1,.36,1) both; }
+@media (prefers-reduced-motion: reduce){ .wp{ animation:none; } }
+
+/* shadow not outline: Market and Hustles homes, no borders, soft shadows */
+.wp{ --sh:0 8px 24px -14px rgba(17,20,24,.3), 0 1px 3px rgba(17,20,24,.06); --sh-in:0 4px 14px -8px rgba(17,20,24,.32); }
+.wp .wp-chip, .wp .wp-ico, .wp .gc, .wp .mc, .wp .wp-empty{ border-color:transparent !important; box-shadow:var(--sh) !important; }
+.wp .wp-chip.on{ box-shadow:0 8px 16px -8px var(--w) !important; }
+.wp .wp-search input{ border-color:transparent !important; box-shadow:var(--sh-in) !important; }
+.wp .wp-search input:focus{ border-color:transparent !important; box-shadow:0 0 0 3px var(--w-tint), var(--sh-in) !important; }
+.wp .gc:hover, .wp .mc:hover{ box-shadow:0 14px 26px -16px rgba(17,20,24,.45) !important; }

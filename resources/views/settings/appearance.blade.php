@@ -27,6 +27,7 @@
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
             @foreach([
                 'painted_pill' => 'Painted Pill',
+                'liquid_glass' => 'Liquid Glass',
                 'edge_dock' => 'Edge Dock',
                 'halo_dock' => 'Halo Dock',
             ] as $val => $label)

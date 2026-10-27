@@ -3,169 +3,304 @@
 
 @section('content')
 @php
-  $n = count($flow);
-  $maxAbs = max(1, max(array_map('abs', $flow)));
-  $pts = [];
-  foreach ($flow as $i => $v) { $pts[] = [round($i * (300 / ($n - 1)), 1), round(34 - ($v / $maxAbs) * 26, 1)]; }
-  $linePath = 'M' . $pts[0][0] . ',' . $pts[0][1];
-  for ($i = 1; $i < $n; $i++) {
-    $cx = round(($pts[$i - 1][0] + $pts[$i][0]) / 2, 1);
-    $linePath .= ' C' . $cx . ',' . $pts[$i - 1][1] . ' ' . $cx . ',' . $pts[$i][1] . ' ' . $pts[$i][0] . ',' . $pts[$i][1];
-  }
-  $areaPath = $linePath . ' L300,70 L0,70 Z';
   $net = $weekIn - $weekOut;
-  $mood = $net > 0 ? 162 : ($net < 0 ? 132 : 148);
-  $bubble = $net > 0 ? 'Up ₦' . number_format($net) . ' this week' : ($net < 0 ? 'Spent more than you earned this week' : 'Quiet week. Go earn something');
+  $lagos = now()->setTimezone('Africa/Lagos');
+  $hr = (int) $lagos->format('G');
+  $greet = $hr < 12 ? 'Good morning' : ($hr < 17 ? 'Good afternoon' : 'Good evening');
+  $dateLabel = $lagos->format('l, d M Y');
+  $isVerified = (bool) (auth()->user()->is_verified_seller ?? false);
+  $ovImg = file_exists(public_path('images/overview-circle.png'));
+
+  $gigBal = (float) \App\Models\Transaction::where('user_id', auth()->id())->where('type', 'gig_earning')->where('amount', '>', 0)->sum('amount');
+  $mktBal = (float) \App\Models\Transaction::where('user_id', auth()->id())->where('type', 'marketplace_sale')->where('amount', '>', 0)->sum('amount');
+
+  $dayRows = \App\Models\Transaction::where('user_id', auth()->id())->whereDate('created_at', now()->toDateString())->get(['amount']);
+  $dayIn = (float) $dayRows->where('amount', '>', 0)->sum('amount');
+  $dayOut = abs((float) $dayRows->where('amount', '<', 0)->sum('amount'));
+
+  $wkRows = \App\Models\Transaction::where('user_id', auth()->id())->where('created_at', '>=', now()->subDays(6)->startOfDay())->get(['amount', 'created_at']);
+  $bars = [];
+  for ($i = 6; $i >= 0; $i--) {
+    $d = now()->subDays($i);
+    $key = $d->toDateString();
+    $rows = $wkRows->filter(fn ($r) => $r->created_at->toDateString() === $key);
+    $bi = (float) $rows->where('amount', '>', 0)->sum('amount');
+    $bo = abs((float) $rows->where('amount', '<', 0)->sum('amount'));
+    $bars[] = ['label' => substr($d->format('D'), 0, 1), 'name' => $d->format('D'), 'in' => $bi, 'out' => $bo, 'net' => $bi - $bo];
+  }
+  $bmax = 1;
+  foreach ($bars as $b) { $bmax = max($bmax, $b['in'], $b['out']); }
+  foreach ($bars as $k => $b) {
+    $bars[$k]['pi'] = max(4, round($b['in'] / $bmax * 100));
+    $bars[$k]['po'] = max(4, round($b['out'] / $bmax * 100));
+  }
+  $nmax = 1;
+  foreach ($bars as $b) { $nmax = max($nmax, abs($b['net'])); }
+  $peak = 0;
+  foreach ($bars as $k => $b) { if ($b['net'] > $bars[$peak]['net']) { $peak = $k; } }
+  $trend = [];
+  foreach ($bars as $k => $b) { $trend[] = round(($k + .5) / 7 * 100, 2) . ',' . round(70 - ($b['net'] / $nmax) * 50, 2); }
+  $trendStr = implode(' ', $trend);
+
+  $ovJson = json_encode(['day' => ['in' => $dayIn, 'out' => $dayOut, 'net' => $dayIn - $dayOut], 'week' => ['in' => (float) $weekIn, 'out' => (float) $weekOut, 'net' => (float) $net]], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+  $barsJson = json_encode($bars, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 @endphp
+
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Sora:wght@600;700;800&display=swap');
+
+  html:has(body[data-page="dashboard"]) { background:var(--ov-edge, #D7E2EE) !important; }
   body[data-page="dashboard"], body[data-page="dashboard"] .app-shell-flex, body[data-page="dashboard"] .auth-page-shell,
-  body[data-page="dashboard"] .app-push-content { background:transparent !important; }
-  html:has(body[data-page="dashboard"]) { background:#E9F3FC; }
-  body[data-page="dashboard"]::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
-    background:radial-gradient(60% 38% at 12% 0%, rgba(61,139,253,.28), transparent 70%),
-               radial-gradient(50% 34% at 100% 52%, rgba(18,184,134,.20), transparent 70%),
-               radial-gradient(55% 30% at 0% 100%, rgba(255,122,26,.18), transparent 70%); }
+  body[data-page="dashboard"] .app-push-content, body[data-page="dashboard"] .auth-reveal-content { background:transparent !important; }
+  body[data-page="dashboard"] .app-shell-flex, body[data-page="dashboard"] .auth-page-shell,
+  body[data-page="dashboard"] .app-push-content, body[data-page="dashboard"] .auth-reveal-content { overflow-x:clip !important; overflow-y:visible !important; }
 
-  .ov { --ink:#0F1115; --mute:#8C99A8; max-width:640px; margin:0 auto; padding:14px 16px 180px; color:var(--ink); font-size:12px; overflow-x:hidden; }
-  .od { display:inline-flex; line-height:1; font-variant-numeric:tabular-nums; vertical-align:bottom; }
-  .od-w { display:inline-block; height:1em; overflow:hidden; line-height:1; vertical-align:bottom; }
-  .od-s { display:block; }
-  .od-s i { display:block; height:1em; font-style:normal; line-height:1; }
-  .od-c { display:inline-block; line-height:1; }
+  .ov { --ink:#0F1115; --mute:#7C8596; --line:rgba(255,255,255,.9);
+        position:relative; z-index:1; max-width:760px; margin:0 auto; padding:10px 14px 110px; color:var(--ink); overflow-x:clip; }
 
-  .ov-title p { margin:0; font-size:26px; font-weight:800; line-height:1.06; letter-spacing:-.02em; text-transform:uppercase; }
-  .ov-title .soft { color:#A9B7C6; }
-  .ov-bal { display:inline-block; vertical-align:bottom; }
+  .ov-head { position:relative; display:flex; justify-content:space-between; align-items:flex-start; gap:10px; padding:4px 0 10px; }
+  .ov-head::before { content:''; position:absolute; left:-14px; right:-14px; top:-10px; height:130px; z-index:-1;
+    background:linear-gradient(120deg, rgba(18,184,134,.14), rgba(255,122,26,.08) 70%, transparent);
+    clip-path:polygon(0 0, 100% 0, 100% 62%, 0 100%); }
+  .ov-left { min-width:0; flex:1; }
+  .ov-hello { font-family:'Caveat', cursive; font-size:22px; line-height:1; color:#12B886; margin:0; }
+  .ov-name { font-size:30px; font-weight:900; letter-spacing:-.03em; line-height:1; margin:2px 0 0; }
+  .ov-ver { display:inline-flex; vertical-align:middle; margin-left:6px; color:#12B886; }
+  .ov-ver svg { width:18px; height:18px; }
+  .ov-sub { font-family:'Caveat', cursive; font-size:17px; color:#0B9C73; margin:4px 0 0; position:relative; display:inline-block; }
+  .ov-sub::after { content:''; position:absolute; left:0; right:-8px; bottom:-3px; height:3px; border-radius:3px; background:linear-gradient(90deg,#FF7A1A,#FFB070); transform:rotate(-2deg); }
+  .ov-greet { font-size:11px; color:var(--mute); margin:8px 0 0; line-height:1.3; }
+  .ov-right { flex-shrink:0; max-width:46%; display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+  .ov-date { transform:rotate(-4deg); display:flex; align-items:center; gap:5px; padding:6px 9px; border-radius:14px; font-size:9px; font-weight:700; line-height:1.3; max-width:130px;
+    background:rgba(255,255,255,.6); backdrop-filter:blur(16px) saturate(170%); border:1px solid var(--line); box-shadow:0 12px 24px -16px rgba(15,17,21,.35); }
+  .ov-date svg { width:12px; height:12px; color:#12B886; flex-shrink:0; }
+  .ov-bell { position:relative; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--ink); text-decoration:none;
+    background:rgba(255,255,255,.6); backdrop-filter:blur(16px) saturate(170%); border:1px solid var(--line); box-shadow:0 12px 24px -16px rgba(15,17,21,.35); }
+  .ov-bell svg { width:16px; height:16px; }
+  .ov-bell::after { content:''; position:absolute; top:7px; right:8px; width:7px; height:7px; border-radius:50%; background:#FF7A1A; box-shadow:0 0 0 2px #fff; }
 
-  .ov-panel { position:relative; height:250px; border-radius:28px; margin-top:16px; overflow:hidden; perspective:700px;
-              background:linear-gradient(160deg, #CBE3FA, #E4F1FD); box-shadow:0 22px 44px -24px rgba(61,139,253,.7); }
-  .ov-stage { position:absolute; inset:0; transform-style:preserve-3d; }
-  .ov-plate { position:absolute; left:50%; top:44%; width:240px; height:240px; margin:-120px 0 0 -120px; border-radius:50%;
-              background:radial-gradient(circle, #fff, rgba(255,255,255,0) 70%); }
-  .ov-panel svg#char { position:absolute; left:50%; bottom:-66px; width:330px; height:344px; margin-left:-165px; opacity:0; }
-  .ov-shine { position:absolute; inset:0; pointer-events:none; opacity:.7;
-              background:linear-gradient(105deg, transparent 38%, rgba(255,255,255,.65) 50%, transparent 62%); }
-  .ov-bubble { position:absolute; left:12px; bottom:14px; max-width:160px; background:#fff; border-radius:14px 14px 14px 4px; padding:8px 11px;
-               font-size:10.5px; font-weight:700; line-height:1.25; box-shadow:0 10px 20px -10px rgba(15,17,21,.4); transform-origin:0% 100%; }
+  .ov-main { display:grid; grid-template-columns:76px minmax(0,1fr); grid-template-rows:auto auto; align-items:center; }
+  .ov-dock-slot { grid-column:1; grid-row:1; align-self:center; }
+  .ov-hero { --D:min(520px, calc(200vw - 260px)); grid-column:2; grid-row:1; position:relative; height:calc(var(--D) * .9); }
 
-  .ov-flow { position:relative; overflow:hidden; margin-top:14px; padding:12px 14px 8px; border-radius:24px; background:#0F1115; color:#fff;
-             box-shadow:0 20px 40px -18px rgba(182,240,60,.6); }
-  .ov-flow:before { content:''; position:absolute; right:-50px; top:-60px; width:180px; height:180px; border-radius:50%;
-                    background:radial-gradient(circle, rgba(182,240,60,.34), transparent 70%); pointer-events:none; }
-  .ov-fl { position:relative; display:block; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:#8b948f; }
-  .ov-fh { position:relative; display:flex; justify-content:space-between; align-items:center; margin:5px 0 2px; font-size:12px; font-weight:700; }
-  .ov-io { display:flex; gap:12px; } .ov-io .up, .ov-fh .up { color:#b6f03c; } .ov-io .dn, .ov-fh .dn { color:#ff8fa3; }
-  .ov-flow svg { position:relative; width:100%; height:auto; display:block; overflow:visible; }
-  .ov-days { position:relative; display:flex; justify-content:space-between; font-size:8.5px; color:#6f7873; padding:2px 1px 0; }
+  .ov-stage { position:absolute; top:50%; left:100%; width:var(--D); height:var(--D); margin:calc(var(--D) * -.5) 0 0 calc(var(--D) * -.5); }
+  .ov-orb { position:absolute; inset:0; border-radius:50%; overflow:hidden; background:none; box-shadow:none; }
+  .ov-orb img { width:100%; height:100%; display:block; object-fit:cover; user-select:none; -webkit-user-drag:none; }
+  .ov-ground { position:absolute; left:8%; right:8%; bottom:-4%; height:14%; border-radius:50%; background:radial-gradient(closest-side, rgba(15,17,21,.45), transparent); filter:blur(8px); z-index:0; pointer-events:none; }
+  .ov-big { position:absolute; inset:0; border-radius:50%; border:24px solid #fff; box-sizing:border-box; background:#fff;
+    box-shadow:0 36px 56px -14px rgba(15,17,21,.5), 0 16px 26px -10px rgba(15,17,21,.35); }
+  .ov-white { position:absolute; inset:11%; border-radius:50%; background:#fff; box-shadow:0 32px 48px -12px rgba(15,17,21,.5); }
+  .ov-spin { position:absolute; inset:17%; border-radius:50%;
+    background:conic-gradient(#9AA3B0, #FF7A1A, #12B886, #9AA3B0, #FF7A1A, #12B886, #9AA3B0);
+    animation:ovSpin 7s linear infinite; box-shadow:0 26px 40px -10px rgba(15,17,21,.5); }
+  .ov-black { position:absolute; inset:20%; border-radius:50%; background:#07090C; }
 
-  .ov-deck { position:relative; height:168px; margin-top:16px; }
-  .dk { position:absolute; left:0; right:0; top:0; height:132px; border-radius:24px; padding:14px 16px; background:var(--bg); color:#fff;
-        box-shadow:0 20px 36px -14px var(--glow); user-select:none; -webkit-user-select:none; cursor:grab; overflow:hidden; }
-  .dk-top { display:flex; justify-content:space-between; align-items:center; font-size:9.5px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
-  .dk-top span { display:flex; align-items:center; gap:6px; }
-  .dk-top em { font-style:normal; font-size:8.5px; font-weight:700; opacity:.7; letter-spacing:.08em; }
-  .dk-big { font-size:40px; font-weight:800; letter-spacing:-.03em; margin-top:16px; line-height:1; }
-  .dk-sub { font-size:10px; font-weight:600; opacity:.85; margin-top:7px; }
-  .dk-ghost { position:absolute; right:-10px; bottom:-18px; width:100px; height:100px; opacity:.16; }
-  .ov-hint { text-align:center; font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); margin:2px 0 0; }
+  .ov-cycle { position:absolute; top:16.5%; bottom:16.5%; left:16.5%; right:50%; z-index:3; pointer-events:none; }
+  .ov-cs { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:#fff; opacity:0;
+    font-family:'Sora', system-ui, sans-serif; transition:opacity .6s ease; padding:0 6px; }
+  .ov-cs.on { opacity:1; }
+  .ov-cs small { font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.8); line-height:1.25; }
+  .ov-cs b { display:block; margin-top:6px; font-size:clamp(17px, 4.8vw, 24px); font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; white-space:nowrap; text-shadow:0 2px 10px rgba(0,0,0,.45); }
 
-  .ov-svc { margin-top:16px; display:grid; grid-template-columns:repeat(4,1fr); gap:6px; padding:14px 8px 11px; background:#fff; border-radius:26px;
-            box-shadow:0 14px 28px -18px rgba(15,17,21,.4); }
-  .ov-svc a { display:flex; flex-direction:column; align-items:center; gap:7px; text-decoration:none; color:var(--ink); font-size:9.5px; font-weight:700; }
-  .ov-svc a span { width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#0F1115; color:#fff; }
+  .ov-tw { grid-column:1 / -1; grid-row:2; margin-top:6px; }
+  .stx { position:relative; overflow:hidden; margin:6px -14px 0; padding:18px 18px 16px; border-radius:28px; color:#fff;
+    background:linear-gradient(160deg,#16193A 0%,#0A0C1C 60%,#07080F 100%); box-shadow:0 26px 44px -24px rgba(10,12,28,.75), inset 0 1px 0 rgba(255,255,255,.08); }
+  .stx::before { content:''; position:absolute; right:-80px; top:-90px; width:260px; height:260px; border-radius:50%;
+    background:radial-gradient(circle, rgba(124,130,240,.5), transparent 62%); pointer-events:none; }
+  .stx-top { position:relative; z-index:1; display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  .stx-kicker { font-size:10px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#A9B2FF; margin:0; }
+  .stx-value { font-family:'Sora', system-ui, sans-serif; font-size:30px; font-weight:800; letter-spacing:-.02em; margin:4px 0 0; font-variant-numeric:tabular-nums; }
+  .stx-sub { font-size:11px; color:rgba(255,255,255,.6); margin:4px 0 0; font-variant-numeric:tabular-nums; }
+  .stx-tabs { position:relative; display:grid; grid-template-columns:1fr 1fr; padding:3px; border-radius:12px; background:rgba(255,255,255,.08); flex-shrink:0; }
+  .stx-tabs button { position:relative; z-index:1; border:0; background:transparent; color:rgba(255,255,255,.6); font:inherit; font-size:11px; font-weight:800; padding:7px 12px; cursor:pointer; min-width:56px; }
+  .stx-tabs button.on { color:#0A0C1C; }
+  .stx-ind { position:absolute; top:3px; bottom:3px; left:3px; width:calc(50% - 3px); border-radius:9px; background:#fff; }
+
+  .stx-day { position:relative; z-index:1; margin-top:18px; display:flex; flex-direction:column; gap:14px; }
+  .stx-row { display:grid; grid-template-columns:44px minmax(0,1fr) auto; align-items:center; gap:10px; font-size:12px; font-weight:700; }
+  .stx-row span:last-child { font-variant-numeric:tabular-nums; }
+  .stx-track { height:16px; border-radius:99px; background:rgba(255,255,255,.08); overflow:hidden; }
+  .stx-fill { height:100%; width:0; border-radius:99px; }
+  .stx-fill.in { background:linear-gradient(90deg,#14B57E,#5CF2B5); box-shadow:0 0 16px rgba(92,242,181,.5); }
+  .stx-fill.out { background:linear-gradient(90deg,#FF7A1A,#FFB866); box-shadow:0 0 16px rgba(255,122,26,.5); }
+
+  .stx-week { position:relative; z-index:1; margin-top:18px; height:160px; display:none; align-items:flex-end; gap:8px; }
+  .stx-week.show { display:flex; }
+  .stx-col { position:relative; flex:1; height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:6px; }
+  .stx-bars { width:100%; height:calc(100% - 20px); display:flex; align-items:flex-end; justify-content:center; gap:3px; }
+  .stx-bar { width:38%; max-width:12px; border-radius:7px 7px 3px 3px; transform-origin:bottom; transform:scaleY(0); }
+  .stx-bar.in { background:linear-gradient(180deg,#5CF2B5,#14B57E); box-shadow:0 0 12px rgba(92,242,181,.45); }
+  .stx-bar.out { background:linear-gradient(180deg,#FFB866,#FF7A1A); box-shadow:0 0 12px rgba(255,122,26,.45); }
+  .stx-lbl { font-size:9px; font-weight:700; color:rgba(255,255,255,.55); }
+  .stx-col.peak .stx-lbl { color:#fff; }
+  .stx-line { position:absolute; left:0; right:0; bottom:20px; top:0; width:100%; height:calc(100% - 20px); pointer-events:none; overflow:visible; display:none; }
+  .stx-line.show { display:block; }
+  .stx-line polyline { fill:none; stroke:#C9CEFF; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; vector-effect:non-scaling-stroke; filter:drop-shadow(0 0 6px rgba(201,206,255,.6)); }
+
+  .stx-foot { position:relative; z-index:1; margin-top:16px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .stx-legend { display:flex; gap:8px; }
+  .stx-chip { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:99px; background:rgba(255,255,255,.08); font-size:10px; font-weight:700; color:rgba(255,255,255,.8); }
+  .stx-chip i { width:7px; height:7px; border-radius:50%; display:inline-block; }
+  .stx-best { font-size:11px; font-weight:700; color:rgba(255,255,255,.7); }
+  .stx-best b { color:#fff; }
 
   .ov-coin { position:fixed; left:-84px; bottom:176px; width:60px; height:60px; z-index:40; perspective:300px; touch-action:none; cursor:grab; }
-  .ov-coin-in { width:100%; height:100%; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff;
-                background:radial-gradient(circle at 30% 25%, #ffc27a, #FF7A1A 55%, #d85f00);
-                box-shadow:0 0 26px rgba(255,122,26,.75), 0 12px 22px -6px rgba(255,122,26,.7), inset 0 0 0 3px rgba(255,255,255,.3); }
-  .ov-cord { position:fixed; right:22px; top:-200px; width:54px; height:200px; z-index:40; }
-  .ov-cord-str { position:absolute; left:25px; top:0; width:4px; height:140px; border-radius:4px; background:linear-gradient(#12B886, #5FE3C0); box-shadow:0 0 10px rgba(18,184,134,.7); }
-  .ov-cord-knob { position:absolute; left:0; top:138px; width:54px; height:54px; border-radius:18px; display:flex; align-items:center; justify-content:center; color:#fff;
-                  background:linear-gradient(135deg, #34D3A5, #0B9C73); box-shadow:0 0 28px rgba(18,184,134,.75), 0 12px 22px -8px rgba(11,122,90,.8);
-                  touch-action:none; cursor:grab; }
+  .ov-coin-in { width:100%; height:100%; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#0F1115;
+    background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.8),rgba(255,255,255,.3) 60%,rgba(255,255,255,.15));
+    backdrop-filter:blur(16px) saturate(180%); border:1px solid rgba(255,255,255,.9);
+    box-shadow:0 14px 28px -10px rgba(15,17,21,.35), 0 0 0 4px rgba(255,122,26,.12), inset 0 1px 0 rgba(255,255,255,.95); }
+  .ov-coin-in svg { color:#FF7A1A; }
   .ov-shut { position:fixed; inset:0; z-index:95; display:flex; pointer-events:none; }
   .ov-shut i { flex:1; transform:scaleY(0); transform-origin:top; }
   .ov-wipe { position:fixed; inset:0; z-index:90; pointer-events:none; clip-path:circle(0px at 0 0); }
+
+  .ovd-drop { position:fixed; right:16px; top:0; z-index:50; display:block; text-decoration:none; }
+  .ovd-swing { display:flex; flex-direction:column; align-items:center; transform-origin:50% 0%; }
+  .ovd-cord { display:block; width:3px; height:120px; border-radius:3px; background:linear-gradient(#12B886,#7BE0A8); box-shadow:0 0 10px rgba(18,184,134,.6); }
+  .ovd-knob { width:70px; height:70px; border-radius:24px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; color:#fff;
+    background:linear-gradient(145deg,#1EC995,#0B9C73); box-shadow:0 18px 30px -12px rgba(11,156,115,.75), inset 0 1px 0 rgba(255,255,255,.4); }
+  .ovd-knob svg { width:22px; height:22px; }
+  .ovd-count { font-size:10px; font-weight:900; letter-spacing:.02em; }
+  .ovd-tag { margin-top:6px; font-size:9px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:#0B7A5A; background:rgba(255,255,255,.85); border-radius:99px; padding:3px 8px; box-shadow:0 6px 12px -8px rgba(15,17,21,.4); }
+
+  @keyframes ovSpin { to { transform:rotate(360deg); } }
+  @keyframes sxTw { 0%,100% { opacity:.25; transform:scale(.8); } 50% { opacity:1; transform:scale(1.1); } }
+
+  @media (min-width:900px) {
+    .ov { max-width:1200px; padding:30px 40px 90px; }
+    .ov-head { padding:0 0 26px; }
+    .ov-head::before { left:-40px; right:-40px; height:150px; }
+    .ov-hello { font-size:30px; } .ov-name { font-size:56px; } .ov-sub { font-size:24px; } .ov-greet { font-size:14px; }
+    .ov-date { font-size:12px; padding:10px 14px; max-width:none; } .ov-date svg { width:15px; height:15px; }
+    .ov-bell { width:44px; height:44px; } .ov-bell svg { width:18px; height:18px; } .ov-right { max-width:none; gap:12px; }
+    .ov-main { grid-template-columns:minmax(0,1fr) minmax(0,1.05fr); column-gap:48px; grid-template-rows:auto 1fr; align-items:start; }
+    .ov-dock-slot { grid-column:1; grid-row:1; align-self:start; margin-bottom:22px; }
+    .ov-hero { --D:640px; grid-column:2; grid-row:1 / span 2; height:var(--D); }
+    .ov-tw { grid-column:1; grid-row:2; margin-top:0; }
+    .ov-cs b { font-size:34px; } .ov-cs small { font-size:11px; }
+    .stx { margin:0; padding:24px 24px 20px; }
+    .stx-value { font-size:40px; }
+    .stx-week { height:200px; }
+  }
+  @media (prefers-reduced-motion:reduce) { .ov-spin { animation:none; } }
 </style>
 
+<link rel="stylesheet" href="{{ asset('css/overview-desktop.css') }}?v={{ time() }}">
 <div class="ov">
-  <div class="ov-title">
-    <p>Hey {{ $firstName }},<br>you have <span class="ov-bal" data-odo="₦{{ number_format($balance) }}" data-d=".1">₦{{ number_format($balance) }}</span></p>
-    <p class="soft">in your wallet right now</p>
-  </div>
-
-  <div class="ov-panel" id="ovPanel">
-    <div class="ov-stage" id="ovStage">
-      <div class="ov-plate" id="ovPlate"></div>
-      <svg id="char" viewBox="0 0 240 250">
-        <g id="cAll" stroke="#0F1115" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none">
-          <path class="dr" d="M60,250 C60,208 84,184 108,180"/>
-          <path class="dr" d="M180,250 C180,208 156,184 132,180"/>
-          <path class="dr" d="M104,180 C110,192 130,192 136,180"/>
-          <path class="dr" d="M108,162 L108,180"/>
-          <path class="dr" d="M132,162 L132,180"/>
-          <g id="cHead">
-            <ellipse class="dr hd" cx="120" cy="118" rx="44" ry="46" fill="#fff"/>
-            <path class="dr" d="M77,112 C62,108 62,134 79,133"/>
-            <path class="dr" d="M163,112 C178,108 178,134 161,133"/>
-            <path class="dr fl" d="M76,104 C72,62 98,38 122,38 C152,38 172,62 166,104 Z" fill="#0F1115"/>
-            <path class="dr fl" d="M62,106 C102,92 152,92 198,110 C168,114 104,114 62,106 Z" fill="#0F1115"/>
-            <path d="M100,66 L126,63" stroke="#fff" stroke-width="4"/>
-            <ellipse id="eL" cx="104" cy="128" rx="3.6" ry="4.6" fill="#0F1115" stroke="none"/>
-            <ellipse id="eR" cx="136" cy="128" rx="3.6" ry="4.6" fill="#0F1115" stroke="none"/>
-            <path id="smile" d="M106,144 Q120,{{ $mood }} 134,144"/>
-          </g>
-        </g>
-      </svg>
-      <div class="ov-bubble" id="ovBubble">{{ $bubble }}</div>
+  <header class="ov-head">
+    <div class="ov-left">
+      <p class="ov-hello">Hello!</p>
+      <h1 class="ov-name">{{ $firstName }}@if($isVerified)<span class="ov-ver"><i data-lucide="badge-check"></i></span>@endif</h1>
+      <p class="ov-sub">Wallet Overview</p>
+      <p class="ov-greet">{{ $greet }}, make it a great day!</p>
     </div>
-    <div class="ov-shine" id="ovShine"></div>
-  </div>
-
-  <div class="ov-flow">
-    <small class="ov-fl">7-day flow</small>
-    <div class="ov-fh">
-      <div class="ov-io"><span class="up">&#9650; ₦{{ number_format($weekIn) }}</span><span class="dn">&#9660; ₦{{ number_format($weekOut) }}</span></div>
-      <span class="{{ $net >= 0 ? 'up' : 'dn' }}">{{ $net >= 0 ? '+' : '-' }}₦{{ number_format(abs($net)) }}</span>
+    <div class="ov-right">
+      <div class="ov-date"><i data-lucide="calendar"></i><span>{{ $dateLabel }}</span></div>
+      <a href="{{ route('notifications.index') }}" class="ov-bell" aria-label="Notifications"><i data-lucide="bell"></i></a>
     </div>
-    <svg viewBox="0 0 300 70">
-      <defs>
-        <linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b6f03c" stop-opacity=".4"/><stop offset="1" stop-color="#b6f03c" stop-opacity="0"/></linearGradient>
-        <filter id="glow" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="2.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-      </defs>
-      <path id="pArea" d="{{ $areaPath }}" fill="url(#pg)"/>
-      <path id="pLine" d="{{ $linePath }}" fill="none" stroke="#b6f03c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
-      <circle id="pDot" cx="{{ $pts[0][0] }}" cy="{{ $pts[0][1] }}" r="3.8" fill="#fff" stroke="#b6f03c" stroke-width="2" filter="url(#glow)"/>
-    </svg>
-    <div class="ov-days">@foreach($labels as $l)<span>{{ $l }}</span>@endforeach</div>
-  </div>
+  </header>
 
-  <div class="ov-deck" id="ovDeck">
-    <div class="dk" data-href="{{ route('gigs.index') }}" data-color="#12B886" style="--bg:linear-gradient(135deg,#34D3A5,#0B8F6B);--glow:rgba(18,184,134,.75)">
-      <div class="dk-top"><span><i data-lucide="briefcase" style="width:13px;height:13px"></i>Hustles</span><em>enter</em></div>
-      <div class="dk-big" data-odo="{{ number_format($gigCount) }}" data-d=".5">{{ number_format($gigCount) }}</div>
-      <div class="dk-sub">open hustles right now</div>
-      <i class="dk-ghost" data-lucide="briefcase" style="stroke-width:1.5"></i>
+  <div class="ov-main">
+    <div class="ov-dock-slot">
+      @include('partials.ov-dock', ['ovDockActive' => 'overview'])
     </div>
-    <div class="dk" data-href="{{ route('marketplace.index') }}" data-color="#FF7A1A" style="--bg:linear-gradient(135deg,#FFA24D,#FF6A00);--glow:rgba(255,122,26,.75)">
-      <div class="dk-top"><span><i data-lucide="shopping-bag" style="width:13px;height:13px"></i>Campus Market</span><em>enter</em></div>
-      <div class="dk-big" data-odo="{{ number_format($listingCount) }}" data-d=".6">{{ number_format($listingCount) }}</div>
-      <div class="dk-sub">items on sale</div>
-      <i class="dk-ghost" data-lucide="shopping-bag" style="stroke-width:1.5"></i>
-    </div>
-  </div>
-  <p class="ov-hint">swipe a card away &middot; tap to enter</p>
 
-  <div class="ov-svc">
-    <a href="{{ route('services.index') }}"><span><i data-lucide="smartphone" style="width:18px;height:18px"></i></span>Airtime</a>
-    <a href="{{ route('services.index') }}"><span><i data-lucide="wifi" style="width:18px;height:18px"></i></span>Data</a>
-    <a href="{{ route('services.index') }}"><span><i data-lucide="tv" style="width:18px;height:18px"></i></span>Cable</a>
-    <a href="{{ route('services.index') }}"><span><i data-lucide="layout-grid" style="width:18px;height:18px"></i></span>More</a>
+    <section class="ov-hero">
+      <button type="button" class="ov-eye" id="ovEye" aria-label="Hide or show balance"><i data-lucide="eye"></i></button>
+      <style>
+        .ov-hero{position:relative}
+        .ov-eye{position:absolute;top:6px;right:6px;z-index:5;width:34px;height:34px;border-radius:50%;border:0;display:grid;place-items:center;background:rgba(255,255,255,.18);color:#fff;cursor:pointer}
+        .ov-eye svg{width:18px;height:18px}
+        .ov-cs .qn{display:block;margin-top:3px;font-style:normal;font-size:10px;font-weight:500;opacity:.45}
+        .qh{display:none}
+        .ov-hero.hid ~ .ov-tw .stx-value,.ov-hero.hid ~ .ov-tw .stx-sub,.ov-hero.hid ~ .ov-tw .stx-row span:last-child,.ov-hero.hid ~ .ov-tw .stx-best{filter:blur(7px)}
+        .ov-hero.hid .qa,.ov-hero.hid .qn{display:none}
+        .ov-hero.hid .qh{display:inline}
+      </style>
+      <script>(function(){var h=document.querySelector('.ov-hero'),b=document.getElementById('ovEye');if(!h||!b)return;
+        function set(x){h.classList.toggle('hid',x);b.innerHTML='<i data-lucide="'+(x?'eye-off':'eye')+'"></i>';if(window.lucide)lucide.createIcons();try{localStorage.setItem('ovHide',x?'1':'0')}catch(e){}}
+        try{set(localStorage.getItem('ovHide')==='1')}catch(e){}
+        b.addEventListener('click',function(){set(!h.classList.contains('hid'))});})();</script>
+
+      <div class="ov-stage">
+        @if($ovImg)
+          <div class="ov-orb"><img id="ovOrbImg" src="{{ asset('images/overview-circle.png') }}" alt="" draggable="false"></div>
+        @else
+          <div class="ov-big"></div>
+          <div class="ov-white"></div>
+          <div class="ov-spin"></div>
+          <div class="ov-black"></div>
+        @endif
+        <div class="ov-ground" aria-hidden="true"></div>
+
+        <div class="ov-cycle" aria-live="polite">
+          @php $qr = config('qcoin.q_per_naira_display', 100); @endphp
+          <div class="ov-cs on"><small>Overall balance</small><b><span class="qa">{{ number_format($balance * $qr) }} Q</span><span class="qh">•••• Q</span></b><em class="qn">₦{{ number_format($balance) }}</em></div>
+          <div class="ov-cs"><small>Gigs</small><b><span class="qa">{{ number_format($gigBal * $qr) }} Q</span><span class="qh">•••• Q</span></b><em class="qn">₦{{ number_format($gigBal) }}</em></div>
+          <div class="ov-cs"><small>Marketplace</small><b><span class="qa">{{ number_format($mktBal * $qr) }} Q</span><span class="qh">•••• Q</span></b><em class="qn">₦{{ number_format($mktBal) }}</em></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ov-tw">
+      <div class="stx" id="stx">
+        <header class="stx-top">
+          <div>
+            <p class="stx-kicker">Cash flow</p>
+            <p class="stx-value"><span id="stxBig">0 Q</span></p>
+            <p class="stx-sub" id="stxSub">In 0 Q · Out 0 Q</p>
+          </div>
+          <div class="stx-tabs" id="stxTabs" role="tablist" data-p="day">
+            <span class="stx-ind" id="stxInd"></span>
+            <button type="button" data-p="day" class="on" role="tab">Day</button>
+            <button type="button" data-p="week" role="tab">Week</button>
+          </div>
+        </header>
+
+        <div class="stx-day" id="stxDay">
+          <div class="stx-row"><span>In</span><span class="stx-track"><span class="stx-fill in" id="fillIn"></span></span><span id="valIn">0 Q</span></div>
+          <div class="stx-row"><span>Out</span><span class="stx-track"><span class="stx-fill out" id="fillOut"></span></span><span id="valOut">0 Q</span></div>
+        </div>
+
+        <div class="stx-week" id="stxWeek">
+          @foreach($bars as $k => $b)
+          <div class="stx-col {{ $k === $peak ? 'peak' : '' }}">
+            <div class="stx-bars">
+              <i class="stx-bar in" style="height: {{ $b['pi'] }}%"></i>
+              <i class="stx-bar out" style="height: {{ $b['po'] }}%"></i>
+            </div>
+            <span class="stx-lbl">{{ $b['label'] }}</span>
+          </div>
+          @endforeach
+        </div>
+        <svg class="stx-line" id="stxLine" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <polyline id="stxPoly" points="{{ $trendStr }}"/>
+        </svg>
+
+        <footer class="stx-foot">
+          <div class="stx-legend">
+            <span class="stx-chip"><i style="background:#14B57E"></i>In</span>
+            <span class="stx-chip"><i style="background:#FF7A1A"></i>Out</span>
+          </div>
+          <p class="stx-best">Best day: <b>{{ $bars[$peak]['name'] }}</b> · {{ number_format($bars[$peak]['net'] * $qr) }} Q</p>
+        </footer>
+      </div>
+    </section>
   </div>
 </div>
 
-<div class="ov-coin" id="ovCoin" data-go="{{ route('marketplace.index') }}"><div class="ov-coin-in" id="ovCoinIn"><i data-lucide="shopping-bag" style="width:26px;height:26px"></i></div></div>
-<div class="ov-cord" id="ovCord" data-go="{{ route('gigs.index') }}"><i class="ov-cord-str" id="cordStr"></i><div class="ov-cord-knob" id="cordKnob"><i data-lucide="briefcase" style="width:24px;height:24px"></i></div></div>
+<a id="ovDrop" class="ovd-drop" href="{{ route('gigs.index') }}" aria-label="Hustles, {{ $gigCount }} open">
+  <span class="ovd-swing">
+    <span class="ovd-cord" aria-hidden="true"></span>
+    <span class="ovd-knob">
+      <i data-lucide="briefcase"></i>
+      <span class="ovd-count">{{ $gigCount }}</span>
+    </span>
+    <span class="ovd-tag">Hustles</span>
+  </span>
+</a>
+
+<div class="ov-coin" id="ovCoin" data-go="{{ route('marketplace.index') }}"><div class="ov-coin-in" id="ovCoinIn"><i data-lucide="shopping-bag" style="width:24px;height:24px"></i></div></div>
 <div class="ov-shut" id="ovShut"></div>
 <div class="ov-wipe" id="ovWipe"></div>
 @endsection
@@ -174,147 +309,137 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/Draggable.min.js"></script>
 <script>
 (function () {
-  var ch = document.getElementById('char'); if (ch) ch.style.opacity = 1;
-  if (!window.gsap) return;
+  /* picture rim colour -> page background (slightly darker) */
+  var orb = document.getElementById('ovOrbImg');
+  function sampleRim() {
+    try {
+      var w = orb.naturalWidth, h = orb.naturalHeight; if (!w || !h) return false;
+      var c = document.createElement('canvas'); c.width = w; c.height = h;
+      var x = c.getContext('2d', { willReadFrequently: true });
+      x.drawImage(orb, 0, 0);
+      var cx = Math.round((w - 1) / 2), cy = Math.round((h - 1) / 2);
+      var row = x.getImageData(cx, cy, w - cx, 1).data, Re = 0;
+      for (var i = 0; i < w - cx; i++) { if (row[i * 4 + 3] < 128) { Re = i; break; } }
+      if (!Re) Re = Math.round(w * .375);
+      var R1 = Re * .90, R2 = Re * .98, r = 0, g = 0, b = 0, wt = 0;
+      for (var a = 0; a < 360; a += 3) {
+        var rad = a * Math.PI / 180;
+        for (var k = 0; k < 4; k++) {
+          var rr = R1 + (R2 - R1) * k / 3;
+          var d = x.getImageData(Math.round(cx + Math.cos(rad) * rr), Math.round(cy + Math.sin(rad) * rr), 1, 1).data;
+          var al = d[3] / 255;
+          if (al > .2) { r += d[0] * al; g += d[1] * al; b += d[2] * al; wt += al; }
+        }
+      }
+      if (!wt) return false;
+      var __c = ('rgb(' +
+        Math.round(r / wt * .94) + ',' + Math.round(g / wt * .94) + ',' + Math.round(b / wt * .94) + ')');
+      try { localStorage.setItem('nvEdge', __c); } catch (e) {}
+      document.documentElement.style.setProperty('--ov-edge', __c);
+      return true;
+    } catch (e) { return false; }
+  }
+  if (orb) { if (orb.complete) sampleRim(); else orb.addEventListener('load', sampleRim); }
+
+  /* balances rotate inside the black centre */
+  var cs = [].slice.call(document.querySelectorAll('.ov-cs')), ci = 0;
+  if (cs.length > 1) {
+    setInterval(function () {
+      cs[ci].classList.remove('on');
+      ci = (ci + 1) % cs.length;
+      cs[ci].classList.add('on');
+    }, 3500);
+  }
+
+  if (window.lucide) lucide.createIcons();
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!window.gsap) return;
   var canDrag = !!window.Draggable;
   if (canDrag) gsap.registerPlugin(Draggable);
 
-  function odo(el) {
-    var text = el.dataset.odo, delay = parseFloat(el.dataset.d || .2);
-    el.setAttribute('aria-label', text); el.textContent = '';
-    var box = document.createElement('span'); box.className = 'od'; el.appendChild(box);
-    Array.from(text).forEach(function (c) {
-      if (/\d/.test(c)) {
-        var w = document.createElement('span'); w.className = 'od-w';
-        var s = document.createElement('span'); s.className = 'od-s';
-        for (var k = 0; k < 10; k++) { var i = document.createElement('i'); i.textContent = k; s.appendChild(i); }
-        w.appendChild(s); box.appendChild(w);
-        gsap.fromTo(s, { yPercent: 0 }, { yPercent: -10 * parseInt(c, 10), duration: reduce ? 0 : 1.1 + Math.random() * .6, ease: 'expo.out', delay: reduce ? 0 : delay });
-      } else {
-        var t = document.createElement('span'); t.className = 'od-c'; t.textContent = c; box.appendChild(t);
+  /* statistics card */
+  var DATA = {!! $ovJson !!};
+  var BARS = {!! $barsJson !!};
+  var stxDay = document.getElementById('stxDay'), stxWeek = document.getElementById('stxWeek');
+  var stxLine = document.getElementById('stxLine'), poly = document.getElementById('stxPoly');
+  var ind = document.getElementById('stxInd'), tabs = document.getElementById('stxTabs');
+  var bigEl = document.getElementById('stxBig'), subEl = document.getElementById('stxSub');
+  var fillIn = document.getElementById('fillIn'), fillOut = document.getElementById('fillOut');
+  var valIn = document.getElementById('valIn'), valOut = document.getElementById('valOut');
+  var lenPoly = 0;
+  try { lenPoly = poly.getTotalLength(); } catch (e) {}
+  var counter = { v: 0 };
+  var QR = {{ (float) $qr }};
+  function money(n) { return (n < 0 ? '-' : '') + Math.round(Math.abs(n) * QR).toLocaleString() + ' Q'; }
+  function countTo(target) {
+    gsap.to(counter, { v: target, duration: reduce ? 0 : 1.1, ease: 'power3.out',
+      onUpdate: function () { bigEl.textContent = money(counter.v); } });
+  }
+  function showDay(animate) {
+    stxDay.style.display = 'flex';
+    stxWeek.classList.remove('show');
+    stxLine.classList.remove('show');
+    var d = DATA.day, mx = Math.max(d.in, d.out, 1);
+    gsap.set([fillIn, fillOut], { width: '0%' });
+    gsap.to(fillIn,  { width: (d.in / mx * 100) + '%',  duration: animate && !reduce ? .9 : 0, ease: 'power3.out' });
+    gsap.to(fillOut, { width: (d.out / mx * 100) + '%', duration: animate && !reduce ? .9 : 0, ease: 'power3.out', delay: .08 });
+    valIn.textContent = money(d.in); valOut.textContent = money(d.out);
+    subEl.textContent = 'In ' + money(d.in) + ' · Out ' + money(d.out);
+    countTo(d.net);
+  }
+  function showWeek(animate) {
+    stxDay.style.display = 'none';
+    stxWeek.classList.add('show');
+    stxLine.classList.add('show');
+    var w = DATA.week;
+    subEl.textContent = 'In ' + money(w.in) + ' · Out ' + money(w.out);
+    countTo(w.net);
+    var bars = [].slice.call(stxWeek.querySelectorAll('.stx-bar'));
+    if (animate && !reduce) {
+      gsap.fromTo(bars, { scaleY: 0 }, { scaleY: 1, duration: .8, ease: 'back.out(1.3)', stagger: { each: .05, from: 'start' } });
+      if (lenPoly) {
+        gsap.set(poly, { strokeDasharray: lenPoly, strokeDashoffset: lenPoly });
+        gsap.to(poly, { strokeDashoffset: 0, duration: 1.4, delay: .35, ease: 'power2.inOut' });
       }
-    });
-  }
-  document.querySelectorAll('[data-odo]').forEach(odo);
-
-  var line = document.getElementById('pLine'), len = line.getTotalLength();
-  gsap.set(line, { strokeDasharray: len, strokeDashoffset: reduce ? 0 : len });
-
-  if (!reduce) {
-    gsap.to(line, { strokeDashoffset: 0, duration: 1.6, delay: .9, ease: 'power2.inOut' });
-    gsap.from('#pArea', { opacity: 0, duration: 1, delay: 1.8 });
-    var dot = document.getElementById('pDot'), o = { p: 0 };
-    gsap.set(dot, { opacity: 0 });
-    gsap.to(o, { p: 1, duration: 2.6, delay: 2.8, repeat: -1, repeatDelay: 2.4, ease: 'power1.inOut',
-      onUpdate: function () { var pt = line.getPointAtLength(o.p * len); dot.setAttribute('cx', pt.x); dot.setAttribute('cy', pt.y); gsap.set(dot, { opacity: 1 }); },
-      onRepeat: function () { gsap.set(dot, { opacity: 0 }); } });
-    gsap.to('.ov-flow', { boxShadow: '0 24px 50px -16px rgba(182,240,60,.85)', duration: 2.2, yoyo: true, repeat: -1, ease: 'sine.inOut' });
-
-    gsap.from('.ov-title p', { y: 14, opacity: 0, duration: .6, stagger: .1, ease: 'power3.out' });
-    gsap.from('.ov-panel', { y: 18, opacity: 0, duration: .6, delay: .15, ease: 'power3.out' });
-    gsap.from('.ov-flow', { y: 16, opacity: 0, duration: .6, delay: .7, ease: 'power3.out' });
-    gsap.from('.ov-svc', { y: 16, opacity: 0, duration: .6, delay: 1.1, ease: 'power3.out' });
-    gsap.from('.ov-svc a', { scale: .6, opacity: 0, duration: .5, stagger: .06, delay: 1.2, ease: 'back.out(2)' });
-
-    // drawn character
-    document.querySelectorAll('#char .dr').forEach(function (p) {
-      var L = p.getTotalLength(); p.style.strokeDasharray = L; p.style.strokeDashoffset = L;
-    });
-    gsap.set('#char .fl, #char .hd', { attr: { 'fill-opacity': 0 } });
-    gsap.set('#eL, #eR, #smile', { opacity: 0 });
-    var ct = gsap.timeline({ delay: .35 });
-    ct.to('#char .dr', { strokeDashoffset: 0, duration: .9, stagger: .11, ease: 'power2.inOut' })
-      .to('#char .fl, #char .hd', { attr: { 'fill-opacity': 1 }, duration: .4 }, '-=.5')
-      .to('#eL, #eR, #smile', { opacity: 1, duration: .3, stagger: .06 })
-      .from('#ovBubble', { scale: 0, opacity: 0, duration: .5, ease: 'back.out(2)' }, '-=.1');
-    var sm = { c: 148 }, smile = document.getElementById('smile');
-    ct.to(sm, { c: {{ $mood }}, duration: .7, ease: 'back.out(2)',
-      onUpdate: function () { smile.setAttribute('d', 'M106,144 Q120,' + sm.c + ' 134,144'); } }, '-=.4');
-    ct.add(function () {
-      gsap.to('#cHead', { y: -2, rotation: 2.2, svgOrigin: '120 165', duration: 2.4, yoyo: true, repeat: -1, ease: 'sine.inOut' });
-      gsap.to('#ovBubble', { y: -4, duration: 1.8, yoyo: true, repeat: -1, ease: 'sine.inOut' });
-      (function blink() {
-        gsap.to('#eL, #eR', { scaleY: .1, svgOrigin: '120 128', duration: .08, yoyo: true, repeat: 1 });
-        gsap.delayedCall(2.5 + Math.random() * 3, blink);
-      })();
-    });
-
-    // 3D tilt: follows the phone's orientation, or the finger / mouse as a fallback
-    var stage = document.getElementById('ovStage'), panel = document.getElementById('ovPanel'), shine = document.getElementById('ovShine');
-    gsap.set('#char', { z: 40 }); gsap.set('#ovBubble', { z: 90 }); gsap.set('#ovPlate', { z: -40 });
-    var rx = gsap.quickTo(stage, 'rotationX', { duration: .5, ease: 'power3.out' });
-    var ry = gsap.quickTo(stage, 'rotationY', { duration: .5, ease: 'power3.out' });
-    var sh = gsap.quickTo(shine, 'xPercent', { duration: .5, ease: 'power3.out' });
-    var clamp = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
-    var gotOrient = false, base = null;
-    window.addEventListener('deviceorientation', function (e) {
-      if (e.gamma == null || e.beta == null) return;
-      gotOrient = true;
-      if (!base) base = { g: e.gamma, b: e.beta };
-      var dg = clamp(e.gamma - base.g, -30, 30), db = clamp(e.beta - base.b, -30, 30);
-      ry(dg * .7); rx(-db * .5); sh(dg * 2);
-    });
-    if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') {
-      document.addEventListener('pointerdown', function ask() {
-        document.removeEventListener('pointerdown', ask);
-        DeviceOrientationEvent.requestPermission().catch(function () {});
-      });
+    } else {
+      gsap.set(bars, { scaleY: 1 });
+      gsap.set(poly, { strokeDasharray: 'none', strokeDashoffset: 0 });
     }
-    panel.addEventListener('pointermove', function (e) {
-      if (gotOrient) return;
-      var r = panel.getBoundingClientRect();
-      var x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
-      ry(x * 34); rx(-y * 24); sh(x * 60);
-    });
-    panel.addEventListener('pointerleave', function () { if (!gotOrient) { ry(0); rx(0); sh(0); } });
-    gsap.fromTo(stage, { rotationY: -16, rotationX: 6 }, { rotationY: 0, rotationX: 0, duration: 1.6, delay: 1.2, ease: 'elastic.out(1,.5)' });
+  }
+  function setTab(p, animate) {
+    tabs.setAttribute('data-p', p);
+    [].slice.call(tabs.querySelectorAll('button')).forEach(function (b) { b.classList.toggle('on', b.dataset.p === p); });
+    gsap.to(ind, { x: p === 'week' ? (ind.parentElement.offsetWidth / 2 - 3) : 0, duration: reduce ? 0 : .45, ease: 'power3.out' });
+    if (p === 'week') showWeek(animate); else showDay(animate);
+  }
+  [].slice.call(tabs.querySelectorAll('button')).forEach(function (b) {
+    b.addEventListener('click', function () { setTab(b.dataset.p, true); });
+  });
+  setTab('day', true);
+
+  /* overview's own entrance */
+  gsap.from('.ov-head > *', { y: 14, opacity: 0, duration: .6, stagger: .08, ease: 'power3.out' });
+  gsap.from('.ov-stage', { x: 60, opacity: 0, duration: .9, delay: .2, ease: 'power3.out' });
+  gsap.from('#stx', { y: 22, opacity: 0, duration: .7, delay: .4, ease: 'power3.out' });
+
+  /* hustles: falls once, stays down (remembered), and the whole strip sways from its top */
+  var drop = document.getElementById('ovDrop');
+  if (drop) {
+    var swing = drop.querySelector('.ovd-swing');
+    var KEY = 'ov_hustles_down_v1', already = false;
+    try { already = localStorage.getItem(KEY) === '1'; } catch (e) {}
+    if (already || reduce) {
+      gsap.set(drop, { y: 0 });
+    } else {
+      gsap.set(drop, { y: -300 });
+      gsap.to(drop, { y: 0, duration: 1.1, delay: 1.2, ease: 'bounce.out',
+        onComplete: function () { try { localStorage.setItem(KEY, '1'); } catch (e) {} } });
+    }
+    if (swing && !reduce) gsap.to(swing, { rotation: 3, duration: 1.8, yoyo: true, repeat: -1, ease: 'sine.inOut' });
   }
 
-  var order = [].slice.call(document.querySelectorAll('.dk'));
-  function layout(animate) {
-    order.forEach(function (c, i) {
-      c.style.pointerEvents = i === 0 ? 'auto' : 'none';
-      gsap.to(c, { x: 0, y: i * 12, scale: 1 - i * .055, rotation: 0, opacity: i < 3 ? 1 : 0, zIndex: order.length - i,
-        duration: animate && !reduce ? .5 : 0, ease: 'back.out(1.5)', overwrite: true });
-    });
-  }
-  layout(false);
-  if (!reduce) gsap.from('.ov-deck', { y: 20, opacity: 0, duration: .6, delay: .9, ease: 'power3.out' });
-
-  function wipeCircle(url, color, x, y) {
-    var w = document.getElementById('ovWipe'); w.style.background = color;
-    gsap.fromTo(w, { clipPath: 'circle(0px at ' + x + 'px ' + y + 'px)' },
-      { clipPath: 'circle(150% at ' + x + 'px ' + y + 'px)', duration: reduce ? 0 : .6, ease: 'power2.in', onComplete: function () { location.href = url; } });
-  }
-  function openCard(c, ev) {
-    var p = ev ? (ev.changedTouches ? ev.changedTouches[0] : ev) : null;
-    wipeCircle(c.dataset.href, c.dataset.color, (p && p.clientX) || innerWidth / 2, (p && p.clientY) || innerHeight / 2);
-  }
-  function fling(c, dir) {
-    gsap.timeline()
-      .to(c, { x: dir * innerWidth, rotation: dir * 18, opacity: 0, duration: .35, ease: 'power2.in', overwrite: true })
-      .add(function () { gsap.set(c, { x: 0, rotation: 0, opacity: 0 }); order.push(order.shift()); layout(true); });
-  }
-  if (canDrag) {
-    order.forEach(function (c) {
-      Draggable.create(c, { type: 'x', minimumMovement: 6, edgeResistance: .9,
-        onDrag: function () { gsap.set(c, { rotation: this.x / 18 }); },
-        onDragEnd: function () {
-          if (Math.abs(this.x) > 70 || Math.abs(this.deltaX) > 14) fling(c, (this.x || this.deltaX) > 0 ? 1 : -1);
-          else gsap.to(c, { x: 0, rotation: 0, duration: .6, ease: 'elastic.out(1,.6)', overwrite: true });
-        },
-        onClick: function () { openCard(c, this.pointerEvent); } });
-    });
-  } else {
-    order.forEach(function (c) { c.addEventListener('click', function (e) { openCard(c, e); }); });
-  }
-  if (!reduce) gsap.to(order[0], { x: 18, rotation: 1.2, duration: .3, yoyo: true, repeat: 1, delay: 3, ease: 'power1.inOut' });
-
-  // coin -> Market (orange), cord -> Gigs (green)
-  var coin = document.getElementById('ovCoin'), cord = document.getElementById('ovCord');
-  var knob = document.getElementById('cordKnob'), str = document.getElementById('cordStr');
-  var shut = document.getElementById('ovShut'), strips = [];
+  /* coin: floats, slides, taps through to Market */
+  var coin = document.getElementById('ovCoin'), shut = document.getElementById('ovShut'), strips = [];
   ['#12B886', '#0FA377', '#12B886', '#0FA377', '#12B886', '#0FA377'].forEach(function (col) {
     var s = document.createElement('i'); s.style.background = col; shut.appendChild(s); strips.push(s);
   });
@@ -322,54 +447,26 @@
     gsap.timeline({ onComplete: function () { location.href = url; } })
       .to(strips, { scaleY: 1, duration: reduce ? 0 : .45, stagger: reduce ? 0 : .07, ease: 'power3.in' });
   }
-
   var tl = null;
-  gsap.set(cord, { transformOrigin: '27px 0px' });
   if (!reduce) {
-    gsap.to('#ovCoinIn', { rotationY: 360, duration: 2.2, repeat: -1, ease: 'none' });
-    tl = gsap.timeline({ repeat: -1, repeatDelay: 3, delay: 2.2 });
-    tl.to(coin, { x: 104, duration: .55, ease: 'back.out(1.6)' })
-      .to(coin, { x: 0, duration: .5, ease: 'power2.in' }, '+=9')
-      .to(cord, { y: 200, duration: .9, ease: 'elastic.out(1,.5)' }, '+=1')
-      .to(cord, { rotation: 8, duration: 1.4, yoyo: true, repeat: 7, ease: 'sine.inOut' }, '>-.1')
-      .to(cord, { y: 0, duration: .5, ease: 'power2.in' }, '+=.3');
+    gsap.to('#ovCoinIn', { rotationY: 360, duration: 2.4, repeat: -1, ease: 'none' });
+    tl = gsap.timeline({ repeat: -1, repeatDelay: 3, delay: 2.6 });
+    tl.to(coin, { x: 96, duration: .55, ease: 'back.out(1.6)' })
+      .to(coin, { x: 0, duration: .5, ease: 'power2.in' }, '+=2');
   } else {
-    gsap.set(coin, { x: 104 }); gsap.set(cord, { y: 200 });
+    gsap.set(coin, { x: 96 });
   }
-
   var sx = 0, down = false;
   coin.addEventListener('pointerdown', function (e) { sx = e.clientX; down = true; if (tl) tl.pause(); coin.setPointerCapture(e.pointerId); });
   coin.addEventListener('pointerup', function (e) {
     if (!down) return; down = false;
     var dx = e.clientX - sx;
-    if (dx > 24 || Math.abs(dx) < 6) {
-      var r = coin.getBoundingClientRect();
-      wipeCircle(coin.dataset.go, '#FF7A1A', r.left + r.width / 2, r.top + r.height / 2);
-    } else if (tl) tl.resume();
+    if (dx > 24 || Math.abs(dx) < 6) shutters(coin.dataset.go);
+    else if (tl) tl.resume();
   });
   coin.addEventListener('pointercancel', function () { down = false; if (tl) tl.resume(); });
 
-  function resetKnob() {
-    gsap.to(knob, { y: 0, duration: .7, ease: 'elastic.out(1,.45)' });
-    gsap.to(str, { height: 140, duration: .7, ease: 'elastic.out(1,.45)' });
-  }
-  if (canDrag) {
-    Draggable.create(knob, { type: 'y', bounds: { minY: 0, maxY: 130 }, edgeResistance: .85,
-      onPress: function () { if (tl) tl.pause(); },
-      onDrag: function () { gsap.set(str, { height: 140 + this.y }); },
-      onDragEnd: function () {
-        if (this.y > 80) { shutters(cord.dataset.go); }
-        else { resetKnob(); if (tl) gsap.delayedCall(1.5, function () { tl.resume(); }); }
-      },
-      onClick: function () { shutters(cord.dataset.go); } });
-  } else {
-    knob.addEventListener('click', function () { shutters(cord.dataset.go); });
-  }
-
-  window.addEventListener('pageshow', function () {
-    gsap.set('#ovWipe', { clipPath: 'circle(0px at 0 0)' });
-    gsap.set(strips, { scaleY: 0 });
-  });
+  window.addEventListener('pageshow', function () { gsap.set(strips, { scaleY: 0 }); });
 })();
 </script>
 @endsection

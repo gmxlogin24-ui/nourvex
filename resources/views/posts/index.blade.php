@@ -1,8 +1,10 @@
-@extends('layouts.app-authenticated')
+@extends('layouts.world-shell')
+@section('world', 'gigs')
 @section('content')
+<link rel="stylesheet" href="{{ asset('css/world-pages.css') }}?v={{ @filemtime(public_path('css/world-pages.css')) }}"><link rel="stylesheet" href="{{ asset('css/world-page.css') }}?v={{ @filemtime(public_path('css/world-page.css')) }}">
 
 
-<main class="max-w-4xl mx-auto p-6 {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-page' : '' }}" style="{{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'padding-top:0 !important;' : '' }}">
+<main class="wp-page wp-gigs wp-wide {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-page' : '' }}" style="{{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'padding-top:0 !important;' : '' }}">
     <h1 class="text-2xl font-semibold mb-1">My Posts</h1>
     <p class="text-muted text-sm mb-6">Manage your hustles and campus market listings</p>
 

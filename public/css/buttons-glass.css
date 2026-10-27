@@ -1,0 +1,64 @@
+html body[data-page="cart"]{ --bt:linear-gradient(145deg,#FF8A2B 0%,#2A2A2A 42%,#000000 100%); --ti:#C2410C; }
+html[data-theme="dark"] body[data-page="cart"]{ --ti:#FB923C; }
+html:is(html,html[data-theme="dark"]) body :is(button.btn-primary,a.btn-primary,input.btn-primary,.svc-submit-btn,.mpd-btn-solid,.lp-btn-primary,.pfx-btn:not(.ghost),.pf2-btn,.nvp-cta,.inv-btn:not(.ghost),.meetup-respond-btn.btn-primary){
+  background-image:var(--bt-hi),var(--bt) !important;
+  background-color:#000000 !important;
+  color:#fff !important;
+  border:1px solid transparent !important;
+  border-radius:14px !important;
+  box-shadow:0 10px 20px -12px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.25) !important;
+  transition:transform .3s cubic-bezier(.3,1.5,.5,1);
+}
+html:is(html,html[data-theme="dark"]) body :is(button.btn-primary,a.btn-primary,input.btn-primary,.svc-submit-btn,.mpd-btn-solid,.lp-btn-primary,.pfx-btn:not(.ghost),.pf2-btn,.nvp-cta,.inv-btn:not(.ghost),.meetup-respond-btn.btn-primary) :is(svg,i){ color:#fff !important; stroke:#fff !important; }
+html:is(html,html[data-theme="dark"]) body :is(button.btn-secondary,a.btn-secondary,.glass-btn,.pfx-btn.ghost,.inv-btn.ghost,.mpd-btn-ghost,.mpd-icon-btn,.meetup-respond-btn.btn-secondary){
+  background-image:linear-gradient(180deg,rgba(255,255,255,.6) 0%,rgba(255,255,255,.14) 100%) !important;
+  background-color:rgba(255,255,255,.2) !important;
+  -webkit-backdrop-filter:blur(14px) saturate(1.5) !important;
+  backdrop-filter:blur(14px) saturate(1.5) !important;
+  border:1px solid rgba(255,255,255,.65) !important;
+  border-radius:14px !important;
+  color:var(--ti,#111) !important;
+  box-shadow:0 10px 20px -12px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.9), 0 0 0 1px rgba(128,128,128,.16) !important;
+  transition:transform .3s cubic-bezier(.3,1.5,.5,1);
+}
+html[data-theme="dark"] body :is(button.btn-secondary,a.btn-secondary,.glass-btn,.pfx-btn.ghost,.inv-btn.ghost,.mpd-btn-ghost,.mpd-icon-btn,.meetup-respond-btn.btn-secondary){
+  background-image:linear-gradient(180deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,.05) 100%) !important;
+  background-color:rgba(255,255,255,.06) !important;
+  border:1px solid rgba(255,255,255,.2) !important;
+  box-shadow:0 10px 20px -12px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.25) !important;
+}
+html:is(html,html[data-theme="dark"]) body :is(button.btn-secondary,a.btn-secondary,.glass-btn,.pfx-btn.ghost,.inv-btn.ghost,.mpd-btn-ghost,.mpd-icon-btn,.meetup-respond-btn.btn-secondary) :is(svg,i){ color:var(--ti,#111) !important; stroke:var(--ti,#111) !important; }
+html body :is(button.btn-primary,a.btn-primary,.svc-submit-btn,.mpd-btn-solid,.lp-btn-primary,.pfx-btn,.pf2-btn,.nvp-cta,.inv-btn,button.btn-secondary,a.btn-secondary,.glass-btn,.mpd-btn-ghost,.mpd-icon-btn):active{ transform:scale(.96); }
+html:is(html,html[data-theme="dark"]) body .dg-it.on .dg-tile{
+  background-image:linear-gradient(180deg,rgba(255,255,255,.7) 0%,rgba(255,255,255,.2) 100%) !important;
+  background-color:rgba(255,255,255,.28) !important;
+  border:1px solid rgba(255,255,255,.75) !important;
+  outline:none !important;
+  box-shadow:0 10px 20px -12px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.9), inset 0 0 0 2px var(--ti,#111) !important;
+}
+html[data-theme="dark"] body .dg-it.on .dg-tile{ background-image:linear-gradient(180deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,.05) 100%) !important; background-color:rgba(255,255,255,.06) !important; border-color:rgba(255,255,255,.2) !important; }
+html:is(html,html[data-theme="dark"]) body .dg-it.on .dg-tile svg{ color:var(--ti,#111) !important; stroke:var(--ti,#111) !important; }
+html:is(html,html[data-theme="dark"]) body .dg-it.on > b{ color:var(--ti,#111) !important; }
+html:is(html,html[data-theme="dark"]) body :is(.wp .wp-chip:not(.on),.wp-sort a:not(.on)){
+  background-image:linear-gradient(180deg,rgba(255,255,255,.6) 0%,rgba(255,255,255,.14) 100%) !important;
+  background-color:rgba(255,255,255,.2) !important;
+  border:1px solid rgba(255,255,255,.65) !important;
+  color:var(--ti,#111) !important;
+}
+html[data-theme="dark"] body :is(.wp .wp-chip:not(.on),.wp-sort a:not(.on)){ background-image:linear-gradient(180deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,.05) 100%) !important; background-color:rgba(255,255,255,.06) !important; border-color:rgba(255,255,255,.2) !important; }
+html:is(html,html[data-theme="dark"]) body a.ovm-dep.ovm-dep-money{ display:inline-flex; align-items:center; gap:6px; padding:10px 20px; background-image:linear-gradient(135deg,#34D399 0%,#059669 100%) !important; background-color:#059669 !important; color:#fff !important; border:1px solid rgba(255,255,255,.55) !important; font-weight:800; box-shadow:0 0 0 3px rgba(16,185,129,.22), 0 10px 22px -8px rgba(5,150,105,.8), inset 0 1px 0 rgba(255,255,255,.5) !important; }
+html:is(html,html[data-theme="dark"]) body a.ovm-dep.ovm-dep-money svg{ width:16px; height:16px; color:#fff !important; stroke:#fff !important; }
+html:is(html,html[data-theme="dark"]) body a.ovm-dep.ovm-dep-money{ background-image:none !important; background-color:#F97316 !important; color:#fff !important; border:0 !important; box-shadow:none !important; text-shadow:none !important; filter:none !important; }
+html:is(html,html[data-theme="dark"]) body a.ovm-dep.ovm-dep-money:hover,
+html:is(html,html[data-theme="dark"]) body a.ovm-dep.ovm-dep-money:active{ background-color:#EA580C !important; box-shadow:none !important; }
+html:not([data-theme="dark"]):has(body.ws2-profile){ background:#fff !important; }
+html:not([data-theme="dark"]) body.ws2-profile{ background:#fff !important; }
+html:not([data-theme="dark"]) body.ws2-profile::before,
+html:not([data-theme="dark"]) body.ws2-profile::after{ display:none !important; }
+html:is(html,html[data-theme="dark"]) body a.ovm-dep.ovm-dep-money.ovm-dep-money.ovm-dep-money{ background:#F97316 !important; background-image:none !important; color:#fff !important; border-color:#F97316 !important; box-shadow:none !important; text-shadow:none !important; filter:none !important; }
+html:is(html,html[data-theme="dark"]) body a.ovm-dep.ovm-dep-money.ovm-dep-money.ovm-dep-money:is(:hover,:active){ background:#EA580C !important; border-color:#EA580C !important; box-shadow:none !important; }
+/* DEPOSIT-FLAT: one solid orange, no gradient, no shadow */
+html:is(html,html[data-theme="dark"]) body a.ovm-dep.ovm-dep-money.ovm-dep-money.ovm-dep-money{ background:#F97316 !important; background-image:none !important; color:#fff !important; border:0 !important; box-shadow:none !important; text-shadow:none !important; filter:none !important; display:inline-flex; align-items:center; justify-content:center; gap:7px; height:40px; padding:0 20px 0 16px; border-radius:99px; font-size:14px; font-weight:800; letter-spacing:.01em; line-height:1; transition:transform .12s, opacity .12s; }
+html:is(html,html[data-theme="dark"]) body a.ovm-dep.ovm-dep-money.ovm-dep-money.ovm-dep-money svg{ width:18px; height:18px; stroke-width:2.8; }
+html:is(html,html[data-theme="dark"]) body a.ovm-dep.ovm-dep-money.ovm-dep-money.ovm-dep-money:is(:hover,:active){ background:#F97316 !important; transform:scale(.96); opacity:.9; box-shadow:none !important; }
+button.ovm-ic,button.pb-ic{ background:none; border:0; padding:0; cursor:pointer; font:inherit; }

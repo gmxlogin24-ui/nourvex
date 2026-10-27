@@ -8,7 +8,7 @@
     </a>
 
     <div class="glass-card p-6">
-        <h1 class="text-xl font-semibold mb-1">Activate NOURVEX Pay</h1>
+        <h1 class="text-xl font-semibold mb-1">Activate NAURVEX Pay</h1>
         
 
         @if ($errors->any())
@@ -24,9 +24,9 @@
             <div>
                 <label class="text-sm text-muted">BVN</label>
                 <input type="text" name="bvn" required maxlength="11" placeholder="11-digit BVN" class="input-field !mt-1">
-                <p class="text-xs text-muted mt-1">Required to activate your NOURVEX Pay account. We never store your BVN.</p>
+                <p class="text-xs text-muted mt-1">Required to activate your NAURVEX Pay account. We never store your BVN.</p>
             </div>
-            <button type="submit" class="btn-primary w-full justify-center">Activate NOURVEX Pay</button>
+            <button type="submit" class="btn-primary w-full justify-center">Activate NAURVEX Pay</button>
         </form>
     </div>
 </main>

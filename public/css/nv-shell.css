@@ -1,5 +1,5 @@
-/* NOURVEX shell: theme variables, drawer colours, phone top bar, light skin for other pages */
-html{--nvn-bg:#000;--nvn-fg:#fff;--nvn-muted:rgba(255,255,255,.68);--nvn-line:rgba(255,255,255,.14);--nvn-hover:rgba(255,255,255,.08);--nvn-cta-bg:#fff;--nvn-cta-fg:#000}
+/* NAURVEX shell: theme variables, drawer colours, phone top bar, light skin for other pages */
+html{--nvn-bg:#1E2128;--nvn-fg:#fff;--nvn-muted:rgba(255,255,255,.68);--nvn-line:rgba(255,255,255,.14);--nvn-hover:rgba(255,255,255,.08);--nvn-cta-bg:#fff;--nvn-cta-fg:#000}
 html.nv-light{--nvn-bg:#fff;--nvn-fg:#0b0d14;--nvn-muted:#4b5163;--nvn-line:rgba(10,12,20,.12);--nvn-hover:rgba(10,12,20,.06);--nvn-cta-bg:#0b0d14;--nvn-cta-fg:#fff}
 
 /* old drawer: purple -> black (dark) / white (light) */
@@ -30,6 +30,6 @@ html .sn-cta svg,html .sn-cta i{color:var(--nvn-cta-fg) !important}
 }
 
 /* light skin for pages that have no light design yet (not the landing page): dark pages are inverted */
-html.nv-skin-off:not(:has(main.lp)){filter:invert(1) hue-rotate(180deg);background:#050505}
+html.nv-skin-off:not(:has(main.lp)){filter:invert(1) hue-rotate(180deg);background:#1E2128}
 html.nv-skin-off:not(:has(main.lp)) :is(img,video,picture,canvas,iframe,[style*="background-image"]){filter:invert(1) hue-rotate(180deg)}
 html.nv-skin-off:not(:has(main.lp)) :is(#lpxbBar,.sn-drawer,.sn-backdrop){filter:invert(1) hue-rotate(180deg)}

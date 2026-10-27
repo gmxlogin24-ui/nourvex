@@ -8,7 +8,6 @@
         ['route' => 'dashboard', 'key' => 'dashboard', 'icon' => 'layout-dashboard', 'label' => 'Home'],
         ['route' => 'gigs.index', 'key' => 'gigs', 'icon' => 'briefcase', 'label' => 'Hustles'],
         ['route' => 'marketplace.index', 'key' => 'marketplace', 'icon' => 'shopping-bag', 'label' => 'Market'],
-        ['route' => 'pulse.index', 'key' => 'pulse', 'icon' => 'zap', 'label' => 'Pulse'],
         ['route' => 'profile.index', 'key' => 'profile', 'icon' => 'user-circle', 'label' => 'Profile'],
         ['route' => 'levels-badges.show', 'key' => 'levels-badges', 'icon' => 'award', 'label' => 'Levels'],
     ]);
@@ -39,7 +38,7 @@
     {{-- Card 2: icon + label, plain theme only --}}
     <aside class="d2-rail-labels">
         <div class="d2-rail-header-slot" style="flex-direction:column;align-items:stretch;gap:8px;">
-            <div class="d2-rail-brand"><img src="{{ asset('images/qelvo-mark.png') }}" alt="NOURVEX" class="d2-rail-logo"><span>NOURVEX</span></div>
+            <div class="d2-rail-brand"><img src="{{ asset('images/qelvo-mark.png') }}" alt="NAURVEX" class="d2-rail-logo"><span>NAURVEX</span></div>
             @if(auth()->user()->planAllows('gigs_post'))<a href="{{ route('gigs.create') }}" class="d2-rail-create"><i data-lucide="plus" class="w-4 h-4"></i><span>Post a Hustle</span></a>@endif
         </div>
         <nav class="d2-rail-nav">

@@ -1,0 +1,15 @@
+/* Overview: desktop box */
+@media (min-width: 900px){
+  body .ov{
+    max-width:1120px;
+    margin:24px auto;
+    padding:36px 44px 48px;
+    position:relative;
+    overflow:hidden;
+    border-radius:32px;
+    background:rgba(255,255,255,0.45);
+    border:1px solid var(--line, rgba(15,17,21,0.08));
+    box-shadow:0 30px 70px -34px rgba(15,17,21,0.35);
+  }
+  body .ov-hero{ --D:min(600px, 72vh); }
+}

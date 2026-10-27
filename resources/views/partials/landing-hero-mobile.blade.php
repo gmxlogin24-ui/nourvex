@@ -3,7 +3,7 @@
     <div class="lpxm-bg"></div>
     <div class="lpxm-scrim"></div>
     <div class="lpxm-copy">
-        <div class="lpxm-meta"><span>NOURVEX LTD</span><i></i><span>Made for campus</span></div>
+        <div class="lpxm-meta"><span>NAURVEX LTD</span><i></i><span>Made for campus</span></div>
         <h1 class="lpxm-h">Work. Sell.<br>Get paid.</h1>
         <p class="lpxm-sub"><b>All in one campus app.</b>Escrow-held payments and PIN-confirmed transfers keep your money safe.</p>
         <div class="lpxm-actions">

@@ -1,0 +1,97 @@
+/* Investment pages: no sidebar. The bottom dock is the only navigation.
+   The filter <svg> is excluded from the hide rule because the dock's glass
+   effect references it by id. */
+body[data-page="investment"] .app-shell-flex > :not(.auth-page-shell):not(svg){
+  display:none !important;
+}
+body[data-page="investment"] .auth-page-shell,
+body[data-page="investment"] .app-push-content{
+  margin-left:0 !important;
+  width:100%;
+  max-width:100%;
+}
+
+@media (min-width:900px){
+  :root{ --dock-left-offset:0px; }
+
+  /* wider laptop layout for the investment overview */
+  body[data-page="investment"] .inv-index{
+    max-width:1180px;
+    padding:30px 48px 190px;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:18px 22px;
+    align-items:start;
+  }
+  .inv-index > header,
+  .inv-index > .inv-flash{ grid-column:1 / -1; }
+  .inv-index > section{ margin-top:0; }
+  .inv-index > section:nth-of-type(3){ grid-column:1 / -1; }
+  .inv-index > section:nth-of-type(4),
+  .inv-index > section:nth-of-type(5){ grid-column:auto; }
+
+  /* bigger, more transparent bottom dock, raised 48px (glass effect unchanged) */
+  body:not(.ws2) .nv-dock-fixed{
+    display:block !important;
+    left:50%;
+    right:auto;
+    top:auto;
+    bottom:calc(64px + env(safe-area-inset-bottom,0px));
+    transform:translateX(-50%);
+    width:min(940px, calc(100vw - 48px));
+    padding:12px 18px;
+    border-radius:32px;
+    background:transparent !important;
+    border-color:transparent !important;
+  }
+  body:not(.ws2) .nv-dock-fixed .ovd{ justify-content:center; gap:10px; }
+  body:not(.ws2) .nv-dock-fixed .ovd-btn{ flex:1 1 0; max-width:128px; width:auto; gap:7px; }
+  body:not(.ws2) .nv-dock-fixed .ovd-tile{ width:64px; height:64px; border-radius:22px; }
+  body:not(.ws2) .nv-dock-fixed .ovd-in{ width:50px; height:50px; }
+  body:not(.ws2) .nv-dock-fixed .ovd-in svg{ width:22px; height:22px; }
+  body:not(.ws2) .nv-dock-fixed .ovd-lbl{ font-size:12px; }
+  body:not(.ws2) .app-push-content{ padding-bottom:180px; }
+}
+
+/* Q-Coin page: no sidebar, same as investment. Bottom dock is the only navigation. */
+body[data-page="qcoin"] .app-shell-flex > :not(.auth-page-shell):not(svg){
+  display:none !important;
+}
+body[data-page="qcoin"] .auth-page-shell,
+body[data-page="qcoin"] .app-push-content{
+  margin-left:0 !important;
+  width:100%;
+  max-width:100%;
+}
+
+/* Q-Coin page, both route spellings: no sidebar. */
+body[data-page="q-coin"] .app-shell-flex > :not(.auth-page-shell):not(svg),
+body[data-page="qcoin"] .app-shell-flex > :not(.auth-page-shell):not(svg){
+  display:none !important;
+}
+body[data-page="q-coin"] .auth-page-shell,
+body[data-page="q-coin"] .app-push-content,
+body[data-page="qcoin"] .auth-page-shell,
+body[data-page="qcoin"] .app-push-content{
+  margin-left:0 !important;
+  width:100%;
+  max-width:100%;
+}
+
+/* Laptop dock: a centered pill, not full width. */
+@media (min-width:900px){
+  body:not(.ws2) .nv-dock-fixed{
+    width:min(560px, calc(100vw - 48px));
+  }
+}
+
+/* NaGolf page: no sidebar, the stage is the layout. */
+body[data-page="golfvex"] .app-shell-flex > :not(.auth-page-shell):not(svg){
+  display:none !important;
+}
+body[data-page="golfvex"] .auth-page-shell,
+body[data-page="golfvex"] .app-push-content{
+  margin-left:0 !important;
+  width:100%;
+  max-width:100%;
+}

@@ -276,3 +276,4 @@ body[data-theme-style="plain"] .mnav-item-pulse.active .mnav-icon {
 body[data-theme-style="plain"] .mnav-item-pulse.active .mnav-icon::after {
     background: radial-gradient(circle, rgba(255,59,48,0.5) 0%, transparent 70%);
 }
+

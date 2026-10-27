@@ -73,6 +73,35 @@ class ProfileController extends Controller
         ]);
     }
 
+    // Public profile: any signed-in user can open this. Each visit counts once per viewer per day.
+    public function show(\App\Models\User $user)
+    {
+        \App\Models\ProfileView::record($user->id);
+        $isMe = Auth::id() === $user->id;
+        $viewers = collect();
+        if ($isMe) {
+            try {
+                $rows = \App\Models\ProfileView::where('profile_user_id', $user->id)->latest()->limit(30)->get();
+                $us = \App\Models\User::whereIn('id', $rows->pluck('viewer_id'))->get()->keyBy('id');
+                $viewers = $rows->map(fn ($r) => ['user' => $us[$r->viewer_id] ?? null, 'at' => $r->created_at])->filter(fn ($x) => $x['user']);
+            } catch (\Throwable $e) { $viewers = collect(); }
+        }
+        $safe = function (callable $f) { try { return $f(); } catch (\Throwable $e) { return collect(); } };
+        return view('profile.public', [
+            'user' => $user,
+            'isMe' => $isMe,
+            'listings' => $safe(fn () => \App\Models\Listing::with('images')->where('user_id', $user->id)->where('status', 'available')->latest()->take(24)->get()),
+            'gigs' => $safe(fn () => \App\Models\Gig::where('user_id', $user->id)->where('status', 'open')->latest()->take(24)->get()),
+            'reviews' => $safe(fn () => \App\Models\Review::with('reviewer')->where('reviewed_user_id', $user->id)->latest()->take(20)->get()),
+            'rating' => $user->averageRatingReceived(),
+            'reviewCount' => $user->reviewsReceivedCount(),
+            'completed' => $user->completedGigsCount(),
+            'level' => $user->workerLevel(),
+            'views' => $safe(fn () => \App\Models\ProfileView::where('profile_user_id', $user->id)->count()),
+            'viewers' => $viewers,
+        ]);
+    }
+
     public function preview()
     {
         $user = Auth::user();
@@ -117,15 +146,18 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
+        if ($request->filled('username')) { $request->merge(['username' => strtolower(trim($request->input('username')))]); }
         \Log::info('PROFILE UPDATE RAW accent_color: ' . var_export($request->input('accent_color'), true));
         $user = Auth::user();
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
+            'bio' => 'nullable|string|max:300',
+            'username' => ['nullable', 'regex:/^[a-z0-9_]{3,20}$/', Rule::unique('users', 'username')->ignore($user->id)],
             'accent_color' => 'nullable|string|max:7',
             'theme_style' => 'nullable|string|in:glass,neumorphic,plain,aurora',
-            'mobile_nav_style' => 'nullable|string|in:painted_pill,edge_dock,halo_dock',
+            'mobile_nav_style' => 'nullable|string|in:painted_pill,edge_dock,halo_dock,liquid_glass',
             'sidebar_style' => 'nullable|string|in:classic,rail',
             'avatar' => 'nullable|image|max:4096',
             'background' => 'nullable|image|max:8192',
@@ -142,8 +174,11 @@ class ProfileController extends Controller
         }
 
         unset($validated['avatar'], $validated['background']);
+        $extra = [];
+        foreach (['bio', 'username'] as $k) { if ($request->exists($k)) { $extra[$k] = $validated[$k] ?? null; } unset($validated[$k]); }
 
         $user->update($validated);
+        if ($extra) { $user->forceFill($extra)->save(); }
 
         return back()->with('status', 'Profile updated.');
     }
@@ -171,6 +206,6 @@ class ProfileController extends Controller
         $user = $request->user();
         $user->theme_style = ($user->theme_style ?? 'glass') === 'qelvo-dark' ? 'glass' : 'qelvo-dark';
         $user->save();
-        return back()->with('status', $user->theme_style === 'qelvo-dark' ? 'NOURVEX Dark enabled' : 'NOURVEX Dark disabled');
+        return back()->with('status', $user->theme_style === 'qelvo-dark' ? 'NAURVEX Dark enabled' : 'NAURVEX Dark disabled');
     }
 }

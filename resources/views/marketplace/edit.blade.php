@@ -1,7 +1,9 @@
-@extends('layouts.app-authenticated')
+@extends('layouts.world-shell')
+@section('world', 'market')
 @section('content')
+<link rel="stylesheet" href="{{ asset('css/world-pages.css') }}?v={{ @filemtime(public_path('css/world-pages.css')) }}"><link rel="stylesheet" href="{{ asset('css/world-page.css') }}?v={{ @filemtime(public_path('css/world-page.css')) }}">
 
-<main class="max-w-xl mx-auto p-6">
+<main class="wp-page wp-market">
     <a href="{{ route('marketplace.show', $listing->id) }}" class="text-muted text-sm flex items-center gap-1 mb-4">
         <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Listing
     </a>
@@ -35,6 +37,16 @@
                 @if($listing->image_url)
                 <img src="{{ $listing->image_url }}" class="w-20 h-20 object-cover rounded-lg mb-2" alt="Current photo">
                 <p class="text-muted text-xs mb-2">Current photo — upload a new one to replace it</p>
+                @endif
+                @php $emImgs = $listing->images()->get(); @endphp
+                @if($emImgs->count())
+                <style>.em-photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0}.em-ph{position:relative;border-radius:12px;overflow:hidden;border:1px solid rgba(128,128,128,.3)}.em-ph img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}.em-ph label{display:flex;align-items:center;gap:5px;padding:5px 7px;font-size:11.5px;font-weight:700}.em-hint{font-size:11.5px;opacity:.65;margin:2px 0 8px}</style>
+                <div class="em-photos">
+                  @foreach($emImgs as $emI)
+                    <div class="em-ph"><img src="{{ $emI->image_url }}" alt=""><label><input type="radio" name="cover_image" value="{{ $emI->id }}"> Make cover</label><label><input type="checkbox" name="remove_images[]" value="{{ $emI->id }}"> Remove</label></div>
+                  @endforeach
+                </div>
+                <p class="em-hint">Tick Make cover to set the main photo, or Remove to delete one. Add more below: front, side, top and back.</p>
                 @endif
                 <input type="file" name="images[]" accept="image/*" multiple class="input-field !mt-1">
             </div>
@@ -89,6 +101,20 @@
             <div>
                 <label class="text-sm text-muted">Description</label>
                 <textarea name="description" rows="3" class="input-field !mt-1">{{ $listing->description }}</textarea>
+<div class="lf">
+  <style>.lf{display:grid;gap:6px;margin-top:12px}.lf label{font-size:12.5px;font-weight:700}.lf small{font-weight:500;opacity:.65}.lf-ck{display:flex;align-items:center;gap:8px}</style>
+  <label>Brand <small>(optional)</small></label>
+  <input type="text" name="brand" maxlength="100" value="{{ old('brand', $listing->brand) }}" placeholder="e.g. Samsung" class="input-field !mt-1">
+  <label>Highlights <small>(one per line)</small></label>
+  <textarea name="highlights" rows="3" maxlength="1500" placeholder="Battery lasts 2 days" class="input-field !mt-1">{{ old('highlights', $listing->highlights) }}</textarea>
+  <label>What's in the box <small>(one per line)</small></label>
+  <textarea name="whats_in_box" rows="2" maxlength="1000" placeholder="Charger" class="input-field !mt-1">{{ old('whats_in_box', $listing->whats_in_box) }}</textarea>
+  <label>Warranty <small>(optional)</small></label>
+  <input type="text" name="warranty" maxlength="100" value="{{ old('warranty', $listing->warranty) }}" placeholder="e.g. 3 months" class="input-field !mt-1">
+  <label>Return policy <small>(optional)</small></label>
+  <textarea name="return_policy" rows="2" maxlength="1000" placeholder="e.g. Returns accepted within 2 days if faulty" class="input-field !mt-1">{{ old('return_policy', $listing->return_policy) }}</textarea>
+  <label class="lf-ck"><input type="checkbox" name="negotiable" value="1" {{ old('negotiable', $listing->negotiable) ? 'checked' : '' }}> Price is negotiable</label>
+</div>
             </div>
             <div>
                 <label class="text-sm text-muted">Delivery Method</label>

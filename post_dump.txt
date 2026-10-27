@@ -1,0 +1,1566 @@
+=== STACK ===
+
+  Environment ........................................  
+  Application Name ........................... Laravel  
+  Laravel Version ............................ 13.19.0  
+  PHP Version .................................. 8.5.1  
+  Composer Version ............................ 2.10.3  
+  Environment .................................. local  
+  Debug Mode ................................. ENABLED  
+  URL ...................................... localhost  
+  Maintenance Mode ............................... OFF  
+  Timezone ....................................... UTC  
+  Locale .......................................... en  
+
+  Cache ..............................................  
+  Config .................................. NOT CACHED  
+  Events .................................. NOT CACHED  
+  Routes .................................. NOT CACHED  
+  Views ....................................... CACHED  
+
+  Drivers ............................................  
+=== ROUTES ===
+  GET|HEAD  / ............ welcome › routes/web.php:30
+  GET|HEAD  about .............................. about
+  GET|HEAD  activate signup-fee.activate › routes/web…
+  GET|HEAD  admin admin.index › AdminController@index
+  GET|HEAD  admin/badges admin.badges.index › AdminLe…
+  POST      admin/badges admin.badges.store › AdminLe…
+  GET|HEAD  admin/badges/create admin.badges.create  …
+  PUT       admin/badges/{badge} admin.badges.update …
+  DELETE    admin/badges/{badge} admin.badges.destroy…
+  GET|HEAD  admin/badges/{badge}/edit admin.badges.ed…
+  GET|HEAD  admin/blog admin.blog › AdminController@b…
+  DELETE    admin/blog/{blog} admin.blog.delete › Adm…
+  GET|HEAD  admin/concierge-misses admin.concierge-mi…
+  POST      admin/concierge-misses/{miss}/resolve adm…
+  GET|HEAD  admin/conversations admin.conversations.i…
+  GET|HEAD  admin/conversations/{conversation} admin.…
+  DELETE    admin/conversations/{conversation}/messages/{message} admin.conversations.messages.delete › Admin\ConversationController@d…
+  GET|HEAD  admin/disputes admin.disputes.index › Gig…
+  POST      admin/disputes/assign admin.disputes.assi…
+  POST      admin/disputes/{dispute}/dismiss admin.di…
+  POST      admin/disputes/{dispute}/partial admin.di…
+  POST      admin/disputes/{dispute}/pay admin.disput…
+  GET|HEAD  admin/feature-gates admin.feature-gates.i…
+  PUT       admin/feature-gates/{featureGate} admin.f…
+  POST      admin/feature-gates/{featureGate}/toggle …
+  GET|HEAD  admin/gigs admin.gigs › AdminController@g…
+  DELETE    admin/gigs/{gig} admin.gigs.delete › Admi…
+  GET|HEAD  admin/grant-access admin.grant-access › A…
+  POST      admin/grant-access admin.grant-access.sto…
+  GET|HEAD  admin/invites admin.invites › AdminContro…
+  POST      admin/invites admin.invites.store › Admin…
+  DELETE    admin/invites/{invite} admin.invites.revo…
+  GET|HEAD  admin/levels admin.levels.index › AdminLe…
+  POST      admin/levels admin.levels.store › AdminLe…
+  GET|HEAD  admin/levels/create admin.levels.create  …
+  PUT       admin/levels/{level} admin.levels.update …
+  DELETE    admin/levels/{level} admin.levels.destroy…
+  GET|HEAD  admin/levels/{level}/edit admin.levels.ed…
+  GET|HEAD  admin/listings admin.listings › AdminCont…
+  DELETE    admin/listings/{listing} admin.listings.d…
+  GET|HEAD  admin/marketplace-disputes admin.marketpl…
+  POST      admin/marketplace-disputes/{dispute}/dismiss admin.marketplace-disputes.dismiss › ListingDisputeController@dis…
+  POST      admin/marketplace-disputes/{dispute}/pay …
+  POST      admin/marketplace-disputes/{dispute}/refund admin.marketplace-disputes.refund › ListingDisputeController@resolveRefun…
+  GET|HEAD  admin/news admin.news › AdminController@n…
+  DELETE    admin/news/{news} admin.news.delete › Adm…
+  GET|HEAD  admin/profit admin.profit.index › Admin\P…
+  GET|HEAD  admin/profit/users/{user} admin.profit.us…
+  GET|HEAD  admin/revenue admin.revenue › AdminContro…
+  GET|HEAD  admin/settings/appearance admin.settings.…
+  POST      admin/settings/appearance/animations admi…
+  POST      admin/settings/appearance/background admi…
+  POST      admin/settings/appearance/background/reset admin.settings.appearance.background.reset › Admin\SiteSettingsController@resetBackgrou…
+  GET|HEAD  admin/subscriptions admin.subscriptions  …
+  POST      admin/subscriptions/{subscription}/cancel admin.subscriptions.cancel › AdminController@cancelSubscriptio…
+  GET|HEAD  admin/transactions admin.transactions › A…
+  GET|HEAD  admin/users admin.users › AdminController…
+  POST      admin/users/{user}/adjust-balance admin.a…
+  PUT       admin/users/{user}/cc-permissions admin.u…
+  POST      admin/users/{user}/refresh-badges admin.u…
+  POST      admin/users/{user}/toggle-admin admin.tog…
+  POST      admin/users/{user}/toggle-ban admin.toggl…
+  POST      admin/users/{user}/toggle-customer-care a…
+  GET|HEAD  area ..... area.show › AreaController@show
+  POST      area . area.update › AreaController@update
+  GET|HEAD  auth/google auth.google › SocialAuthContr…
+  GET|HEAD  auth/google/callback auth.google.callback…
+  GET|HEAD  blog ... blog.index › BlogController@index
+  POST      blog ... blog.store › BlogController@store
+  GET|HEAD  blog/create blog.create › BlogController@…
+  GET|HEAD  blog/{blog} blog.show › BlogController@sh…
+  GET|HEAD  buzz ...... news.index › routes/web.php:80
+  GET|HEAD  cart ... cart.index › CartController@index
+  POST      cart/add/{listing} cart.add › CartControl…
+  POST      cart/checkout cart.checkout › CartControl…
+  POST      cart/remove/{listing} cart.remove › CartC…
+  GET|HEAD  chat ... chat.index › ChatController@index
+  GET|HEAD  concierge concierge.show › ConciergeContr…
+  POST      concierge/message concierge.message › Con…
+  GET|HEAD  customer-care customer-care.index › Custo…
+  POST      customer-care/flag customer-care.flag › C…
+  GET|HEAD  customer-care/gig-disputes customer-care.…
+  POST      customer-care/gig-disputes/{dispute}/escalate customer-care.gig-disputes.escalate › CustomerCareController@escalateGigDi…
+  POST      customer-care/gig-disputes/{dispute}/note customer-care.gig-disputes.note › CustomerCareController@addGigDisputeNot…
+  POST      customer-care/gigs/{gig}/message customer…
+  GET|HEAD  customer-care/gigs/{gig}/thread customer-…
+  GET|HEAD  customer-care/listing-disputes customer-c…
+  POST      customer-care/listing-disputes/{dispute}/escalate customer-care.listing-disputes.escalate › CustomerCareController@escalateListi…
+  POST      customer-care/listing-disputes/{dispute}/note customer-care.listing-disputes.note › CustomerCareController@addListingDisput…
+  POST      customer-care/listings/{listing}/message …
+  GET|HEAD  customer-care/listings/{listing}/thread c…
+  GET|HEAD  customer-care/orders customer-care.orders…
+  POST      customer-care/orders/{order}/confirm-delivery customer-care.orders.confirm-delivery › CustomerCareController@confirmDel…
+  GET|HEAD  customer-care/user-lookup customer-care.u…
+  GET|HEAD  dashboard dashboard › OverviewController@…
+  GET|HEAD  faq .................................. faq
+  GET|HEAD  features features › FeaturesController@in…
+  GET|HEAD  forgot-password password.request › AuthCo…
+  POST      forgot-password password.email › AuthCont…
+  GET|HEAD  gigs .... gigs.index › GigController@index
+  POST      gigs .... gigs.store › GigController@store
+  GET|HEAD  gigs/create gigs.create › GigController@c…
+  GET|HEAD  gigs/{gig} gigs.show › GigController@show
+  POST      gigs/{gig}/accept gigs.accept › GigContro…
+  POST      gigs/{gig}/complete gigs.complete › GigCo…
+  POST      gigs/{gig}/deliver gigs.deliver › GigCont…
+  POST      gigs/{gig}/dispute gigs.dispute.store › G…
+  GET|HEAD  gigs/{gig}/edit gigs.edit › GigController…
+  POST      gigs/{gig}/message gigs.message › GigCont…
+  GET|HEAD  gigs/{gig}/messages gigs.messages › GigCo…
+  POST      gigs/{gig}/reject gigs.reject › GigContro…
+  POST      gigs/{gig}/review gigs.review › ReviewCon…
+  POST      gigs/{gig}/withdraw gigs.withdraw › GigCo…
+  GET|HEAD  golfvex golfvex.index › GolfVexController…
+  POST      golfvex/play golfvex.play › GolfVexContro…
+  GET|HEAD  investment investment.index › InvestmentC…
+  GET|HEAD  kyc ........ kyc.show › KycController@show
+  POST      kyc/submit kyc.submit › KycController@sub…
+  POST      kyc/{step} . kyc.save › KycController@save
+  GET|HEAD  leaderboard leaderboard.index › Leaderboa…
+  POST      leaderboard/toggle leaderboard.toggle › L…
+  GET|HEAD  levels-badges levels-badges.show › LevelB…
+  GET|HEAD  levels-badges/badges levels-badges.badges…
+  GET|HEAD  levels-badges/levels levels-badges.levels…
+  GET|HEAD  login ... login › AuthController@showLogin
+  POST      login ............... AuthController@login
+  POST      logout .... logout › AuthController@logout
+  GET|HEAD  marketplace marketplace.index › Marketpla…
+  POST      marketplace marketplace.store › Marketpla…
+  GET|HEAD  marketplace/create marketplace.create › M…
+  GET|HEAD  marketplace/favorites marketplace.favorit…
+  GET|HEAD  marketplace/orders marketplace.orders › M…
+  POST      marketplace/orders/{order}/confirm market…
+  GET|HEAD  marketplace/{listing} marketplace.show › …
+  POST      marketplace/{listing}/confirm marketplace…
+  POST      marketplace/{listing}/dispute marketplace…
+  GET|HEAD  marketplace/{listing}/edit marketplace.ed…
+  POST      marketplace/{listing}/favorite marketplac…
+  POST      marketplace/{listing}/meetup-propose mark…
+  POST      marketplace/{listing}/meetup-respond/{message} marketplace.meetup.respond › MarketplaceController@respond…
+  POST      marketplace/{listing}/message marketplace…
+  GET|HEAD  marketplace/{listing}/messages marketplac…
+  POST      marketplace/{listing}/purchase marketplac…
+  POST      marketplace/{listing}/review marketplace.…
+  POST      marketplace/{listing}/ship marketplace.sh…
+  GET|HEAD  money-tracker money-tracker.index › Walle…
+  GET|HEAD  my-posts posts.index › MyPostsController@…
+  DELETE    my-posts/gigs/{gig} posts.gigs.delete › M…
+  DELETE    my-posts/listings/{listing} posts.listing…
+  POST      news ... news.store › NewsController@store
+  POST      news/ad news.ad.store › NewsController@st…
+  GET|HEAD  news/ad/create news.ad.create › NewsContr…
+  GET|HEAD  notifications notifications.index › Notif…
+  POST      notifications/mark-all-read notifications…
+  POST      notifications/{id}/read notifications.rea…
+  GET|HEAD  onboarding/interests onboarding.interests…
+  POST      onboarding/interests onboarding.interests…
+  GET|HEAD  plans plans.choose › PlanGateController@c…
+  GET|HEAD  profile profile.index › ProfileController…
+  POST      profile profile.update › ProfileControlle…
+  GET|HEAD  profile-preview profile.preview › Profile…
+  GET|HEAD  profile/account profile.account › Profile…
+  GET|HEAD  profile/appearance profile.appearance › P…
+  POST      profile/password profile.password › Profi…
+  GET|HEAD  profile/reputation profile.reputation › P…
+  POST      profile/theme-toggle profile.theme.toggle…
+  GET|HEAD  pulse pulse.index › PulseController@index
+  POST      push/subscribe push.subscribe › PushSubsc…
+  POST      push/unsubscribe push.unsubscribe › PushS…
+  GET|HEAD  q-coin qcoin.index › QCoinController@index
+  POST      q-coin/claim qcoin.claim › QCoinControlle…
+  GET|HEAD  referrals referrals.index › ReferralContr…
+  GET|HEAD  register register › AuthController@showRe…
+  POST      register .... FreeRegisterController@store
+  GET|HEAD  register/invite/{code} register.invite › …
+  POST      register/invite/{code} register.invite.st…
+  GET|HEAD  register/pay register.pay › AuthControlle…
+  GET|HEAD  register/pay/callback register.pay.callba…
+  GET|HEAD  register/pay/initiate register.pay.initia…
+  GET|HEAD  register/vendor register.vendor › AuthCon…
+  POST      register/vendor register.vendor.store › A…
+  POST      reset-password password.update › AuthCont…
+  GET|HEAD  reset-password/{token} password.reset › A…
+  GET|HEAD  robots.txt .......... SeoController@robots
+  GET|HEAD  safety ............................ safety
+  POST      saved-numbers saved-numbers.store › Saved…
+  GET|HEAD  search .. search › SearchController@search
+  GET|HEAD  services services.index › ServicesControl…
+  POST      services/airtime services.airtime › Servi…
+  POST      services/cable services.cable › ServicesC…
+  GET|HEAD  services/cable-plans services.cable-plans…
+  POST      services/data services.data › ServicesCon…
+  GET|HEAD  services/data-plans services.data-plans  …
+  GET|HEAD  services/receipt/{purchase} services.rece…
+  POST      settings/appearance appearance.update › A…
+  GET|HEAD  settings/appearance appearance.edit › rou…
+  GET|HEAD  signup-fee signup-fee.initiate › Paystack…
+  GET|HEAD  signup-fee/callback signup-fee.callback  …
+  GET|HEAD  sitemap.xml ........ SeoController@sitemap
+  GET|HEAD  storage/{path} storage.local › vendor/lar…
+  PUT       storage/{path} storage.local.upload › ven…
+  GET|HEAD  subscriptions subscriptions.index › Subsc…
+  GET|HEAD  subscriptions/callback subscriptions.call…
+  POST      subscriptions/subscribe subscriptions.sub…
+  POST      tour/complete tour.complete › TourControl…
+  GET|HEAD  up vendor/laravel/framework/src/Illuminat…
+  GET|HEAD  vendor/activate vendor.activate › routes/…
+  GET|HEAD  vendor/callback vendor.callback › Paystac…
+  POST      vendor/pay vendor.pay › PaystackControlle…
+  GET|HEAD  wallet wallet.index › WalletController@in…
+  GET|HEAD  wallet/bank-account wallet.bank-account.e…
+  POST      wallet/bank-account wallet.bank-account.s…
+  POST      wallet/bank-account/resolve wallet.bank-a…
+  GET|HEAD  wallet/paystack/callback paystack.callbac…
+  POST      wallet/paystack/initiate paystack.initiat…
+  GET|HEAD  wallet/pin wallet.pin.edit › TransactionP…
+  POST      wallet/pin wallet.pin.update › Transactio…
+  POST      wallet/send wallet.send › WalletControlle…
+  GET|HEAD  wallet/send wallet.send.form › WalletCont…
+  POST      wallet/send/resolve wallet.send.resolve  …
+  GET|HEAD  wallet/transactions/{id} wallet.transacti…
+  GET|HEAD  wallet/virtual-account wallet.virtual-acc…
+  POST      wallet/virtual-account wallet.virtual-acc…
+  POST      wallet/withdraw wallet.withdraw › WalletA…
+  POST      webhooks/paystack PaystackWebhookControll…
+  GET|HEAD  welcome welcome.show › WelcomeTourControl…
+=== FILES ===
+app/Services/VtuService.php
+app/Services/VtuNgService.php
+app/Services/Concierge/ConciergeService.php
+app/Services/Concierge/KeywordConciergeService.php
+app/Services/QCoinService.php
+app/Http/Controllers/SeoController.php
+app/Http/Controllers/ProfileController.php
+app/Http/Controllers/MarketplaceController.php
+app/Http/Controllers/ListingDisputeController.php
+app/Http/Controllers/NewsController.php
+app/Http/Controllers/BlogController.php
+app/Http/Controllers/GigDisputeController.php
+app/Http/Controllers/GigController.php
+app/Http/Controllers/VirtualAccountController.php
+app/Http/Controllers/PaystackController.php
+app/Http/Controllers/SubscriptionController.php
+app/Http/Controllers/SearchController.php
+app/Http/Controllers/FeaturesController.php
+app/Http/Controllers/MyPostsController.php
+app/Http/Controllers/WalletController.php
+app/Http/Controllers/AdminController.php
+app/Http/Controllers/AuthController.php
+app/Http/Controllers/PulseController.php
+app/Http/Controllers/WalletActionController.php
+app/Http/Middleware/EnsurePlanAllows.php
+app/Http/Middleware/TrackStreak.php
+app/Http/Middleware/RequireTier.php
+app/Notifications/GigCancelledByPoster.php
+app/Notifications/SubscriptionActivated.php
+app/Console/Commands/SendGigPaymentReminders.php
+app/Models/HasPlanRules.php
+app/Models/Gig.php
+app/Models/News.php
+app/Models/ListingMessage.php
+app/Helpers/icons.php
+routes/web.php
+resources/views/blog/index.blade.php
+resources/views/blog/create.blade.php
+resources/views/profile/index.blade.php
+resources/views/profile/account.blade.php
+=== CONTROLLERS ===
+--- app/Http/Controllers/SeoController.php
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Support\Facades\Route;
+
+class SeoController extends Controller
+{
+    public function robots()
+    {
+        $txt = "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api\n\nSitemap: " . url('/sitemap.xml') . "\n";
+        return response($txt, 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
+    }
+
+    public function sitemap()
+    {
+        $names = ['welcome', 'about', 'faq', 'safety', 'news.index', 'gigs.index', 'marketplace.index', 'pulse.index', 'register'];
+        $urls = [];
+        foreach ($names as $n) {
+            if (Route::has($n)) {
+                $urls[] = route($n);
+            }
+        }
+        $now = now()->toAtomString();
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        foreach (array_unique($urls) as $u) {
+            $xml .= '  <url><loc>' . e($u) . '</loc><lastmod>' . $now . '</lastmod></url>' . "\n";
+        }
+        $xml .= '</urlset>' . "\n";
+        return response($xml, 200, ['Content-Type' => 'application/xml']);
+    }
+}
+--- app/Http/Controllers/ProfileController.php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Services\LevelBadgeService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
+
+class ProfileController extends Controller
+{
+    public function __construct(protected LevelBadgeService $levelBadgeService) {}
+
+    public function index()
+    {
+        $user = Auth::user();
+
+        $result = $this->levelBadgeService->refresh($user);
+        $earnedBadges = $user->badges()->get();
+
+        $allReferrals = \App\Models\User::where('referred_by', $user->id)->get();
+        $activeReferrals = $allReferrals->where('tier', '!=', 'free');
+
+        $recentReviews = \App\Models\Review::with('reviewer')
+            ->where('reviewed_user_id', $user->id)
+            ->latest()
+            ->take(3)
+            ->get();
+
+        $myGigsPosted = \App\Models\Gig::where('user_id', $user->id)->count();
+        $myListingsPosted = \App\Models\Listing::where('user_id', $user->id)->count();
+
+        $monthStart = now()->startOfMonth();
+        $monthIn = \App\Models\Transaction::where('user_id', $user->id)->where('amount', '>', 0)->where('created_at', '>=', $monthStart)->sum('amount');
+        $monthOut = abs(\App\Models\Transaction::where('user_id', $user->id)->where('amount', '<', 0)->where('created_at', '>=', $monthStart)->sum('amount'));
+
+        $leaderboardRank = null;
+        if ($user->leaderboard_opt_in) {
+            $weekStart = now()->startOfWeek();
+            $rankedUsers = \App\Models\Transaction::where('transactions.created_at', '>=', $weekStart)
+                ->where('amount', '>', 0)
+                ->whereIn('type', ['gig_earning', 'marketplace_sale', 'referral_bonus'])
+                ->join('users', 'transactions.user_id', '=', 'users.id')
+                ->where('users.leaderboard_opt_in', true)
+                ->selectRaw('users.id, SUM(transactions.amount) as total')
+                ->groupBy('users.id')
+                ->orderByDesc('total')
+                ->pluck('users.id')
+                ->values();
+            $rankIndex = $rankedUsers->search($user->id);
+            $leaderboardRank = $rankIndex === false ? null : $rankIndex + 1;
+        }
+
+        return view('profile.index', [
+            'user' => $user,
+            'workerLevel' => $user->workerLevel(),
+            'completedGigsCount' => $user->completedGigsCount(),
+            'averageRating' => $user->averageRatingReceived(),
+            'reviewsReceivedCount' => $user->reviewsReceivedCount(),
+            'currentLevel' => $result['level'],
+            'earnedBadges' => $earnedBadges->take(6),
+            'totalBadgesEarned' => $earnedBadges->count(),
+            'allReferralsCount' => $allReferrals->count(),
+            'activeReferralsCount' => $activeReferrals->count(),
+            'recentReferrals' => $allReferrals->sortByDesc('created_at')->take(4)->values(),
+            'recentReviews' => $recentReviews,
+            'myGigsPosted' => $myGigsPosted,
+            'myListingsPosted' => $myListingsPosted,
+            'monthIn' => $monthIn,
+            'monthOut' => $monthOut,
+            'profileLeaderboardRank' => $leaderboardRank,
+        ]);
+    }
+
+    public function preview()
+    {
+        $user = Auth::user();
+
+        $result = $this->levelBadgeService->refresh($user);
+        $earnedBadges = $user->badges()->get();
+
+        return view('profile-preview', [
+            'user' => $user,
+            'workerLevel' => $user->workerLevel(),
+            'completedGigsCount' => $user->completedGigsCount(),
+            'averageRating' => $user->averageRatingReceived(),
+            'reviewsReceivedCount' => $user->reviewsReceivedCount(),
+            'currentLevel' => $result['level'],
+            'earnedBadges' => $earnedBadges->take(6),
+            'totalBadgesEarned' => $earnedBadges->count(),
+        ]);
+    }
+
+    public function reputation()
+    {
+        $user = Auth::user();
+
+        return view('profile.reputation', [
+            'user' => $user,
+            'workerLevel' => $user->workerLevel(),
+            'completedGigsCount' => $user->completedGigsCount(),
+            'averageRating' => $user->averageRatingReceived(),
+            'reviewsReceivedCount' => $user->reviewsReceivedCount(),
+        ]);
+    }
+
+    public function account()
+    {
+        return view('profile.account', ['user' => Auth::user()]);
+    }
+
+    public function appearance()
+    {
+        return view('profile.appearance', ['user' => Auth::user()]);
+    }
+
+    public function update(Request $request)
+    {
+        \Log::info('PROFILE UPDATE RAW accent_color: ' . var_export($request->input('accent_color'), true));
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
+            'accent_color' => 'nullable|string|max:7',
+            'theme_style' => 'nullable|string|in:glass,neumorphic,plain,aurora',
+            'mobile_nav_style' => 'nullable|string|in:painted_pill,edge_dock,halo_dock,liquid_glass',
+            'sidebar_style' => 'nullable|string|in:classic,rail',
+            'avatar' => 'nullable|image|max:4096',
+            'background' => 'nullable|image|max:8192',
+        ]);
+
+        if ($request->hasFile('avatar')) {
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $validated['avatar_url'] = '/storage/' . $path;
+        }
+
+        if ($request->hasFile('background')) {
+            $path = $request->file('background')->store('backgrounds', 'public');
+            $validated['background_url'] = '/storage/' . $path;
+        }
+
+        unset($validated['avatar'], $validated['background']);
+
+        $user->update($validated);
+
+        return back()->with('status', 'Profile updated.');
+    }
+
+--- app/Http/Controllers/MarketplaceController.php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Listing;
+use App\Models\Transaction;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+class MarketplaceController extends Controller
+{
+    public function index(Request $request)
+    {
+        $query = Listing::leftJoin('users', 'listings.user_id', '=', 'users.id')
+            ->select('listings.*')
+            ->orderByRaw("CASE WHEN users.tier IN ('tier2', 'tier3') THEN 0 ELSE 1 END")
+            ->latest('listings.created_at');
+
+        if ($request->filled('category')) {
+            $query->where('category', $request->query('category'));
+        }
+
+        if ($request->filled('type')) {
+            $query->where('listing_type', $request->query('type'));
+        }
+
+        if ($request->filled('q')) {
+            $search = $request->query('q');
+            $query->where(function ($sub) use ($search) {
+                $sub->where('listings.title', 'like', '%' . $search . '%')
+                    ->orWhere('listings.description', 'like', '%' . $search . '%')
+                    ->orWhere('listings.store_name', 'like', '%' . $search . '%');
+            });
+
+            if (Auth::check()) {
+                \App\Models\UserActivity::create([
+                    'user_id' => Auth::id(),
+                    'action' => 'search',
+                    'search_term' => $search,
+                    'category' => $request->query('category'),
+                ]);
+            }
+        }
+
+        if (true) {
+            $allListings = $query->get();
+
+            $justArrived = $allListings->take(4);
+            $secondFeatured = $allListings->skip(4)->take(4)->count() ? $allListings->skip(4)->take(4) : $allListings->take(4);
+
+            $featuredSource = $allListings->where('is_verified_seller', true)->take(4);
+            if ($featuredSource->isEmpty()) {
+                $featuredSource = $allListings->take(4);
+            }
+            $featuredPool = $featuredSource->map(function ($item) {
+                return [
+                    'badge' => $item->is_verified_seller ? 'VERIFIED' : 'FEATURED',
+                    'title' => $item->title,
+                    'price' => $item->amount,
+                    'oldPrice' => null,
+                    'seed' => 'listing' . $item->id,
+                ];
+            })->values()->all();
+
+            $topCategories = Listing::where('status', 'available')
+                ->selectRaw('category, COUNT(*) as cnt, MIN(amount) as min_amount')
+                ->groupBy('category')
+                ->orderByDesc('cnt')
+                ->take(3)
+                ->get();
+
+            $categoryIconMap = ['Fashion' => 'shirt', 'Electronics' => 'cpu', 'Books' => 'book', 'Food' => 'utensils', 'Services' => 'wrench', 'Rentals' => 'key', 'Other' => 'grid'];
+            $catTiles = $topCategories->map(function ($c) use ($categoryIconMap) {
+                return [
+                    'label' => $c->category,
+                    'from' => $c->min_amount,
+                    'icon' => $categoryIconMap[$c->category] ?? 'grid',
+                    'seed' => 'cat' . strtolower($c->category),
+                ];
+            })->values()->all();
+
+            return view('marketplace.index', [
+                'listings' => $allListings,
+                'justArrived' => $justArrived,
+                'secondFeatured' => $secondFeatured,
+                'realFeaturedPool' => $featuredPool,
+                'realCatTiles' => $catTiles,
+                'activeCategory' => $request->query('category'),
+                'activeType' => $request->query('type'),
+                'searchQuery' => $request->query('q'),
+            ]);
+        }
+
+        $recommended = collect();
+        if (Auth::check() && !$request->filled('q') && !$request->filled('category')) {
+            $topCategories = \App\Models\UserActivity::where('user_id', Auth::id())
+                ->whereNotNull('category')
+                ->selectRaw('category, COUNT(*) as cnt')
+                ->groupBy('category')
+                ->orderByDesc('cnt')
+                ->take(3)
+                ->pluck('category');
+
+            if ($topCategories->isNotEmpty()) {
+                $recommended = Listing::where('status', 'available')
+                    ->whereIn('category', $topCategories)
+                    ->where('user_id', '!=', Auth::id())
+                    ->latest()
+                    ->take(8)
+                    ->get();
+            }
+        }
+
+        return view('marketplace.index', [
+            'listings' => $query->get(),
+            'activeCategory' => $request->query('category'),
+            'activeType' => $request->query('type'),
+            'searchQuery' => $request->query('q'),
+            'recommended' => $recommended,
+        ]);
+    }
+
+    public function show(Listing $listing)
+    {
+        if (Auth::check() && Auth::id() !== $listing->user_id) {
+            \App\Models\UserActivity::create([
+                'user_id' => Auth::id(),
+                'action' => 'view',
+                'category' => $listing->category,
+                'listing_id' => $listing->id,
+            ]);
+        }
+
+        $seller = $listing->user_id ? User::find($listing->user_id) : null;
+        $reviews = $listing->reviews()->with('reviewer')->latest()->get();
+        $avgRating = $reviews->avg('rating');
+
+        $isOwner = Auth::check() && Auth::id() === $listing->user_id;
+        $messages = collect();
+        $conversations = collect();
+
+        if (Auth::check() && $listing->user_id) {
+            $convs = \App\Models\Conversation::where('type', 'business')
+                ->where('subject_type', Listing::class)
+                ->where('subject_id', $listing->id)
+                ->whereHas('participants', fn($q) => $q->where('user_id', Auth::id()))
+                ->with(['messages.sender', 'participants'])
+                ->get();
+--- app/Http/Controllers/ListingDisputeController.php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Listing;
+use App\Models\ListingDispute;
+use App\Models\Transaction;
+use App\Models\User;
+use App\Notifications\ListingDisputeFiled;
+use App\Notifications\ListingDisputeResolved;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
+
+class ListingDisputeController extends Controller
+{
+    // Buyer files a complaint. Allowed any time escrow is still held —
+    // before confirming (item never arrived/wrong item) or after shipping
+    // was marked but nothing showed up. Not for the seller to file (they
+    // already got what they wanted the moment the buyer paid).
+    public function store(Request $request, Listing $listing)
+    {
+        $user = Auth::user();
+        abort_unless($listing->buyer_id === $user->id, 403, 'Only the buyer can file a complaint on this listing.');
+        abort_unless($listing->status === 'sold', 422, 'This listing has no pending escrow to dispute.');
+
+        $existing = ListingDispute::where('listing_id', $listing->id)->first();
+        if ($existing && $existing->status === 'open') {
+            return back()->withErrors(['dispute' => 'A complaint is already open for this listing.']);
+        }
+
+        $validated = $request->validate(['description' => 'required|string|max:2000']);
+
+        $dispute = ListingDispute::updateOrCreate(
+            ['listing_id' => $listing->id],
+            [
+                'raised_by' => $user->id,
+                'description' => $validated['description'],
+                'status' => 'open',
+                'resolved_by' => null,
+                'resolved_at' => null,
+            ]
+        );
+
+        Notification::send(User::where('is_admin', true)->get(), new ListingDisputeFiled($dispute));
+
+        if ($listing->user_id) {
+            \App\Models\ListingMessage::postSystemEvent(
+                $listing->id, $user->id, $listing->user_id,
+                '⚠️ A complaint was filed on this listing — admin is reviewing.'
+            );
+        }
+
+        return back()->with('status', 'Complaint submitted — admin will review it.');
+    }
+
+    public function index()
+    {
+        abort_unless(Auth::user()->is_admin, 403);
+        $disputes = ListingDispute::where('status', 'open')->with(['listing', 'raisedBy', 'assignedTo'])->latest()->get();
+        $ccAgents = User::where('role', 'customer_care')->orderBy('name')->get();
+        return view('admin.marketplace-disputes.index', ['disputes' => $disputes, 'ccAgents' => $ccAgents]);
+    }
+
+    // Admin sides with the buyer: escrowed funds already sitting in nobody's
+    // wallet get released to the buyer's wallet (refund). No commission taken.
+    public function resolveRefunded(ListingDispute $dispute)
+    {
+        $admin = Auth::user();
+        abort_unless($admin->is_admin, 403);
+        abort_unless($dispute->status === 'open', 422, 'This complaint has already been resolved.');
+
+        DB::transaction(function () use ($dispute, $admin) {
+            $listing = Listing::where('id', $dispute->listing_id)->lockForUpdate()->first();
+            abort_unless($listing->status === 'sold', 422, 'This listing is no longer awaiting payment resolution.');
+
+            $buyer = User::where('id', $listing->buyer_id)->lockForUpdate()->first();
+
+            $buyer->increment('wallet_balance', $listing->amount);
+            Transaction::create([
+                'user_id' => $buyer->id,
+                'type' => 'marketplace_refund',
+                'amount' => $listing->amount,
+                'description' => 'Admin refund (dispute): ' . $listing->title,
+            ]);
+
+            $listing->update(['status' => 'available', 'buyer_id' => null]);
+
+            $dispute->update(['status' => 'resolved_refunded', 'resolved_by' => $admin->id, 'resolved_at' => now()]);
+        });
+
+        $this->notifyResolution($dispute->fresh(), 'refunded');
+
+        return back()->with('status', 'Dispute resolved — buyer has been refunded.');
+    }
+
+    // Admin sides with the seller: escrow releases normally, same commission
+    // logic as a normal confirmed delivery.
+    public function resolvePaid(ListingDispute $dispute)
+    {
+        $admin = Auth::user();
+        abort_unless($admin->is_admin, 403);
+        abort_unless($dispute->status === 'open', 422, 'This complaint has already been resolved.');
+
+        DB::transaction(function () use ($dispute, $admin) {
+            $listing = Listing::where('id', $dispute->listing_id)->lockForUpdate()->first();
+            abort_unless($listing->status === 'sold', 422, 'This listing is no longer awaiting payment resolution.');
+
+            $seller = $listing->user_id ? User::where('id', $listing->user_id)->lockForUpdate()->first() : null;
+
+            if ($seller) {
+                $rate = match ($seller->tier) {
+                    'tier2', 'tier3' => 0,
+                    'tier1' => 0.03,
+                    default => 0.05,
+                };
+                $commission = round($listing->amount * $rate, 2);
+                $payout = $listing->amount - $commission;
+
+                $seller->increment('wallet_balance', $payout);
+                Transaction::create([
+                    'user_id' => $seller->id,
+                    'type' => 'marketplace_sale',
+                    'amount' => $payout,
+                    'description' => 'Sold (dispute resolved): ' . $listing->title . ($commission > 0 ? ' (after ₦' . number_format($commission) . ' platform fee)' : ''),
+                ]);
+                \App\Models\PlatformRevenue::record('marketplace', $commission, 'Commission (dispute resolved): ' . $listing->title, 'listing', $listing->id);
+            }
+
+            $listing->update(['status' => 'completed']);
+
+            $dispute->update(['status' => 'resolved_paid', 'resolved_by' => $admin->id, 'resolved_at' => now()]);
+        });
+
+        $this->notifyResolution($dispute->fresh(), 'paid');
+
+        return back()->with('status', 'Dispute resolved — seller has been paid.');
+    }
+
+    public function dismiss(ListingDispute $dispute)
+    {
+        $admin = Auth::user();
+        abort_unless($admin->is_admin, 403);
+        abort_unless($dispute->status === 'open', 422, 'This complaint has already been resolved.');
+
+        $dispute->update(['status' => 'dismissed', 'resolved_by' => $admin->id, 'resolved_at' => now()]);
+
+        $this->notifyResolution($dispute->fresh(), 'dismissed');
+
+--- app/Http/Controllers/NewsController.php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\News;
+use App\Models\Transaction;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+class NewsController extends Controller
+{
+    // Duration options in days => price in naira. tier1 (Plus) cannot post ads — requires tier2+.
+    const AD_PRICING = [3 => 1500, 7 => 3000, 14 => 5000];
+
+    public function index()
+    {
+        $newsItems = News::where('type', '!=', 'ad')
+            ->orWhere(function ($q) {
+                $q->where('type', 'ad')->where(function ($q2) {
+                    $q2->whereNull('expires_at')->orWhere('expires_at', '>', now());
+                });
+            })
+            ->orderByDesc('is_featured')
+            ->latest('published_at')
+            ->get();
+
+        return view('news.index', ['newsItems' => $newsItems]);
+    }
+
+    public function createAd()
+    {
+        abort_if(Auth::user()->tier === 'tier1', 403, 'Ads aren\'t available on the Silver plan — upgrade to Gold to post one.');
+        return view('news.create-ad', ['pricing' => self::AD_PRICING]);
+    }
+
+    public function storeAd(Request $request)
+    {
+        $user = Auth::user();
+        abort_if($user->tier === 'tier1', 403, 'Ads aren\'t available on the Silver plan — upgrade to Gold to post one.');
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'category' => 'required|string|max:100',
+            'body' => 'required|string',
+            'duration' => 'required|integer|in:3,7,14',
+            'image' => 'nullable|image|max:6144',
+        ]);
+
+        $cost = self::AD_PRICING[(int) $validated['duration']];
+
+        $imageUrl = null;
+        if ($request->hasFile('image')) {
+            $imageUrl = '/storage/' . $request->file('image')->store('news', 'public');
+        }
+
+        // Balance check + decrement + ad creation must be one atomic unit,
+        // otherwise concurrent submissions can both pass the balance check
+        // before either decrements (race condition -> negative balance).
+        $news = DB::transaction(function () use ($user, $validated, $cost, $imageUrl) {
+            $lockedUser = User::where('id', $user->id)->lockForUpdate()->first();
+
+            if ($lockedUser->wallet_restricted) {
+                return null;
+            }
+            if ($lockedUser->wallet_balance < $cost) {
+                return null;
+            }
+
+            $lockedUser->decrement('wallet_balance', $cost);
+
+            Transaction::create([
+                'user_id' => $lockedUser->id,
+                'type' => 'ad_post',
+                'amount' => -$cost,
+                'description' => $validated['duration'] . '-day ad: ' . $validated['title'],
+            ]);
+
+            return News::create([
+                'title' => $validated['title'],
+                'category' => $validated['category'],
+                'body' => $validated['body'],
+                'image_url' => $imageUrl,
+                'type' => 'ad',
+                'created_by' => $lockedUser->id,
+                'published_at' => now(),
+                'expires_at' => now()->addDays((int) $validated['duration']),
+                'is_featured' => $lockedUser->tier === 'tier3',
+            ]);
+        });
+
+        if (!$news) {
+            $user->refresh();
+            if ($user->wallet_restricted) {
+                return back()->withErrors(['balance' => 'Your wallet is restricted due to an unresolved payment issue. Clear your balance to post ads.'])->withInput();
+            }
+            return back()->withErrors(['balance' => 'Insufficient wallet balance. This ad costs ₦' . number_format($cost) . '. Top up your wallet first.'])->withInput();
+        }
+
+        return redirect()->route('news.index')->with('status', 'Ad is live for ' . $validated['duration'] . ' days.');
+    }
+
+    public function store(Request $request)
+    {
+        abort_unless(Auth::user()->is_admin, 403);
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'category' => 'required|string|max:100',
+            'body' => 'required|string',
+            'type' => 'nullable|in:news,ad',
+            'source_url' => 'nullable|url',
+            'image' => 'nullable|image|max:6144',
+            'video' => 'nullable|mimetypes:video/mp4,video/quicktime|max:20480',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $validated['image_url'] = '/storage/' . $request->file('image')->store('news', 'public');
+        }
+        if ($request->hasFile('video')) {
+            $validated['video_url'] = '/storage/' . $request->file('video')->store('news', 'public');
+        }
+        unset($validated['image'], $validated['video']);
+
+        News::create([
+            ...$validated,
+            'type' => $validated['type'] ?? 'news',
+            'created_by' => Auth::id(),
+            'published_at' => now(),
+        ]);
+
+        return redirect()->route('news.index');
+    }
+}
+=== MODELS ===
+--- app/Models/HasPlanRules.php
+<?php
+
+namespace App\Models;
+
+trait HasPlanRules
+{
+    public function planKey(): string
+    {
+        $tier = $this->tier ?? 'free';
+        return config('plans.' . $tier) ? $tier : 'free';
+    }
+
+    public function planLabel(): string
+    {
+        return Subscription::PLANS[$this->planKey()]['label'] ?? 'Free';
+    }
+
+    public function planRule(string $key, $default = null)
+    {
+        return config('plans.' . $this->planKey() . '.' . $key, $default);
+    }
+
+    // Use in Blade: @if(auth()->user()->planAllows('gigs_post'))
+    public function planAllows(string $key): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+        $v = $this->planRule($key, false);
+        if ($v === null) {
+            return true;
+        }
+        if (is_bool($v)) {
+            return $v;
+        }
+        if (is_numeric($v)) {
+            return $v > 0;
+        }
+        return (bool) $v;
+    }
+}
+--- app/Models/Gig.php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Gig extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'title', 'category', 'description', 'amount', 'escrowed_amount',
+        'user_id', 'accepted_by', 'status', 'whatsapp', 'phone',
+        'guest_name', 'guest_token', 'delivery_note', 'delivered_at',
+        'rejection_note', 'payment_reminder_sent_at', 'revision_count',
+        'deadline', 'location_type', 'location', 'details',
+        'attachment_path', 'delivery_attachment_path',
+        'has_item', 'item_name', 'item_qty', 'item_cost',
+        'delivery_address', 'item_delivery_method',
+        'packages', 'chosen_package',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'delivered_at' => 'datetime',
+            'payment_reminder_sent_at' => 'datetime',
+            'deadline' => 'date',
+            'details' => 'array',
+            'has_item' => 'boolean',
+            'item_cost' => 'decimal:2',
+            'packages' => 'array',
+        ];
+    }
+
+    public function reviews()
+    {
+        return $this->morphMany(Review::class, 'reviewable');
+    }
+
+    public function poster()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function worker()
+    {
+        return $this->belongsTo(User::class, 'accepted_by');
+    }
+
+    public function dispute()
+    {
+        return $this->hasOne(GigDispute::class);
+    }
+
+    // Resolves the WhatsApp number to show for this gig (gig-specific
+    // number takes priority over the poster's profile number), and
+    // normalizes it to bare digits with the 234 country code - handles
+    // numbers stored as 0803..., 234803..., or +234803... consistently.
+--- app/Models/News.php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class News extends Model
+{
+    protected $fillable = ['title', 'category', 'body', 'source_url', 'created_by', 'published_at'];
+
+    protected $casts = [
+        'published_at' => 'datetime',
+    ];
+}
+--- app/Models/ListingMessage.php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class ListingMessage extends Model
+{
+    protected $fillable = ['listing_id', 'sender_id', 'recipient_id', 'body', 'read_at', 'is_system', 'message_type', 'meta'];
+
+    protected function casts(): array
+    {
+        return ['is_system' => 'boolean', 'meta' => 'array'];
+    }
+
+    // Posts an automated event line into the buyer/seller thread. Attributed
+    // to whoever triggered the action (there's no real "system" user, and
+    // sender_id/recipient_id are required, non-nullable columns), so this
+    // reuses the existing thread-lookup/polling logic with zero extra work.
+    public static function postSystemEvent(int $listingId, int $actorId, int $counterpartyId, string $text): void
+    {
+        static::create([
+            'listing_id' => $listingId,
+            'sender_id' => $actorId,
+            'recipient_id' => $counterpartyId,
+            'body' => $text,
+            'is_system' => true,
+        ]);
+    }
+
+    public function listing()
+    {
+        return $this->belongsTo(Listing::class);
+    }
+
+    public function sender()
+    {
+        return $this->belongsTo(User::class, 'sender_id');
+    }
+
+    public function recipient()
+    {
+        return $this->belongsTo(User::class, 'recipient_id');
+    }
+}
+=== VIEWS ===
+--- resources/views/blog/index.blade.php
+@extends('layouts.app-authenticated')
+@section('content')
+
+
+<main class="max-w-4xl mx-auto p-6">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold">Blog</h1>
+            <p class="text-muted text-sm">Stories and guides from the NAURVEX community</p>
+        </div>
+        @auth
+        <a href="{{ route('blog.create') }}" class="btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Write</a>
+        @endauth
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-5">
+        @forelse($blogs as $post)
+        <a href="{{ route('blog.show', $post->id) }}" class="glass-card p-5" style="text-decoration:none;color:inherit;">
+            @if($post->cover_image)
+            <img src="{{ $post->cover_image }}" class="w-full h-40 object-cover rounded-xl mb-3">
+            @endif
+            <h3 class="font-semibold">{{ $post->title }}</h3>
+            <p class="text-muted text-sm mt-1 line-clamp-2">{{ Str::limit(strip_tags($post->body), 100) }}</p>
+            <p class="text-muted text-xs mt-3">By {{ $post->author->name ?? 'Unknown' }} · {{ $post->created_at->diffForHumans() }}</p>
+        </a>
+        @empty
+        <p class="text-muted text-sm">No blog posts yet.</p>
+        @endforelse
+    </div>
+</main>
+@endsection
+--- resources/views/blog/create.blade.php
+@extends('layouts.app-authenticated')
+@section('content')
+
+
+<main class="max-w-2xl mx-auto p-6">
+    <h1 class="text-2xl font-semibold mb-6">Write a Blog Post</h1>
+
+    @if ($errors->any())
+    <div class="bg-red-500/10 text-red-500 text-sm rounded-lg p-3 mb-4">{{ $errors->first() }}</div>
+    @endif
+
+    <div class="glass-card p-6">
+        <form method="POST" action="{{ route('blog.store') }}" enctype="multipart/form-data" class="space-y-4">
+            @csrf
+            <input type="text" name="title" placeholder="Title" required class="input-field !mt-0">
+            <input type="file" name="cover_image" accept="image/*" class="input-field !mt-0">
+            <textarea name="body" placeholder="Write your post..." required rows="10" class="input-field !mt-0"></textarea>
+            <button type="submit" class="btn-primary">Publish</button>
+        </form>
+    </div>
+</main>
+@endsection
+--- resources/views/profile/index.blade.php.bak
+@extends('layouts.app-authenticated')
+@section('title', 'Profile')
+@section('content')
+@php
+  $pfUser = $user;
+  $pfTier = $pfUser->tier === 'tier1' ? 'Plus' : ($pfUser->tier === 'tier2' ? 'Pro' : ($pfUser->tier === 'tier3' ? 'Premium' : 'Free'));
+  $pfInitial = strtoupper(substr($pfUser->name, 0, 1));
+@endphp
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Sora:wght@600;700;800&display=swap');
+  html:has(body[data-page="profile"]) { background:linear-gradient(180deg,#FFFFFF 0%,#FFFFFF 55%,#F4F8FC 100%) !important; }
+  body[data-page="profile"] .app-push-content { background:transparent !important; }
+  .pf { --ink:#0F1115; --mute:#7C8596; --line:rgba(255,255,255,.9); max-width:760px; margin:0 auto; padding:10px 14px 110px; color:var(--ink); font-family:'Sora', system-ui, sans-serif; }
+  .pf-head { display:flex; align-items:center; gap:14px; padding:6px 0 16px; }
+  .pf-av { width:64px; height:64px; border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    background:linear-gradient(135deg,#12B886,#0B9C73); color:#fff; font-size:24px; font-weight:800; box-shadow:0 14px 26px -14px rgba(11,156,115,.7); }
+  .pf-av img { width:100%; height:100%; object-fit:cover; }
+  .pf-name { font-size:24px; font-weight:800; letter-spacing:-.02em; margin:0; }
+  .pf-tag { font-family:'Caveat', cursive; font-size:18px; color:#0B9C73; margin:2px 0 0; }
+  .pf-meta { font-size:11px; color:var(--mute); margin:4px 0 0; }
+  .pf-flash { padding:10px 14px; border-radius:14px; font-size:12px; font-weight:600; background:rgba(34,197,94,.14); color:#15803d; margin-bottom:12px; }
+  .pf-card { background:rgba(255,255,255,.85); border:1px solid var(--line); border-radius:22px; padding:16px; margin-bottom:12px; box-shadow:0 18px 32px -24px rgba(15,17,21,.4); }
+  .pf-card h2 { font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--mute); margin:0 0 10px; }
+  .pf-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .pf-stat { padding:12px 8px; border-radius:16px; background:#fff; text-align:center; box-shadow:0 10px 18px -14px rgba(15,17,21,.35); }
+  .pf-stat b { display:block; font-size:18px; font-weight:800; }
+  .pf-stat span { font-size:10px; color:var(--mute); }
+  .pf-link { display:flex; justify-content:space-between; align-items:center; padding:12px 4px; border-top:1px solid rgba(15,17,21,.06); color:var(--ink); text-decoration:none; font-size:13px; font-weight:700; }
+  .pf-link:first-of-type { border-top:0; }
+  .pf-link small { display:block; font-size:11px; color:var(--mute); font-weight:500; margin-top:2px; }
+  .pf-kv { display:flex; justify-content:space-between; padding:8px 0; font-size:13px; border-top:1px solid rgba(15,17,21,.06); }
+  .pf-kv:first-of-type { border-top:0; }
+  .pf-kv span:first-child { color:var(--mute); }
+  .pf-kv span:last-child { font-weight:700; }
+  .pf-btn { display:block; width:100%; padding:12px; border-radius:14px; border:0; background:#0F1115; color:#fff; font:inherit; font-size:13px; font-weight:800; cursor:pointer; text-align:center; text-decoration:none; }
+  .pf-btn.ghost { background:#fff; color:var(--ink); border:1px solid var(--line); }
+  .pf-note { font-size:12px; color:var(--mute); margin:0; }
+  .pf-review { padding:10px 0; border-top:1px solid rgba(15,17,21,.06); font-size:12px; }
+  .pf-review:first-of-type { border-top:0; }
+  .pf-review b { font-weight:800; }
+  @media (min-width:900px) {
+    .pf { max-width:1000px; padding:30px 40px 90px; }
+    .pf-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:14px; align-items:start; }
+    .pf-grid .pf-card { margin-bottom:0; }
+    .pf-name { font-size:34px; }
+  }
+</style>
+
+<div class="pf">
+  @if (session('status'))<div class="pf-flash">{{ session('status') }}</div>@endif
+
+  <header class="pf-head">
+    <div class="pf-av">
+      @if($pfUser->avatar_url)<img src="{{ $pfUser->avatar_url }}" alt="">@else{{ $pfInitial }}@endif
+    </div>
+    <div>
+      <p class="pf-name">{{ $pfUser->name }}</p>
+      <p class="pf-tag">{{ $pfTier }} member{{ $pfUser->is_verified_seller ? ' · verified' : '' }}</p>
+      <p class="pf-meta">Referral code {{ $pfUser->referral_code }}</p>
+    </div>
+  </header>
+
+  <div class="pf-grid">
+    <section class="pf-card">
+      <h2>Your record</h2>
+      <div class="pf-stats">
+        <div class="pf-stat"><b>{{ $completedGigsCount }}</b><span>Jobs</span></div>
+        <div class="pf-stat"><b>{{ $averageRating ?: '—' }}</b><span>Rating</span></div>
+        <div class="pf-stat"><b>{{ $reviewsReceivedCount }}</b><span>Reviews</span></div>
+      </div>
+      <div style="margin-top:12px">
+        <a href="{{ route('profile.reputation') }}" class="pf-link">Reputation <span>›</span></a>
+        <a href="{{ route('levels-badges.show') }}" class="pf-link">
+          <span>Level<small>{{ $currentLevel?->name ?? 'Unranked' }} · {{ $totalBadgesEarned }} badges</small></span><span>›</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="pf-card">
+      <h2>Money this month</h2>
+      <div class="pf-kv"><span>In</span><span>₦{{ number_format($monthIn ?? 0) }}</span></div>
+      <div class="pf-kv"><span>Out</span><span>₦{{ number_format($monthOut ?? 0) }}</span></div>
+      <div style="margin-top:12px">
+        <a href="{{ route('money-tracker.index') }}" class="pf-link">Money tracker <span>›</span></a>
+        <a href="{{ route('wallet.index') }}" class="pf-link">Wallet <span>›</span></a>
+      </div>
+    </section>
+
+    <section class="pf-card">
+      <h2>Plan</h2>
+      <div class="pf-kv"><span>Current plan</span><span>{{ $pfTier }}</span></div>
+      <div class="pf-kv"><span>Renews / expires</span><span>{{ $pfUser->subscription_expires_at ? $pfUser->subscription_expires_at->format('M j, Y') : 'No active subscription' }}</span></div>
+      <div style="margin-top:12px"><a href="{{ route('subscriptions.index') }}" class="pf-btn">See plans</a></div>
+    </section>
+
+    <section class="pf-card">
+      <h2>Referrals</h2>
+      <div class="pf-kv"><span>Your code</span><span>{{ $pfUser->referral_code }}</span></div>
+      <div class="pf-kv"><span>Total</span><span>{{ $allReferralsCount ?? 0 }}</span></div>
+      <div class="pf-kv"><span>Active</span><span>{{ $activeReferralsCount ?? 0 }}</span></div>
+      <div style="margin-top:12px"><a href="{{ route('referrals.index') }}" class="pf-btn ghost">Referral details</a></div>
+    </section>
+
+    <section class="pf-card">
+      <h2>Account</h2>
+      <div class="pf-kv"><span>Name</span><span>{{ $pfUser->name }}</span></div>
+      <div class="pf-kv"><span>Email</span><span>{{ $pfUser->email }}</span></div>
+      <div style="margin-top:12px; display:grid; gap:8px;">
+        <a href="{{ route('profile.account') }}" class="pf-btn ghost">Edit account</a>
+        <a href="{{ route('profile.appearance') }}" class="pf-btn ghost">Appearance</a>
+        <a href="{{ route('posts.index') }}" class="pf-btn ghost">My posts</a>
+      </div>
+    </section>
+
+    <section class="pf-card">
+      <h2>Recent reviews</h2>
+      @forelse($recentReviews as $review)
+        <div class="pf-review"><b>{{ $review->reviewer->name ?? 'Anonymous' }}</b> · {{ str_repeat('★', (int) $review->rating) }}
+          @if($review->comment)<p class="pf-note" style="margin-top:4px">{{ \Illuminate\Support\Str::limit($review->comment, 90) }}</p>@endif
+        </div>
+      @empty
+        <p class="pf-note">No reviews yet.</p>
+      @endforelse
+    </section>
+  </div>
+
+  <form method="POST" action="{{ route('logout') }}" style="margin-top:14px">
+    @csrf
+    <button type="submit" class="pf-btn ghost">Log out</button>
+  </form>
+</div>
+@endsection
+--- resources/views/profile/index.blade.php
+@extends('layouts.world-shell')
+
+@section('world', 'profile')
+@section('title', 'Profile')
+
+@section('content')
+@php
+  $pfUser = $user;
+  $pfTier = $pfUser->tier === 'tier1' ? 'Plus' : ($pfUser->tier === 'tier2' ? 'Pro' : ($pfUser->tier === 'tier3' ? 'Premium' : 'Free'));
+  $pfInitial = strtoupper(substr($pfUser->name, 0, 1));
+@endphp
+<link rel="stylesheet" href="{{ asset('css/world-pages.css') }}?v={{ @filemtime(public_path('css/world-pages.css')) }}">
+
+<style>
+  .pf2-head { display:flex; align-items:center; gap:14px; padding:4px 0 16px; }
+  .pf2-av { width:62px; height:62px; border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    background:linear-gradient(135deg, var(--w), var(--w-dark)); color:#fff; font-size:23px; font-weight:800; box-shadow:0 14px 26px -14px var(--w); }
+  .pf2-av img { width:100%; height:100%; object-fit:cover; }
+  .pf2-name { font-size:21px; font-weight:800; letter-spacing:-.02em; margin:0; color:var(--ink); }
+  .pf2-tag { font-size:12px; font-weight:700; color:var(--w-dark); margin:2px 0 0; }
+  .pf2-meta { font-size:11px; color:var(--mute); margin:3px 0 0; }
+  .pf2-flash { padding:10px 14px; border-radius:14px; font-size:12px; font-weight:600; background:var(--w-tint); color:var(--w-dark); margin-bottom:12px; box-shadow:var(--sh); }
+
+  .pf2-grid { display:grid; grid-template-columns:1fr; gap:10px; }
+  @media (min-width:700px) { .pf2-grid { grid-template-columns:repeat(2, 1fr); align-items:start; } }
+
+  .pf2-card { background:#fff; border-radius:18px; padding:16px; box-shadow:var(--sh); }
+  .pf2-card h2 { font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); margin:0 0 10px; }
+
+  .pf2-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .pf2-stat { padding:12px 6px; border-radius:14px; background:var(--w-tint); text-align:center; }
+  .pf2-stat b { display:block; font-size:17px; font-weight:800; color:var(--w-dark); }
+  .pf2-stat span { font-size:9.5px; color:var(--mute); font-weight:600; }
+
+  .pf2-link { display:flex; justify-content:space-between; align-items:center; padding:11px 2px; color:var(--ink); text-decoration:none; font-size:13px; font-weight:700; }
+  .pf2-link + .pf2-link { border-top:1px solid #F0F1F5; }
+  .pf2-link small { display:block; font-size:10.5px; color:var(--mute); font-weight:500; margin-top:2px; }
+  .pf2-link > span:last-child { color:var(--w-dark); }
+
+  .pf2-kv { display:flex; justify-content:space-between; padding:7px 0; font-size:12.5px; }
+  .pf2-kv + .pf2-kv { border-top:1px solid #F0F1F5; }
+  .pf2-kv span:first-child { color:var(--mute); }
+  .pf2-kv span:last-child { font-weight:700; }
+
+  .pf2-btn { display:block; width:100%; padding:12px; border-radius:12px; border:0; background:var(--w); color:#fff !important; font:inherit; font-size:13px; font-weight:800; cursor:pointer; text-align:center; text-decoration:none; box-shadow:0 8px 16px -8px var(--w); }
+  .pf2-btn.ghost { background:#fff; color:var(--ink) !important; box-shadow:var(--sh); }
+  .pf2-note { font-size:11.5px; color:var(--mute); margin:0; }
+  .pf2-review { padding:9px 0; font-size:12px; }
+  .pf2-review + .pf2-review { border-top:1px solid #F0F1F5; }
+  .pf2-review b { font-weight:800; color:var(--ink); }
+</style>
+
+<div class="wp wp-profile">
+  @if (session('status'))<div class="pf2-flash">{{ session('status') }}</div>@endif
+
+  <header class="pf2-head">
+    <div class="pf2-av">
+      @if($pfUser->avatar_url)<img src="{{ $pfUser->avatar_url }}" alt="">@else{{ $pfInitial }}@endif
+    </div>
+    <div>
+      <p class="pf2-name">{{ $pfUser->name }}</p>
+      <p class="pf2-tag">{{ $pfTier }} member{{ $pfUser->is_verified_seller ? ' · verified' : '' }}</p>
+      <p class="pf2-meta">Referral code {{ $pfUser->referral_code }}</p>
+    </div>
+  </header>
+
+  <div class="pf2-grid">
+    <section class="pf2-card">
+      <h2>Your record</h2>
+      <div class="pf2-stats">
+        <div class="pf2-stat"><b>{{ $completedGigsCount }}</b><span>Jobs</span></div>
+        <div class="pf2-stat"><b>{{ $averageRating ?: '—' }}</b><span>Rating</span></div>
+        <div class="pf2-stat"><b>{{ $reviewsReceivedCount }}</b><span>Reviews</span></div>
+      </div>
+      <div style="margin-top:10px">
+        <a href="{{ route('profile.reputation') }}" class="pf2-link">Reputation <span>›</span></a>
+        <a href="{{ route('levels-badges.show') }}" class="pf2-link">
+          <span>Level<small>{{ $currentLevel?->name ?? 'Unranked' }} · {{ $totalBadgesEarned }} badges</small></span><span>›</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="pf2-card">
+      <h2>Money this month</h2>
+      <div class="pf2-kv"><span>In</span><span>₦{{ number_format($monthIn ?? 0) }}</span></div>
+      <div class="pf2-kv"><span>Out</span><span>₦{{ number_format($monthOut ?? 0) }}</span></div>
+      <div style="margin-top:10px">
+        <a href="{{ route('money-tracker.index') }}" class="pf2-link">Money tracker <span>›</span></a>
+        <a href="{{ route('wallet.index') }}" class="pf2-link">Wallet <span>›</span></a>
+      </div>
+    </section>
+
+    <section class="pf2-card">
+      <h2>Plan</h2>
+      <div class="pf2-kv"><span>Current plan</span><span>{{ $pfTier }}</span></div>
+      <div class="pf2-kv"><span>Renews / expires</span><span>{{ $pfUser->subscription_expires_at ? $pfUser->subscription_expires_at->format('M j, Y') : 'No active subscription' }}</span></div>
+      <div style="margin-top:10px"><a href="{{ route('subscriptions.index') }}" class="pf2-btn">See plans</a></div>
+    </section>
+
+    <section class="pf2-card">
+      <h2>Referrals</h2>
+      <div class="pf2-kv"><span>Your code</span><span>{{ $pfUser->referral_code }}</span></div>
+      <div class="pf2-kv"><span>Total</span><span>{{ $allReferralsCount ?? 0 }}</span></div>
+      <div class="pf2-kv"><span>Active</span><span>{{ $activeReferralsCount ?? 0 }}</span></div>
+      <div style="margin-top:10px"><a href="{{ route('referrals.index') }}" class="pf2-btn ghost">Referral details</a></div>
+    </section>
+
+    <section class="pf2-card">
+      <h2>Account</h2>
+      <div class="pf2-kv"><span>Name</span><span>{{ $pfUser->name }}</span></div>
+      <div class="pf2-kv"><span>Email</span><span>{{ $pfUser->email }}</span></div>
+      <div style="margin-top:10px; display:grid; gap:8px;">
+        <a href="{{ route('profile.account') }}" class="pf2-btn ghost">Edit account</a>
+        <a href="{{ route('profile.appearance') }}" class="pf2-btn ghost">Appearance</a>
+        <a href="{{ route('posts.index') }}" class="pf2-btn ghost">My posts</a>
+      </div>
+    </section>
+
+    <section class="pf2-card">
+      <h2>Recent reviews</h2>
+      @forelse($recentReviews as $review)
+        <div class="pf2-review"><b>{{ $review->reviewer->name ?? 'Anonymous' }}</b> · {{ str_repeat('★', (int) $review->rating) }}
+          @if($review->comment)<p class="pf2-note" style="margin-top:4px">{{ \Illuminate\Support\Str::limit($review->comment, 90) }}</p>@endif
+        </div>
+      @empty
+        <p class="pf2-note">No reviews yet.</p>
+      @endforelse
+    </section>
+  </div>
+
+  <form method="POST" action="{{ route('logout') }}" style="margin-top:12px">
+    @csrf
+    <button type="submit" class="pf2-btn ghost">Log out</button>
+  </form>
+</div>
+@endsection
+--- resources/views/profile/index.blade.php.bak2
+@extends('layouts.world-shell')
+
+@section('world', 'profile')
+@section('title', 'Profile')
+@section('content')
+@php
+  $pfUser = $user;
+  $pfTier = $pfUser->tier === 'tier1' ? 'Plus' : ($pfUser->tier === 'tier2' ? 'Pro' : ($pfUser->tier === 'tier3' ? 'Premium' : 'Free'));
+  $pfInitial = strtoupper(substr($pfUser->name, 0, 1));
+@endphp
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Sora:wght@600;700;800&display=swap');
+  html:has(body[data-page="profile"]) { background:linear-gradient(180deg,#FFFFFF 0%,#FFFFFF 55%,#F4F8FC 100%) !important; }
+  body[data-page="profile"] .app-push-content { background:transparent !important; }
+  .pf { --ink:#0F1115; --mute:#7C8596; --line:rgba(255,255,255,.9); max-width:760px; margin:0 auto; padding:10px 14px 110px; color:var(--ink); font-family:'Sora', system-ui, sans-serif; }
+  .pf-head { display:flex; align-items:center; gap:14px; padding:6px 0 16px; }
+  .pf-av { width:64px; height:64px; border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    background:linear-gradient(135deg,#12B886,#0B9C73); color:#fff; font-size:24px; font-weight:800; box-shadow:0 14px 26px -14px rgba(11,156,115,.7); }
+  .pf-av img { width:100%; height:100%; object-fit:cover; }
+  .pf-name { font-size:24px; font-weight:800; letter-spacing:-.02em; margin:0; }
+  .pf-tag { font-family:'Caveat', cursive; font-size:18px; color:#0B9C73; margin:2px 0 0; }
+  .pf-meta { font-size:11px; color:var(--mute); margin:4px 0 0; }
+  .pf-flash { padding:10px 14px; border-radius:14px; font-size:12px; font-weight:600; background:rgba(34,197,94,.14); color:#15803d; margin-bottom:12px; }
+  .pf-card { background:rgba(255,255,255,.85); border:1px solid var(--line); border-radius:22px; padding:16px; margin-bottom:12px; box-shadow:0 18px 32px -24px rgba(15,17,21,.4); }
+  .pf-card h2 { font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--mute); margin:0 0 10px; }
+  .pf-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .pf-stat { padding:12px 8px; border-radius:16px; background:#fff; text-align:center; box-shadow:0 10px 18px -14px rgba(15,17,21,.35); }
+  .pf-stat b { display:block; font-size:18px; font-weight:800; }
+  .pf-stat span { font-size:10px; color:var(--mute); }
+  .pf-link { display:flex; justify-content:space-between; align-items:center; padding:12px 4px; border-top:1px solid rgba(15,17,21,.06); color:var(--ink); text-decoration:none; font-size:13px; font-weight:700; }
+  .pf-link:first-of-type { border-top:0; }
+  .pf-link small { display:block; font-size:11px; color:var(--mute); font-weight:500; margin-top:2px; }
+  .pf-kv { display:flex; justify-content:space-between; padding:8px 0; font-size:13px; border-top:1px solid rgba(15,17,21,.06); }
+  .pf-kv:first-of-type { border-top:0; }
+  .pf-kv span:first-child { color:var(--mute); }
+  .pf-kv span:last-child { font-weight:700; }
+  .pf-btn { display:block; width:100%; padding:12px; border-radius:14px; border:0; background:#0F1115; color:#fff; font:inherit; font-size:13px; font-weight:800; cursor:pointer; text-align:center; text-decoration:none; }
+  .pf-btn.ghost { background:#fff; color:var(--ink); border:1px solid var(--line); }
+  .pf-note { font-size:12px; color:var(--mute); margin:0; }
+  .pf-review { padding:10px 0; border-top:1px solid rgba(15,17,21,.06); font-size:12px; }
+  .pf-review:first-of-type { border-top:0; }
+  .pf-review b { font-weight:800; }
+  @media (min-width:900px) {
+    .pf { max-width:1000px; padding:30px 40px 90px; }
+    .pf-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:14px; align-items:start; }
+    .pf-grid .pf-card { margin-bottom:0; }
+    .pf-name { font-size:34px; }
+  }
+</style>
+
+<div class="pf">
+  @if (session('status'))<div class="pf-flash">{{ session('status') }}</div>@endif
+
+  <header class="pf-head">
+    <div class="pf-av">
+      @if($pfUser->avatar_url)<img src="{{ $pfUser->avatar_url }}" alt="">@else{{ $pfInitial }}@endif
+    </div>
+    <div>
+      <p class="pf-name">{{ $pfUser->name }}</p>
+      <p class="pf-tag">{{ $pfTier }} member{{ $pfUser->is_verified_seller ? ' · verified' : '' }}</p>
+      <p class="pf-meta">Referral code {{ $pfUser->referral_code }}</p>
+    </div>
+  </header>
+
+  <div class="pf-grid">
+    <section class="pf-card">
+      <h2>Your record</h2>
+      <div class="pf-stats">
+        <div class="pf-stat"><b>{{ $completedGigsCount }}</b><span>Jobs</span></div>
+        <div class="pf-stat"><b>{{ $averageRating ?: '—' }}</b><span>Rating</span></div>
+        <div class="pf-stat"><b>{{ $reviewsReceivedCount }}</b><span>Reviews</span></div>
+      </div>
+      <div style="margin-top:12px">
+        <a href="{{ route('profile.reputation') }}" class="pf-link">Reputation <span>›</span></a>
+        <a href="{{ route('levels-badges.show') }}" class="pf-link">
+          <span>Level<small>{{ $currentLevel?->name ?? 'Unranked' }} · {{ $totalBadgesEarned }} badges</small></span><span>›</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="pf-card">
+      <h2>Money this month</h2>
+      <div class="pf-kv"><span>In</span><span>₦{{ number_format($monthIn ?? 0) }}</span></div>
+      <div class="pf-kv"><span>Out</span><span>₦{{ number_format($monthOut ?? 0) }}</span></div>
+      <div style="margin-top:12px">
+        <a href="{{ route('money-tracker.index') }}" class="pf-link">Money tracker <span>›</span></a>
+        <a href="{{ route('wallet.index') }}" class="pf-link">Wallet <span>›</span></a>
+      </div>
+    </section>
+
+    <section class="pf-card">
+      <h2>Plan</h2>
+      <div class="pf-kv"><span>Current plan</span><span>{{ $pfTier }}</span></div>
+      <div class="pf-kv"><span>Renews / expires</span><span>{{ $pfUser->subscription_expires_at ? $pfUser->subscription_expires_at->format('M j, Y') : 'No active subscription' }}</span></div>
+      <div style="margin-top:12px"><a href="{{ route('subscriptions.index') }}" class="pf-btn">See plans</a></div>
+    </section>
+
+    <section class="pf-card">
+      <h2>Referrals</h2>
+      <div class="pf-kv"><span>Your code</span><span>{{ $pfUser->referral_code }}</span></div>
+      <div class="pf-kv"><span>Total</span><span>{{ $allReferralsCount ?? 0 }}</span></div>
+      <div class="pf-kv"><span>Active</span><span>{{ $activeReferralsCount ?? 0 }}</span></div>
+      <div style="margin-top:12px"><a href="{{ route('referrals.index') }}" class="pf-btn ghost">Referral details</a></div>
+    </section>
+
+    <section class="pf-card">
+      <h2>Account</h2>
+      <div class="pf-kv"><span>Name</span><span>{{ $pfUser->name }}</span></div>
+      <div class="pf-kv"><span>Email</span><span>{{ $pfUser->email }}</span></div>
+      <div style="margin-top:12px; display:grid; gap:8px;">
+        <a href="{{ route('profile.account') }}" class="pf-btn ghost">Edit account</a>
+        <a href="{{ route('profile.appearance') }}" class="pf-btn ghost">Appearance</a>
+        <a href="{{ route('posts.index') }}" class="pf-btn ghost">My posts</a>
+      </div>
+    </section>
+
+    <section class="pf-card">
+      <h2>Recent reviews</h2>
+      @forelse($recentReviews as $review)
+        <div class="pf-review"><b>{{ $review->reviewer->name ?? 'Anonymous' }}</b> · {{ str_repeat('★', (int) $review->rating) }}
+          @if($review->comment)<p class="pf-note" style="margin-top:4px">{{ \Illuminate\Support\Str::limit($review->comment, 90) }}</p>@endif
+        </div>
+      @empty
+        <p class="pf-note">No reviews yet.</p>
+      @endforelse
+    </section>
+  </div>
+
+  <form method="POST" action="{{ route('logout') }}" style="margin-top:14px">
+    @csrf
+    <button type="submit" class="pf-btn ghost">Log out</button>
+  </form>
+</div>
+@endsection
+=== LAYOUTS ===
+app-admin.blade.php
+app-authenticated.blade.php
+auth.blade.php
+auth.blade.php.bak
+landing.blade.php
+world-gigs.blade.php
+world-gigs.blade.php.bak1
+world-gigs.blade.php.bak2
+world-gigs.blade.php.bak3
+world-gigs.blade.php.bak4
+world-gigs.blade.php.bak5
+world-gigs.blade.php.bak6
+world-market.blade.php
+world-market.blade.php.bak-shop
+world-market.blade.php.bak1
+world-market.blade.php.bak2
+world-market.blade.php.bak3
+world-market.blade.php.bak4
+world-market.blade.php.bak5
+world-market.blade.php.bak6
+world-market.blade.php.bak7
+world-market.blade.php.bak8
+world-shell.blade.php
+world-shell.blade.php.bak
+world-shell.blade.php.bak2

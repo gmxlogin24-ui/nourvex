@@ -1,0 +1,6 @@
+/* 8 buttons in 2 full rows of 4. Remove the link to undo. */
+.ovm-grid{ grid-template-columns:repeat(4,1fr) !important; gap:14px 6px !important; }
+.ovm-grid .dg-tile{ width:54px !important; height:54px !important; border-radius:19px !important; }
+.ovm-grid .dg-tile svg{ width:23px !important; height:23px !important; }
+.ovm-grid .dg-it b{ font-size:11px !important; }
+@media (min-width:900px){ .ovm-grid{ grid-template-columns:repeat(8,1fr) !important; } }

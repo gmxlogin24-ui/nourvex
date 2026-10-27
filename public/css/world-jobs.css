@@ -1,0 +1,48 @@
+/* Upwork-style jobs page, same glass + lens recipe as the dock */
+.uj{ max-width:900px; margin:0 auto; }
+.wg .uj-swipe{ animation:none !important; padding:0 !important; min-height:0; }
+.uj-search{ display:flex; gap:10px; align-items:center; margin:8px 0 12px; }
+.uj-search label{ flex:1; display:flex; align-items:center; gap:10px; height:48px; padding:0 16px; border-radius:99px; }
+.uj-search svg{ width:18px; height:18px; flex:none; }
+.uj-search input{ flex:1; min-width:0; border:0; outline:0; background:transparent; font:inherit; font-size:14px; color:#fff; }
+.uj-search input::placeholder{ color:rgba(255,255,255,.75); }
+.uj-save{ flex:none; width:48px; height:48px; border-radius:50%; display:grid; place-items:center; }
+.uj-save svg{ width:20px; height:20px; }
+.uj-tabs{ display:flex; gap:22px; margin:0 0 14px; border-bottom:1px solid rgba(255,255,255,.35); overflow-x:auto; scrollbar-width:none; }
+.uj-tabs::-webkit-scrollbar{ display:none; }
+.uj-tabs a{ padding:10px 2px 9px; font-size:14px; font-weight:700; white-space:nowrap; border-bottom:3px solid transparent; opacity:.8; }
+.uj-tabs a.on{ border-bottom-color:#9CFF8A; opacity:1; }
+.uj-list{ display:flex; flex-direction:column; gap:12px; padding-bottom:70px; }
+.uj-card{ display:block; padding:16px 16px 14px; border-radius:24px; text-decoration:none; }
+.uj-meta{ margin:0 0 6px; font-size:11.5px; opacity:.85; }
+.uj-card h3{ margin:0 0 6px; font-size:17px; font-weight:800; line-height:1.25; letter-spacing:-.01em; }
+.uj-budget{ margin:0 0 8px; font-size:12px; opacity:.9; }
+.uj-desc{ margin:0 0 10px; font-size:13px; line-height:1.5; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.uj-chips{ display:flex; gap:6px; flex-wrap:wrap; margin:0 0 10px; }
+.uj-chips span{ padding:5px 11px; border-radius:99px; font-size:11.5px; font-weight:700; border:1px solid rgba(255,255,255,.5); background:rgba(255,255,255,.12); }
+.uj-row{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; font-size:12px; margin-top:4px; }
+.uj-row svg{ width:15px; height:15px; vertical-align:-3px; margin-right:4px; }
+.wg .uj-ok, .wg .uj-ok *{ color:#9CFF8A !important; }
+.uj-foot{ opacity:.85; }
+.uj-pages{ padding:0 0 80px; }
+.uj-filters{ position:fixed; right:14px; bottom:calc(92px + env(safe-area-inset-bottom)); z-index:65; }
+.uj-filters summary{ list-style:none; display:flex; align-items:center; gap:8px; height:46px; padding:0 18px; border-radius:99px; font-size:14px; font-weight:800; cursor:pointer; }
+.uj-filters summary::-webkit-details-marker{ display:none; }
+.uj-filters summary svg{ width:18px; height:18px; }
+.uj-filters form{ position:absolute; right:0; bottom:calc(100% + 10px); width:min(300px, calc(100vw - 28px)); padding:14px; border-radius:24px; display:flex; flex-direction:column; gap:10px; }
+.uj-filters label{ display:flex; flex-direction:column; gap:5px; font-size:11.5px; font-weight:700; flex:1; }
+.uj-filters select, .uj-filters input{ width:100%; height:40px; padding:0 12px; border-radius:12px; border:1px solid rgba(255,255,255,.6); background:rgba(255,255,255,.88); color:#1C2B1C; font:inherit; font-size:13px; }
+.uj-two{ display:flex; gap:8px; }
+.uj-btns{ display:flex; gap:8px; }
+.uj-btns a, .uj-btns button{ flex:1; height:40px; border-radius:99px; display:grid; place-items:center; font-size:13px; font-weight:800; text-decoration:none; border:1.5px solid rgba(255,255,255,.7); cursor:pointer; }
+.uj-btns button{ background:linear-gradient(180deg,#22B90E,#14A800); color:#fff; }
+.wg .uj-card, .wg .uj-search label, .wg .uj-save, .wg .uj-filters summary, .wg .uj-filters form{
+  background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.02) 45%,rgba(255,255,255,.08)) !important;
+  border:1.5px solid rgba(255,255,255,.55) !important; box-shadow:none !important;
+  -webkit-backdrop-filter:blur(2px) saturate(1.15); backdrop-filter:blur(2px) saturate(1.15);
+  backdrop-filter:url(#wlLens) saturate(1.15); }
+@media (min-width:901px){
+  .uj-list{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
+  .wg-tabs{ display:none; }
+  .uj-filters{ bottom:24px; }
+}

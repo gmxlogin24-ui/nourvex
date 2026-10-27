@@ -5,7 +5,7 @@
 
     $auDeckCards = [
         ['label' => 'Q Coin Balance', 'value' => number_format($qCoinBalance) . ' Q', 'sub' => ($streakDays ?? 0) . ' day streak', 'c1' => '#8b5cf6', 'c2' => '#3730a3', 'claim' => true],
-        ['label' => 'Total Earnings', 'value' => '₦' . number_format($earnings), 'sub' => 'from completed gigs', 'c1' => '#22c55e', 'c2' => '#14532d', 'claim' => false],
+        ['label' => 'Total Earnings', 'value' => number_format($earnings * config('qcoin.q_per_naira_display', 10)) . ' Q', 'sub' => 'from completed gigs', 'c1' => '#22c55e', 'c2' => '#14532d', 'claim' => false],
         ['label' => 'Active Gigs', 'value' => (string) $myOpenGigs, 'sub' => 'currently open', 'c1' => '#3b82f6', 'c2' => '#1e3a8a', 'claim' => false],
         ['label' => 'Rating', 'value' => ($avgRating ? number_format($avgRating,1) : '—') . ' ★', 'sub' => $reviewCount . ' reviews', 'c1' => '#fb923c', 'c2' => '#7c2d12', 'claim' => false],
     ];
@@ -137,7 +137,7 @@
                         <span class="au-list-title">{{ $gig->title }}</span>
                         <span class="au-list-sub">{{ ucfirst($gig->status ?? '') }}</span>
                     </span>
-                    <span class="au-list-amount">₦{{ number_format($gig->amount) }}</span>
+                    <span class="au-list-amount">{{ number_format(($gig->amount) * config('qcoin.q_per_naira_display', 10)) }} Q<small style="display:block;font-size:.5em;font-weight:500;opacity:.4">₦{{ number_format($gig->amount) }}</small></span>
                 </a>
             @empty
                 <p class="au-empty-note">No gigs yet.</p>
@@ -151,14 +151,14 @@
                 <div class="au-dark-card">
                     <div class="au-flow-header">
                         <span>Money Flow</span>
-                        <span>₦{{ number_format($netFlow ?? 0) }} net</span>
+                        <span>{{ number_format(($netFlow ?? 0) * config('qcoin.q_per_naira_display', 10)) }} Q<small style="display:block;font-size:.5em;font-weight:500;opacity:.4">₦{{ number_format($netFlow ?? 0) }}</small> net</span>
                     </div>
                     <div class="au-flow-track">
                         <div class="au-flow-fill" style="width: {{ ($totalIn ?? 0) > 0 ? min(100, round((($netFlow ?? 0) / $totalIn) * 100)) : 0 }}%;"></div>
                     </div>
                     <div class="au-flow-meta">
-                        <span>In: ₦{{ number_format($totalIn ?? 0) }}</span>
-                        <span>Out: ₦{{ number_format($totalOut ?? 0) }}</span>
+                        <span>In: {{ number_format(($totalIn ?? 0) * config('qcoin.q_per_naira_display', 10)) }} Q<small style="display:block;font-size:.5em;font-weight:500;opacity:.4">₦{{ number_format($totalIn ?? 0) }}</small></span>
+                        <span>Out: {{ number_format(($totalOut ?? 0) * config('qcoin.q_per_naira_display', 10)) }} Q<small style="display:block;font-size:.5em;font-weight:500;opacity:.4">₦{{ number_format($totalOut ?? 0) }}</small></span>
                     </div>
                 </div>
             </div>

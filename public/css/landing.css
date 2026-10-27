@@ -270,7 +270,7 @@
 @keyframes lpHeroEyeIdle{0%,100%{transform:translate(0,0)}20%{transform:translate(-8px,-4px)}45%{transform:translate(6px,5px)}70%{transform:translate(-4px,6px)}90%{transform:translate(5px,-3px)}}
 @media(prefers-reduced-motion:reduce){.lp-hero-eye-pupil{animation:none}}
 
-/* ===== NOURVEX features: one big card at a time (laptop) ===== */
+/* ===== NAURVEX features: one big card at a time (laptop) ===== */
 html, body { overflow-x: clip; }
 @media (min-width: 1024px) {
   #features.lp-h-on { --cw: min(1200px, 86vw); }
@@ -295,7 +295,7 @@ html, body { overflow-x: clip; }
 }
 
 
-/* ===== NOURVEX hero v3 ===== */
+/* ===== NAURVEX hero v3 ===== */
 @media(min-width:641px){.lp-hero.lpx-hero{height:max(86vh,640px);min-height:640px;max-height:860px}}
 @media(max-width:640px){.lp-hero.lpx-hero{height:auto;min-height:660px;max-height:none}}
 .lpx-hero .lp-hero-in{max-width:1400px;padding:110px clamp(16px,4vw,64px) 260px;justify-content:center;position:relative;z-index:2}
@@ -329,7 +329,7 @@ html, body { overflow-x: clip; }
 .lpx-scroll i::after{content:"";position:absolute;left:0;top:-55%;width:100%;height:55%;background:linear-gradient(180deg,transparent,#e3b34a);animation:lpxScroll 1.7s ease-in infinite}
 @keyframes lpxScroll{to{top:100%}}
 
-/* ===== NOURVEX steps stack ===== */
+/* ===== NAURVEX steps stack ===== */
 .lp-st{position:relative;overflow:hidden;color:#fff;background:linear-gradient(180deg,#050505 0%,#0a0c1c 50%,#050505 100%);padding:96px 0 72px}
 .lp-st .lp-h2{color:#fff}
 .lp-st .lp-lead{color:rgba(255,255,255,.72)}
@@ -372,7 +372,7 @@ html, body { overflow-x: clip; }
   .lp-st-cta{display:inline-flex}
 }
 
-/* ===== NOURVEX plans ===== */
+/* ===== NAURVEX plans ===== */
 .lp-pl{position:relative;overflow:hidden;color:#fff;background:linear-gradient(180deg,#050505,#0b0b0d 55%,#050505);padding:96px 0}
 .lp-pl .lp-h2{color:#fff}
 .lp-pl-head{text-align:center;padding:0 24px;margin-bottom:56px}
@@ -421,7 +421,7 @@ html, body { overflow-x: clip; }
 }
 @media(prefers-reduced-motion:reduce){.lp-pl-face::after{animation:none}}
 
-/* ===== NOURVEX button text fix (dark text on white buttons) ===== */
+/* ===== NAURVEX button text fix (dark text on white buttons) ===== */
 main.lp a.lp-hero-cta,main.lp a.lp-hero-cta *,main.lp a.lp-st-cta,main.lp a.lp-st-cta *,main.lp a.lp-pl-btn{color:#111 !important;-webkit-text-fill-color:#111 !important}
 
 /* ---- Plans: Free (bronze) card, 4-up desktop, stacked mobile ---- */
@@ -440,7 +440,7 @@ main.lp a.lp-hero-cta,main.lp a.lp-hero-cta *,main.lp a.lp-st-cta,main.lp a.lp-s
   .lp-pl-card,.lp-pl-card.is-featured{flex:0 0 auto;width:100%;max-width:460px;margin:0 auto;scroll-snap-align:none}
 }
 
-/* ===== NOURVEX mobile hero ===== */
+/* ===== NAURVEX mobile hero ===== */
 .lpxm-hero,.lpxm-bar,.lpxm-menu{display:none}
 @media(max-width:640px){
   .lp-hero.lpx-hero{display:none}
@@ -501,7 +501,7 @@ main.lp a.lp-hero-cta,main.lp a.lp-hero-cta *,main.lp a.lp-st-cta,main.lp a.lp-s
 }
 @media(prefers-reduced-motion:reduce){.lpxm-copy>*,.lpxm-scroll i::after{animation:none}}
 
-/* ===== NOURVEX mobile hero tune ===== */
+/* ===== NAURVEX mobile hero tune ===== */
 @media(max-width:640px){
   .lpxm-logo{font-size:12px;letter-spacing:.3em}
   .lpxm-hero{padding-bottom:104px}
@@ -518,7 +518,7 @@ main.lp a.lp-hero-cta,main.lp a.lp-hero-cta *,main.lp a.lp-st-cta,main.lp a.lp-s
   .lpxm-menu-cta{font-size:.92rem;padding:14px}
 }
 
-/* ===== NOURVEX nav and marquee ===== */
+/* ===== NAURVEX nav and marquee ===== */
 .lpxm-oldnav-wrap{display:contents}
 
 .lp-trust-mq .lp-trust-in{display:block !important;max-width:none !important;padding-left:0 !important;padding-right:0 !important;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}

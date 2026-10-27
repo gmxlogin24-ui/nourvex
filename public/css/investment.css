@@ -1,0 +1,54 @@
+.inv { --ink:#0F1115; --mute:#7C8596; max-width:760px; margin:0 auto; padding:10px 14px 120px; color:var(--ink); font-family:'Sora', system-ui, sans-serif; }
+.inv h1 { font-size:30px; font-weight:800; letter-spacing:-.02em; margin:0; }
+.inv h2 { font-size:15px; font-weight:800; margin:0 0 8px; }
+.inv-kicker { font-family:'Caveat', cursive; font-size:22px; color:#E0620A; margin:0; }
+.inv-sub, .inv-sub2 { font-size:12px; color:var(--mute); margin:6px 0 0; }
+.inv-muted { font-size:12px; color:var(--mute); margin:4px 0 0; }
+.inv-lbl { font-size:10px; letter-spacing:.14em; text-transform:uppercase; opacity:.75; margin:0; font-weight:800; }
+.inv-amt { font-size:34px; font-weight:800; letter-spacing:-.02em; margin:6px 0 2px; font-variant-numeric:tabular-nums; }
+
+.inv-glass { position:relative; margin-top:12px; padding:16px; border-radius:22px; color:var(--ink);
+  background:linear-gradient(180deg, rgba(255,255,255,.62), rgba(255,255,255,.22) 50%, rgba(255,255,255,.46));
+  border:1px solid rgba(255,255,255,.9); -webkit-backdrop-filter:blur(14px) saturate(1.6); backdrop-filter:blur(14px) saturate(1.6);
+  box-shadow:0 18px 34px -22px rgba(15,17,21,.45), inset 0 1px 0 #fff; text-decoration:none; display:block; }
+a.inv-glass:hover { transform:translateY(-2px); transition:transform .15s; }
+
+.inv-hero { margin-top:16px; padding:22px; border-radius:26px; color:#fff; position:relative; overflow:hidden;
+  background:linear-gradient(160deg, rgba(40,44,72,.92), rgba(7,8,15,.96));
+  border:1px solid rgba(255,255,255,.18); box-shadow:0 26px 44px -24px rgba(10,12,28,.7), inset 0 1px 0 rgba(255,255,255,.25); }
+.inv-hero::before { content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(120deg, rgba(255,255,255,.14), transparent 40%); }
+.inv-stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
+.inv-stats > div { padding:12px; border-radius:16px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.12); }
+.inv-stats small { font-size:10px; opacity:.75; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+.inv-stats b { display:block; font-size:16px; font-weight:800; margin-top:4px; font-variant-numeric:tabular-nums; }
+
+.inv-tag { display:inline-block; padding:4px 10px; border-radius:99px; font-size:10px; font-weight:800; background:rgba(224,98,10,.14); color:#A64300; }
+.inv-card b { display:block; font-size:15px; font-weight:800; margin:8px 0 6px; }
+.inv-card small { font-size:11px; color:var(--mute); }
+.inv-bar { height:8px; border-radius:99px; background:rgba(15,17,21,.08); overflow:hidden; }
+.inv-bar span { display:block; height:100%; border-radius:99px; background:linear-gradient(90deg, #E0620A, #FF9A3C); }
+.inv-row { display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:13px; padding:10px 0; border-bottom:1px solid rgba(15,17,21,.06); }
+.inv-row:last-child { border-bottom:0; }
+.inv-status { font-size:10px; font-weight:800; padding:3px 9px; border-radius:99px; background:rgba(11,156,115,.14); color:#0B7A5A; }
+.inv-status.off { background:rgba(124,133,150,.16); color:#4B5563; }
+
+.inv-input { width:100%; margin-top:8px; padding:12px 14px; border-radius:14px; border:1px solid rgba(15,17,21,.12);
+  background:rgba(255,255,255,.7); color:var(--ink); font:inherit; font-size:13px; outline:none; }
+.inv-input:focus { border-color:#E0620A; box-shadow:0 0 0 3px rgba(224,98,10,.18); }
+.inv-btn { display:inline-flex; align-items:center; justify-content:center; margin-top:10px; height:42px; padding:0 18px; border-radius:14px; border:0; cursor:pointer;
+  background:linear-gradient(180deg, #F07A22, #E0620A); color:#fff; font-weight:800; font-size:13px; box-shadow:0 10px 18px -10px #E0620A; }
+.inv-btn.ghost { background:rgba(255,255,255,.7); color:var(--ink); box-shadow:none; border:1px solid rgba(15,17,21,.12); margin-left:6px; }
+.inv-btn.small { height:34px; font-size:12px; padding:0 12px; }
+
+.inv-flash { margin-top:12px; padding:12px 14px; border-radius:16px; font-size:13px; font-weight:600; }
+.inv-flash.ok { background:rgba(11,156,115,.12); color:#0B7A5A; }
+.inv-flash.bad { background:rgba(225,29,72,.10); color:#B4123F; }
+.inv-err { color:#B4123F; font-size:12px; margin-top:6px; }
+.inv-section { margin-top:22px; }
+
+@media (min-width:900px) {
+  .inv { max-width:1000px; padding:30px 40px 110px; }
+  .inv h1 { font-size:44px; }
+  .inv-amt { font-size:44px; }
+}

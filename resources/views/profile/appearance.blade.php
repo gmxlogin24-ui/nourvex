@@ -1,5 +1,6 @@
 @extends('layouts.app-authenticated')
 @section('content')
+<link rel="stylesheet" href="{{ asset('css/profile-redesign.css') }}?v=1">
 
 <main class="profile-shell p-6 {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-page' : '' }}" style="{{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'padding-top:0 !important;max-width:1240px;' : '' }}">
     <a href="{{ route('profile.index') }}" class="profile-back-link"><i data-lucide="arrow-left" class="w-4 h-4"></i> Profile</a>
@@ -71,6 +72,7 @@
                 <div class="grid grid-cols-3 gap-3">
                     @foreach([
                         'painted_pill' => ['label' => 'Painted Pill', 'desc' => 'Rounded bottom, painted icon badges'],
+                        'liquid_glass' => ['label' => 'Liquid Glass', 'desc' => 'Clear glass pill that magnifies what is behind it'],
                         'edge_dock' => ['label' => 'Edge Dock', 'desc' => 'Draggable floating handle'],
                         'halo_dock' => ['label' => 'Halo Dock', 'desc' => 'Notched bar, floating center button'],
                     ] as $style => $meta)

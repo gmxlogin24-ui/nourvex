@@ -2,7 +2,7 @@
 @section('content')
     <div class="flex items-center gap-3 mb-5">
         <div class="logo-badge"></div>
-        <h1 class="text-lg font-semibold">NOURVEX</h1>
+        <h1 class="text-lg font-semibold">NAURVEX</h1>
     </div>
 
     <p class="text-sm mb-6" style="opacity:0.75;">Create your account. Free to join — upgrade any time.</p>
@@ -33,6 +33,11 @@
         <div>
             <label class="text-xs" style="opacity:0.7;">Full Name</label>
             <input type="text" name="name" required value="{{ old('name') }}" placeholder="Your full name" class="glass-input">
+    </div>
+    <div>
+        <label class="text-xs" style="opacity:0.7;">Username (this is what people see)</label>
+        <input type="text" name="username" required value="{{ old('username') }}" maxlength="20" autocapitalize="none" autocomplete="off" placeholder="e.g. emmanuel_k" class="glass-input">
+        <p class="text-xs" style="opacity:0.6;margin-top:.3rem;">3 to 20 characters: lowercase letters, numbers, underscores.</p>
         </div>
         <div>
             <label class="text-xs" style="opacity:0.7;">Email</label>

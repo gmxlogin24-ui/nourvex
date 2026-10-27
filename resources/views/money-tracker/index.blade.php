@@ -9,22 +9,22 @@
     <div class="kpi-row reveal-on-scroll">
         <div class="kpi-tile featured">
             <div class="kpi-tile-top"><div class="kpi-tile-icon"><i data-lucide="wallet" class="w-4 h-4"></i></div></div>
-            <p class="kpi-tile-value">₦{{ number_format($balance, 2) }}</p>
+            <p class="kpi-tile-value">{{ number_format($balance * config('qcoin.q_per_naira_display', 10)) }} Q<small style="display:block;font-size:.6em;font-weight:600;opacity:.7">≈ {{ number_format(($balance) * config('qcoin.q_per_naira_display', 10)) }} Q</small></p>
             <p class="kpi-tile-label">Current Balance</p>
         </div>
         <div class="kpi-tile">
             <div class="kpi-tile-top"><div class="kpi-tile-icon"><i data-lucide="arrow-down-circle" class="w-4 h-4"></i></div></div>
-            <p class="kpi-tile-value" style="color:var(--color-accent3);">₦{{ number_format($totalIn) }}</p>
+            <p class="kpi-tile-value" style="color:var(--color-accent3);">{{ number_format(($totalIn) * config('qcoin.q_per_naira_display', 10)) }} Q<small style="display:block;font-size:.5em;font-weight:500;opacity:.4">₦{{ number_format($totalIn) }}</small></p>
             <p class="kpi-tile-label">Total Money In</p>
         </div>
         <div class="kpi-tile">
             <div class="kpi-tile-top"><div class="kpi-tile-icon"><i data-lucide="arrow-up-circle" class="w-4 h-4"></i></div></div>
-            <p class="kpi-tile-value" style="color:#ef4444;">₦{{ number_format($totalOut) }}</p>
+            <p class="kpi-tile-value" style="color:#ef4444;">{{ number_format(($totalOut) * config('qcoin.q_per_naira_display', 10)) }} Q<small style="display:block;font-size:.5em;font-weight:500;opacity:.4">₦{{ number_format($totalOut) }}</small></p>
             <p class="kpi-tile-label">Total Money Out</p>
         </div>
         <div class="kpi-tile">
             <div class="kpi-tile-top"><div class="kpi-tile-icon"><i data-lucide="trending-up" class="w-4 h-4"></i></div></div>
-            <p class="kpi-tile-value">₦{{ number_format($totalIn - $totalOut) }}</p>
+            <p class="kpi-tile-value">{{ number_format(($totalIn - $totalOut) * config('qcoin.q_per_naira_display', 10)) }} Q<small style="display:block;font-size:.5em;font-weight:500;opacity:.4">₦{{ number_format($totalIn - $totalOut) }}</small></p>
             <p class="kpi-tile-label">Net Flow</p>
         </div>
     </div>
@@ -51,7 +51,7 @@
         <div class="tx-table-row">
             <span>{{ ucfirst(str_replace('_', ' ', $t->type)) }}</span>
             <span class="text-muted text-xs">{{ $t->created_at->format('M j, Y') }}</span>
-            <span class="text-right font-medium" style="color:{{ $t->amount >= 0 ? 'var(--color-accent3)' : '#ef4444' }};">₦{{ number_format($t->amount, 2) }}</span>
+            <span class="text-right font-medium" style="color:{{ $t->amount >= 0 ? 'var(--color-accent3)' : '#ef4444' }};">{{ number_format(($t->amount) * config('qcoin.q_per_naira_display', 10)) }} Q</span>
         </div>
         @endforeach
     </div>
@@ -87,7 +87,7 @@
         labels.forEach((label, i) => {
             const row = document.createElement('div');
             row.className = 'ring-legend-row';
-            row.innerHTML = '<span><span class="ring-legend-dot" style="background:' + colors[i % colors.length] + ';"></span>' + label.replace(/_/g, ' ') + '</span><strong>₦' + Number(values[i]).toLocaleString() + '</strong>';
+            row.innerHTML = '<span><span class="ring-legend-dot" style="background:' + colors[i % colors.length] + ';"></span>' + label.replace(/_/g, ' ') + '</span><strong>' + Math.round(Number(values[i]) * {{ (float) config('qcoin.q_per_naira_display', 10) }}).toLocaleString() + ' Q <small style="opacity:.4;font-weight:500">₦' + Number(values[i]).toLocaleString() + '</small></strong>';
             legend.appendChild(row);
         });
         document.getElementById('mtCategoryCenter').textContent = labels[0]?.replace(/_/g, ' ') || '—';

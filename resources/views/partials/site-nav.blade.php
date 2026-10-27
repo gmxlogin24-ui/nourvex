@@ -2,7 +2,7 @@
     <div class="sn-bar-inner">
         <a href="{{ route('welcome') }}" class="sn-logo">
             <div class="logo-badge" style="width:2rem;height:2rem;"></div>
-            <span>NOURVEX</span>
+            <span>NAURVEX</span>
         </a>
 
         <div class="sn-links-center">
@@ -26,7 +26,7 @@
 <aside class="sn-drawer" id="snDrawer">
     <div class="sn-drawer-brand">
         <div class="logo-badge"></div>
-        <span>NOURVEX</span>
+        <span>NAURVEX</span>
     </div>
     <div class="sn-reveal-heading">Menu</div>
     <nav class="sn-item-list">

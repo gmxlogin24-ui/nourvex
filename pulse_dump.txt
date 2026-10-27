@@ -1,0 +1,399 @@
+=== NEWS COLUMNS ===
+id, title, category, body, source_url, created_by, published_at, created_at, updated_at, type, image_url, video_url, expires_at, is_featured
+=== PULSE VIEW ===
+@extends(auth()->check() ? 'layouts.app-authenticated' : 'layouts.landing')
+@section('content')
+
+
+<link rel="stylesheet" href="{{ asset('css/pulse.css') }}?v={{ time() }}">
+
+@auth<style>.pulse-feed{padding-top:calc(env(safe-area-inset-top,0px) + 70px) !important;}</style>@endauth
+<canvas id="pulseBgCanvas"></canvas>
+<div class="pulse-rail" id="pulseRail"></div>
+<div class="autoplay-indicator" id="autoplayIndicator"><span class="ring"></span>auto-playing</div>
+<button class="motion-permit" id="motionPermit">enable motion tilt</button>
+
+<div class="pulse-feed" id="pulseFeed">
+
+    @forelse($posts as $post)
+    @php
+        $isArt = $post->type === 'ad';
+        $fallbackTint = $isArt ? '#5c1745' : '#0d3a4c';
+    @endphp
+    <section class="pulse-card {{ $isArt ? 'pulse-card--art' : 'pulse-card--news' }}" data-type="{{ $isArt ? 'art' : 'news' }}">
+        <div class="pulse-card__bg">
+            <div class="media-grid count-1">
+                @if($post->video_url)
+                <div class="tile video">
+                    <video src="{{ $post->video_url }}" autoplay muted loop playsinline></video>
+                    <div class="play"><svg viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div>
+                </div>
+                @elseif($post->image_url)
+                <div class="tile" style="background-image:url('{{ $post->image_url }}')"></div>
+                @else
+                <div class="tile" style="background:radial-gradient(120% 90% at 30% 20%, {{ $fallbackTint }} 0%, #0b0b0f 70%)"></div>
+                @endif
+            </div>
+        </div>
+        <div class="pulse-card__content">
+            <div class="pulse-card__eyebrow">
+                <span class="dot"></span>{{ $isArt ? ($post->category ?? 'Original') : 'Campus News' }}
+                @if($isArt)<span class="pulse-sponsored-tag">Sponsored</span>@endif
+            </div>
+            <h1 class="pulse-card__title">{{ $post->title }}</h1>
+            <p class="pulse-card__body">{{ Str::limit($post->body, 140) }}</p>
+            <div class="pulse-card__meta">
+                <span>{{ $post->published_at?->diffForHumans() ?? 'Just now' }}</span>
+            </div>
+            @if($post->source_url)
+                @if($isArt)
+                <a href="{{ $post->source_url }}" target="_blank" class="pulse-cta-btn">
+                    <span>Learn more</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </a>
+                @else
+                <a href="{{ $post->source_url }}" target="_blank" class="pulse-cta-link">Read source &rarr;</a>
+                @endif
+            @endif
+        </div>
+    </section>
+    @empty
+    <section class="pulse-card pulse-card--news" data-type="news">
+        <div class="pulse-card__bg"><div class="media-grid count-1"><div class="tile" style="background:radial-gradient(120% 90% at 60% 20%,#0d3a4c 0%,#0b0b0f 70%)"></div></div></div>
+        <div class="pulse-card__content">
+            <div class="pulse-card__eyebrow"><span class="dot"></span>Pulse</div>
+            <h1 class="pulse-card__title">Nothing here yet</h1>
+            <p class="pulse-card__body">Posts from the Buzz page will show up here as art and news, mixed together.</p>
+        </div>
+    </section>
+    @endforelse
+
+</div>
+
+<div class="pulse-rail-actions pulse-rail-actions--art">
+    <div><button class="rail-btn rail-btn--like" aria-label="like"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7.5-4.6-10-9.3C.6 8.1 2.4 4.5 6 4.1c2-.2 3.6.9 6 3.4 2.4-2.5 4-3.6 6-3.4 3.6.4 5.4 4 3 7.6C19.5 16.4 12 21 12 21z"/></svg><span class="burst"></span></button></div>
+    <div><button class="rail-btn" aria-label="comment"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.4A9 9 0 0 1 3 15.4 8.4 8.4 0 0 1 11.4 3 8.4 8.4 0 0 1 21 11.5z"/></svg></button></div>
+    <button id="pulsePostBtn" class="rail-btn rail-btn--post" aria-label="post"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></button>
+</div>
+<div class="pulse-rail-actions pulse-rail-actions--news">
+    <div><button class="rail-btn rail-btn--save" aria-label="save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg><span class="burst"></span></button></div>
+    <div><button class="rail-btn" aria-label="share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="5" r="2.8"/><circle cx="6" cy="12" r="2.8"/><circle cx="18" cy="19" r="2.8"/><path d="M8.6 10.6l6.8-3.8M8.6 13.4l6.8 3.8"/></svg></button></div>
+    <button class="rail-btn rail-btn--post" aria-label="post"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></button>
+</div>
+
+<div class="pulse-composer-trigger" id="pulseComposerTrigger">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
+    Post something
+</div>
+
+@guest
+<div class="pulse-gate" id="pulseGate">
+    <div class="pulse-gate__card" id="pulseGateCard">
+        <div class="pulse-gate__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.6 6.6L22 9l-5.5 4.4L18 21l-6-4-6 4 1.5-7.6L2 9l7.4-.4z"/></svg></div>
+        <h3>Posting needs an account</h3>
+        <p>Create a free account and pick a plan to publish into Pulse.</p>
+        <div class="pulse-gate__note">Photo(s) and video both work. One image or clip today &mdash; Pulse will tile multiple photos automatically once you add more per post.</div>
+        <a href="{{ route('register') }}" class="pulse-gate__primary">Create account &amp; choose a plan</a>
+        <button class="pulse-gate__ghost" id="pulseGateClose">Not now</button>
+    </div>
+</div>
+@endguest
+
+@endsection
+
+@section('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollToPlugin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/SplitText.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="{{ asset('js/pulse.js') }}?v={{ time() }}"></script>
+@endsection
+=== PULSE CSS ===
+:root{
+  --pulse-ink:#0b0b0f;
+  --pulse-ink-2:#141319;
+  --pulse-paper:#f5f3f0;
+  --pulse-dim:#8a8894;
+  --pulse-signal:#ff3d7f;
+  --pulse-info:#3ddcff;
+  --pulse-line: rgba(245,243,240,0.12);
+}
+#pulseBgCanvas{ position:fixed; inset:0; z-index:-3; }
+
+.pulse-feed{ height:100vh; height:100dvh; overflow-y:scroll; scroll-snap-type:y mandatory; scrollbar-width:none; position:relative; z-index:1; background:var(--pulse-ink); color:var(--pulse-paper); font-family:'Inter', sans-serif; }
+.pulse-feed::-webkit-scrollbar{ display:none; }
+
+.pulse-card{ position:relative; height:100vh; height:100dvh; width:100%; scroll-snap-align:start; display:flex; align-items:flex-end; overflow:hidden; isolation:isolate; }
+.pulse-card__bg{ position:absolute; inset:0; z-index:-1; }
+.pulse-card__bg::after{ content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(11,11,15,0.1) 0%, rgba(11,11,15,0.5) 50%, rgba(11,11,15,0.97) 100%); z-index:2; pointer-events:none; }
+
+.media-grid{ position:absolute; inset:0; display:grid; gap:2px; }
+.media-grid.count-1{ grid-template-columns:1fr; grid-template-rows:1fr; }
+.media-grid.count-2{ grid-template-columns:1fr 1fr; grid-template-rows:1fr; }
+.media-grid.count-3{ grid-template-columns:1.3fr 1fr; grid-template-rows:1fr 1fr; }
+.media-grid.count-3 .tile:nth-child(1){ grid-row:1 / 3; }
+.media-grid.count-4{ grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; }
+
+.tile{ position:relative; overflow:hidden; background-size:cover; background-position:center; transform:scale(1.12); }
+.tile.more::after{ content: attr(data-more); position:absolute; inset:0; background:rgba(11,11,15,0.62); color:var(--pulse-paper); font-weight:800; font-size:22px; display:flex; align-items:center; justify-content:center; }
+.tile video{ width:100%; height:100%; object-fit:cover; }
+.tile.video .play{ position:absolute; inset:0; margin:auto; width:44px; height:44px; border-radius:50%; background:rgba(11,11,15,0.5); border:1px solid rgba(245,243,240,0.4); display:flex; align-items:center; justify-content:center; pointer-events:none; }
+.tile.video .play svg{ width:16px; height:16px; margin-left:2px; }
+
+.pulse-card__content{ position:relative; z-index:3; padding:0 clamp(20px,6vw,64px) clamp(28px,7vh,72px); width:100%; max-width:640px; }
+.pulse-card__eyebrow{ font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:.14em; text-transform:uppercase; display:flex; align-items:center; gap:8px; margin-bottom:14px; overflow:hidden; }
+.pulse-card__eyebrow .dot{ width:6px; height:6px; border-radius:50%; display:inline-block; }
+.pulse-card--art .dot{ background:var(--pulse-signal); box-shadow:0 0 10px var(--pulse-signal); }
+.pulse-card--news .dot{ background:var(--pulse-info); box-shadow:0 0 10px var(--pulse-info); }
+.pulse-card--art .pulse-card__eyebrow{ color:var(--pulse-signal); }
+.pulse-card--news .pulse-card__eyebrow{ color:var(--pulse-info); }
+
+.pulse-card__title{ font-family:'Unbounded', sans-serif; font-weight:800; font-size:clamp(28px, 5.5vw, 52px); line-height:1.05; letter-spacing:-.01em; margin-bottom:14px; max-width:14ch; overflow:hidden; }
+.pulse-card__title .char{ display:inline-block; will-change:transform; }
+.pulse-card__body{ font-size:15px; line-height:1.55; color:rgba(245,243,240,.82); max-width:46ch; margin-bottom:20px; }
+.pulse-card__body .word{ display:inline-block; will-change:transform,filter; }
+.pulse-card__meta{ font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--pulse-dim); display:flex; gap:16px; overflow:hidden; }
+.pulse-card__meta span{ display:inline-block; }
+
+.pulse-rail-actions{ position:absolute; right:clamp(14px,3vw,28px); bottom:clamp(120px,20vh,180px); display:flex; flex-direction:column; align-items:center; gap:22px; z-index:5; }
+.pulse-rail-actions button{ background:rgba(20,19,25,.55); backdrop-filter:blur(6px); border:1px solid var(--pulse-line); color:var(--pulse-paper); width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .15s ease, border-color .15s ease; }
+.pulse-rail-actions button:hover{ transform:scale(1.08); border-color:var(--pulse-signal); }
+.pulse-rail-actions button svg{ width:20px; height:20px; }
+
+.pulse-rail{ position:fixed; left:16px; top:50%; transform:translateY(-50%); z-index:15; display:flex; flex-direction:column; align-items:center; gap:2px; }
+.pulse-rail .tick{ width:18px; height:3px; background:var(--pulse-line); border-radius:2px; transition:background .25s ease, transform .25s ease, width .25s ease; }
+.pulse-rail .tick.active-art{ background:var(--pulse-signal); width:26px; transform:translateX(4px); }
+.pulse-rail .tick.active-news{ background:var(--pulse-info); width:26px; transform:translateX(4px) scaleY(.8) translateY(1px); }
+
+.autoplay-indicator{ position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:20; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--pulse-dim); display:flex; align-items:center; gap:6px; opacity:0; transition:opacity .3s ease; }
+.autoplay-indicator.show{ opacity:1; }
+.autoplay-indicator .ring{ width:8px; height:8px; border-radius:50%; border:1.5px solid var(--pulse-dim); border-top-color:var(--pulse-paper); animation:pulseSpin 1s linear infinite; }
+@keyframes pulseSpin{ to{ transform:rotate(360deg); } }
+
+.pulse-gate{ position:fixed; inset:0; background:rgba(11,11,15,.72); backdrop-filter:blur(10px); display:flex; align-items:center; justify-content:center; z-index:100; opacity:0; pointer-events:none; }
+.pulse-gate.show{ opacity:1; pointer-events:auto; }
+.pulse-gate__card{ width:min(380px, 88vw); background:var(--pulse-ink-2); border:1px solid var(--pulse-line); border-radius:20px; padding:32px 28px 28px; text-align:center; transform:translateY(24px) scale(.96); opacity:0; color:var(--pulse-paper); }
+.pulse-gate__icon{ width:52px; height:52px; border-radius:50%; margin:0 auto 18px; background:linear-gradient(135deg, var(--pulse-signal), var(--pulse-info)); display:flex; align-items:center; justify-content:center; }
+.pulse-gate__icon svg{ width:24px; height:24px; color:var(--pulse-ink); }
+.pulse-gate__card h3{ font-family:'Unbounded', sans-serif; font-size:20px; margin-bottom:10px; }
+.pulse-gate__card p{ font-size:14px; color:rgba(245,243,240,.7); line-height:1.5; margin-bottom:18px; }
+.pulse-gate__note{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--pulse-dim); border:1px dashed var(--pulse-line); border-radius:10px; padding:10px; margin-bottom:18px; text-align:left; line-height:1.5; }
+.pulse-gate__primary{ display:block; width:100%; background:var(--pulse-paper); color:var(--pulse-ink); border:none; padding:13px; border-radius:12px; font-family:'Inter',sans-serif; font-weight:600; font-size:14px; cursor:pointer; margin-bottom:10px; text-decoration:none; box-sizing:border-box; }
+.pulse-gate__ghost{ width:100%; background:transparent; color:var(--pulse-dim); border:none; font-size:13px; cursor:pointer; padding:6px; }
+
+.pulse-composer-trigger{ position:fixed; bottom:22px; left:50%; transform:translateX(-50%); z-index:20; display:flex; align-items:center; gap:8px; background:rgba(20,19,25,.6); backdrop-filter:blur(8px); border:1px solid var(--pulse-line); padding:11px 20px 11px 16px; border-radius:999px; font-size:13px; font-weight:500; cursor:pointer; color:var(--pulse-paper); }
+.pulse-composer-trigger svg{ width:16px; height:16px; }
+
+.motion-permit{ position:fixed; bottom:80px; left:50%; transform:translateX(-50%); z-index:25; font-family:'JetBrains Mono',monospace; font-size:11px; background:rgba(20,19,25,.7); border:1px solid var(--pulse-line); color:var(--pulse-paper); padding:8px 14px; border-radius:999px; cursor:pointer; display:none; }
+.motion-permit.show{ display:block; }
+
+@media (max-width:560px){ .pulse-rail-actions{ bottom:100px; } .pulse-rail{ left:8px; } }
+
+/* ---------- reskin the shared site nav specifically on this page ---------- */
+body[data-page="pulse"] .guest-topbar{
+  position:relative;
+  z-index:10;
+  background:rgba(11,11,15,.72);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--pulse-line);
+}
+body[data-page="pulse"] .guest-topbar,
+body[data-page="pulse"] .guest-topbar a,
+body[data-page="pulse"] .guest-topbar span{
+  color:var(--pulse-paper);
+}
+body[data-page="pulse"] .guest-topbar .text-accent{ color:var(--pulse-signal); }
+
+/* Pulse is always-dark by design, like the homepage — hide the toggle so it doesn't imply something it doesn't do */
+body[data-page="pulse"] .theme-toggle{ display:none; }
+
+/* Full-bleed feed shouldn't end in the site-wide footer */
+body[data-page="pulse"] .site-footer{ display:none; }
+
+.pulse-rail-actions{ display:none; }
+.pulse-card--art .pulse-rail-actions--art{ display:flex; }
+.pulse-card--news .pulse-rail-actions--news{ display:flex; }
+
+.rail-btn{
+  position:relative;
+  background: linear-gradient(160deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04));
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.16);
+  box-shadow: 0 8px 20px -8px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.12);
+  transition: transform 0.15s cubic-bezier(.2,.9,.3,1.3), border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+.rail-btn:active{ transform: scale(0.88); }
+.rail-btn.is-active{
+  background: linear-gradient(160deg, var(--pulse-signal), var(--pulse-info));
+  border-color: transparent;
+  color:#0b0b0f;
+  box-shadow: 0 8px 22px -6px color-mix(in srgb, var(--pulse-signal) 55%, transparent), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+.rail-btn--post{
+  background: linear-gradient(160deg, var(--pulse-paper), rgba(245,243,240,0.85));
+  color:#0b0b0f; border-color: transparent;
+}
+.burst{
+  position:absolute; inset:0; border-radius:50%;
+  pointer-events:none;
+}
+.rail-btn.bursting .burst{
+  animation: railBurst 0.5s ease-out;
+}
+@keyframes railBurst{
+  0%{ box-shadow: 0 0 0 0 color-mix(in srgb, var(--pulse-signal) 65%, transparent); }
+  100%{ box-shadow: 0 0 0 16px color-mix(in srgb, var(--pulse-signal) 0%, transparent); }
+}
+
+.pulse-card__title{
+  background: linear-gradient(180deg, var(--pulse-paper) 0%, rgba(245,243,240,0.78) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  letter-spacing: -0.02em;
+  text-shadow: none;
+}
+.pulse-card__body{ text-shadow: 0 1px 12px rgba(0,0,0,0.35); }
+.pulse-card__eyebrow{ font-weight:600; }
+
+.pulse-card__bg::before{
+  content:'';
+  position:absolute; inset:0; z-index:1; pointer-events:none;
+  background: radial-gradient(120% 60% at 50% 100%, rgba(0,0,0,0.15), transparent 60%);
+}
+
+.pulse-sponsored-tag{
+  font-family:'Inter', sans-serif; text-transform:none; letter-spacing:normal;
+  font-size:11px; font-weight:600; color: rgba(245,243,240,0.55);
+  border: 1px solid rgba(245,243,240,0.25); border-radius:999px;
+  padding: 2px 9px; margin-left:2px;
+}
+
+.pulse-cta-btn{
+  position:relative; overflow:hidden;
+  display:inline-flex; align-items:center; gap:8px;
+  margin-top:6px;
+  background: linear-gradient(160deg, var(--pulse-paper), rgba(245,243,240,0.9));
+  color:#0b0b0f; font-weight:600; font-size:13.5px;
+  padding:10px 18px; border-radius:999px;
+  text-decoration:none;
+  box-shadow: 0 10px 24px -8px rgba(0,0,0,0.55);
+  transition: transform 0.15s ease;
+}
+.pulse-cta-btn:active{ transform: scale(0.96); }
+.pulse-cta-btn svg{ width:15px; height:15px; }
+.pulse-cta-btn::before{
+  content:'';
+  position:absolute; top:0; left:-60%; width:40%; height:100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.55), transparent);
+  transform: skewX(-20deg);
+  animation: pulseCtaShine 3.2s ease-in-out infinite;
+}
+@keyframes pulseCtaShine{
+  0%{ left:-60%; }
+  35%{ left:130%; }
+  100%{ left:130%; }
+}
+
+.pulse-cta-link{
+  font-family:'JetBrains Mono', monospace; font-size:12px;
+  color: var(--pulse-info); text-decoration:none;
+}
+=== WORLD SHELL ===
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>NAURVEX - @yield('title', 'Market')</title>
+  @include('partials.favicons')
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta name="theme-color" content="#F5F7FA">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <link rel="stylesheet" href="{{ asset('css/design-tokens.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/world-shell.css') }}?v={{ @filemtime(public_path('css/world-shell.css')) }}">
+  @stack('styles')
+</head>
+@php
+  $mode = trim($__env->yieldContent('world')) ?: 'market';
+  $isM = $mode === 'market';
+  $isG = $mode === 'gigs';
+  $isP = $mode === 'profile';
+  $cartN = count(session('cart', []));
+  $canPost = auth()->user()->planAllows('gigs_post');
+
+  if ($isM) {
+    $nav = [
+      ['home', 'Shop', route('marketplace.index'), request()->routeIs('marketplace.index', 'marketplace.show', 'marketplace.edit', 'marketplace.create'), 0],
+      ['heart', 'Saved', route('marketplace.favorites'), request()->routeIs('marketplace.favorites'), 0],
+      ['shopping-bag', 'Cart', route('cart.index'), request()->routeIs('cart.*'), $cartN],
+      ['package', 'Orders', route('marketplace.orders'), request()->routeIs('marketplace.orders'), 0],
+    ];
+  } elseif ($isG) {
+    $nav = [
+      ['briefcase', 'Hustles', route('gigs.index'), request()->routeIs('gigs.index', 'gigs.show', 'gigs.edit'), 0],
+      ['layers', 'My posts', route('posts.index'), request()->routeIs('posts.*'), 0],
+    ];
+    if ($canPost) $nav[] = ['plus-circle', 'Post', route('gigs.create'), request()->routeIs('gigs.create'), 0];
+    $nav[] = ['message-square', 'Chat', route('chat.index'), request()->routeIs('chat.*'), 0];
+    $nav[] = ['bell', 'Alerts', route('notifications.index'), request()->routeIs('notifications.*'), 0];
+  } else {
+    $nav = [
+      ['user-circle', 'Profile', route('profile.index'), request()->routeIs('profile.index'), 0],
+      ['wallet', 'Wallet', route('wallet.index'), request()->routeIs('wallet.*'), 0],
+      ['crown', 'Plan', route('subscriptions.index'), request()->routeIs('subscriptions.*'), 0],
+      ['users', 'Referrals', route('referrals.index'), request()->routeIs('referrals.*'), 0],
+      ['settings', 'Account', route('profile.account'), request()->routeIs('profile.account'), 0],
+    ];
+  }
+@endphp
+<body class="ws2 {{ $isM ? 'ws2-market' : ($isG ? 'ws2-gigs' : 'ws2-profile') }}">
+@include('partials.world-lens')
+
+<main class="ws2-main">
+  @yield('content')
+</main>
+<nav class="ws2-dock">
+  @foreach($nav as $n)
+    <a href="{{ $n[2] }}" class="{{ $n[3] ? 'on' : '' }}"><i data-lucide="{{ $n[0] }}"></i>@if($n[4])<em>{{ $n[4] }}</em>@endif<span>{{ $n[1] }}</span></a>
+  @endforeach
+</nav>
+@include('partials.dg-lens')
+<link rel="stylesheet" href="{{ asset('css/dashboard-glass.css') }}?v={{ time() }}">
+@if($isM)
+<a id="dgDrop" class="dg-drop" href="{{ route('gigs.index') }}" aria-label="Hustles"><span class="dg-swing"><span class="dg-cord" aria-hidden="true"></span><span class="dg-knob"><i data-lucide="briefcase"></i><span class="dg-count">{{ \App\Models\Gig::where('status', 'open')->count() }}</span></span><span class="dg-tag">Hustles</span></span></a>
+@elseif($isG)
+<div class="dg-coin" id="dgCoin" data-go="{{ route('marketplace.index') }}"><div class="dg-coin-in" id="dgCoinIn"><i data-lucide="shopping-bag" style="width:24px;height:24px"></i></div></div>
+<div class="dg-shut" id="dgShut"></div>
+@endif
+<script>lucide.createIcons();</script>
+@include('partials.world-switch-js')
+@yield('scripts')
+@stack('scripts')
+</body>
+</html>
+=== BOTTOM BAR FILES ===
+resources/views/overview.blade.php
+resources/views/profile/appearance.blade.php
+resources/views/layouts/app-authenticated.blade.php
+resources/views/layouts/world-shell.blade.php
+resources/views/partials/nav-edge-dock.blade.php
+resources/views/partials/ov-dock.blade.php
+resources/views/partials/nav-halo-dock.blade.php
+resources/views/settings/appearance.blade.php
+public/css/dashboard-premium.css
+public/css/dashboard-glass.css
+public/css/app-v2.css
+public/css/halo-dock.css
+public/css/dock.css
+public/css/world-shell.css
+public/css/qcoin-redesign.css
+public/css/app.css
+public/css/app-enhance.css
+public/css/world-jobs.css
+public/css/mobile-nav-styles.css
+public/css/world-glass.css
+public/css/dg-desktop-layout.css
+public/css/auth-glass.css

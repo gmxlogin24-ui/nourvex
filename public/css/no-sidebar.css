@@ -1,0 +1,4 @@
+/* no side bars: hides everything beside the page except the dock. Remove the link to undo. */
+.app-shell-flex > :not(.auth-page-shell):not([class*="dock"]):not([class*="ovd"]):not(svg):not(script):not(style):not(link){ display:none !important; }
+.auth-page-shell{ flex:1 1 auto; min-width:0; width:100%; }
+.auth-page-shell, .app-push-content{ margin-left:0 !important; }

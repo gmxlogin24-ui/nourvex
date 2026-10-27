@@ -1,0 +1,16 @@
+/* Dark gradient over dashboard card photos (dark mode only) */
+html.nv-dark .dg-card,
+[data-theme="dark"] .dg-card{position:relative;overflow:hidden;background:#000}
+html.nv-dark .dg-card::after,
+[data-theme="dark"] .dg-card::after{
+  content:"";position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(160deg,rgba(0,0,0,.25) 0%,rgba(0,0,0,.6) 60%,rgba(0,0,0,.9) 100%);
+}
+html.nv-dark .dg-card img,
+[data-theme="dark"] .dg-card img{position:relative;z-index:0}
+html.nv-dark .dg-card > b,
+html.nv-dark .dg-card > small,
+html.nv-dark .dg-card > .dg-chipi,
+[data-theme="dark"] .dg-card > b,
+[data-theme="dark"] .dg-card > small,
+[data-theme="dark"] .dg-card > .dg-chipi{position:relative;z-index:2}

@@ -109,7 +109,7 @@ class SubscriptionController extends Controller
                 'currency' => 'NGN',
                 'email' => $user->email,
                 'callback_url' => route('subscriptions.callback'),
-                'metadata' => ['title' => 'NOURVEX ' . Subscription::PLANS[$target]['label'] . ' Subscription'],
+                'metadata' => ['title' => 'NAURVEX ' . Subscription::PLANS[$target]['label'] . ' Subscription'],
             ]);
 
         $data = $response->json();

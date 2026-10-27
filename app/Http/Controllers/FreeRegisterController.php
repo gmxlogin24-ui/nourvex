@@ -12,6 +12,7 @@ class FreeRegisterController extends Controller
 {
     public function store(Request $request)
     {
+        if ($request->filled('username')) { $request->merge(['username' => strtolower(trim($request->input('username')))]); }
         $key = 'register|' . $request->ip();
         if (RateLimiter::tooManyAttempts($key, 10)) {
             $seconds = RateLimiter::availableIn($key);
@@ -21,6 +22,7 @@ class FreeRegisterController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'username' => ['required', 'regex:/^[a-z0-9_]{3,20}$/', 'unique:users,username'],
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6',
             'referral_code' => 'nullable|string',
@@ -47,6 +49,7 @@ class FreeRegisterController extends Controller
             'account_type' => 'guest',
             'tier' => 'free',
         ]);
+        $user->forceFill(['username' => $validated['username']])->save();
 
         if ($referrer) {
             try {

@@ -2,7 +2,7 @@
 <header class="lpxb-bar" id="lpxbBar">
     <a href="{{ route('welcome') }}" class="lpxb-logo">
         <div class="logo-badge" style="width:1.9rem;height:1.9rem;"></div>
-        <span>NOURVEX</span>
+        <span>NAURVEX</span>
     </a>
     <button type="button" class="lpxb-burger" id="lpxbBurger" aria-label="Menu"><i></i><i></i></button>
 </header>

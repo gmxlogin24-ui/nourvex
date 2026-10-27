@@ -1,0 +1,40 @@
+/* separate world shell: original grey/white format, glass dock with the Overview lens */
+html{ overflow-x:hidden; }
+.ws2{ margin:0; background:#F5F7FA; color:#111418; font-family:Roboto,system-ui,-apple-system,'Segoe UI',sans-serif; overflow-x:hidden; max-width:100vw; }
+.ws2 *{ box-sizing:border-box; }
+.ws2 a{ color:inherit; text-decoration:none; }
+.ws2-market{ --dglow:18,184,134; --dglow-ink:#0B9C73; --w:#FF7A1A; --w-dark:#C2540A; --w-tint:#FFEFE2; }
+.ws2-gigs{ --dglow:230,100,10; --dglow-ink:#A8440A; --w:#12B886; --w-dark:#0B7A5A; --w-tint:#E2F8F0; }
+.ws2-profile{ --w:#8B7CFA; --w-dark:#6C5CE7; --w-tint:#EFECFF; }
+.ws2-head{ position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:10px; padding:calc(10px + env(safe-area-inset-top)) 14px 10px; background:rgba(245,247,250,.9); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); border-bottom:1px solid #E7EAF0; }
+.ws2-ic{ position:relative; width:38px; height:38px; flex:none; display:grid; place-items:center; border-radius:12px; background:#fff; border:1px solid #E7EAF0; color:#111418; }
+.ws2-ic svg{ width:18px; height:18px; }
+.ws2-ic em{ position:absolute; top:-6px; right:-6px; min-width:18px; height:18px; padding:0 5px; border-radius:99px; background:var(--w); color:#fff; font-style:normal; font-size:10.5px; font-weight:800; line-height:18px; text-align:center; }
+.ws2-title{ flex:1; font-size:18px; font-weight:800; letter-spacing:-.02em; }
+.ws2-post{ display:inline-flex; align-items:center; gap:6px; height:38px; padding:0 16px; border-radius:12px; background:var(--w); color:#fff !important; font-size:13px; font-weight:700; box-shadow:0 8px 16px -8px var(--w); }
+.ws2-post svg{ width:15px; height:15px; }
+.ws2-main{ max-width:1100px; margin:0 auto; }
+.ws2-dock{ position:fixed; left:50%; transform:translateX(-50%); bottom:calc(10px + env(safe-area-inset-bottom)); z-index:60; width:min(420px, calc(100vw - 24px)); display:flex; padding:6px; border-radius:34px;
+  background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,.22) 45%,rgba(255,255,255,.5));
+  border:1.5px solid rgba(255,255,255,.95); box-shadow:0 14px 30px -14px rgba(17,20,24,.35), inset 0 1px 0 #fff;
+  -webkit-backdrop-filter:blur(2px) saturate(1.8) brightness(1.05); backdrop-filter:blur(2px) saturate(1.8) brightness(1.05);
+  backdrop-filter:url(#wlLens) saturate(1.8) brightness(1.05); }
+.ws2-dock a{ position:relative; flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 0 6px; border-radius:28px; font-size:10.5px; font-weight:700; color:#5E6877; }
+.ws2-dock a svg{ width:20px; height:20px; }
+.ws2-dock a.on{ background:var(--w); color:#fff; box-shadow:0 8px 16px -8px var(--w); }
+.ws2-dock em{ position:absolute; top:2px; left:calc(50% + 6px); min-width:16px; height:16px; padding:0 4px; border-radius:99px; background:#111418; color:#fff; font-style:normal; font-size:9.5px; font-weight:800; line-height:16px; text-align:center; }
+.ws2 .dg-drop{ right:70px; z-index:70; }
+.ws2 .dg-coin{ z-index:55; }
+@media (prefers-reduced-motion: reduce){ .ws2 *{ animation:none !important; } }
+
+/* shadow not outline: no borders on the world pages, soft shadows instead */
+.ws2{ --sh:0 8px 24px -14px rgba(17,20,24,.3), 0 1px 3px rgba(17,20,24,.06); --sh-in:0 4px 14px -8px rgba(17,20,24,.32); }
+.ws2 main *:not(.tx-table-row):not(.cr-row){ border-color:transparent !important; }
+.ws2 .wp-page .glass-card, .ws2 .wp-page .bg-card, .ws2 .cr-item, .ws2 .cr-sum, .ws2 .cr-empty, .ws2 .mpd-seller-card, .ws2 .mpd-meta-pill,
+.ws2 .mpd-image-wrap, .ws2 .mpd-thumb, .ws2 .mpd-icon-btn, .ws2 .mpd-btn-solid, .ws2 .type-badge, .ws2 .cr-back, .ws2 .cr-cta.ghost,
+.ws2 .wp-page .btn-secondary, .ws2 .wp-page > a:first-child{ box-shadow:var(--sh) !important; }
+.ws2 .wp-page :is(.input-field, input[type=text], input[type=number], input[type=date], input[type=email], input[type=tel], input[type=file], select, textarea){ box-shadow:var(--sh-in) !important; }
+.ws2 .wp-page :is(.input-field, input, select, textarea):focus{ border-color:transparent !important; box-shadow:0 0 0 3px var(--w-tint), var(--sh-in) !important; }
+.ws2-head{ border-bottom:0; box-shadow:0 8px 20px -14px rgba(17,20,24,.35); }
+.ws2-ic{ border:0; box-shadow:var(--sh); }
+.ws2-dock{ border:0 !important; box-shadow:0 14px 30px -14px rgba(17,20,24,.4), 0 2px 6px rgba(17,20,24,.08), inset 0 1px 0 rgba(255,255,255,.9) !important; }

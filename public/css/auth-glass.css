@@ -1,0 +1,225 @@
+/* Liquid-glass login: same recipe as liquid-dock.css */
+body.auth-body{
+  background-color:#0b1220 !important;
+  background-image:var(--lamp-off) !important;
+  background-size:cover !important;
+  background-position:center !important;
+  background-repeat:no-repeat !important;
+}
+body.auth-body .auth-split-shell{
+  background:transparent !important;
+  box-shadow:none !important;
+}
+body.auth-body .auth-form-panel{
+  background:linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 45%, rgba(255,255,255,0.07)) !important;
+  -webkit-backdrop-filter:blur(2px) saturate(2) brightness(1.1) !important;
+  backdrop-filter:blur(2px) saturate(2) brightness(1.1) !important;
+  backdrop-filter:url(#authLens) saturate(2) brightness(1.1) !important;
+  border:1.5px solid transparent !important;
+  box-shadow:none !important;
+}
+
+/* White text */
+body.auth-body .auth-form-panel,
+body.auth-body .auth-form-panel h1,
+body.auth-body .auth-form-panel p,
+body.auth-body .auth-form-panel label,
+body.auth-body .auth-form-panel span{ color:#fff !important; }
+body.auth-body .auth-form-panel p.text-gray-500{ color:rgba(255,255,255,0.8) !important; }
+body.auth-body .auth-form-panel p.text-gray-400{ color:rgba(255,255,255,0.65) !important; }
+body.auth-body .auth-form-panel a:not(.auth-google-circle){ color:rgba(255,255,255,0.9) !important; }
+
+/* Inputs */
+body.auth-body .auth-form-panel input[type="email"],
+body.auth-body .auth-form-panel input[type="password"],
+body.auth-body .auth-form-panel input[type="text"]{
+  background:rgba(255,255,255,0.14) !important;
+  border:1.5px solid transparent !important;
+  color:#fff !important;
+  transition:background .25s ease;
+}
+body.auth-body .auth-form-panel input:focus{
+  background:rgba(255,255,255,0.22) !important;
+  border-color:transparent !important;
+  box-shadow:none !important;
+  outline:none !important;
+}
+body.auth-body .auth-form-panel input::placeholder{ color:rgba(255,255,255,0.6) !important; }
+body.auth-body .auth-form-panel input:-webkit-autofill{
+  -webkit-text-fill-color:#fff !important;
+  transition:background-color 9999s ease-out;
+}
+
+/* Log In button = the dock's dark active pill */
+body.auth-body .auth-form-panel button[type="submit"]{
+  background:rgba(0,0,0,0.4) !important;
+  border:1.5px solid transparent !important;
+  color:#fff !important;
+  transition:transform .25s cubic-bezier(.3,1.3,.5,1);
+}
+body.auth-body .auth-form-panel button[type="submit"]:active{ transform:scale(1.05); }
+
+/* Google button */
+body.auth-body .auth-form-panel .auth-google-circle{
+  background:rgba(255,255,255,0.14);
+  border:1.5px solid transparent;
+  transition:background .25s ease, transform .25s cubic-bezier(.3,1.3,.5,1);
+}
+body.auth-body .auth-form-panel .auth-google-circle:hover{
+  border-color:transparent;
+  background:rgba(255,255,255,0.22);
+  transform:none;
+}
+body.auth-body .auth-form-panel .auth-google-circle:active{ transform:scale(1.08); }
+
+/* Alerts */
+body.auth-body .auth-form-panel .bg-red-50{ background:rgba(239,68,68,0.25) !important; color:#fff !important; }
+body.auth-body .auth-form-panel .bg-green-50{ background:rgba(34,197,94,0.25) !important; color:#fff !important; }
+
+/* Top of page: undo the relative positioning from auth-lamp-effect.css */
+body.auth-body .auth-visual-topnav,
+body.auth-body .auth-visual-tagline{ position:absolute; z-index:2; }
+@media (max-width: 900px){
+  body.auth-body .auth-visual-tagline{ bottom:56px; }
+}
+
+/* >>> glass-v2 */
+body.auth-body .auth-form-panel{
+  background:transparent !important;
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
+body.auth-body .auth-form-panel::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  border-radius:inherit;
+  background:linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 45%, rgba(255,255,255,0.07));
+  -webkit-backdrop-filter:blur(2px) saturate(2) brightness(1.1);
+  backdrop-filter:blur(2px) saturate(2) brightness(1.1);
+}
+body.auth-body .auth-form-panel input[type="email"],
+body.auth-body .auth-form-panel input[type="password"],
+body.auth-body .auth-form-panel input[type="text"],
+body.auth-body .auth-form-panel button[type="submit"],
+body.auth-body .auth-form-panel .auth-google-circle{
+  -webkit-backdrop-filter:blur(2px) saturate(2) brightness(1.1) !important;
+  backdrop-filter:blur(2px) saturate(2) brightness(1.1) !important;
+  backdrop-filter:url(#authLens) saturate(2) brightness(1.1) !important;
+}
+/* <<< glass-v2 */
+
+/* >>> glass-v3 */
+body.auth-body .auth-form-panel select,
+body.auth-body .auth-form-panel textarea,
+body.auth-body .auth-form-panel input.glass-input,
+body.auth-body .auth-form-panel input[type="tel"],
+body.auth-body .auth-form-panel input[type="number"],
+body.auth-body .auth-form-panel input[type="date"],
+body.auth-body .auth-form-panel input[type="url"],
+body.auth-body .auth-form-panel input[type="search"]{
+  background:rgba(255,255,255,0.14) !important;
+  border:1.5px solid transparent !important;
+  color:#fff !important;
+}
+body.auth-body .auth-form-panel select:focus,
+body.auth-body .auth-form-panel textarea:focus,
+body.auth-body .auth-form-panel input.glass-input:focus{
+  background:rgba(255,255,255,0.22) !important;
+  border-color:transparent !important;
+  box-shadow:none !important;
+  outline:none !important;
+}
+body.auth-body .auth-form-panel textarea::placeholder{ color:rgba(255,255,255,0.6) !important; }
+body.auth-body .auth-form-panel select option{ color:#111827 !important; background:#fff !important; }
+body.auth-body .auth-form-panel [style*="var(--color-surface)"]{ background:rgba(255,255,255,0.18) !important; }
+
+/* Same zoom lens on these fields and the plan cards */
+body.auth-body .auth-form-panel select,
+body.auth-body .auth-form-panel textarea,
+body.auth-body .auth-form-panel input.glass-input,
+body.auth-body .auth-form-panel input[type="tel"],
+body.auth-body .auth-form-panel input[type="number"],
+body.auth-body .auth-form-panel input[type="date"],
+body.auth-body .auth-form-panel input[type="url"],
+body.auth-body .auth-form-panel input[type="search"],
+body.auth-body .auth-form-panel .reg-plan-body{
+  -webkit-backdrop-filter:blur(2px) saturate(2) brightness(1.1) !important;
+  backdrop-filter:blur(2px) saturate(2) brightness(1.1) !important;
+  backdrop-filter:url(#authLens) saturate(2) brightness(1.1) !important;
+}
+
+/* Desktop: fit content instead of a fixed tall box */
+@media (min-width: 901px){
+  body.auth-body .auth-split-shell{
+    height:auto !important;
+    max-height:none !important;
+    padding:24px 40px !important;
+  }
+  body.auth-body .auth-form-panel{
+    height:auto !important;
+    max-height:none !important;
+    overflow:visible !important;
+    padding-top:36px !important;
+    padding-bottom:36px !important;
+  }
+  body.auth-body .auth-visual-panel{
+    height:auto !important;
+    max-height:none !important;
+    min-height:460px;
+    align-self:stretch;
+  }
+}
+/* <<< glass-v3 */
+
+/* >>> glass-v4 */
+@media (min-width: 901px){
+  body.auth-body .auth-split-shell{
+    min-height:0 !important;
+    width:min(960px, 92vw) !important;
+    padding:0 !important;
+    margin:24px auto !important;
+  }
+}
+/* <<< glass-v4 */
+/* autofill-fix-q23 */
+body.auth-body .auth-form-panel input{color-scheme:dark;caret-color:#fff}
+body.auth-body .auth-form-panel input:-webkit-autofill,
+body.auth-body .auth-form-panel input:-webkit-autofill:hover,
+body.auth-body .auth-form-panel input:-webkit-autofill:focus,
+body.auth-body .auth-form-panel input:-webkit-autofill:active{
+  -webkit-text-fill-color:#fff !important;
+  -webkit-box-shadow:0 0 0 1000px #1c2536 inset !important;
+  box-shadow:0 0 0 1000px #1c2536 inset !important;
+  caret-color:#fff !important;
+}
+body.auth-body .auth-form-panel input:autofill{
+  -webkit-text-fill-color:#fff !important;
+  box-shadow:0 0 0 1000px #1c2536 inset !important;
+}
+/* one-bg-q24 */
+body.auth-body{background-image:none !important;background-color:#0b1220 !important}
+body.auth-body::before,
+body.auth-body::after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background-size:cover;background-position:30% 25%;background-repeat:no-repeat}
+body.auth-body::before{
+  background-image:linear-gradient(180deg,rgba(5,10,20,.25),rgba(5,10,20,0) 30%,rgba(5,10,20,0) 55%,rgba(5,10,20,.5)),var(--lamp-off);
+}
+body.auth-body::after{
+  background-image:linear-gradient(180deg,rgba(5,10,20,.25),rgba(5,10,20,0) 30%,rgba(5,10,20,0) 55%,rgba(5,10,20,.5)),var(--lamp-on);
+  opacity:var(--lamp-intensity,0);transition:opacity 1.6s ease;
+  box-shadow:inset 0 0 120px rgba(255,176,74,calc(var(--lamp-intensity,0) * .6));
+}
+body.auth-body .auth-split-shell{position:relative;z-index:1}
+/* left panel: no image of its own */
+body.auth-body .auth-visual-panel{background:none !important;background-image:none !important;box-shadow:none !important}
+body.auth-body .auth-visual-panel::before,
+body.auth-body .auth-visual-panel::after{display:none !important}
+/* card: glass layer gets the lens too */
+body.auth-body .auth-form-panel::after{
+  -webkit-backdrop-filter:blur(2px) saturate(2) brightness(1.1);
+  backdrop-filter:blur(2px) saturate(2) brightness(1.1);
+  backdrop-filter:url(#authLens) saturate(2) brightness(1.1);
+  border:1px solid rgba(255,255,255,.28);
+}

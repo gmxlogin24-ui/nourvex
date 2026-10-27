@@ -1,0 +1,213 @@
+/* Dashboard. Phone rules live in dashboard-glass.css and are not changed here.
+   Laptop and desktop (901px and up): balance on top, overview block, carousel with
+   the world buttons beside it, Airtime rail on the right, highlights below. */
+
+/* Old Hustles knob and old Market coin: hidden everywhere. partials/world-hover replaces them. */
+body[data-page="dashboard"] #dgDrop,
+body[data-page="dashboard"] #dgCoin,
+body[data-page="dashboard"] #dgShut { display:none !important; }
+
+/* Phone: overview block and world buttons are hidden */
+.dg-ov, .dgb-side { display:none; }
+
+@media (min-width:901px) {
+  /* No sidebar, no top bars on the dashboard */
+  body[data-page="dashboard"] .app-shell-flex > :not(.auth-page-shell):not(svg) { display:none !important; }
+  body[data-page="dashboard"] .auth-page-shell,
+  body[data-page="dashboard"] .app-push-content { margin-left:0 !important; width:100%; max-width:100%; }
+  body[data-page="dashboard"] .dqm-topbar-fixed,
+  body[data-page="dashboard"] .dqm-topbar-tab,
+  body[data-page="dashboard"] .dgd-bar { display:none !important; }
+
+  /* Page column. Overrides the old two-column grid in dg-desktop-layout.css */
+  .dg .dg-in {
+    display:block !important;
+    grid-template-areas:none !important;
+    max-width:1180px !important;
+    padding-right:72px !important;
+  }
+
+  /* Balance card on top */
+  .dg .dg-in > .dg-top {
+    display:flex !important;
+    align-items:center;
+    gap:24px;
+    margin:0 0 22px;
+  }
+
+  /* Overview block: profile card left, four summary cards in a 2x2 on the right */
+  .dg .dg-in > .dg-ov {
+    display:grid !important;
+    grid-template-columns:260px minmax(0,1fr) minmax(0,1fr);
+    grid-template-rows:auto auto;
+    gap:14px;
+    margin:0 0 22px;
+  }
+  .dg .dg-in > .dg-ov > * { min-width:0; }
+  .dg .dg-in > .dg-ov > :nth-child(1) { grid-column:1; grid-row:1 / span 2; }
+  .dg .dg-in > .dg-ov > :nth-child(2) { grid-column:2; grid-row:1; }
+  .dg .dg-in > .dg-ov > :nth-child(3) { grid-column:3; grid-row:1; }
+  .dg .dg-in > .dg-ov > :nth-child(4) { grid-column:2; grid-row:2; }
+  .dg .dg-in > .dg-ov > :nth-child(5) { grid-column:3; grid-row:2; }
+
+  .dgx-face, .dgx-card {
+    display:flex; flex-direction:column; align-items:flex-start; gap:4px;
+    padding:16px 18px; border-radius:24px; text-decoration:none; color:#0F1115;
+    transition:transform .18s ease;
+  }
+  .dgx-face:hover, .dgx-card:hover { transform:translateY(-2px); }
+  .dgx-photo {
+    width:72px; height:72px; border-radius:22px; overflow:hidden; flex:none;
+    display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg,#D8FF5A,#7BC21A); color:#07140B; font-size:26px; font-weight:800;
+  }
+  .dgx-photo img { width:100%; height:100%; object-fit:cover; display:block; }
+  .dgx-face > b { font-size:20px; font-weight:800; letter-spacing:-.02em; margin-top:8px; }
+  .dgx-face > small, .dgx-card > small {
+    font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#7C8596;
+  }
+  .dgx-card > i { width:20px; height:20px; color:#4F5BD5; }
+  .dgx-card > b { font-size:22px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; margin-top:2px; }
+  .dgx-card > span { font-size:12px; color:#5B6475; line-height:1.35; }
+  .dgx-face-stats {
+    display:flex; gap:18px; margin-top:auto; padding-top:12px; width:100%;
+    border-top:1px solid rgba(15,17,21,.08);
+  }
+  .dgx-face-stats > div { display:flex; flex-direction:column; font-size:11px; color:#5B6475; }
+  .dgx-face-stats b { font-size:16px; font-weight:800; color:#0F1115; margin:0; }
+
+  /* Carousel row: carousel, then the three world buttons. Airtime rail sits beside it. */
+  .dg .dg-in > .dg-grid {
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) 92px;
+    gap:18px;
+    align-items:start;
+    margin-top:0;
+  }
+  .dg .dg-in .dg-grid > .dg-stage-row {
+    display:flex; align-items:center; gap:14px; min-width:0;
+  }
+  .dg .dg-in .dg-grid > .dg-stage-row > .dg-stage {
+    flex:0 1 auto; width:min(100%, 480px); min-width:0; margin:0; padding:0;
+  }
+  .dg .dg-in .dg-grid .dg-deck { height:clamp(300px, 46vh, 440px); min-height:0; flex:none; }
+  .dg .dg-in .dg-grid .dg-jc { height:100%; }
+
+  .dgb-side {
+    display:flex !important;
+    flex-direction:column; align-items:center; gap:14px;
+    flex:0 0 96px;
+  }
+  .dgb-btn {
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    text-decoration:none; color:#0F1115; perspective:500px;
+  }
+  .dgb-face {
+    width:60px; height:60px; border-radius:20px;
+    display:flex; align-items:center; justify-content:center; color:#0B9C73;
+    background:linear-gradient(160deg, rgba(255,255,255,.42), rgba(255,255,255,.08) 45%, rgba(255,255,255,.3));
+    -webkit-backdrop-filter:blur(2px) saturate(1.8) brightness(1.1);
+    backdrop-filter:blur(2px) saturate(1.8) brightness(1.1);
+    backdrop-filter:url(#dgLens) saturate(1.8) brightness(1.1);
+    border:1px solid rgba(255,255,255,.95);
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,.95),
+      inset 0 -6px 10px -6px rgba(8,110,80,.35),
+      0 4px 0 rgba(8,110,80,.35),
+      0 14px 24px -12px rgba(15,17,21,.45);
+    transform:rotateX(14deg) rotateY(-12deg);
+    transform-style:preserve-3d;
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .dgb-face svg { width:22px; height:22px; }
+  .dgb-m { color:#FF7A1A; }
+  .dgb-o { color:#4F5BD5; }
+  .dgb-btn:hover .dgb-face {
+    transform:rotateX(0) rotateY(0) translateY(3px);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.95), 0 6px 14px -8px rgba(15,17,21,.45);
+  }
+  .dgb-lbl {
+    font-size:9px; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+    color:#0B7A5A; background:rgba(255,255,255,.85); border-radius:99px; padding:3px 8px;
+    box-shadow:0 6px 12px -8px rgba(15,17,21,.4);
+  }
+
+  /* Airtime, Data, Cable TV, More: vertical rail on the right */
+  .dg .dg-in .dg-grid > .dg-quick {
+    position:relative; z-index:5;
+    display:flex; flex-direction:column; align-items:center; gap:14px;
+    margin:0; padding:16px 8px; border-radius:28px;
+  }
+  .dg .dg-in .dg-quick .dg-it {
+    flex-direction:column; align-items:center; gap:6px; padding:0;
+  }
+  .dg .dg-in .dg-quick .dg-it b { font-size:10px; font-weight:800; text-align:center; line-height:1.1; }
+  .dg .dg-in .dg-quick .dg-tile { width:52px; height:52px; border-radius:18px; }
+  .dg .dg-in .dg-quick .dg-tile svg { width:22px; height:22px; }
+  .dg .dg-in .dg-quick .dg-sheet {
+    position:absolute; top:0; right:calc(100% + 12px); left:auto; bottom:auto;
+    width:190px; margin:0; padding:8px;
+  }
+
+  /* Highlights */
+  .dg .dg-in > .dg-hlh { margin:26px 2px 12px; }
+  .dg .dg-in > .dg-cards {
+    display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:20px;
+  }
+  .dg .dg-in .dg-cards .dg-card { height:260px; border-radius:28px; }
+}
+
+/* Desktop fixes: no side world buttons, rail in the same row as the carousel, tighter spacing */
+@media (min-width:901px) {
+  .dgb-side { display:none !important; }
+
+  /* headline left, earnings card right, in one row (overrides the stacked rule for 901-1099px) */
+  .dg .dg-in > .dg-top { flex-direction:row !important; align-items:center !important; gap:24px !important; margin:0 0 18px !important; }
+  .dg .dg-in > .dg-top .dg-hero { flex:1 1 auto; min-width:0; margin:0; }
+  .dg .dg-in > .dg-top .dg-earn.dg-glass { flex:0 0 340px !important; }
+
+  /* carousel column + rail column, both in row 1 (cancels the old grid-area:dock/stage placement) */
+  .dg .dg-in > .dg-grid {
+    grid-template-columns:minmax(0,1fr) 92px !important;
+    grid-template-rows:auto !important;
+    grid-template-areas:none !important;
+    gap:18px !important;
+    align-items:start !important;
+    margin-top:0 !important;
+  }
+  .dg .dg-in .dg-grid > .dg-stage-row { grid-area:1 / 1 / 2 / 2 !important; justify-content:center; }
+  .dg .dg-in .dg-grid > .dg-quick {
+    grid-area:1 / 2 / 2 / 3 !important;
+    position:relative !important; top:auto !important; align-self:start !important;
+  }
+  .dg .dg-in .dg-grid > .dg-stage-row > .dg-stage { width:min(100%, 560px) !important; }
+
+  /* More list only shows when the More button is opened */
+  .dg .dg-in .dg-quick .dg-more:not([open]) .dg-sheet { display:none !important; }
+
+  .dg .dg-in > .dg-hlh { margin:20px 2px 10px !important; }
+}
+
+/* Desktop: remove the More list, remove side gap, carousel fills its column */
+@media (min-width:901px) {
+  .dg .dg-in .dg-quick .dg-more,
+  .dg .dg-in .dg-quick .dg-sheet { display:none !important; }
+
+  .dg .dg-in { padding-right:0 !important; padding-left:0 !important; max-width:1180px !important; margin:0 auto !important; }
+  .dg { padding-left:24px !important; padding-right:24px !important; }
+
+  .dg .dg-in .dg-grid > .dg-stage-row { justify-content:flex-start !important; }
+  .dg .dg-in .dg-grid > .dg-stage-row > .dg-stage { width:100% !important; flex:1 1 auto !important; }
+  .dg .dg-in .dg-grid .dg-deck { height:clamp(300px, 44vh, 420px) !important; }
+
+  /* rail matches the carousel height */
+  .dg .dg-in .dg-grid > .dg-quick { justify-content:center; align-self:stretch !important; gap:18px; }
+  .dg .dg-in .dg-grid > .dg-stage-row { align-self:stretch; }
+}
+
+@media (min-width:900px){
+  .dg .dg-in .dg-grid > .dg-quick{ max-height:340px !important; overflow-y:auto !important;
+    flex-wrap:nowrap !important; justify-content:flex-start !important; scrollbar-width:none; }
+  .dg .dg-in .dg-grid > .dg-quick::-webkit-scrollbar{ display:none; }
+  .dg .dg-in .dg-quick .dg-it{ flex-shrink:0 !important; }
+}

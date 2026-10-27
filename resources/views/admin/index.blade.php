@@ -4,6 +4,7 @@
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold">Admin Overview</h1>
         <a href="{{ route('admin.invites') }}" class="balance-chip primary">+ Invites</a>
+        <a href="{{ route('admin.announcements.index') }}" class="balance-chip">Announcements</a>
     </div>
 
     @if(session('status'))

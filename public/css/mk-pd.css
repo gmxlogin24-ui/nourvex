@@ -1,0 +1,13 @@
+/* tighter top of the product page */
+.wp-product,.wp-product .pd,.pdw{padding-top:0 !important;margin-top:0 !important}
+.pd-s0{margin-top:0 !important;padding-top:0 !important}
+.pd-stage{margin-top:0 !important}
+/* buttons in your glass style, with colour */
+.pd-bar .pd-buy{background:linear-gradient(145deg,#FB923C,#EA580C) !important;border:1px solid rgba(255,255,255,.4) !important;color:#fff !important;box-shadow:0 6px 16px rgba(234,88,12,.35)}
+.pd-bar .pd-buy :is(svg,i){color:#fff !important;stroke:#fff !important}
+.pd-bar .pd-cart,.pd-bar .pd-cartin{background:rgba(255,255,255,.6) !important;border:1px solid rgba(255,255,255,.8) !important;color:#EA580C !important}
+.pd-bar .pd-cart :is(svg,i),.pd-bar .pd-cartin :is(svg,i){color:#EA580C !important;stroke:#EA580C !important}
+.pd-sbtns{display:flex;gap:8px;margin:12px 0}
+.pd-sbtn{flex:1;height:42px;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:14px;font-size:13px;font-weight:800;text-decoration:none;cursor:pointer}
+.pd-sbtn svg{width:16px;height:16px}
+.pd-msg-seller{background:linear-gradient(145deg,#2DD4BF,#0D9488) !important;border:1px solid rgba(255,255,255,.4) !important;color:#fff !important}

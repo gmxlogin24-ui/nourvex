@@ -1,0 +1,104 @@
+/* Dashboard desktop: sidebar dock + content column. Loads after dashboard-glass.css */
+@media (min-width: 901px){
+
+  .dg .dg-in{
+    max-width:1240px;
+    display:grid;
+    grid-template-columns:200px minmax(0,1fr);
+    grid-template-areas:
+      "bar  bar"
+      "dock top"
+      "dock stage"
+      "dock hlh"
+      "dock cards";
+    column-gap:22px;
+    row-gap:0;
+    align-items:start;
+  }
+  .dg .dg-in > .dgd-bar{ grid-area:bar; }
+  .dg .dg-in > .dg-top{ grid-area:top; }
+  .dg .dg-in > .dg-grid{ display:contents; }
+  .dg .dg-in > .dg-hlh{ grid-area:hlh; }
+  .dg .dg-in > .dg-cards{ grid-area:cards; }
+  .dg .dg-in .dg-grid > .dg-stage{ grid-area:stage; }
+  .dg .dg-in .dg-grid > .dg-quick{ grid-area:dock; }
+
+  /* top bar: readable on the light background */
+  .dg .dgd-bar{
+    margin:0 0 22px;
+    background:linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.5));
+    border:1px solid rgba(255,255,255,.95);
+    box-shadow:0 14px 34px -20px rgba(60,90,200,.4), inset 0 1px 0 #fff;
+    -webkit-backdrop-filter:blur(16px) saturate(170%);
+    backdrop-filter:blur(16px) saturate(170%);
+  }
+  .dg .dgd-brand{ color:var(--ink); }
+  .dg .dgd-bar nav a{ color:#51608a; }
+  .dg .dgd-bar nav a.on{ background:rgba(63,91,255,.12); color:var(--blue); }
+  .dg .dgd-av{ background:rgba(63,91,255,.12); color:var(--blue); }
+
+  /* headline + earnings row */
+  .dg .dg-in .dg-top{ gap:24px; margin:0 0 22px; }
+  .dg .dg-in .dg-top .dg-hero h2{ font-size:clamp(26px, 3vw, 36px); }
+  .dg .dg-in .dg-top .dg-earn.dg-glass{
+    flex:0 0 clamp(280px, 36%, 380px);
+    padding:18px 22px; gap:16px; border-radius:30px;
+  }
+  .dg .dg-in .dg-top .dg-ico{ width:56px; height:56px; }
+  .dg .dg-in .dg-top .dg-ico svg{ width:26px; height:26px; }
+  .dg .dg-in .dg-top .dg-earn-t b{ font-size:34px; }
+  .dg .dg-in .dg-top .dg-bars{ height:64px; gap:6px; }
+  .dg .dg-in .dg-top .dg-bars i{ width:9px; }
+
+  /* left sidebar dock */
+  .dg .dg-in .dg-grid > .dg-quick{
+    position:sticky; top:14px; z-index:5; align-self:start;
+    display:flex; flex-direction:column; flex-wrap:nowrap;
+    align-items:stretch; justify-content:flex-start;
+    gap:4px; padding:14px 12px; border-radius:28px;
+  }
+  .dg .dg-in .dg-quick .dg-it{
+    flex-direction:row; align-items:center; gap:12px;
+    padding:8px 10px; border-radius:18px;
+    color:var(--ink); text-decoration:none;
+    transition:background .2s ease;
+  }
+  .dg .dg-in .dg-quick .dg-it:hover{ background:rgba(63,91,255,.08); }
+  .dg .dg-in .dg-quick .dg-it b{ font-size:14px; font-weight:700; line-height:1.2; color:var(--ink); }
+  .dg .dg-in .dg-quick .dg-tile{ width:42px; height:42px; border-radius:15px; flex:none; }
+  .dg .dg-in .dg-quick .dg-tile svg{ width:19px; height:19px; }
+  .dg .dg-in .dg-quick .dg-sheet{
+    position:static; width:auto; margin:8px 0 0; padding:8px 0 0;
+    display:flex; flex-direction:column; flex-wrap:nowrap; gap:2px;
+    background:none; border:0; border-top:1px solid rgba(18,22,43,.08); border-radius:0;
+    box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none;
+  }
+  .dg .dg-in .dg-quick .dg-sheet a{
+    display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:14px;
+    font-size:14px; font-weight:700; color:var(--ink); background:none; border:0;
+    text-decoration:none; transition:background .2s ease;
+  }
+  .dg .dg-in .dg-quick .dg-sheet a:hover{ background:rgba(63,91,255,.08); }
+  .dg .dg-in .dg-quick .dg-sheet svg{ width:18px; height:18px; color:var(--blue); }
+
+  /* hero carousel: capped height so it is not a giant slab */
+  .dg .dg-in .dg-grid .dg-stage{ margin:0; padding:0; }
+  .dg .dg-in .dg-grid .dg-deck{ height:clamp(300px, 46vh, 440px); min-height:0; flex:none; }
+  .dg .dg-in .dg-grid .dg-jc{ height:100%; }
+
+  /* highlight cards */
+  .dg .dg-in .dg-cards{ gap:20px; }
+  .dg .dg-in .dg-cards .dg-card{ height:260px; border-radius:28px; }
+  .dg .dg-in .dg-cards .dg-card b{ font-size:20px; }
+  .dg .dg-in .dg-cards .dg-card small{ font-size:13px; }
+}
+
+/* narrower desktop widths: stack headline above earnings, keep the Hustles cord clear */
+@media (min-width: 901px) and (max-width: 1099px){
+  .dg .dg-in{ padding-right:64px; }
+  .dg .dg-in .dg-top{ flex-direction:column; align-items:stretch; gap:14px; }
+  .dg .dg-in .dg-top .dg-earn.dg-glass{ flex:none; }
+}
+@media (min-width: 1100px) and (max-width: 1399px){
+  .dg .dg-in{ padding-right:72px; }
+}

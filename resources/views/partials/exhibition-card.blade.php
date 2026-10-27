@@ -2,7 +2,7 @@
     $item = $item ?? [];
     $imageUrl = $item['image_url'] ?? null;
     $videoUrl = $item['video_url'] ?? null;
-    $title = $item['title'] ?? 'Featured on NOURVEX';
+    $title = $item['title'] ?? 'Featured on NAURVEX';
     $subtitle = $item['subtitle'] ?? null;
     $ctaText = $item['cta_text'] ?? 'Shop Now';
     $ctaUrl = $item['cta_url'] ?? route('register');

@@ -124,6 +124,7 @@ class MarketplaceController extends Controller
 
     public function show(Listing $listing)
     {
+        \App\Models\ListingView::record($listing);
         if (Auth::check() && Auth::id() !== $listing->user_id) {
             \App\Models\UserActivity::create([
                 'user_id' => Auth::id(),
@@ -163,7 +164,8 @@ class MarketplaceController extends Controller
             }
         }
 
-        return view('marketplace.show', [
+        $mkExtra = $this->productExtras($listing, $seller);
+        return view('marketplace.show', $mkExtra + [
             'listing' => $listing,
             'seller' => $seller,
             'reviews' => $reviews,
@@ -188,10 +190,48 @@ class MarketplaceController extends Controller
         return back()->with('status', 'Added to favorites.');
     }
 
+
+    // One inbox for every chat about a listing, whether you are the buyer or the seller.
+    public function inbox()
+    {
+        $me = Auth::id();
+        $threads = collect();
+        try {
+            $convs = \App\Models\Conversation::where('type', 'business')
+                ->where('subject_type', Listing::class)
+                ->whereHas('participants', fn ($q) => $q->where('user_id', $me))
+                ->with(['messages', 'participants'])
+                ->get();
+            $listings = Listing::with('images')->whereIn('id', $convs->pluck('subject_id')->all())->get()->keyBy('id');
+            $otherIds = $convs->flatMap(fn ($c) => $c->participants->pluck('user_id'))->unique()->reject(fn ($id) => (int) $id === (int) $me)->values()->all();
+            $others = User::whereIn('id', $otherIds)->get()->keyBy('id');
+            foreach ($convs as $c) {
+                $l = $listings[$c->subject_id] ?? null;
+                $last = $c->messages->sortByDesc('created_at')->first();
+                if (!$l || !$last) { continue; }
+                $otherId = $c->participants->pluck('user_id')->first(fn ($id) => (int) $id !== (int) $me);
+                $o = $others[$otherId] ?? null;
+                $threads->push([
+                    'listing' => $l,
+                    'other' => $o ? ($o->username ? '@'.$o->username : ($o->business_name ?? $o->name)) : 'Buyer',
+                    'avatar' => $o->avatar_url ?? null,
+                    'selling' => (int) $l->user_id === (int) $me,
+                    'mine' => (int) $last->sender_id === (int) $me,
+                    'text' => $last->body ?: ($last->message_type === 'image' ? 'Photo' : 'Update'),
+                    'at' => $last->created_at,
+                ]);
+            }
+            $threads = $threads->sortByDesc('at')->values();
+        } catch (\Throwable $e) {
+            $threads = collect();
+        }
+        return view('marketplace.inbox', ['threads' => $threads]);
+    }
+
     public function favorites()
     {
         $listings = Auth::user()->favoriteListings()->latest('listing_favorites.created_at')->get();
-        return view('marketplace.favorites', ['listings' => $listings]);
+        return redirect()->route('cart.index');
     }
 
     // Seller marks a ship-method listing as sent. Buyer sees this on the
@@ -643,6 +683,11 @@ class MarketplaceController extends Controller
             'images' => 'nullable|array|max:6',
             'images.*' => 'image|max:4096',
             'delivery_method' => 'required|in:meetup,ship',
+            'brand' => 'nullable|string|max:100',
+            'highlights' => 'nullable|string|max:1500',
+            'whats_in_box' => 'nullable|string|max:1000',
+            'warranty' => 'nullable|string|max:100',
+            'return_policy' => 'nullable|string|max:1000',
         ]);
 
         $uploadedUrls = [];
@@ -665,6 +710,12 @@ class MarketplaceController extends Controller
             'phone' => $validated['phone'] ?? null,
             'image_url' => $uploadedUrls[0] ?? $listing->image_url,
             'delivery_method' => $validated['delivery_method'],
+            'brand' => $validated['brand'] ?? null,
+            'highlights' => $validated['highlights'] ?? null,
+            'whats_in_box' => $validated['whats_in_box'] ?? null,
+            'warranty' => $validated['warranty'] ?? null,
+            'return_policy' => $validated['return_policy'] ?? null,
+            'negotiable' => $request->boolean('negotiable'),
         ]);
 
         if ($uploadedUrls) {
@@ -672,6 +723,19 @@ class MarketplaceController extends Controller
             foreach ($uploadedUrls as $i => $url) {
                 $listing->images()->create(['image_url' => $url, 'sort_order' => $startOrder + $i]);
             }
+        }
+
+        if ($request->filled('remove_images') || $request->filled('cover_image')) {
+            foreach ((array) $request->input('remove_images', []) as $rid) {
+                $im = $listing->images()->where('id', (int) $rid)->first();
+                if ($im) { $im->delete(); }
+            }
+            $imgs = $listing->images()->get();
+            $coverId = (int) $request->input('cover_image', 0);
+            $cv = $coverId ? $imgs->firstWhere('id', $coverId) : null;
+            if ($cv) { $imgs = $imgs->reject(fn ($x) => $x->id === $cv->id)->prepend($cv)->values(); }
+            foreach ($imgs as $i => $im) { if ((int) $im->sort_order !== $i) { $im->update(['sort_order' => $i]); } }
+            $listing->update(['image_url' => $imgs->count() ? $imgs->first()->image_url : null]);
         }
 
         return redirect()->route('marketplace.show', $listing->id)->with('status', 'Listing updated.');
@@ -705,6 +769,15 @@ class MarketplaceController extends Controller
             'images.*' => 'image|max:4096',
             'stock_quantity' => 'nullable|integer|min:1',
             'delivery_method' => 'required|in:meetup,ship',
+            'brand' => 'nullable|string|max:100',
+            'highlights' => 'nullable|string|max:1500',
+            'whats_in_box' => 'nullable|string|max:1000',
+            'warranty' => 'nullable|string|max:100',
+            'return_policy' => 'nullable|string|max:1000',
+            'old_price' => 'nullable|numeric|min:0',
+            'colors' => 'nullable|string|max:255',
+            'sizes' => 'nullable|string|max:255',
+            'specs' => 'nullable|string|max:1500',
         ]);
 
         $uploadedUrls = [];
@@ -733,6 +806,16 @@ class MarketplaceController extends Controller
             'image_url' => $uploadedUrls[0] ?? null,
             'stock_quantity' => $canTrackStock ? ($validated['stock_quantity'] ?? null) : null,
             'delivery_method' => $validated['delivery_method'],
+            'brand' => $validated['brand'] ?? null,
+            'highlights' => $validated['highlights'] ?? null,
+            'whats_in_box' => $validated['whats_in_box'] ?? null,
+            'warranty' => $validated['warranty'] ?? null,
+            'return_policy' => $validated['return_policy'] ?? null,
+            'negotiable' => $request->boolean('negotiable'),
+            'old_price' => $validated['old_price'] ?? null,
+            'colors' => $validated['colors'] ?? null,
+            'sizes' => $validated['sizes'] ?? null,
+            'specs' => $validated['specs'] ?? null,
         ]);
 
         foreach ($uploadedUrls as $i => $url) {
@@ -740,5 +823,97 @@ class MarketplaceController extends Controller
         }
 
         return redirect()->route('marketplace.index');
+    }
+
+    public function love(Listing $listing)
+    {
+        $user = Auth::user();
+        $own = $listing->user_id === $user->id;
+        $loved = $listing->favoritedBy()->where('user_id', $user->id)->exists();
+        $cart = \Illuminate\Support\Facades\Session::get('cart', []);
+        if ($loved) {
+            $listing->favoritedBy()->detach($user->id);
+            \Illuminate\Support\Facades\Session::put('cart', array_values(array_diff($cart, [$listing->id])));
+            $now = false;
+        } else {
+            $listing->favoritedBy()->syncWithoutDetaching([$user->id]);
+            if (!$own && $listing->status === 'available' && !in_array($listing->id, $cart, true)) {
+                $cart[] = $listing->id;
+                \Illuminate\Support\Facades\Session::put('cart', $cart);
+            }
+            $now = true;
+        }
+
+        return response()->json([
+            'loved' => $now,
+            'cart_count' => count(\Illuminate\Support\Facades\Session::get('cart', [])),
+        ]);
+    }
+
+    private function productExtras(Listing $listing, $seller): array
+    {
+        $similar = Listing::with('images')
+            ->where('status', 'available')
+            ->where('id', '!=', $listing->id)
+            ->where('category', $listing->category)
+            ->latest()
+            ->limit(8)
+            ->get();
+
+        $stats = ['listings' => 0, 'sold' => 0, 'rating' => null, 'reviews' => 0];
+        if ($listing->user_id) {
+            $ids = Listing::where('user_id', $listing->user_id)->pluck('id');
+            $stats['listings'] = $ids->count();
+            $stats['sold'] = Listing::where('user_id', $listing->user_id)->whereIn('status', ['sold', 'completed'])->count();
+            $r = \App\Models\Review::where('reviewable_type', Listing::class)
+                ->whereIn('reviewable_id', $ids)
+                ->selectRaw('AVG(rating) as a, COUNT(*) as c')
+                ->first();
+            $stats['reviews'] = (int) ($r->c ?? 0);
+            $stats['rating'] = $stats['reviews'] ? round((float) $r->a, 1) : null;
+        }
+
+        $sellerMore = $listing->user_id
+            ? Listing::with('images')->where('status', 'available')->where('user_id', $listing->user_id)->where('id', '!=', $listing->id)->latest()->limit(8)->get()
+            : collect();
+        $skipIds = $similar->pluck('id')->merge($sellerMore->pluck('id'))->push($listing->id)->all();
+        $alsoLike = Listing::with('images')->where('status', 'available')->whereNotIn('id', $skipIds)->inRandomOrder()->limit(8)->get();
+        $starCounts = \App\Models\Review::where('reviewable_type', Listing::class)->where('reviewable_id', $listing->id)->selectRaw('rating, COUNT(*) as c')->groupBy('rating')->pluck('c', 'rating');
+        $breakdown = [];
+        for ($i = 5; $i >= 1; $i--) { $breakdown[$i] = (int) ($starCounts[$i] ?? 0); }
+        $soldCount = \App\Models\ListingOrder::where('listing_id', $listing->id)->count();
+        if ($soldCount === 0 && in_array($listing->status, ['sold', 'completed'], true)) { $soldCount = 1; }
+        $sellerDisputes = 0;
+        try {
+            if ($listing->user_id) {
+                $sellerDisputes = \App\Models\ListingDispute::whereIn('listing_id', Listing::where('user_id', $listing->user_id)->pluck('id'))->count();
+            }
+        } catch (\Throwable $e) {
+            $sellerDisputes = 0;
+        }
+        $recentlyViewed = collect();
+        if (Auth::check()) {
+            try {
+                $rvIds = \App\Models\UserActivity::where('user_id', Auth::id())->where('action', 'view')->whereNotNull('listing_id')->where('listing_id', '!=', $listing->id)->latest()->limit(40)->pluck('listing_id')->unique()->take(8)->values();
+                if ($rvIds->count()) {
+                    $rvMap = Listing::with('images')->whereIn('id', $rvIds)->get()->keyBy('id');
+                    $recentlyViewed = $rvIds->map(fn ($id) => $rvMap[$id] ?? null)->filter()->values();
+                }
+            } catch (\Throwable $e) {
+                $recentlyViewed = collect();
+            }
+        }
+        return [
+            'sellerDisputes' => $sellerDisputes,
+            'recentlyViewed' => $recentlyViewed,
+            'sellerMore' => $sellerMore,
+            'alsoLike' => $alsoLike,
+            'breakdown' => $breakdown,
+            'soldCount' => $soldCount,
+            'similar' => $similar,
+            'sellerStats' => $stats,
+            'isLoved' => Auth::check() && $listing->favoritedBy()->where('user_id', Auth::id())->exists(),
+            'inCart' => in_array($listing->id, \Illuminate\Support\Facades\Session::get('cart', []), true),
+        ];
     }
 }

@@ -254,17 +254,30 @@ body[data-theme-style="plain"] main { padding: 0 !important; margin: 0 !importan
     left: 12px;
     right: 12px;
     z-index: 500;
-    background: linear-gradient(135deg, rgba(22,22,22,0.82), rgba(10,10,10,0.82));
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 999px;
-    padding: 8px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 18px 36px -10px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.06);
+    padding: 12px 18px;
+    min-height: 68px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.06));
+    -webkit-backdrop-filter: blur(4px) saturate(2) brightness(1.1);
+    backdrop-filter: blur(4px) saturate(2) brightness(1.1);
+    border: 1.5px solid rgba(255,255,255,0.45);
+    box-shadow: 0 14px 34px rgba(0,0,0,0.3), inset 0 2px 2px rgba(255,255,255,0.7), inset 0 -2px 3px rgba(255,255,255,0.3), inset 0 0 20px rgba(255,255,255,0.12);
+    transition: transform 0.4s cubic-bezier(.22,1,.36,1), opacity 0.3s ease;
 }
+.dqm-topbar-fixed.dqm-topbar-hidden {
+    transform: translateY(calc(-100% - 24px - env(safe-area-inset-top, 0px)));
+    opacity: 0;
+    pointer-events: none;
+}
+/* invisible strip across the top edge: only catches taps while the bar is hidden */
+.dqm-topbar-tab {
+    position: fixed; top: 0; left: 0; right: 0; height: 26px; margin: 0; padding: 0;
+    border: 0; background: transparent; opacity: 0; pointer-events: none; z-index: 1000;
+}
+.dqm-topbar-tab.visible { pointer-events: auto; }
 .dqm-topbar-fixed .dqm-topbar-user { text-decoration: none; padding-left: 4px; display: flex; align-items: center; gap: 10px; }
 .dqm-topbar-fixed .dqm-topbar-avatar { background: linear-gradient(135deg, var(--user-accent, #7c5cf0), #38D9E8); box-shadow: 0 6px 14px -4px rgba(124,92,240,0.6); }
 .dqm-topbar-fixed .dqm-topbar-greeting { color: rgba(255,255,255,0.55); }
@@ -281,8 +294,6 @@ body[data-theme-style="plain"] main { padding: 0 !important; margin: 0 !importan
 .dqm-topbar-wallet-dot { width: 12px; height: 12px; border-radius: 3px; background: linear-gradient(135deg, var(--user-accent, #7c5cf0), #38D9E8); flex-shrink: 0; }
 .dqm-topbar-pill { width: 34px; height: 34px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 13px; font-weight: 700; color: #111; }
 .dqm-topbar-pill img { width: 100%; height: 100%; object-fit: cover; }
-/* Same topbar clearance on every other Minimal-theme page, not just the dashboard */
-body[data-theme-style="plain"] .app-push-content { padding-top: 10px !important; }
 
 /* Your Activity: vibrant stat row, replaces the old flat stat-row */
 .dqm-activity-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; font-weight: 700; color: var(--dqm-text); margin: 4px 0 2px; }
@@ -380,11 +391,7 @@ body[data-theme-style="plain"] .app-push-content { padding-top: 10px !important;
 @keyframes dqm-fab-pulse { 0%, 100% { box-shadow: 0 10px 24px -6px rgba(124,92,240,0.6); } 50% { box-shadow: 0 12px 30px -4px rgba(124,92,240,0.85); } }
 
 /* Auto-hide topbar: slides up after a few seconds idle, reveals on a downward drag near the top edge */
-.dqm-topbar-fixed { transition: transform 0.4s cubic-bezier(.22,1,.36,1); }
-.dqm-topbar-fixed.dqm-topbar-hidden { transform: translateY(-110%); }
 
-/* Reduce topbar transparency — opaque override, wins cascade as last declaration */
-.dqm-topbar-fixed { background: rgba(10,10,10,0.14) !important; backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important; }
 
 /* Marketplace filter row: smaller buttons, softer selected state (tinted, not solid white-on-color) */
 .mm-filter-row .dqm-service { width: auto; flex-shrink: 0; padding: 8px 12px; border-radius: 999px; flex-direction: row; gap: 5px; }
@@ -532,18 +539,6 @@ body[data-theme-style="plain"] .app-push-content { padding-top: 10px !important;
 .dqm-page .podium-name { color: var(--dqm-text); }
 .dqm-page .podium-amount { color: var(--dqm-text-2); }
 
-/* Tap-to-reveal pill: only visible while the topbar is hidden, sits at
-   top-center, tap brings the bar back down (drag-based reveal was unreliable) */
-.dqm-topbar-tab {
-    position: fixed; top: 0; left: 50%; transform: translateX(-50%) translateY(-100%);
-    margin-top: env(safe-area-inset-top, 0px);
-    width: 44px; height: 20px; border-radius: 0 0 12px 12px;
-    background: var(--dqm-card); border: 1px solid var(--dqm-border); border-top: none;
-    display: flex; align-items: center; justify-content: center; color: var(--dqm-text-2);
-    z-index: 1000; opacity: 0; pointer-events: none;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-}
-.dqm-topbar-tab.visible { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
 
 /* ===== Profile page: flatten the hero card, list rows, and shape-accent
    panels to the plain/minimal look — only inside .dqm-page ===== */
@@ -586,16 +581,6 @@ body[data-theme-style="plain"] .dqm-page { padding-left: 16px !important; paddin
     .dqm-ai-fab { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); right: 14px; width: 48px; height: 48px; }
 }
 
-/* Topbar redesign: quiet, adaptive (white in light mode, dark card in dark
-   mode), no shadow/blur, shorter — replaces the earlier forced-dark version */
-.dqm-topbar-fixed {
-    background: rgba(10,10,14,0.22) !important;
-    backdrop-filter: blur(14px) !important;
-    -webkit-backdrop-filter: blur(14px) !important;
-    box-shadow: 0 4px 12px -6px rgba(0,0,0,0.10) !important;
-    border: 1.5px solid rgba(255,255,255,0.16) !important;
-    padding: 8px 14px !important;
-}
 /* Sidebar (rail) is 84px wide + 20px left margin = ends at 104px — topbar
    was spanning full width underneath/over it. Clear it on desktop. */
 @media (min-width: 901px) {
@@ -1313,8 +1298,6 @@ body[data-theme-style="plain"] .svc-balance-strip i[data-lucide="wallet"] {
     opacity: 1 !important;
 }
 
-/* ── top bar: never fully hidden, ~10% stays visible ── */
-body .dqm-topbar-fixed.dqm-topbar-hidden { transform: translateY(-90%) !important; }
 
 /* ── thinner card shadows (tight, small spread) ── */
 body, body[data-theme-style="plain"], .dqm-page {
@@ -1347,31 +1330,6 @@ body[data-theme-style="plain"] .dqm-deck-fan-center {
     box-shadow: 0 8px 14px -8px rgba(0,0,0,0.4) !important;
 }
 
-/* ── top bar: no tab button, 5% peek, glassy, tap to open ── */
-.dqm-topbar-tab,
-.dqm-topbar-tab.visible { display: none !important; }
-
-body .dqm-topbar-fixed.dqm-topbar-hidden,
-body[data-theme-style="plain"] .dqm-topbar-fixed.dqm-topbar-hidden {
-    transform: translateY(-95%) !important;
-}
-body .dqm-topbar-fixed,
-body[data-theme-style="plain"] .dqm-topbar-fixed {
-    background: rgba(255,255,255,0.07) !important;
-    backdrop-filter: blur(18px) saturate(160%) !important;
-    -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
-    border: 1px solid rgba(255,255,255,0.12) !important;
-    box-shadow: none !important;
-}
-/* invisible extra tap area under the thin visible strip */
-.dqm-topbar-fixed.dqm-topbar-hidden::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 100%;
-    height: 34px;
-}
 
 /* ── lighter, tighter shadows: balance cards + services buttons ── */
 body .dqm-acc-card2,
@@ -1399,9 +1357,9 @@ body .svc-wrap .svc-plan-btn.svc-plan-card.selected {
 }
 
 /* ── dashboard: no shadows under cards / balance / services ── */
-body[data-page="dashboard"] .app-push-content *:not(.selected):not(.dqm-ai-fab):not(:focus-visible),
-body[data-page="dashboard"] .app-push-content *::before,
-body[data-page="dashboard"] .app-push-content *::after {
+body[data-page="dashboard"] .app-push-content *:not(.selected):not(.dqm-ai-fab):not(:focus-visible):not(.dg *, .dg-drop *, .dg-coin, .dg-coin *),
+body[data-page="dashboard"] .app-push-content *:not(.dg *, .dg-drop *, .dg-coin, .dg-coin *)::before,
+body[data-page="dashboard"] .app-push-content *:not(.dg *, .dg-drop *, .dg-coin, .dg-coin *)::after {
     box-shadow: none !important;
     filter: none !important;
 }
@@ -1434,16 +1392,6 @@ body[data-page="dashboard"] .app-push-content .dqp-hero-card:not(.selected):not(
     box-shadow: 0 3px 8px rgba(0,0,0,0.3) !important;
 }
 
-/* ── top bar: more transparent, bigger, wider ── */
-body .dqm-topbar-fixed,
-body[data-theme-style="plain"] .dqm-topbar-fixed {
-    background: rgba(255,255,255,0.03) !important;
-    backdrop-filter: blur(14px) saturate(150%) !important;
-    -webkit-backdrop-filter: blur(14px) saturate(150%) !important;
-    border: 1px solid rgba(255,255,255,0.08) !important;
-    padding: 12px 18px !important;
-    min-height: 68px;
-}
 body .dqm-topbar-fixed .dqm-topbar-avatar { width: 44px !important; height: 44px !important; }
 body .dqm-topbar-fixed .dqm-topbar-name { font-size: 17px !important; }
 body .dqm-topbar-fixed .dqm-topbar-greeting { font-size: 12px !important; }

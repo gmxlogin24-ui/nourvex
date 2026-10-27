@@ -1,0 +1,76 @@
+/* Marketplace + Gigs glass. Built from world-shell.css, world-pages.css and the old world-glass.css lens chain. */
+
+/* background: overview base + drifting patches */
+html:has(body.ws2-market), html:has(body.ws2-gigs){ background:var(--ov-edge,#D7E2EE) !important; }
+body.ws2-market, body.ws2-gigs{ background:transparent !important; }
+body.ws2-market{ --wg-a:rgba(255,122,26,.36); --wg-b:rgba(124,130,240,.34); --wg-c:rgba(18,184,134,.26); }
+body.ws2-gigs{ --wg-a:rgba(224,98,10,.46); --wg-b:rgba(255,150,60,.32); --wg-c:rgba(124,130,240,.20); }
+body.ws2-market::before, body.ws2-gigs::before{ content:''; position:fixed; inset:-20%; z-index:-1; pointer-events:none; filter:blur(8px);
+  background:
+    radial-gradient(40% 35% at 20% 25%, var(--wg-a), transparent 70%),
+    radial-gradient(35% 30% at 82% 18%, var(--wg-b), transparent 70%),
+    radial-gradient(40% 35% at 72% 82%, var(--wg-c), transparent 70%),
+    radial-gradient(35% 30% at 14% 86%, var(--wg-a), transparent 70%);
+  animation:wgDrift 22s ease-in-out infinite alternate; }
+@keyframes wgDrift{ 0%{transform:translate3d(0,0,0) scale(1)} 50%{transform:translate3d(3%,-2%,0) scale(1.06)} 100%{transform:translate3d(-3%,3%,0) scale(1.1)} }
+body.ws2-market .ws2-main, body.ws2-gigs .ws2-main{ position:relative; z-index:1; }
+
+/* gigs: dark orange (world-shell.css had green) */
+body.ws2-gigs, body.ws2-gigs .wp{ --w:#E0620A; --w-dark:#A64300; --w-tint:#FFEADB; }
+
+/* glass shadow + white rim through --sh (used with !important by world-shell.css and world-pages.css) */
+body.ws2-market, body.ws2-market .wp, body.ws2-gigs, body.ws2-gigs .wp{
+  --sh:0 14px 28px -18px rgba(15,17,21,.4), inset 0 0 0 1.5px rgba(255,255,255,.7), inset 0 1px 0 rgba(255,255,255,.95); }
+
+/* lens glass on cards (same filter chain as the old file / old dock) */
+body.ws2-gigs :is(.wp-chip:not(.on), .wp-ico, .wp-empty, .bg-card),
+body.ws2-market :is(.wp-chip:not(.on), .wp-ico, .wp-empty, .bg-card, .cr-item, .cr-sum, .cr-empty){
+  background:linear-gradient(180deg, rgba(255,255,255,.4), rgba(255,255,255,.14) 45%, rgba(255,255,255,.28)) !important;
+  -webkit-backdrop-filter:blur(2px) saturate(1.8) brightness(1.1);
+  backdrop-filter:blur(2px) saturate(1.8) brightness(1.1);
+  backdrop-filter:url(#wlLens) saturate(1.8) brightness(1.1); }
+body.ws2-market .wp-search input, body.ws2-gigs .wp-search input{ background:rgba(255,255,255,.35) !important; }
+
+/* entry animation must not create a backdrop root around the cards (same fix as the old file) */
+@keyframes wpEnterT{ from{ transform:scale(1.05); } to{ transform:none; } }
+body.ws2-market .wp, body.ws2-gigs .wp{ animation:wpEnterT .8s cubic-bezier(.22,1,.36,1) backwards; filter:none !important; opacity:1 !important; will-change:auto; }
+
+/* gigs dock: dark orange */
+body.ws2-gigs .nv-dock-fixed{ border-color:rgba(255,190,130,.75) !important; }
+body.ws2-gigs .nv-dock-fixed .ovd-btn.on .ovd-tile{ background:rgba(224,98,10,.30) !important;
+  box-shadow:0 0 0 1px rgba(224,98,10,.6), 0 0 18px 2px rgba(224,98,10,.6), inset 0 1px 0 #fff, inset 0 -6px 10px -6px rgba(224,98,10,.5) !important; }
+body.ws2-gigs .nv-dock-fixed .ovd-btn.on .ovd-in{ color:#A64300 !important; }
+body.ws2-gigs .nv-dock-fixed .ovd-btn.on .ovd-lbl{ color:#B34700 !important; }
+
+@media (prefers-reduced-motion:reduce){ body.ws2-market::before, body.ws2-gigs::before, body.ws2-market .wp, body.ws2-gigs .wp{ animation:none; } }
+
+/* balance-card look, copied from the overview .stx card: navy gradient + purple glow */
+body.ws2-gigs :is(.gc, .glass-card), body.ws2-market :is(.mc, .glass-card){
+  --sh:0 26px 44px -24px rgba(10,12,28,.75), inset 0 1px 0 rgba(255,255,255,.08);
+  background:radial-gradient(circle 184px at calc(100% - 50px) 40px, rgba(124,130,240,.5), transparent 62%), linear-gradient(160deg,#16193A 0%,#0A0C1C 60%,#07080F 100%) !important;
+  color:#fff;
+  -webkit-backdrop-filter:none; backdrop-filter:none; }
+
+/* text inside the gig and market list cards */
+body.ws2-gigs .gc-t, body.ws2-market .mc-t{ color:#fff; }
+body.ws2-gigs .gc-m, body.ws2-market .mc-l{ color:rgba(255,255,255,.62); }
+body.ws2-gigs .gc-p{ color:#FFB070; }
+body.ws2-market .mc-p{ color:#FFA05A; }
+body.ws2-gigs .gc-s.off{ background:rgba(255,255,255,.12); color:rgba(255,255,255,.72); }
+
+/* text and fields inside the inner-page cards (create, edit, show, posts, cart) */
+body.ws2-gigs .glass-card .text-muted, body.ws2-market .glass-card .text-muted{ color:rgba(255,255,255,.62) !important; }
+body.ws2-gigs .glass-card .bg-card, body.ws2-market .glass-card .bg-card{ background:rgba(255,255,255,.12) !important; color:#fff; }
+body.ws2-gigs .glass-card :is(.input-field, textarea, select, input:not([type=radio]):not([type=checkbox]):not([type=file]):not([type=range])),
+body.ws2-market .glass-card :is(.input-field, textarea, select, input:not([type=radio]):not([type=checkbox]):not([type=file]):not([type=range])){
+  background:rgba(255,255,255,.92) !important; color:#0F1115 !important; }
+
+/* white-v2: plain white, no drifting blobs (light mode only) */
+html:not([data-theme="dark"]):has(body.ws2-market),
+html:not([data-theme="dark"]):has(body.ws2-gigs),
+html:not([data-theme="dark"]):has(body.ws2-profile){ background:#fff !important; }
+html:not([data-theme="dark"]) body.ws2-market,
+html:not([data-theme="dark"]) body.ws2-gigs,
+html:not([data-theme="dark"]) body.ws2-profile{ background:#fff !important; }
+html:not([data-theme="dark"]) body.ws2-market::before,
+html:not([data-theme="dark"]) body.ws2-gigs::before{ display:none !important; animation:none !important; background:none !important; }

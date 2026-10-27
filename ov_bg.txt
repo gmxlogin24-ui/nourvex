@@ -1,0 +1,71 @@
+=== OVERVIEW BACKGROUND RULES ===
+52:  html:has(body[data-page="dashboard"]) { background:var(--ov-edge, #D7E2EE) !important; }
+53:  body[data-page="dashboard"], body[data-page="dashboard"] .app-shell-flex, body[data-page="dashboard"] .auth-page-shell,
+54:  body[data-page="dashboard"] .app-push-content, body[data-page="dashboard"] .auth-reveal-content { background:transparent !important; }
+55:  body[data-page="dashboard"] .app-shell-flex, body[data-page="dashboard"] .auth-page-shell,
+56:  body[data-page="dashboard"] .app-push-content, body[data-page="dashboard"] .auth-reveal-content { overflow-x:clip !important; overflow-y:visible !important; }
+58:  .ov { --ink:#0F1115; --mute:#7C8596; --line:rgba(255,255,255,.9);
+170:    .ov { max-width:1200px; padding:30px 40px 90px; }
+318:      document.documentElement.style.setProperty('--ov-edge', 'rgb(' +
+=== OVERVIEW HEAD (style start) ===
+49:<style>
+@extends('layouts.app-authenticated')
+@section('title', 'Overview')
+
+@section('content')
+@php
+  $net = $weekIn - $weekOut;
+  $lagos = now()->setTimezone('Africa/Lagos');
+  $hr = (int) $lagos->format('G');
+  $greet = $hr < 12 ? 'Good morning' : ($hr < 17 ? 'Good afternoon' : 'Good evening');
+  $dateLabel = $lagos->format('l, d M Y');
+  $isVerified = (bool) (auth()->user()->is_verified_seller ?? false);
+  $ovImg = file_exists(public_path('images/overview-circle.png'));
+
+  $gigBal = (float) \App\Models\Transaction::where('user_id', auth()->id())->where('type', 'gig_earning')->where('amount', '>', 0)->sum('amount');
+  $mktBal = (float) \App\Models\Transaction::where('user_id', auth()->id())->where('type', 'marketplace_sale')->where('amount', '>', 0)->sum('amount');
+
+  $dayRows = \App\Models\Transaction::where('user_id', auth()->id())->whereDate('created_at', now()->toDateString())->get(['amount']);
+  $dayIn = (float) $dayRows->where('amount', '>', 0)->sum('amount');
+  $dayOut = abs((float) $dayRows->where('amount', '<', 0)->sum('amount'));
+
+  $wkRows = \App\Models\Transaction::where('user_id', auth()->id())->where('created_at', '>=', now()->subDays(6)->startOfDay())->get(['amount', 'created_at']);
+  $bars = [];
+  for ($i = 6; $i >= 0; $i--) {
+    $d = now()->subDays($i);
+    $key = $d->toDateString();
+    $rows = $wkRows->filter(fn ($r) => $r->created_at->toDateString() === $key);
+    $bi = (float) $rows->where('amount', '>', 0)->sum('amount');
+    $bo = abs((float) $rows->where('amount', '<', 0)->sum('amount'));
+    $bars[] = ['label' => substr($d->format('D'), 0, 1), 'name' => $d->format('D'), 'in' => $bi, 'out' => $bo, 'net' => $bi - $bo];
+  }
+  $bmax = 1;
+  foreach ($bars as $b) { $bmax = max($bmax, $b['in'], $b['out']); }
+  foreach ($bars as $k => $b) {
+    $bars[$k]['pi'] = max(4, round($b['in'] / $bmax * 100));
+    $bars[$k]['po'] = max(4, round($b['out'] / $bmax * 100));
+  }
+  $nmax = 1;
+  foreach ($bars as $b) { $nmax = max($nmax, abs($b['net'])); }
+  $peak = 0;
+  foreach ($bars as $k => $b) { if ($b['net'] > $bars[$peak]['net']) { $peak = $k; } }
+  $trend = [];
+  foreach ($bars as $k => $b) { $trend[] = round(($k + .5) / 7 * 100, 2) . ',' . round(70 - ($b['net'] / $nmax) * 50, 2); }
+  $trendStr = implode(' ', $trend);
+
+  $ovJson = json_encode(['day' => ['in' => $dayIn, 'out' => $dayOut, 'net' => $dayIn - $dayOut], 'week' => ['in' => (float) $weekIn, 'out' => (float) $weekOut, 'net' => (float) $net]], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+  $barsJson = json_encode($bars, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+@endphp
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Sora:wght@600;700;800&display=swap');
+
+  html:has(body[data-page="dashboard"]) { background:var(--ov-edge, #D7E2EE) !important; }
+  body[data-page="dashboard"], body[data-page="dashboard"] .app-shell-flex, body[data-page="dashboard"] .auth-page-shell,
+  body[data-page="dashboard"] .app-push-content, body[data-page="dashboard"] .auth-reveal-content { background:transparent !important; }
+  body[data-page="dashboard"] .app-shell-flex, body[data-page="dashboard"] .auth-page-shell,
+  body[data-page="dashboard"] .app-push-content, body[data-page="dashboard"] .auth-reveal-content { overflow-x:clip !important; overflow-y:visible !important; }
+
+  .ov { --ink:#0F1115; --mute:#7C8596; --line:rgba(255,255,255,.9);
+        position:relative; z-index:1; max-width:760px; margin:0 auto; padding:10px 14px 110px; color:var(--ink); overflow-x:clip; }
+

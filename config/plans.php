@@ -11,17 +11,17 @@ $rules = [
     'tier1' => [ // Silver
         'gigs_post' => false, 'gigs_claim_cap' => 5, 'gigs_commission' => 0.03,
         'market_buy' => true, 'market_sell' => true, 'market_weekly_cap' => 10,
-        'referral_pct' => 0.10, 'qcoin_daily' => 25,
+        'referral_pct' => 0.10, 'qcoin_daily' => 10,
     ],
     'tier2' => [ // Gold
         'gigs_post' => true, 'gigs_claim_cap' => 5, 'gigs_commission' => 0.00,
         'market_buy' => true, 'market_sell' => true, 'market_weekly_cap' => 20,
-        'referral_pct' => 0.15, 'qcoin_daily' => 40,
+        'referral_pct' => 0.15, 'qcoin_daily' => 15,
     ],
     'tier3' => [ // Premium
         'gigs_post' => true, 'gigs_claim_cap' => null, 'gigs_commission' => 0.00,
         'market_buy' => true, 'market_sell' => true, 'market_weekly_cap' => null,
-        'referral_pct' => 0.20, 'qcoin_daily' => 55,
+        'referral_pct' => 0.20, 'qcoin_daily' => 20,
     ],
 ];
 

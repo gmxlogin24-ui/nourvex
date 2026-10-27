@@ -1,20 +1,20 @@
 @extends('layouts.landing')
 @section('title', 'FAQ')
 @section('meta')
-<meta name="description" content="Answers about NOURVEX: hustles, escrow payments, your wallet and PIN, the Campus Market, airtime and data, levels and badges, and getting help.">
+<meta name="description" content="Answers about NAURVEX: hustles, escrow payments, your wallet and PIN, the Campus Market, airtime and data, levels and badges, and getting help.">
 @endsection
 @php
 $faqs = [
-    ['What is NOURVEX?', 'NOURVEX is a campus app where students can work, sell and get paid in one place. It brings hustles, a wallet, a campus market, a live campus feed, airtime and data, and an AI concierge together. It is run by NOURVEX LTD.'],
+    ['What is NAURVEX?', 'NAURVEX is a campus app where students can work, sell and get paid in one place. It brings hustles, a wallet, a campus market, a live campus feed, airtime and data, and an AI concierge together. It is run by NAURVEX LTD.'],
     ['Is it free to join?', 'Yes. Creating an account is free.'],
     ['What is a hustle?', 'A hustle is a task one student posts and another student does. The poster sets the budget, and anyone can browse open hustles and apply.'],
     ['How does escrow protect my payment?', 'When a hustle is accepted, the funds move into escrow. They are released to the person who did the work only after the poster marks it as delivered, so neither side is left exposed.'],
     ['How do I add money to my wallet?', 'You can top up by card or transfer. Every credit and debit shows up in your wallet as it happens.'],
     ['What is my PIN for?', 'Your PIN confirms anything that moves money, such as paying for a hustle or buying airtime, so nobody can spend from your wallet without it.'],
     ['How does the Campus Market work?', 'Sellers list textbooks, gadgets, services or rentals. Buyers confirm delivery before the funds are released to the seller. If something goes wrong, support is one tap away.'],
-    ['Can I buy airtime and data?', 'Yes. You can buy airtime and data bundles for any network, paid straight from your NOURVEX wallet and confirmed with your PIN.'],
+    ['Can I buy airtime and data?', 'Yes. You can buy airtime and data bundles for any network, paid straight from your NAURVEX wallet and confirmed with your PIN.'],
     ['What are levels and badges?', 'Every hustle you finish and every good review you earn pushes your level up. Higher levels unlock badges that buyers and sellers can see before they deal with you.'],
-    ['Who is Levi?', 'Levi is the NOURVEX AI concierge. Ask in plain chat to find a hustle, check a wallet transaction or explain how something works.'],
+    ['Who is Levi?', 'Levi is the NAURVEX AI concierge. Ask in plain chat to find a hustle, check a wallet transaction or explain how something works.'],
     ['What if something goes wrong?', 'Use the support option in the app. Customer care and dispute help are there for hustles and Campus Market orders.'],
 ];
 $ld = [
@@ -49,7 +49,7 @@ $ld = [
         <section class="nvp-sec">
             <div class="nvp-actions">
                 <a class="nvp-cta" href="{{ route('register') }}">Create your free account</a>
-                <a class="nvp-link" href="{{ route('about') }}">About NOURVEX</a>
+                <a class="nvp-link" href="{{ route('about') }}">About NAURVEX</a>
             </div>
         </section>
     </div>

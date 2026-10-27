@@ -386,7 +386,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/area', [\App\Http\Controllers\AreaController::class, 'update'])->name('area.update');
 });
 
-// ===== NOURVEX SEO pages =====
+// ===== NAURVEX SEO pages =====
 Route::view('/about', 'about')->name('about');
 Route::view('/faq', 'faq')->name('faq');
 Route::get('/robots.txt', [\App\Http\Controllers\SeoController::class, 'robots']);

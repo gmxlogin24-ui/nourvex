@@ -1,0 +1,67 @@
+/* Shared shell: same flat background as Overview + .stx-style cards.
+   Applies to every app page except Overview and Pulse. */
+
+html:has(body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"])){ background:var(--ov-edge,#D7E2EE) !important; }
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]),
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) .app-shell-flex,
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) .auth-page-shell,
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) .app-push-content,
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) .auth-reveal-content{ background:transparent !important; }
+.nv-bg{ display:none !important; }
+
+/* space from the top + side margins */
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) .app-push-content{
+  padding-top:calc(env(safe-area-inset-top,0px) + 28px) !important;
+  padding-left:max(16px, env(safe-area-inset-left)) !important;
+  padding-right:max(16px, env(safe-area-inset-right)) !important;
+  box-sizing:border-box !important; }
+
+/* text on the background: Overview ink colours */
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) .ad-h1{ color:#0F1115 !important; }
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) .ad-sub,
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) .ad-back,
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) .ad-prev-label,
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) .text-muted{ color:#7C8596 !important; }
+
+/* cards = Overview balance card (.stx) */
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) :is(.glass-card,.bg-card,.card,.ad-card,.pf-card,.gc,.mc,.tx-table-row){
+  position:relative !important; overflow:hidden !important; border:0 !important; border-radius:28px !important; color:#fff !important;
+  background:linear-gradient(160deg,#16193A 0%,#0A0C1C 60%,#07080F 100%) !important;
+  box-shadow:0 26px 44px -24px rgba(10,12,28,.75), inset 0 1px 0 rgba(255,255,255,.08) !important;
+  -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) :is(.glass-card,.bg-card,.card,.ad-card,.pf-card,.gc,.mc)::before{
+  content:'' !important; position:absolute !important; right:-80px !important; top:-90px !important; left:auto !important; bottom:auto !important;
+  width:260px; height:260px; border-radius:50%;
+  background:radial-gradient(circle, rgba(124,130,240,.5), transparent 62%) !important; pointer-events:none; z-index:0; }
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) :is(.glass-card,.bg-card,.card,.ad-card,.pf-card,.gc,.mc) > *{ position:relative; z-index:1; }
+
+/* text and fields inside the dark cards */
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) :is(.glass-card,.bg-card,.card,.ad-card,.pf-card,.gc,.mc,.tx-table-row) :is(h1,h2,h3,h4,p,label,small,b,span,a:not(.btn-primary)){ color:#fff !important; }
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) :is(.glass-card,.bg-card,.card,.ad-card,.pf-card,.gc,.mc) :is(.text-muted,.ad-f label,.ad-f label em,.ad-row,.ad-d i,.ad-up small){ color:rgba(255,255,255,.65) !important; }
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) :is(.glass-card,.ad-card,.card,.bg-card) :is(input:not([type=radio]):not([type=checkbox]):not([type=file]),textarea,select,.input-field,.ad-in){
+  background:rgba(255,255,255,.08) !important; border:1px solid rgba(255,255,255,.18) !important; color:#fff !important; }
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) :is(input,textarea)::placeholder{ color:rgba(255,255,255,.5) !important; }
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) .ad-d span{ background:rgba(255,255,255,.08) !important; border:1.5px solid rgba(255,255,255,.2) !important; }
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) .ad-d input:checked + span{ background:rgba(124,130,240,.35) !important; border-color:#A9B2FF !important; box-shadow:none !important; }
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) .ad-up{ background:rgba(255,255,255,.06) !important; border-color:rgba(255,255,255,.3) !important; }
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) .ad-note{ background:rgba(124,130,240,.2) !important; color:#fff !important; }
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) .ad-row.tot{ border-top-color:rgba(255,255,255,.2) !important; }
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) .ad-go{ background:#fff !important; color:#0A0C1C !important; border:0 !important; box-shadow:0 16px 30px -14px rgba(10,12,28,.7) !important; }
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) .ad-low{ color:#ffb27a !important; }
+
+/* room to scroll past the bottom dock on every app page */
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) .app-push-content{
+  padding-bottom:calc(150px + env(safe-area-inset-bottom,0px)) !important; }
+body[data-page]:not([data-page="pulse"]):not([data-page="dashboard"]) .app-push-content::after{
+  content:""; display:block; height:40px; }
+/* market, hustles and profile layout */
+.ws2-main{ padding-bottom:calc(150px + env(safe-area-inset-bottom,0px)) !important; }
+
+
+/* feed-white: plain white on hustles and market feeds (light mode only) */
+html:not([data-theme="dark"]):has(body[data-page="gigs"]),
+html:not([data-theme="dark"]):has(body[data-page="marketplace"]),
+html:not([data-theme="dark"]):has(body[data-page="market"]){ background:#fff !important; }
+html:not([data-theme="dark"]) body[data-page="gigs"],
+html:not([data-theme="dark"]) body[data-page="marketplace"],
+html:not([data-theme="dark"]) body[data-page="market"]{ background:#fff !important; background-image:none !important; }

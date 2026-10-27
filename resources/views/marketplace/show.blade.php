@@ -1,181 +1,392 @@
-@extends('layouts.app-authenticated')
+@extends('layouts.world-shell')
+@section('world', 'market')
 @section('content')
+<link rel="stylesheet" href="{{ asset('css/world-pages.css') }}?v={{ @filemtime(public_path('css/world-pages.css')) }}"><link rel="stylesheet" href="{{ asset('css/world-page.css') }}?v={{ @filemtime(public_path('css/world-page.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/marketplace-neu.css') }}?v={{ time() }}">
 <link rel="stylesheet" href="{{ asset('css/marketplace-detail.css') }}?v={{ time() }}">
+<link rel="stylesheet" href="{{ asset('css/world-product.css') }}?v={{ @filemtime(public_path('css/world-product.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/market-new.css') }}?v={{ time() }}">
+<link rel="stylesheet" href="{{ asset('css/mk-pd.css') }}?v={{ time() }}">
 
-<main class="max-w-4xl mx-auto p-6">
-<div class="mpd-page">
-
-    <div class="mpd-topbar">
-        <a href="{{ route('marketplace.index') }}" class="mpd-icon-btn">
-            <i data-lucide="arrow-left" class="w-5 h-5"></i>
-        </a>
-        <div class="mpd-topbar-actions">
-            @auth
-                @if(!$isOwner)
-                <form method="POST" action="{{ route('marketplace.favorite', $listing->id) }}">
-                    @csrf
-                    @php $isFavorited = $listing->favoritedBy()->where('user_id', auth()->id())->exists(); @endphp
-                    <button type="submit" class="mpd-icon-btn" style="{{ $isFavorited ? 'color:#ff4757;' : '' }}">
-                        <i data-lucide="heart" class="w-4 h-4" style="{{ $isFavorited ? 'fill:#ff4757;' : '' }}"></i>
-                    </button>
-                </form>
-                @endif
-            @endauth
-            <a href="{{ Route::has('cart.index') ? route('cart.index') : '#' }}" class="mpd-icon-btn">
-                <i data-lucide="shopping-bag" class="w-4 h-4"></i>
-            </a>
-        </div>
+<main class="wp-page wp-market wp-product">
+@php
+  $pdGallery = $listing->images->pluck('image_url')->filter()->values()->all();
+  if (!$pdGallery && $listing->image_url) { $pdGallery = [$listing->image_url]; }
+  $pdVerified = (bool) ($seller && $seller->is_verified_seller);
+  $pdDesc = trim((string) $listing->description);
+  $pdSellerName = $seller ? ($seller->username ? '@'.$seller->username : ($seller->business_name ?? $seller->name)) : $listing->seller_name;
+  $pdStock = $listing->stock_quantity;
+  $pdTypes = ['item' => 'Item', 'service' => 'Service', 'rent' => 'For rent', 'store' => 'Store'];
+  $pdLines = fn ($v) => array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string) $v))));
+  $pdHigh = $pdLines($listing->highlights);
+  $pdBox = $pdLines($listing->whats_in_box);
+  $pdAttrs = $listing->getAttributes();
+  $pdNeg = array_key_exists('negotiable', $pdAttrs) ? (bool) $pdAttrs['negotiable'] : null;
+  $pdWord = fn ($v) => $v === null ? 'New seller' : ($v >= 4.5 ? 'Excellent' : ($v >= 3.5 ? 'Good' : 'Average'));
+  $pdDisp = (int) ($sellerDisputes ?? 0);
+  $pdSold = (int) $sellerStats['sold'];
+  $pdCompl = $pdSold === 0 ? 'New seller' : ($pdDisp === 0 ? 'Excellent' : (($pdDisp / $pdSold) <= 0.1 ? 'Good' : 'Average'));
+  $pdShip = $listing->delivery_method === 'ship';
+  $pdFew = $pdStock !== null && $pdStock > 0 && $pdStock <= 5;
+@endphp
+<div class="pd pdw">
+  <section class="pd-s pd-s0">
+    <div class="pd-stage">
+      <a href="{{ route('marketplace.index') }}" class="pd-bk" aria-label="Back"><i data-lucide="arrow-left"></i></a>
+      @auth
+        <button type="button" class="pd-heart {{ $isLoved ? 'on' : '' }}" data-url="{{ route('marketplace.love', $listing->id) }}" data-token="{{ csrf_token() }}" aria-label="Save and add to cart"><i data-lucide="heart"></i></button>
+      @endauth
+      @if(count($pdGallery))
+        <div class="pd-slides" id="pdSlides">@foreach($pdGallery as $pdG)<div class="pd-slide"><img src="{{ $pdG }}" alt="{{ $listing->title }}"></div>@endforeach</div>
+      @else
+        <div class="pd-ph"><i data-lucide="image"></i></div>
+      @endif
+      @if($pdVerified)<span class="pd-ver" title="Verified seller" aria-label="Verified seller"><i data-lucide="badge-check"></i></span>@endif
     </div>
-
-    <div class="mpd-image-wrap reveal-on-scroll">
-        @if($listing->images->count() > 0)
-            <img id="mainListingImage" src="{{ $listing->images->first()->image_url }}" alt="{{ $listing->title }}" class="mpd-image">
-        @elseif($listing->image_url)
-            <img id="mainListingImage" src="{{ $listing->image_url }}" alt="{{ $listing->title }}" class="mpd-image">
-        @else
-            <div class="mpd-image mpd-image-placeholder"><i data-lucide="image" class="w-12 h-12"></i></div>
-        @endif
-        <span class="type-badge type-{{ $listing->listing_type }} mpd-type-badge">{{ ucfirst($listing->listing_type) }}</span>
-    </div>
-    @if($listing->images->count() > 1)
-        <div class="mpd-thumb-row">
-            @foreach($listing->images as $img)
-                <img src="{{ $img->image_url }}" onclick="document.getElementById('mainListingImage').src = this.src;" class="mpd-thumb">
-            @endforeach
-        </div>
+    @if(count($pdGallery) > 1)
+      <div class="pd-dots" id="pdDots">@foreach($pdGallery as $pdI => $pdG)<i class="{{ $pdI === 0 ? 'on' : '' }}"></i>@endforeach</div>
+      <div class="pd-thumbs">@foreach($pdGallery as $pdI => $pdG)<button type="button" data-i="{{ $pdI }}" class="pd-th {{ $pdI === 0 ? 'on' : '' }}"><img src="{{ $pdG }}" alt=""></button>@endforeach</div>
     @endif
+  </section>
 
-    <div class="mpd-info">
-        @if($listing->store_name)
-            <p class="mpd-store">{{ $listing->store_name }}</p>
-        @endif
-        <div class="mpd-title-row">
-            <h1 class="mpd-title">{{ $listing->title }}</h1>
-            @if($avgRating)
-                <span class="mpd-rating"><i data-lucide="star" class="w-3 h-3"></i> {{ number_format($avgRating, 1) }}</span>
-            @endif
-        </div>
-        <div class="mpd-meta-row">
-            <span class="mpd-meta-pill"><i data-lucide="map-pin" class="w-3 h-3"></i> {{ $listing->location }}</span>
-            <span class="mpd-meta-pill"><i data-lucide="tag" class="w-3 h-3"></i> {{ $listing->condition }}</span>
-        </div>
-
-        <p class="mpd-price">₦{{ number_format($listing->amount) }}</p>
-
-        <a href="{{ $seller ? route('profile.index') : '#' }}" class="mpd-seller-card">
-            <div class="mpd-seller-avatar">
-                {{ $seller ? strtoupper(substr($seller->business_name ?? $seller->name, 0, 1)) : '?' }}
-            </div>
-            <div class="mpd-seller-body">
-                <p class="mpd-seller-name">{{ $listing->seller_name }}</p>
-                @if($listing->is_verified_seller)
-                    <p class="mpd-seller-verified"><i data-lucide="badge-check" class="w-3 h-3"></i> Verified seller</p>
-                @else
-                    <p class="mpd-seller-sub">Student seller</p>
-                @endif
-                @if($seller)
-                    <p class="mpd-seller-sub">Member since {{ $seller->created_at->format('M Y') }}</p>
-                @endif
-            </div>
-            <i data-lucide="chevron-right" class="w-4 h-4 mpd-seller-chevron"></i>
-        </a>
-
-        <p class="mpd-description">{{ $listing->description }}</p>
-
-        @if ($errors->any())
-            <p class="text-red-500 text-sm mt-4">{{ $errors->first() }}</p>
-        @endif
-
-        @auth
-            @if($listing->status === 'sold' && $listing->buyer_id === auth()->id())
-                @if($listing->delivery_method === 'ship')
-                <div class="glass-card p-3 mt-6" style="border:1px solid var(--border-color);">
-                    @if($listing->shipped_at)
-                    <p class="text-sm font-medium flex items-center gap-1"><i data-lucide="truck" class="w-4 h-4"></i> Shipped {{ $listing->shipped_at->diffForHumans() }}</p>
-                    @if($listing->shipping_note)
-                        <p class="text-muted text-xs mt-1">{{ $listing->shipping_note }}</p>
-                    @endif
-                    @else
-                    <p class="text-sm text-muted flex items-center gap-1"><i data-lucide="clock" class="w-4 h-4"></i> Seller hasn't marked this as shipped yet.</p>
-                    @endif
-                </div>
-                @endif
-                <form method="POST" action="{{ route('marketplace.confirm', $listing->id) }}">
-                    @csrf
-                    <button type="submit" class="mpd-btn-solid mpd-btn-full mt-4">
-                        <i data-lucide="check-circle" class="w-4 h-4"></i> Confirm Receipt — Release Payment
-                    </button>
-                </form>
-                <p class="text-muted text-xs mt-2 text-center">Funds are held in escrow until you confirm you received this.</p>
-                @if(!$listing->dispute || $listing->dispute->status !== 'open')
-                <button type="button" onclick="document.getElementById('disputeFormBox').style.display='block';this.style.display='none';" class="text-red-500 text-xs mt-2 w-full text-center" style="background:none;border:none;">
-                    Something wrong? File a complaint
-                </button>
-                <div id="disputeFormBox" style="display:none;">
-                    <form method="POST" action="{{ route('marketplace.dispute', $listing->id) }}" class="mt-2 space-y-2">
-                        @csrf
-                        <textarea name="description" required rows="2" placeholder="What went wrong?" class="input-field !mt-0 text-sm"></textarea>
-                        <button type="submit" class="btn-secondary text-sm w-full justify-center">Submit Complaint</button>
-                    </form>
-                </div>
-                @else
-                <p class="text-amber-500 text-xs mt-2 text-center">Complaint submitted — admin is reviewing.</p>
-                @endif
-            @elseif($listing->status === 'sold' && $listing->user_id === auth()->id())
-                @if($listing->delivery_method === 'ship')
-                <div class="glass-card p-4 mt-6">
-                    <p class="text-sm font-medium mb-2">This item sold — arrange shipping</p>
-                    @if($listing->shipped_at)
-                    <p class="text-accent text-sm flex items-center gap-1"><i data-lucide="truck" class="w-4 h-4"></i> Marked shipped {{ $listing->shipped_at->diffForHumans() }}</p>
-                    @else
-                    <form method="POST" action="{{ route('marketplace.ship', $listing->id) }}" class="space-y-2">
-                        @csrf
-                        <input type="text" name="shipping_note" placeholder="Courier / tracking info (optional)" class="input-field !mt-0 text-sm">
-                        <button type="submit" class="btn-primary text-sm w-full justify-center">Mark as Shipped</button>
-                    </form>
-                    @endif
-                </div>
-                @else
-                <p class="text-muted text-sm mt-6 text-center">Sold — awaiting buyer confirmation.</p>
-                @endif
-            @elseif($listing->status === 'completed')
-                <p class="text-accent text-sm mt-6 text-center font-medium">✓ Purchase completed</p>
-            @elseif($listing->status !== 'available')
-                <p class="text-muted text-sm mt-6 text-center">This listing is no longer available.</p>
-            @else
-                @if($listing->user_id === auth()->id())
-                    <a href="{{ route('marketplace.edit', $listing->id) }}" class="mpd-btn-ghost mpd-btn-full">
-                        <i data-lucide="pencil" class="w-4 h-4"></i> Edit Listing
-                    </a>
-                @else
-@if(auth()->user()->planAllows('market_buy'))
-                    <div class="mpd-action-row">
-                        <form method="POST" action="{{ route('cart.add', $listing->id) }}" style="flex:1;">
-                            @csrf
-                            <button type="submit" class="mpd-btn-ghost mpd-btn-full">
-                                <i data-lucide="shopping-cart" class="w-4 h-4"></i> Add to Cart
-                            </button>
-                        </form>
-                        <form method="POST" action="{{ route('marketplace.purchase', $listing->id) }}" style="flex:1;" onsubmit="return confirm('Buy this item for ₦{{ number_format($listing->amount) }}? The amount will be held in escrow until you confirm delivery.');">
-                            @csrf
-                            <button type="submit" class="mpd-btn-solid mpd-btn-full">
-                                Buy Now
-                            </button>
-                        </form>
-                    </div>
-@else
-<a href="{{ route('subscriptions.index') }}" class="mpd-btn-solid mpd-btn-full"><i data-lucide="lock" class="w-4 h-4"></i> Upgrade to Silver to buy</a>
-@endif
-                @endif
-            @endif
-        @else
-            <a href="{{ route('register') }}" class="mpd-btn-solid mpd-btn-full mt-6">
-                <i data-lucide="lock" class="w-4 h-4"></i> Sign up to Buy — ₦{{ number_format($listing->amount) }}
-            </a>
-        @endauth
+  <section class="pd-s">
+    <div class="pd-tags">
+      <span class="pd-tag">{{ $pdShip ? 'Seller ships' : 'Meetup' }}</span>
+      @if($pdVerified)<span class="pd-tag">Verified seller</span>@endif
+      @if($pdNeg)<span class="pd-tag">Negotiable</span>@endif
     </div>
+    @if($listing->store_name)<p class="pd-store">{{ $listing->store_name }}</p>@endif
+    <h1 class="pd-title">{{ $listing->title }}</h1>
+    <div class="pd-pr"><b>₦{{ number_format($listing->amount) }}</b></div>
+    @if($pdStock !== null && $pdStock <= 0)<p class="pd-few">Out of stock</p>@elseif($pdFew)<p class="pd-few">Few units left ({{ $pdStock }})</p>@elseif($pdStock !== null)<p class="pd-okt">{{ $pdStock }} in stock</p>@endif
+    <p class="pd-ship"><i data-lucide="map-pin"></i>{{ $listing->location }} · {{ $pdShip ? 'The seller delivers' : 'Meet the seller' }}</p>
+    <div class="pd-meta">
+      <a href="#pdReviews" class="pd-rl">
+        @if($reviews->count())
+          <span class="pd-st5">{{ str_repeat('★', (int) round($avgRating)) }}{{ str_repeat('☆', 5 - (int) round($avgRating)) }}</span> <span>({{ $reviews->count() }} {{ $reviews->count() === 1 ? 'rating' : 'ratings' }})</span>
+        @else
+          <span>No ratings yet</span>
+        @endif
+      </a>
+      @if($soldCount > 0)<span class="pd-dotsep">{{ $soldCount }} sold</span>@endif
+      <button type="button" class="pd-share" id="pdShare" data-title="{{ $listing->title }}" aria-label="Share"><i data-lucide="share-2"></i></button>
+    </div>
+    <div class="pd-chips">
+      @if($listing->brand)<span><i data-lucide="award"></i>{{ $listing->brand }}</span>@endif
+      @if($listing->condition)<span><i data-lucide="tag"></i>{{ $listing->condition }}</span>@endif
+      <span><i data-lucide="layers"></i>{{ $pdTypes[$listing->listing_type] ?? ucfirst($listing->listing_type) }}</span>
+      <span><i data-lucide="folder"></i>{{ $listing->category }}</span>
+    </div>
+    @if ($errors->any())<p class="pd-note err">{{ $errors->first() }}</p>@endif
+    @if(session('status'))<p class="pd-note">{{ session('status') }}</p>@endif
+  </section>
+
+  @auth
+    @if($listing->status === 'sold' && $listing->buyer_id === auth()->id())
+      <section class="pd-s pd-state">
+        @if($pdShip)
+          <div class="pd-dr">
+            <i data-lucide="{{ $listing->shipped_at ? 'truck' : 'clock' }}"></i>
+            <div>
+              @if($listing->shipped_at)
+                <b>Shipped {{ $listing->shipped_at->diffForHumans() }}</b>
+                @if($listing->shipping_note)<p>{{ $listing->shipping_note }}</p>@endif
+              @else
+                <b>Waiting for the seller</b><p>The seller hasn't marked this as shipped yet.</p>
+              @endif
+            </div>
+          </div>
+        @endif
+        <form method="POST" action="{{ route('marketplace.confirm', $listing->id) }}">
+          @csrf
+          <button type="submit" class="btn-primary pd-buy"><i data-lucide="check-circle"></i> Confirm Receipt — Release Payment</button>
+        </form>
+        <p class="pd-note">Funds are held in escrow until you confirm you received this.</p>
+        @if(!$listing->dispute || $listing->dispute->status !== 'open')
+          <details class="pd-dispute">
+            <summary>Something wrong? File a complaint</summary>
+            <form method="POST" action="{{ route('marketplace.dispute', $listing->id) }}">
+              @csrf
+              <textarea name="description" required rows="3" placeholder="What went wrong?"></textarea>
+              <button type="submit" class="btn-secondary pd-buy">Submit Complaint</button>
+            </form>
+          </details>
+        @else
+          <p class="pd-note">Complaint submitted — admin is reviewing.</p>
+        @endif
+      </section>
+    @elseif($listing->status === 'sold' && $listing->user_id === auth()->id())
+      <section class="pd-s pd-state">
+        @if($pdShip)
+          <p class="pd-sn">This item sold — arrange shipping</p>
+          @if($listing->shipped_at)
+            <p class="pd-ss">Marked shipped {{ $listing->shipped_at->diffForHumans() }}</p>
+          @else
+            <form method="POST" action="{{ route('marketplace.ship', $listing->id) }}">
+              @csrf
+              <textarea name="shipping_note" rows="2" placeholder="Courier / tracking info (optional)" style="width:100%;margin:8px 0;padding:10px 12px;border-radius:14px;background:rgba(128,128,128,.12);border:1px solid rgba(128,128,128,.24);color:var(--ink,#0A0A0A);"></textarea>
+              <button type="submit" class="btn-primary pd-buy">Mark as Shipped</button>
+            </form>
+          @endif
+        @else
+          <p class="pd-note">Sold — awaiting buyer confirmation.</p>
+        @endif
+      </section>
+    @elseif($listing->status === 'completed')
+      <section class="pd-s"><p class="pd-note">✓ Purchase completed</p></section>
+    @elseif($listing->status !== 'available')
+      <section class="pd-s"><p class="pd-note">This listing is no longer available.</p></section>
+    @elseif($listing->user_id === auth()->id())
+      <div class="pd-bar">
+        <button type="button" class="btn-secondary pd-cart" disabled aria-label="Add to cart"><i data-lucide="shopping-cart"></i></button>
+        <button type="button" class="btn-primary pd-buy" disabled>Buy Now</button>
+      </div>
+      <section class="pd-s pd-state"><a href="{{ route('marketplace.edit', $listing->id) }}" class="btn-secondary pd-buy"><i data-lucide="pencil"></i> Edit Listing</a><p class="pd-note">This is your own listing, so it can't be added to your cart or bought. Favoriting it only saves it. Open it from another account to see the buyer view.</p></section>
+    @elseif(auth()->user()->planAllows('market_buy'))
+      <div class="pd-bar">
+        <a href="{{ route('cart.index') }}" class="btn-secondary pd-cartin" id="pdCartIn" {{ $inCart ? '' : 'hidden' }}><i data-lucide="check"></i> In cart</a>
+        <form method="POST" action="{{ route('cart.add', $listing->id) }}" id="pdCartForm" {{ $inCart ? 'hidden' : '' }}>
+          @csrf
+          <button type="submit" class="btn-secondary pd-cart" aria-label="Add to cart"><i data-lucide="shopping-cart"></i></button>
+        </form>
+        <form method="POST" action="{{ route('marketplace.purchase', $listing->id) }}" style="display:contents;" onsubmit="return confirm('Buy this item for ₦{{ number_format($listing->amount) }}? The money is held in escrow until you confirm delivery.');">
+          @csrf
+          <button type="submit" class="btn-primary pd-buy">Buy Now</button>
+        </form>
+      </div>
+    @else
+      <section class="pd-s pd-state"><a href="{{ route('subscriptions.index') }}" class="btn-primary pd-buy"><i data-lucide="lock"></i> Upgrade to Silver to buy</a></section>
+    @endif
+  @else
+    <section class="pd-s pd-state"><a href="{{ route('register') }}" class="btn-primary pd-buy"><i data-lucide="lock"></i> Sign up to Buy — ₦{{ number_format($listing->amount) }}</a></section>
+  @endauth
+
+  @include('marketplace.partials.pd-row', ['title' => 'Similar items', 'items' => $similar])
+
+  <section class="pd-s">
+    <h2 class="pd-sec">Buyer protection</h2>
+    <div class="pd-dr"><i data-lucide="shield-check"></i><div><b>Pay safely</b><p>Your payment is held in escrow and only released to the seller after you confirm you received the item.</p></div></div>
+    <div class="pd-dr"><i data-lucide="life-buoy"></i><div><b>Complaints are reviewed</b><p>If something is wrong, file a complaint after buying and an admin reviews it before the seller is paid.</p></div></div>
+    <div class="pd-dr"><i data-lucide="lock"></i><div><b>Stay on Naurvex</b><p>Pay only through Naurvex. Meet in a public place and check the item before you confirm.</p></div></div>
+  </section>
+
+  <section class="pd-s">
+    <h2 class="pd-sec">Delivery &amp; Returns</h2>
+    <div class="pd-dr">
+      <i data-lucide="{{ $pdShip ? 'truck' : 'handshake' }}"></i>
+      <div>
+        <b>{{ $pdShip ? 'Delivered by the seller' : 'Meet up with the seller' }}</b>
+        <p>{{ $pdShip ? ($listing->shipping_note ?: 'The seller ships it to you after you pay and adds tracking info when it is on its way.') : 'Chat with the seller to agree a place and time. Confirm receipt only after you have checked the item.' }}</p>
+      </div>
+    </div>
+    <div class="pd-dr"><i data-lucide="map-pin"></i><div><b>Item location</b><p>{{ $listing->location }}</p></div></div>
+    <div class="pd-dr"><i data-lucide="undo-2"></i><div><b>Return policy</b><p>{{ $listing->return_policy ?: 'No return policy was set by the seller. If the item is not as described, file a complaint after buying.' }}</p></div></div>
+    @if($listing->warranty)<div class="pd-dr"><i data-lucide="award"></i><div><b>Warranty</b><p>{{ $listing->warranty }}</p></div></div>@endif
+  </section>
+
+  <section class="pd-s">
+    <h2 class="pd-sec">Description</h2>
+    @if($pdDesc !== '')
+      <p class="pd-desc">{!! nl2br(e($pdDesc)) !!}</p>
+    @else
+      <p class="pd-muted">The seller hasn't added a description yet. Use the chat to ask them anything about this item.</p>
+    @endif
+    @if(count($pdHigh))
+      <h3 class="pd-h">Highlights</h3>
+      <ul class="pd-list">@foreach($pdHigh as $pdL)<li>{{ $pdL }}</li>@endforeach</ul>
+    @endif
+    @if(count($pdBox))
+      <h3 class="pd-h">What's in the box</h3>
+      <ul class="pd-list">@foreach($pdBox as $pdL)<li>{{ $pdL }}</li>@endforeach</ul>
+    @endif
+  </section>
+
+  <section class="pd-s">
+    <h2 class="pd-sec">Specifications</h2>
+    <dl class="pd-info">
+      @if($listing->brand)<div><dt>Brand</dt><dd>{{ $listing->brand }}</dd></div>@endif
+      <div><dt>Category</dt><dd>{{ $listing->category }}</dd></div>
+      <div><dt>Condition</dt><dd>{{ $listing->condition }}</dd></div>
+      <div><dt>Location</dt><dd>{{ $listing->location }}</dd></div>
+      <div><dt>Type</dt><dd>{{ $pdTypes[$listing->listing_type] ?? ucfirst($listing->listing_type) }}</dd></div>
+      <div><dt>Availability</dt><dd>{{ $pdStock === null ? ucfirst($listing->status) : ($pdStock > 0 ? $pdStock . ' in stock' : 'Out of stock') }}</dd></div>
+      <div><dt>Delivery</dt><dd>{{ $pdShip ? 'Seller ships' : 'Meetup' }}</dd></div>
+      @if($listing->warranty)<div><dt>Warranty</dt><dd>{{ $listing->warranty }}</dd></div>@endif
+      @if($pdNeg !== null)<div><dt>Price</dt><dd>{{ $pdNeg ? 'Negotiable' : 'Fixed' }}</dd></div>@endif
+      <div><dt>Listed</dt><dd>{{ $listing->created_at->diffForHumans() }}</dd></div>
+      <div><dt>Item ID</dt><dd>#{{ $listing->id }}</dd></div>
+    </dl>
+  </section>
+
+  @include('marketplace.partials.pd-row', ['title' => 'Customers also viewed', 'items' => $alsoLike])
+
+  <section class="pd-s" id="pdReviews">
+    <h2 class="pd-sec">Product Rating &amp; Reviews</h2>
+    @if($reviews->count())
+      <div class="pd-rs">
+        <div class="pd-rs-big"><b>{{ number_format($avgRating, 1) }}</b><span>out of 5</span><small>{{ $reviews->count() }} {{ $reviews->count() === 1 ? 'rating' : 'ratings' }}</small></div>
+        <div class="pd-rs-bars">
+          @foreach($breakdown as $pdStar => $pdN)
+            <div><em>{{ $pdStar }}★</em><i><u style="width:{{ round($pdN / $reviews->count() * 100) }}%"></u></i><small>{{ $pdN }}</small></div>
+          @endforeach
+        </div>
+      </div>
+    @endif
+    @forelse($reviews as $pdRv)
+      <div class="pd-rv">
+        <span class="pd-rav">{{ strtoupper(substr(optional($pdRv->reviewer)->name ?? 'B', 0, 1)) }}</span>
+        <div>
+          <div class="pd-rh"><b>{{ optional($pdRv->reviewer)->username ? '@'.optional($pdRv->reviewer)->username : (optional($pdRv->reviewer)->name ?? 'Buyer') }}</b><span>{{ str_repeat('★', (int) $pdRv->rating) }}{{ str_repeat('☆', 5 - (int) $pdRv->rating) }}</span></div>
+          <small>{{ $pdRv->created_at->format('M j, Y') }}@if($listing->buyer_id && $listing->buyer_id === $pdRv->reviewer_id) · Verified purchase @endif</small>
+          @if($pdRv->comment)<p>{{ $pdRv->comment }}</p>@endif
+        </div>
+      </div>
+    @empty
+      <p class="pd-muted">No reviews yet. Be the first to share your experience.</p>
+    @endforelse
+    @auth
+      @if(!$isOwner)
+        <form method="POST" action="{{ route('marketplace.review', $listing->id) }}" class="pd-rf">
+          @csrf
+          <b>Rate this item</b>
+          <div class="pd-stars">
+            @for($pdI = 5; $pdI >= 1; $pdI--)<input type="radio" name="rating" id="pdr{{ $pdI }}" value="{{ $pdI }}" required><label for="pdr{{ $pdI }}" aria-label="{{ $pdI }} stars">★</label>@endfor
+          </div>
+          <textarea name="comment" rows="2" placeholder="Share your experience or report a problem" class="input-field !mt-0"></textarea>
+          <button type="submit" class="btn-primary pd-rsub">Submit review</button>
+        </form>
+      @endif
+    @else
+      <p class="pd-muted"><a href="{{ route('login') }}">Log in</a> to leave a review.</p>
+    @endauth
+  </section>
+
+  <section class="pd-s">
+    <h2 class="pd-sec">Seller information</h2>
+    <div class="pd-sh">
+      <span class="pd-sav">@if($seller && $seller->avatar_url)<img src="{{ $seller->avatar_url }}" alt="">@else{{ strtoupper(substr($pdSellerName ?? '?', 0, 1)) }}@endif</span>
+      <div>
+        <p class="pd-sn">{{ $pdSellerName }}@if($pdVerified)<i data-lucide="badge-check" title="Verified seller"></i>@endif</p>
+        @if($seller)<p class="pd-ss">Member since {{ $seller->created_at->format('M Y') }}</p>@endif
+      </div>
+    </div>
+    <div class="pd-st">
+      <div><b>{{ $sellerStats['listings'] }}</b>Listings</div>
+      <div><b>{{ $pdSold }}</b>Sold</div>
+      <div><b>{{ $sellerStats['rating'] ? $sellerStats['rating'] . ' ★' : '—' }}</b>Rating</div>
+    </div>
+    @if($seller)
+    <div class="pd-sbtns">
+      <a href="{{ route('profile.public', $seller->id) }}" class="btn-secondary pd-sbtn"><i data-lucide="user"></i> View profile</a>
+      @auth @unless($isOwner)<button type="button" class="btn-primary pd-sbtn pd-msg-seller"><i data-lucide="message-circle"></i> Message seller</button>@endunless @endauth
+    </div>
+    <script>(function(){var b=document.querySelector('.pd-msg-seller');if(!b)return;b.addEventListener('click',function(){var a=document.getElementById('pdAsk');if(a){a.click();return;}var c=document.getElementById('chatMessages');if(c){c.scrollIntoView({behavior:'smooth',block:'center'});var i=document.querySelector('.chat-form input[name="body"]');if(i)i.focus({preventScroll:true});}});})();</script>
+    @endif
+    <h3 class="pd-h">Seller performance</h3>
+    <ul class="pd-perf">
+      <li><i data-lucide="check-circle-2"></i><span>Quality score:</span> <b>{{ $pdWord($sellerStats['rating']) }}</b></li>
+      <li><i data-lucide="check-circle-2"></i><span>Customer rating:</span> <b>{{ $sellerStats['rating'] ? $sellerStats['rating'] . ' out of 5' : 'No ratings yet' }}</b></li>
+      <li><i data-lucide="check-circle-2"></i><span>Order completion:</span> <b>{{ $pdCompl }}</b></li>
+      <li><i data-lucide="check-circle-2"></i><span>Items sold:</span> <b>{{ $pdSold }}</b></li>
+    </ul>
+  </section>
+
+  @include('marketplace.partials.pd-row', ['title' => 'More from this seller', 'items' => $sellerMore])
+
+  @unless($isOwner)
+    <section class="pd-s">
+      <h2 class="pd-sec">Questions about this product?</h2>
+      @auth
+        @if($seller)<button type="button" class="btn-secondary pd-ask" id="pdAsk"><i data-lucide="message-square"></i> Chat with seller</button>@endif
+      @else
+        <a href="{{ route('login') }}" class="btn-secondary pd-ask">Log in to chat with the seller</a>
+      @endauth
+    </section>
+  @endunless
+
+  @include('marketplace.partials.pd-row', ['title' => 'Recently viewed', 'items' => $recentlyViewed])
 </div>
+<script>
+(function () {
+  var w = document.createElement('div');
+  w.className = 'pd-bgw';
+  document.body.appendChild(w);
+  document.body.classList.add('pd-white');
+  var s = document.getElementById('pdSlides');
+  var dots = document.querySelectorAll('#pdDots i');
+  var th = document.querySelectorAll('.pd-th');
+  if (s) {
+    s.addEventListener('scroll', function () {
+      var i = Math.round(s.scrollLeft / s.clientWidth);
+      dots.forEach(function (d, k) { d.classList.toggle('on', k === i); });
+      th.forEach(function (t, k) { t.classList.toggle('on', k === i); });
+    }, { passive: true });
+    th.forEach(function (t) {
+      t.addEventListener('click', function () { s.scrollTo({ left: s.clientWidth * Number(t.dataset.i), behavior: 'smooth' }); });
+    });
+  }
+  document.querySelectorAll('.pd-rl').forEach(function (l) {
+    l.addEventListener('click', function (e) {
+      e.preventDefault();
+      var r = document.getElementById('pdReviews');
+      if (r) r.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  var sh = document.getElementById('pdShare');
+  if (sh) {
+    sh.addEventListener('click', function () {
+      if (navigator.share) {
+        navigator.share({ title: sh.dataset.title, url: location.href }).catch(function () {});
+      } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(location.href).then(function () {
+          sh.classList.add('done');
+          setTimeout(function () { sh.classList.remove('done'); }, 1500);
+        }).catch(function () {});
+      }
+    });
+  }
+  var ask = document.getElementById('pdAsk');
+  if (ask) {
+    ask.addEventListener('click', function () {
+      var c = document.getElementById('chatMessages');
+      if (!c) return;
+      c.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      var i = document.querySelector('.chat-form input[name="body"]');
+      if (i) i.focus({ preventScroll: true });
+    });
+  }
+  var pb = document.querySelector('.pd-bar');
+  if (pb && pb.parentNode !== document.body) { pb.setAttribute('data-pd-bar-move', '1'); document.body.appendChild(pb); }
+  if (pb) { document.body.classList.add('pd-has-bar'); }
+  var h = document.querySelector('.pd-heart');
+  if (h) {
+    h.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (h.dataset.busy) return;
+      h.dataset.busy = '1';
+      fetch(h.dataset.url, { method: 'POST', headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': h.dataset.token, 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (typeof d.loved !== 'boolean') return;
+          h.classList.toggle('on', d.loved);
+          var ci = document.getElementById('pdCartIn'), cf = document.getElementById('pdCartForm');
+          if (ci && cf) { ci.hidden = !d.loved; cf.hidden = d.loved; }
+          var c = document.querySelector('.pb-ic[aria-label="Cart"]');
+          if (c) {
+            var em = c.querySelector('.nv-badge');
+            if (d.cart_count > 0) {
+              if (!em) { em = document.createElement('em'); em.className = 'nv-badge'; c.appendChild(em); }
+              em.textContent = d.cart_count;
+            } else if (em) { em.remove(); }
+          }
+        })
+        .catch(function () {})
+        .then(function () { delete h.dataset.busy; });
+    });
+  }
+  if (window.lucide) lucide.createIcons();
+})();
+</script>
 
 @auth
     @if($seller && !$isOwner)
@@ -254,7 +465,7 @@
         @foreach($conversations as $otherUserId => $thread)
         @php $otherUser = $thread->first()->sender_id == $otherUserId ? $thread->first()->sender : $thread->first()->recipient; @endphp
         <div class="mb-4" style="border-bottom:1px solid var(--border-color);padding-bottom:1rem;">
-            <p class="text-sm font-medium mb-2">{{ $otherUser->name ?? 'User' }}</p>
+            <p class="text-sm font-medium mb-2">{{ ($otherUser->username ?? null) ? '@'.$otherUser->username : ($otherUser->name ?? 'User') }}</p>
             <div id="chatMessages-{{ $otherUserId }}" class="space-y-2 mb-3" style="max-height:200px;overflow-y:auto;">
                 @foreach($thread as $msg)
                 @if($msg->is_system)
@@ -551,49 +762,5 @@
     @endif
     @endauth
 
-    <!-- Reviews -->
-    <div class="glass-card p-6 mt-8 reveal-on-scroll">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="font-semibold">Reviews {{ $reviews->count() ? '(' . $reviews->count() . ')' : '' }}</h2>
-            @if($avgRating)
-            <span class="flex items-center gap-1 text-sm"><i data-lucide="star" class="w-4 h-4 text-amber-500"></i> {{ number_format($avgRating, 1) }} average</span>
-            @endif
-        </div>
-
-        @auth
-        <form method="POST" action="{{ route('marketplace.review', $listing->id) }}" class="mb-6 space-y-2">
-            @csrf
-            <select name="rating" required class="input-field !mt-0">
-                <option value="">Rate this listing</option>
-                <option value="5">5 - Excellent</option>
-                <option value="4">4 - Good</option>
-                <option value="3">3 - Okay</option>
-                <option value="2">2 - Poor</option>
-                <option value="1">1 - Bad, report an issue</option>
-            </select>
-            <textarea name="comment" rows="2" placeholder="Share your experience or report a problem with this listing..." class="input-field !mt-0"></textarea>
-            <button type="submit" class="btn-secondary text-sm">Submit Review</button>
-        </form>
-        @else
-        <p class="text-muted text-sm mb-6">
-            <a href="{{ route('login') }}" class="text-accent">Log in</a> to leave a review.
-        </p>
-        @endauth
-
-        @forelse($reviews as $review)
-        <div class="tx-table-row" style="display:block;">
-            <div class="flex justify-between items-start">
-                <p class="font-medium text-sm">{{ $review->reviewer->name ?? 'User' }}</p>
-                <span class="text-xs text-amber-500">{{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}</span>
-            </div>
-            @if($review->comment)
-            <p class="text-muted text-sm mt-1">{{ $review->comment }}</p>
-            @endif
-            <p class="text-muted text-xs mt-1">{{ $review->created_at->diffForHumans() }}</p>
-        </div>
-        @empty
-        <p class="text-muted text-sm">No reviews yet — be the first to share your experience.</p>
-        @endforelse
-    </div>
-</main>
+    </main>
 @endsection

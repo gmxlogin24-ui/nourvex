@@ -1,4 +1,4 @@
-/* NOURVEX content pages (About, FAQ). Colours follow the global light/dark theme variables from nv-shell.css */
+/* NAURVEX content pages (About, FAQ). Colours follow the global light/dark theme variables from nv-shell.css */
 body:has(main.nvp){background:var(--nvn-bg,#050505) !important}
 main.nvp{min-height:100vh;padding:120px 0 0;background:var(--nvn-bg,#050505);color:var(--nvn-fg,#fff)}
 @media(max-width:640px){main.nvp{padding-top:96px}}

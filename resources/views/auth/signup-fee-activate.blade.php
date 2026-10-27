@@ -4,7 +4,7 @@
     <div class="glass-card p-8 text-center">
         <div class="icon-badge mx-auto mb-4"><i data-lucide="sparkles" class="w-6 h-6"></i></div>
         <h1 class="text-xl font-semibold mb-1">One Last Step</h1>
-        <p class="text-muted text-sm mb-6">Choose a plan to activate your account and start using NOURVEX.</p>
+        <p class="text-muted text-sm mb-6">Choose a plan to activate your account and start using NAURVEX.</p>
 
         @if ($errors->any())
         <div class="bg-red-500/10 text-red-500 text-sm rounded-lg p-3 mb-4">{{ $errors->first() }}</div>

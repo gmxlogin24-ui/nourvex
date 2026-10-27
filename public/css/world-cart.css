@@ -1,0 +1,14 @@
+/* cart: same accent, corners and price colour as the Market grid */
+.cr{ --w:#FF7A1A; --w-dark:#C2540A; --w-tint:#FFEFE2; --ctext:#111418; --cmute:#7A8594; --cline:#E7EAF0; max-width:640px; overflow-x:clip; }
+.cr *{ min-width:0; }
+.cr-back{ border-radius:99px; }
+.cr-title h1{ font-size:20px; font-weight:800; letter-spacing:-.02em; }
+.cr-item{ border-radius:18px; box-shadow:none; }
+.cr-thumb{ border-radius:14px; background:var(--w-tint); color:var(--w-dark); }
+.cr-price{ color:var(--w-dark); font-weight:800; }
+.cr-sum{ border-radius:18px; box-shadow:none; }
+.cr-row.total span:last-child{ color:var(--w-dark); }
+.cr-cta{ background:var(--w); color:#fff; border-radius:12px; min-height:50px; box-shadow:0 8px 16px -8px var(--w); }
+.cr-cta:disabled{ background:#EEF0F4; color:var(--cmute); box-shadow:none; }
+.cr-cta.ghost{ background:#fff; color:var(--ctext); border:1px solid var(--cline); box-shadow:none; }
+.cr-empty-ic{ background:var(--w-tint); color:var(--w-dark); }

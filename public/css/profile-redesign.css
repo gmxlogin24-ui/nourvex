@@ -1,0 +1,28 @@
+/* Profile sub-pages redesign (Appearance, Account, Reputation) */
+.profile-shell{max-width:760px;margin:0 auto;padding-bottom:110px}
+.profile-shell .profile-back-link{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;margin-bottom:14px;border-radius:999px;font-size:13px;font-weight:700;text-decoration:none;color:inherit;background:rgba(127,127,140,.12);border:1px solid rgba(127,127,140,.2)}
+.profile-shell h1{font-size:30px!important;font-weight:800!important;letter-spacing:-.02em;line-height:1.1;margin-bottom:4px!important}
+.profile-shell .text-muted{opacity:.65}
+.profile-shell .glass-card{border-radius:26px!important;padding:14px!important;background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important}
+.profile-shell form.space-y-5>*+*{margin-top:0!important}
+.profile-shell form>div{margin-bottom:14px;padding:18px;border-radius:22px;background:rgba(127,127,140,.09);border:1px solid rgba(127,127,140,.18);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.profile-shell form>div>p.text-sm.font-medium{font-size:15px!important;font-weight:800!important;letter-spacing:-.01em;margin-bottom:4px!important}
+.profile-shell .grid{gap:10px!important}
+.profile-shell .theme-style-option{display:block}
+.profile-shell .theme-style-swatch{border-radius:16px!important;padding:14px 10px!important;border-width:2px!important;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;background:rgba(127,127,140,.08)}
+.profile-shell .theme-style-option:active .theme-style-swatch{transform:scale(.97)}
+.profile-shell .theme-style-option:has(input:checked) .theme-style-swatch{border-color:var(--accent,#0F9D6E)!important;box-shadow:0 0 0 4px color-mix(in srgb,var(--accent,#0F9D6E) 22%,transparent),0 10px 24px -12px var(--accent,#0F9D6E);transform:translateY(-2px)}
+.profile-shell .theme-style-option:has(input:checked) .theme-style-swatch p:first-child::after{content:" \2713";color:var(--accent,#0F9D6E);font-weight:900}
+.profile-shell .grid.grid-cols-3{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.profile-shell .input-field,.profile-shell input[type=text],.profile-shell input[type=email],.profile-shell input[type=password],.profile-shell input[type=file],.profile-shell select,.profile-shell textarea{border-radius:14px!important;border:1px solid rgba(127,127,140,.3)!important;background:rgba(127,127,140,.08)!important;padding:12px 14px!important;width:100%}
+.profile-shell input:focus,.profile-shell select:focus,.profile-shell textarea:focus{outline:none;border-color:var(--accent,#0F9D6E)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent,#0F9D6E) 25%,transparent)}
+.profile-shell img.object-cover{border-radius:16px;box-shadow:0 12px 26px -16px rgba(0,0,0,.5)}
+.profile-shell input[type=color]{padding:2px!important;width:3rem;border-radius:14px!important;cursor:pointer}
+.profile-shell .btn-primary{width:100%;padding:15px 18px!important;border-radius:18px!important;font-size:15px;font-weight:800;border:0;color:#fff;background:linear-gradient(135deg,var(--accent,#0F9D6E),color-mix(in srgb,var(--accent,#0F9D6E) 60%,#000));box-shadow:0 14px 28px -14px var(--accent,#0F9D6E);transition:transform .15s ease}
+.profile-shell .btn-primary:active{transform:scale(.98)}
+.profile-shell .glass-card>div.flex.items-center.justify-between{margin:0 0 14px;padding:16px 18px!important;border:1px solid rgba(127,127,140,.18)!important;border-radius:22px;background:rgba(127,127,140,.09)}
+.profile-shell .theme-toggle{width:44px;height:44px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;background:rgba(127,127,140,.15);border:1px solid rgba(127,127,140,.25)}
+.profile-shell .bg-green-500\/10{border-radius:16px;padding:12px 14px;font-weight:700}
+.profile-shell .stat-card,.profile-shell .rep-card{border-radius:20px!important}
+html[data-theme="dark"] .profile-shell form>div,html[data-theme="dark"] .profile-shell .glass-card>div.flex.items-center.justify-between{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)}
+@media(min-width:640px){.profile-shell .grid.grid-cols-3{grid-template-columns:repeat(2,minmax(0,1fr))!important}}

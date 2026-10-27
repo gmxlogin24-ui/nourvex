@@ -1,6 +1,6 @@
 @extends('layouts.app-authenticated')
 
-@section('title', 'LEVI — NOURVEX Concierge')
+@section('title', 'LEVI — NAURVEX Concierge')
 
 @section('content')
 <main class="w-full p-0 concierge-page">

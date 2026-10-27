@@ -1,6 +1,8 @@
-@extends('layouts.app-authenticated')
+@extends('layouts.world-shell')
+@section('world', 'gigs')
 @section('content')
-<main class="max-w-2xl mx-auto p-6">
+<link rel="stylesheet" href="{{ asset('css/world-pages.css') }}?v={{ @filemtime(public_path('css/world-pages.css')) }}"><link rel="stylesheet" href="{{ asset('css/world-page.css') }}?v={{ @filemtime(public_path('css/world-page.css')) }}">
+<main class="wp-page wp-gigs">
     <a href="{{ route('gigs.show', $gig->id) }}" class="text-muted text-sm flex items-center gap-1 mb-4">
         <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Gig
     </a>

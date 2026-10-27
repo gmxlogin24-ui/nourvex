@@ -1,20 +1,20 @@
 @extends('layouts.landing')
 @section('title', 'About us')
 @section('meta')
-<meta name="description" content="NOURVEX LTD builds a campus app where students work, sell and get paid safely: escrow-held hustles, a student wallet, a campus market, airtime and data.">
+<meta name="description" content="NAURVEX LTD builds a campus app where students work, sell and get paid safely: escrow-held hustles, a student wallet, a campus market, airtime and data.">
 @endsection
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/nv-pages.css') }}?v={{ @filemtime(public_path('css/nv-pages.css')) }}">
 <main class="lp nvp">
     <div class="nvp-wrap">
         <header class="nvp-head">
-            <p class="nvp-eyebrow">About NOURVEX</p>
+            <p class="nvp-eyebrow">About NAURVEX</p>
             <h1>Work, sell and get paid, all in one campus app.</h1>
-            <p class="nvp-lead">NOURVEX LTD builds tools that help students earn, buy, sell and pay safely, without juggling five different apps.</p>
+            <p class="nvp-lead">NAURVEX LTD builds tools that help students earn, buy, sell and pay safely, without juggling five different apps.</p>
         </header>
 
         <section class="nvp-sec">
-            <h2>What you can do on NOURVEX</h2>
+            <h2>What you can do on NAURVEX</h2>
             <div class="nvp-grid">
                 <div class="nvp-card"><h3>Hustles</h3><p>Post a task with your budget, or browse open ones and apply. Pay is held in escrow until the work is delivered.</p></div>
                 <div class="nvp-card"><h3>Wallet</h3><p>One balance for everything. Top up by card or transfer, track every credit and debit, and confirm payments with your own PIN.</p></div>

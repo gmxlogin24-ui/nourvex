@@ -4,7 +4,7 @@
     $dqmInitial = strtoupper(substr($dqmName, 0, 1));
 
     $dqmMiniStats = [
-        ['label' => 'Earnings', 'value' => '₦' . number_format($earnings ?? 0), 'icon' => 'trending-up', 'tint' => 'green', 'seed' => (int)(($earnings ?? 0)/1000)+5],
+        ['label' => 'Earnings', 'value' => number_format(($earnings ?? 0) * config('qcoin.q_per_naira_display', 10)) . ' Q', 'icon' => 'trending-up', 'tint' => 'green', 'seed' => (int)(($earnings ?? 0)/1000)+5],
         ['label' => 'Active Gigs', 'value' => (string) ($myOpenGigs ?? 0), 'icon' => 'briefcase', 'tint' => 'purple', 'seed' => ($myOpenGigs ?? 0)+2],
         ['label' => 'Q Coin', 'value' => number_format($qCoinBalance ?? 0) . ' Q', 'icon' => 'gem', 'tint' => 'gold', 'seed' => (int)(($qCoinBalance ?? 0)/10)+7],
         ['label' => 'Rating', 'value' => $avgRating ? number_format($avgRating, 1) . ' ★' : '—', 'icon' => 'star', 'tint' => 'blue', 'seed' => (int)(($avgRating ?? 1)*10)+1],
@@ -42,7 +42,7 @@
             <i data-lucide="wallet" class="w-4 h-4"></i>
         </div>
         <div class="dqp-hero-chip"></div>
-        <div class="dqp-hero-amount">₦<span class="dqm-countup" data-value="{{ $balance ?? 0 }}">0</span></div>
+        <div class="dqp-hero-amount"><span class="dqm-countup" data-value="{{ ($balance ?? 0) * config('qcoin.q_per_naira_display', 10) }}">0</span> Q<small style="display:block;font-size:.5em;font-weight:500;opacity:.4">₦{{ number_format($balance ?? 0) }}</small></div>
         @if($user->virtual_account_number ?? false)
             <div class="dqp-hero-masked">•••• •••• {{ substr($user->virtual_account_number, -4) }}</div>
             <div class="dqp-hero-holder-row">
@@ -50,7 +50,7 @@
             </div>
         @else
             <div class="dqp-hero-holder-row">
-                <a href="{{ route('wallet.virtual-account') }}" class="dqp-hero-holder" style="text-decoration:none;">Activate NOURVEX Pay to fund your wallet</a>
+                <a href="{{ route('wallet.virtual-account') }}" class="dqp-hero-holder" style="text-decoration:none;">Activate NAURVEX Pay to fund your wallet</a>
             </div>
         @endif
         <div class="dqp-hero-actions">
@@ -85,10 +85,10 @@
 
     <div class="dqp-card dqp-chart-card dqp-anim" style="--i:4">
         <div class="dqp-chart-top">
-            <span class="dqp-flow-pill dqp-flow-pill-in"><i data-lucide="arrow-down" class="w-3 h-3"></i> In ₦{{ number_format($totalIn ?? 0) }}</span>
-            <span class="dqp-flow-pill dqp-flow-pill-out"><i data-lucide="arrow-up" class="w-3 h-3"></i> Out ₦{{ number_format($totalOut ?? 0) }}</span>
+            <span class="dqp-flow-pill dqp-flow-pill-in"><i data-lucide="arrow-down" class="w-3 h-3"></i> In {{ number_format(($totalIn ?? 0) * config('qcoin.q_per_naira_display', 10)) }} Q<small style="display:block;font-size:.5em;font-weight:500;opacity:.4">₦{{ number_format($totalIn ?? 0) }}</small></span>
+            <span class="dqp-flow-pill dqp-flow-pill-out"><i data-lucide="arrow-up" class="w-3 h-3"></i> Out {{ number_format(($totalOut ?? 0) * config('qcoin.q_per_naira_display', 10)) }} Q<small style="display:block;font-size:.5em;font-weight:500;opacity:.4">₦{{ number_format($totalOut ?? 0) }}</small></span>
         </div>
-        <div class="dqp-card-head"><span>Money Flow</span><span class="dqp-flow-net">₦{{ number_format($netFlow ?? 0) }} net</span></div>
+        <div class="dqp-card-head"><span>Money Flow</span><span class="dqp-flow-net">{{ number_format(($netFlow ?? 0) * config('qcoin.q_per_naira_display', 10)) }} Q<small style="display:block;font-size:.5em;font-weight:500;opacity:.4">₦{{ number_format($netFlow ?? 0) }}</small> net</span></div>
         <div class="dqp-wave-wrap">
             <svg class="dqp-wave-svg" viewBox="0 0 300 100" preserveAspectRatio="none">
                 <defs>
@@ -134,7 +134,7 @@
                     <span class="t">{{ $gig->title }}</span>
                     <span class="s">{{ ucfirst($gig->status ?? '') }}</span>
                 </div>
-                <span class="dqp-tx-amount">₦{{ number_format($gig->amount) }}</span>
+                <span class="dqp-tx-amount">{{ number_format(($gig->amount) * config('qcoin.q_per_naira_display', 10)) }} Q<small style="display:block;font-size:.5em;font-weight:500;opacity:.4">₦{{ number_format($gig->amount) }}</small></span>
             </a>
         @empty
             <p class="dqp-empty">No gigs yet.</p>

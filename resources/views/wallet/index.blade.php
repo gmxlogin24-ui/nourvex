@@ -1,81 +1,82 @@
 @extends('layouts.app-authenticated')
+@section('title', 'Wallet')
 @section('content')
+@php
+  $wlDark = (auth()->user()->theme_style ?? '') === 'qelvo-dark';
+  $wlTxCount = count($transactions);
+  $wlTier = auth()->user()->tier ?? 'free';
+@endphp
+<link rel="stylesheet" href="{{ asset('css/wallet-redesign.css') }}?v={{ time() }}">
+<div class="wl {{ $wlDark ? 'wl-dark' : '' }}">
+  <header class="wl-head">
+    <h1>Wallet</h1>
+    <p>Money in, money out, all in one place.</p>
+  </header>
 
-@if((auth()->user()->theme_style ?? 'glass') === 'plain')
-<div class="dqm-page" style="padding-top:0 !important;">
-@include('partials.dqm-balance-deck')
-</div>
-@endif
+  @if(session('status'))<div class="wl-flash ok">{{ session('status') }}</div>@endif
+  @if($errors->any())<div class="wl-flash bad">{{ $errors->first() }}</div>@endif
+  @if(!($isVerified ?? true))
+    <div class="wl-notice">
+      <b>Unverified wallet limit</b>
+      <span>You can hold up to ₦{{ number_format($walletCapRemaining ?? 0) }} more before you need to verify your BVN. Earnings from gigs, sales and referrals aren't affected.</span>
+    </div>
+  @endif
 
-<main class="max-w-3xl mx-auto p-6 {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-page' : '' }}" style="{{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'padding-top:0 !important;' : '' }}">
-    <h1 class="text-2xl font-semibold mb-6">Wallet</h1>
-
-    <div class="balance-card mb-6 {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-card' : '' }}">
-        <p class="balance-label">Total Balance</p>
-        <p class="balance-amount">₦{{ number_format($balance, 2) }}</p>
-        <div class="balance-actions">
-            <button onclick="document.getElementById('withdrawModal').classList.add('open')" class="balance-chip primary"><i data-lucide="arrow-down-to-line" class="w-4 h-4"></i> Withdraw</button>
-            <button onclick="document.getElementById('topupModal').classList.add('open')" class="balance-chip"><i data-lucide="plus" class="w-4 h-4"></i> Top Up</button>
-            <a href="{{ route('wallet.send.form') }}" class="balance-chip"><i data-lucide="send" class="w-4 h-4"></i> Send</a>
+  <div class="wl-grid">
+    <div class="wl-col-a">
+      <section class="wl-balance">
+        <p class="wl-lbl">Total balance</p>
+        <p class="wl-amt">₦{{ number_format($balance, 2) }}</p>
+        <div class="wl-actions">
+          <button type="button" class="wl-act primary" onclick="document.getElementById('withdrawModal').classList.add('open')"><i data-lucide="arrow-down-to-line"></i><span>Withdraw</span></button>
+          <a href="{{ route('wallet.deposit') }}" class="wl-act"><i data-lucide="plus"></i><span>Top up</span></a>
+          <a href="{{ route('wallet.send.form') }}" class="wl-act"><i data-lucide="send"></i><span>Send</span></a>
         </div>
+      </section>
+
+      <a href="{{ route('wallet.virtual-account') }}" class="wl-link">
+        <span class="ib"><i data-lucide="landmark"></i></span>
+        <span><b>Activate NAURVEX Pay</b><small>Fund your wallet by bank transfer, anytime</small></span>
+        <i data-lucide="chevron-right" class="go"></i>
+      </a>
+
+      <a href="{{ route('wallet.bank-account.edit') }}" class="wl-link">
+        <span class="ib"><i data-lucide="building-2"></i></span>
+        <span><b>{{ $hasBankAccount ? 'Payout bank account' : 'Add payout bank account' }}</b><small>{{ $hasBankAccount ? 'Where your withdrawals are sent' : 'Required before you can withdraw' }}</small></span>
+        <i data-lucide="chevron-right" class="go"></i>
+      </a>
+
+      @if(in_array($wlTier, ['tier2', 'tier3'], true))
+      <a href="{{ route('money-tracker.index') }}" class="wl-link">
+        <span class="ib"><i data-lucide="trending-up"></i></span>
+        <span><b>Money Tracker</b><small>See your cash flow by month</small></span>
+        <i data-lucide="chevron-right" class="go"></i>
+      </a>
+      @endif
     </div>
 
-    <a href="{{ route('wallet.virtual-account') }}" class="glass-card p-4 mb-3 flex items-center justify-between {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-card' : '' }}">
-        <div class="flex items-center gap-3">
-            <div class="icon-badge"><i data-lucide="landmark" class="w-5 h-5"></i></div>
-            <div>
-                <p class="text-sm font-medium">Activate NOURVEX Pay</p>
-                <p class="text-muted text-xs">Fund your wallet by bank transfer, anytime</p>
-            </div>
-        </div>
-        <i data-lucide="chevron-right" class="w-4 h-4 text-muted"></i>
-    </a>
-
-    <a href="{{ route('wallet.bank-account.edit') }}" class="glass-card p-4 mb-6 flex items-center justify-between {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-card' : '' }}">
-        <div class="flex items-center gap-3">
-            <div class="icon-badge"><i data-lucide="building-2" class="w-5 h-5"></i></div>
-            <div>
-                <p class="text-sm font-medium">{{ $hasBankAccount ? 'Payout Bank Account' : 'Add Payout Bank Account' }}</p>
-                <p class="text-muted text-xs">{{ $hasBankAccount ? 'Where your withdrawals are sent' : 'Required before you can withdraw' }}</p>
-            </div>
-        </div>
-        <i data-lucide="chevron-right" class="w-4 h-4 text-muted"></i>
-    </a>
-
-    @if(!($isVerified ?? true))
-    <div class="glass-card p-4 mb-6" style="border:1px solid var(--color-accent);">
-        <p class="text-sm font-medium">Unverified wallet limit</p>
-        <p class="text-muted text-xs mt-1">You can hold up to ₦{{ number_format($walletCapRemaining ?? 0) }} more before you need to verify your BVN. Earnings from gigs, sales, and referrals aren't affected.</p>
-    </div>
-    @endif
-
-    <div class="glass-card p-6 {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-card' : '' }}">
-        <h2 class="font-semibold mb-4">Transaction History</h2>
-        @if(session('status'))
-    <div class="bg-card card-rounded p-4 mb-4 text-sm text-accent">{{ session('status') }}</div>
-    @endif
-    @if($errors->any())
-    <div class="bg-card card-rounded p-4 mb-4 text-sm text-red-500">{{ $errors->first() }}</div>
-    @endif
-    @if(count($transactions) === 0)
-        <p class="text-muted text-sm">No transactions yet. Earnings from gigs, sales, and referrals will show up here.</p>
+    <div class="wl-col-b">
+      <section class="wl-card">
+        <div class="wl-card-head"><h2>Transaction history</h2><span>{{ $wlTxCount }} {{ $wlTxCount === 1 ? 'entry' : 'entries' }}</span></div>
+        @if($wlTxCount === 0)
+          <p class="wl-empty">No transactions yet. Earnings from gigs, sales and referrals will show up here.</p>
         @else
-        <div class="space-y-3">
+          <div class="wl-list">
             @foreach($transactions as $tx)
-            <a href="{{ route('wallet.transaction.show', $tx->id) }}" class="list-row" style="text-decoration:none;">
-                <div>
-                    <p class="text-sm font-medium">{{ $tx->description }}</p>
-                    <p class="text-muted text-xs">{{ $tx->created_at->diffForHumans() }}{{ $tx->reference ? ' · ' . $tx->reference : '' }}</p>
-                </div>
-                <p class="font-semibold text-sm {{ $tx->amount >= 0 ? 'text-accent' : '' }}">
-                    {{ $tx->amount >= 0 ? '+' : '' }}₦{{ number_format($tx->amount, 2) }}
-                </p>
+            <a href="{{ route('wallet.transaction.show', $tx->id) }}" class="wl-row">
+              <span style="min-width:0">
+                <span class="wl-rt" style="display:block">{{ $tx->description }}</span>
+                <span class="wl-rs">{{ $tx->created_at->diffForHumans() }}{{ $tx->reference ? ' · ' . $tx->reference : '' }}</span>
+              </span>
+              <span class="wl-amt-row {{ $tx->amount >= 0 ? 'in' : '' }}">{{ $tx->amount >= 0 ? '+' : '' }}₦{{ number_format($tx->amount, 2) }}</span>
             </a>
             @endforeach
-        </div>
+          </div>
         @endif
+      </section>
     </div>
-</main>
+  </div>
+</div>
 
 <div id="topupModal" class="modal-overlay">
     <div class="glass-card p-6 max-w-sm mx-auto mt-24">

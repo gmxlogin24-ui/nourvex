@@ -59,7 +59,7 @@ $plans = [
                 <span class="lp-pl-chip" aria-hidden="true"></span>
                 <div class="lp-pl-foot">
                     <div class="lp-pl-name">{{ $p['name'] }}</div>
-                    <div class="lp-pl-brand">NOURVEX</div>
+                    <div class="lp-pl-brand">NAURVEX</div>
                 </div>
             </div>
             <div class="lp-pl-body">

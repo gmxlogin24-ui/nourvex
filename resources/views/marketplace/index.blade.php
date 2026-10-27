@@ -1,15 +1,25 @@
 @extends('layouts.app-authenticated')
+
+@section('world', 'market')
 @section('title', 'Campus Market')
 
 @section('content')
 @php
+  $mkList = $listings instanceof \Illuminate\Pagination\AbstractPaginator ? $listings->getCollection() : collect($listings);
+  $cats = [
+    'Fashion'     => ['shirt', '#F97316'],
+    'Electronics' => ['cpu', '#2563EB'],
+    'Books'       => ['book', '#16A34A'],
+    'Food'        => ['utensils', '#E11D48'],
+    'Services'    => ['wrench', '#7C5CF0'],
+    'Rentals'     => ['key', '#0EA5A4'],
+    'Other'       => ['grid', '#64748B'],
+  ];
   $types = ['item' => 'Items', 'service' => 'Services', 'rent' => 'Rentals', 'store' => 'Stores'];
-  $cats = ['Fashion' => 'shirt', 'Electronics' => 'cpu', 'Books' => 'book', 'Food' => 'utensils', 'Services' => 'wrench', 'Rentals' => 'key', 'Other' => 'grid'];
-  $type = request('type'); $cat = request('category');
-  $u = function ($extra = []) {
-      $p = array_merge(request()->only(['q', 'type', 'category']), $extra);
-      return route('marketplace.index', array_filter($p, fn ($v) => $v !== null && $v !== ''));
-  };
+  $q = trim((string) request('q'));
+  $cat = request('category');
+  $type = request('type');
+  $filtered = $q !== '' || $cat || $type;
   $imgOf = function ($l) {
       $url = $l->image_url ?? null;
       if (!$url) {
@@ -18,77 +28,98 @@
           $url = $first ? ($first->url ?? $first->path ?? $first->image_path ?? $first->image_url ?? null) : null;
       }
       if (!$url) return null;
-      return preg_match('~^(https?:)?//~', $url) ? $url : asset('storage/' . ltrim($url, '/'));
+      return preg_match('~^(https?:)?//~', $url) ? $url : asset(ltrim($url, '/'));
   };
+  $mkLoved = auth()->check() ? \Illuminate\Support\Facades\DB::table('listing_favorites')->where('user_id', auth()->id())->pluck('listing_id')->all() : [];
+  $mkVerified = \App\Models\User::whereIn('id', $mkList->pluck('user_id')->filter()->unique()->values())->where('is_verified_seller', true)->pluck('id')->all();
+  $mkRates = \App\Models\Review::where('reviewable_type', \App\Models\Listing::class)->whereIn('reviewable_id', $mkList->pluck('id'))->selectRaw('reviewable_id, AVG(rating) as a, COUNT(*) as c')->groupBy('reviewable_id')->get()->keyBy('reviewable_id');
+
+  $recent = collect();
+  $top = collect();
+  if (!$filtered) {
+    try {
+      if (auth()->check()) {
+        $rIds = \App\Models\ListingView::where('user_id', auth()->id())->orderByDesc('updated_at')->limit(40)->pluck('listing_id')->unique()->take(10)->values()->all();
+        if ($rIds) {
+          $recent = \App\Models\Listing::whereIn('id', $rIds)->where('status', 'available')->get()->sortBy(fn ($l) => array_search($l->id, $rIds))->values();
+        }
+      }
+    } catch (\Throwable $e) { $recent = collect(); }
+    try {
+      $tIds = \App\Models\ListingOrder::selectRaw('listing_id, COUNT(*) as c')->groupBy('listing_id')->orderByDesc('c')->take(10)->pluck('listing_id')->all();
+      $top = $mkList->whereIn('id', $tIds)->sortBy(fn ($l) => array_search($l->id, $tIds))->values();
+    } catch (\Throwable $e) { $top = collect(); }
+  }
 @endphp
-<link rel="stylesheet" href="{{ asset('css/world-pages.css') }}?v={{ @filemtime(public_path('css/world-pages.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/mk2.css') }}?v={{ time() }}">
+<div class="mk2" id="mk2" data-token="{{ csrf_token() }}">
 
-<div class="wp wp-market">
-  <div class="wp-top">
-    <div>
-      <h1>Campus Market</h1>
-      <p class="wp-sub">{{ count($listings) }} listings</p>
+  
+  <section class="mk2-sec">
+    <div class="mk2-sh"><b>Shop by category</b></div>
+    <div class="mk2-cats">
+      @foreach($cats as $name => $meta)
+        <a href="{{ route('marketplace.index', ['category' => $name]) }}" class="mk2-cat {{ $cat === $name ? 'on' : '' }}"><span style="background:{{ $meta[1] }}"><i data-lucide="{{ $meta[0] }}"></i></span><small>{{ $name }}</small></a>
+      @endforeach
+      <a href="{{ route('marketplace.index', ['type' => 'store']) }}" class="mk2-cat {{ $type === 'store' ? 'on' : '' }}"><span style="background:#CA8A04"><i data-lucide="store"></i></span><small>Stores</small></a>
     </div>
-    <div class="wp-acts">
-      <a href="{{ route('cart.index') }}" class="wp-ico" title="Cart"><i data-lucide="shopping-cart" style="width:17px;height:17px"></i></a>
-      @if(auth()->user()->planAllows('market_sell'))
-        <a href="{{ route('marketplace.create') }}" class="wp-btn"><i data-lucide="plus" style="width:15px;height:15px"></i>Sell</a>
+  </section>
+
+  @if($filtered)
+    <section class="mk2-sec">
+      <div class="mk2-sh">
+        <b>{{ $q !== '' ? 'Results for “' . $q . '”' : ($cat ?: ($types[$type] ?? 'Results')) }}</b>
+        <a href="{{ route('marketplace.index') }}" class="mk2-clear">Clear</a>
+      </div>
+      <p class="mk2-n">{{ $mkList->count() }} {{ $mkList->count() === 1 ? 'listing' : 'listings' }}</p>
+      @if($mkList->count())
+        <div class="mk2-grid">
+          @foreach($mkList as $item)
+            @include('marketplace.partials.mk2-card')
+          @endforeach
+        </div>
+      @else
+        <div class="mk2-empty"><b>Nothing found</b>Try another word or category.</div>
       @endif
-    </div>
-  </div>
-
-  <form method="GET" action="{{ route('marketplace.index') }}" class="wp-search">
-    <i data-lucide="search"></i>
-    <input type="text" name="q" value="{{ request('q') }}" placeholder="Search listings...">
-    @if($type)<input type="hidden" name="type" value="{{ $type }}">@endif
-    @if($cat)<input type="hidden" name="category" value="{{ $cat }}">@endif
-  </form>
-
-  <div class="wp-chips">
-    <a href="{{ $u(['type' => null]) }}" class="wp-chip {{ !$type ? 'on' : '' }}">All</a>
-    @foreach($types as $val => $label)
-      <a href="{{ $u(['type' => $val]) }}" class="wp-chip {{ $type === $val ? 'on' : '' }}">{{ $label }}</a>
+    </section>
+  @else
+    @include('marketplace.partials.mk2-rail', ['rTitle' => 'Recently viewed', 'rItems' => $recent])
+    @include('marketplace.partials.mk2-rail', ['rTitle' => 'Just arrived', 'rItems' => $mkList->sortByDesc('created_at')->take(10)->values()])
+    @include('marketplace.partials.mk2-rail', ['rTitle' => 'Top sellers', 'rItems' => $top])
+    @foreach($mkList->groupBy('category') as $cName => $group)
+      @include('marketplace.partials.mk2-rail', ['rTitle' => ($cName ?: 'Other'), 'rLink' => route('marketplace.index', ['category' => ($cName ?: 'Other')]), 'rItems' => $group->take(10)->values()])
     @endforeach
-    <span class="wp-sep"></span>
-    <a href="{{ route('marketplace.favorites') }}" class="wp-chip">Saved</a>
-    <a href="{{ route('marketplace.orders') }}" class="wp-chip">Orders</a>
-  </div>
-  <div class="wp-chips">
-    <a href="{{ $u(['category' => null]) }}" class="wp-chip {{ !$cat ? 'on' : '' }}">All categories</a>
-    @foreach($cats as $name => $icon)
-      <a href="{{ $u(['category' => $name]) }}" class="wp-chip {{ $cat === $name ? 'on' : '' }}">{{ $name }}</a>
-    @endforeach
-  </div>
-
-  <div class="mk-grid">
-    @forelse($listings as $item)
-      @php $img = $imgOf($item); @endphp
-      <a href="{{ route('marketplace.show', $item->id) }}" class="mc">
-        <span class="mc-i">
-          @if($img)
-            <img src="{{ $img }}" alt="" loading="lazy">
-          @else
-            <i data-lucide="{{ $cats[$item->category] ?? 'shopping-bag' }}" style="width:26px;height:26px"></i>
-          @endif
-          @if(!empty($item->is_verified_seller))<span class="mc-v">VERIFIED</span>@endif
-        </span>
-        <span class="mc-b">
-          <span class="mc-p">₦{{ number_format($item->amount) }}</span>
-          <span class="mc-t">{{ $item->title }}</span>
-          @if(!empty($item->location))<span class="mc-l">{{ $item->location }}</span>@endif
-        </span>
-      </a>
-    @empty
-      <div class="wp-empty"><b>Nothing listed here yet</b>Try another category, or be the first to sell.</div>
-    @endforelse
-  </div>
+    @if(!$mkList->count())
+      <div class="mk2-empty"><b>Nothing listed here yet</b>Be the first to sell.</div>
+    @endif
+  @endif
 </div>
-@endsection
 
-@section('scripts')
 <script>
-if (window.gsap) {
-  gsap.from(gsap.utils.toArray('.mc').slice(0, 30), { y: 14, opacity: 0, duration: .45, stagger: .03, ease: 'power2.out', clearProps: 'all' });
-}
+(function () {
+  var g = document.getElementById('mk2');
+  if (!g) return;
+  function cart(n) {
+    document.querySelectorAll('[aria-label="Cart"]').forEach(function (c) {
+      var em = c.querySelector('.nv-badge');
+      if (n > 0) {
+        if (!em && c.classList.contains('pb-ic')) { em = document.createElement('em'); em.className = 'nv-badge'; c.appendChild(em); }
+        if (em) em.textContent = n;
+      } else if (em) { em.remove(); }
+    });
+  }
+  g.addEventListener('click', function (e) {
+    var b = e.target.closest('.mk2-heart');
+    if (!b) return;
+    e.preventDefault();
+    if (b.dataset.busy) return;
+    b.dataset.busy = '1';
+    fetch(b.dataset.url, { method: 'POST', headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': g.dataset.token, 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { if (typeof d.loved === 'boolean') { b.classList.toggle('on', d.loved); cart(d.cart_count); } })
+      .catch(function () {})
+      .then(function () { delete b.dataset.busy; });
+  });
+})();
 </script>
 @endsection

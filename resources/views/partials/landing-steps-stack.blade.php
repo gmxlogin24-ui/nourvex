@@ -4,7 +4,7 @@
         <div class="lp-st-intro">
             <p class="lp-eyebrow" style="margin-bottom:12px">How it works</p>
             <h2 class="lp-h2" style="margin:0">From sign-up to <span class="lp-grad">paid</span> in five steps.</h2>
-            <p class="lp-lead lp-st-lead" style="margin-top:16px">No long forms and no juggling apps. This is exactly how NOURVEX works, start to finish.</p>
+            <p class="lp-lead lp-st-lead" style="margin-top:16px">No long forms and no juggling apps. This is exactly how NAURVEX works, start to finish.</p>
             <div class="lp-st-count"><span id="lpStNum">01</span><small>/ 05</small></div>
             <div class="lp-st-bar" aria-hidden="true"><i></i></div>
             <a href="{{ route('register') }}" class="lp-btn lp-btn-primary lp-st-introbtn" style="margin-top:28px">Create your free account <i data-lucide="arrow-right"></i></a>

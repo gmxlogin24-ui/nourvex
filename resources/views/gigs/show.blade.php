@@ -1,6 +1,8 @@
-@extends('layouts.app-authenticated')
+@extends('layouts.world-shell')
+@section('world', 'gigs')
 @section('content')
-<main class="max-w-2xl mx-auto p-6">
+<link rel="stylesheet" href="{{ asset('css/world-pages.css') }}?v={{ @filemtime(public_path('css/world-pages.css')) }}"><link rel="stylesheet" href="{{ asset('css/world-page.css') }}?v={{ @filemtime(public_path('css/world-page.css')) }}">
+<main class="wp-page wp-gigs">
     <a href="{{ route('gigs.index') }}" class="text-muted text-sm flex items-center gap-1 mb-4">
         <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Gigs
     </a>
@@ -12,110 +14,144 @@
     <p class="text-red-500 text-sm mb-4">{{ $errors->first() }}</p>
     @endif
 
-    <div class="glass-card p-8 reveal-on-scroll">
-        <div class="flex items-center justify-between mb-4">
-            <div class="icon-badge"><i data-lucide="briefcase" class="w-6 h-6"></i></div>
-            <span class="tx-status {{ $gig->status === 'open' ? 'done' : 'pending' }}">
-                {{ ['open' => 'Open', 'in_progress' => 'In Progress', 'delivered' => 'Delivered', 'awaiting_worker_signup' => 'Payment Held', 'completed' => 'Completed'][$gig->status] ?? $gig->status }}
-            </span>
-        </div>
-
-        <div class="flex items-start justify-between gap-3">
-            <div>
-                <h1 class="text-2xl font-semibold">{{ $gig->title }}</h1>
-                <p class="text-muted text-sm mt-1">{{ $gig->category }} · Posted {{ $gig->created_at->diffForHumans() }}</p>
-            </div>
-            @auth
-            @if($gig->user_id === auth()->id() && $gig->status === 'open')
-            <a href="{{ route('gigs.edit', $gig->id) }}" class="btn-secondary text-sm" style="white-space:nowrap;"><i data-lucide="pencil" class="w-4 h-4"></i> Edit</a>
-            @endif
-            @endauth
-        </div>
-        <p class="text-3xl font-bold text-accent mt-4">₦{{ number_format($gig->amount) }}</p>
-        <p class="mt-6 text-sm">{{ $gig->description }}</p>
-    </div>
-
-    @if($gig->deadline || $gig->location_type || $gig->location || $gig->phone || $gig->attachment_path || !empty($gig->details) || $gig->has_item || !empty($gig->packages))
-    <div class="glass-card p-5 mt-6 reveal-on-scroll">
-        <h2 class="font-semibold mb-3">Job Details</h2>
-        <div class="space-y-2 text-sm">
-            @if(!empty($gig->packages))
-            <div>
-                <span class="text-muted">Packages:</span>
-                <ul class="mt-1 space-y-1">
-                    @foreach($gig->packages as $pkg)
-                    <li>
-                        {{ $pkg['name'] }} — ₦{{ number_format($pkg['price']) }}
-                        @if($gig->chosen_package === $pkg['name'])<span class="text-accent">(chosen)</span>@endif
-                        @if(!empty($pkg['description']))<span class="text-muted"> — {{ $pkg['description'] }}</span>@endif
-                    </li>
-                    @endforeach
-                </ul>
-            </div>
-            @endif
-            @if($gig->has_item)
-            <p><span class="text-muted">Item:</span> {{ $gig->item_name }}{{ $gig->item_qty ? ' × ' . $gig->item_qty : '' }}</p>
-            @if($gig->item_cost)
-            <p><span class="text-muted">Item cost:</span> ₦{{ number_format($gig->item_cost) }} (not included in gig escrow — arrange directly)</p>
-            @endif
-            @if($gig->delivery_address)
-            <p><span class="text-muted">Delivery address:</span> {{ $gig->delivery_address }}</p>
-            @endif
-            @if($gig->item_delivery_method)
-            <p><span class="text-muted">Delivery method:</span> {{ $gig->item_delivery_method === 'ship' ? 'Ship / send' : 'Meet on campus' }}</p>
-            @endif
-            @endif
-            @if($gig->deadline)
-            <p><span class="text-muted">Deadline:</span> {{ $gig->deadline->format('M j, Y') }}</p>
-            @endif
-            @if($gig->location_type)
-            <p><span class="text-muted">Location type:</span> {{ ucfirst($gig->location_type) }}</p>
-            @endif
-            @if($gig->location)
-            <p><span class="text-muted">Location:</span> {{ $gig->location }}</p>
-            @endif
-            @if($gig->phone)
-            <p><span class="text-muted">Call:</span> {{ $gig->phone }}</p>
-            @endif
-            @if(!empty($gig->details))
-            @foreach($gig->details as $key => $value)
-            @if($value)
-            <p><span class="text-muted">{{ ucfirst(str_replace('_', ' ', $key)) }}:</span> {{ $value }}</p>
-            @endif
-            @endforeach
-            @endif
-            @if($gig->attachment_path)
-            <p><a href="/storage/{{ $gig->attachment_path }}" target="_blank" class="text-accent">View attached brief</a></p>
-            @endif
-            @if($gig->delivery_attachment_path)
-            <p><a href="/storage/{{ $gig->delivery_attachment_path }}" target="_blank" class="text-accent">View delivered file</a></p>
-            @endif
-        </div>
-    </div>
-    @endif
-
-    @if($poster)
-    <div class="glass-card p-5 mt-6 flex items-center gap-3 reveal-on-scroll">
-        <div class="w-12 h-12 rounded-full bg-card flex items-center justify-center font-semibold overflow-hidden">
-            @if($poster->avatar_url)<img src="{{ $poster->avatar_url }}" class="w-full h-full object-cover">@else{{ strtoupper(substr($poster->name, 0, 1)) }}@endif
-        </div>
-        <div class="flex-1">
-            <p class="font-medium text-sm">Posted by {{ $poster->name }}</p>
-            @if($poster->skills)<p class="text-xs text-accent mt-0.5">{{ $poster->skills }}</p>@endif
-            @if($poster->is_verified_seller)
-            <p class="text-xs text-accent flex items-center gap-1"><i data-lucide="badge-check" class="w-3 h-3"></i> Verified</p>
-            @else
-            <p class="text-xs text-muted">Student</p>
-            @endif
-            <p class="text-xs text-muted mt-0.5">{{ $posterCompletedCount }} gig{{ $posterCompletedCount === 1 ? '' : 's' }} completed · Member since {{ $poster->created_at->format('M Y') }}</p>
-        </div>
-        @if($gig->whatsappLink())
-        <a href="{{ $gig->whatsappLink() }}" target="_blank" class="theme-toggle"><i data-lucide="message-circle" class="w-4 h-4"></i></a>
+    @php
+  $gxPk = is_array($gig->packages) ? array_values($gig->packages) : [];
+  $gxSt = ['open' => 'Open', 'in_progress' => 'In progress', 'delivered' => 'Delivered', 'awaiting_worker_signup' => 'Payment held', 'completed' => 'Completed'];
+  $gxIcons = ['Typing & Printing' => 'printer', 'Hair & Beauty' => 'scissors', 'Repairs' => 'wrench', 'Errands & Delivery' => 'truck', 'Tutoring' => 'graduation-cap', 'Photography' => 'camera', 'Laundry' => 'shirt'];
+  $gxRev = collect();
+  try { $gxRev = $gig->reviews()->with('reviewer')->latest()->get(); } catch (\Throwable $e) { $gxRev = collect(); }
+  $gxAvg = $gxRev->count() ? round($gxRev->avg('rating'), 1) : null;
+  $gxLvl = data_get($posterLevel ?? null, 'label');
+  $gxOwner = auth()->check() && $gig->user_id === auth()->id();
+  $gxFrom = count($gxPk) ? min(array_map(fn ($x) => (float) ($x['price'] ?? 0), $gxPk)) : (float) $gig->amount;
+  $gxTier = ['Basic', 'Standard', 'Premium'];
+@endphp
+<link rel="stylesheet" href="{{ asset('css/gig-show2.css') }}?v={{ time() }}">
+<div class="gv">
+  <section class="gv-s gv-hero" id="gvHero">
+    <div class="gv-top">
+      <span class="gv-ic"><i data-lucide="{{ $gxIcons[$gig->category] ?? 'briefcase' }}"></i></span>
+      <span class="gv-chip {{ $gig->status === 'open' ? 'ok' : '' }}">{{ $gxSt[$gig->status] ?? $gig->status }}</span>
+      @auth
+        @if($gxOwner && $gig->status === 'open')
+          <a href="{{ route('gigs.edit', $gig->id) }}" class="gv-edit"><i data-lucide="pencil"></i>Edit</a>
         @endif
+      @endauth
     </div>
-    @endif
+    <h1 class="gv-title">{{ $gig->title }}</h1>
+    <div class="gv-meta">
+      <span>{{ $gig->category }}</span>
+      <span>Posted {{ $gig->created_at->diffForHumans() }}</span>
+      @if($gxAvg)<span class="gv-star"><i data-lucide="star"></i>{{ $gxAvg }} ({{ $gxRev->count() }})</span>@endif
+      @if($gig->deadline)<span><i data-lucide="calendar"></i>Due {{ $gig->deadline->format('M j') }}</span>@endif
+    </div>
+  </section>
 
-    @if(in_array($gig->status, ['in_progress', 'delivered', 'awaiting_worker_signup', 'completed']) && ($acceptedByUser || $gig->guest_name))
+  <section class="gv-s">
+    @if(count($gxPk))
+      <div class="gv-tabs" id="gvTabs">
+        @foreach($gxPk as $gi => $gp)
+          <button type="button" class="gv-tab {{ $gi === 0 ? 'on' : '' }}" data-i="{{ $gi }}">{{ $gp['name'] ?? ($gxTier[$gi] ?? 'Package') }}</button>
+        @endforeach
+      </div>
+      @foreach($gxPk as $gi => $gp)
+        <div class="gv-pk" data-i="{{ $gi }}" {{ $gi === 0 ? '' : 'hidden' }}>
+          <div class="gv-pp">₦{{ number_format((float) ($gp['price'] ?? 0)) }}</div>
+          @if(!empty($gp['description']))<p class="gv-pd">{{ $gp['description'] }}</p>@endif
+          @if($gig->chosen_package === ($gp['name'] ?? null))<span class="gv-chip ok">Chosen</span>@endif
+        </div>
+      @endforeach
+      <p class="gv-note"><i data-lucide="shield-check"></i>Pick your package in the claim form below. Payment stays in escrow until the work is approved.</p>
+    @else
+      <div class="gv-pp">₦{{ number_format((float) $gig->amount) }}</div>
+      <p class="gv-note"><i data-lucide="shield-check"></i>Payment stays in escrow until the work is approved.</p>
+    @endif
+  </section>
+
+  <section class="gv-s">
+    <h2 class="gv-h">About this hustle</h2>
+    @if(trim((string) $gig->description) !== '')
+      <p class="gv-desc">{!! nl2br(e($gig->description)) !!}</p>
+    @else
+      <p class="gv-muted">The poster has not added a description. Message them to ask what is needed.</p>
+    @endif
+  </section>
+
+  @if($gig->deadline || $gig->location_type || $gig->location || $gig->phone || $gig->attachment_path || !empty($gig->details) || $gig->has_item)
+    <section class="gv-s">
+      <h2 class="gv-h">Job details</h2>
+      <dl class="gv-dl">
+        @if($gig->deadline)<div><dt>Deadline</dt><dd>{{ $gig->deadline->format('M j, Y') }}</dd></div>@endif
+        @if($gig->location_type)<div><dt>Where</dt><dd>{{ ucfirst($gig->location_type) }}</dd></div>@endif
+        @if($gig->location)<div><dt>Location</dt><dd>{{ $gig->location }}</dd></div>@endif
+        @if($gig->phone)<div><dt>Call</dt><dd>{{ $gig->phone }}</dd></div>@endif
+        @if(!empty($gig->details))
+          @foreach($gig->details as $gk => $gv)
+            @if($gv)<div><dt>{{ ucfirst(str_replace('_', ' ', $gk)) }}</dt><dd>{{ $gv }}</dd></div>@endif
+          @endforeach
+        @endif
+        @if($gig->has_item)
+          <div><dt>Item</dt><dd>{{ $gig->item_name }}{{ $gig->item_qty ? ' x ' . $gig->item_qty : '' }}</dd></div>
+          @if($gig->item_cost)<div><dt>Item cost</dt><dd>₦{{ number_format($gig->item_cost) }} (not in escrow, arrange directly)</dd></div>@endif
+          @if($gig->delivery_address)<div><dt>Deliver to</dt><dd>{{ $gig->delivery_address }}</dd></div>@endif
+          @if($gig->item_delivery_method)<div><dt>Delivery</dt><dd>{{ $gig->item_delivery_method === 'ship' ? 'Ship / send' : 'Meet on campus' }}</dd></div>@endif
+        @endif
+      </dl>
+      @if($gig->attachment_path)<a href="/storage/{{ $gig->attachment_path }}" target="_blank" class="gv-link"><i data-lucide="paperclip"></i>View attached brief</a>@endif
+      @if($gig->delivery_attachment_path)<a href="/storage/{{ $gig->delivery_attachment_path }}" target="_blank" class="gv-link"><i data-lucide="package-check"></i>View delivered file</a>@endif
+    </section>
+  @endif
+
+  @if($poster)
+    <section class="gv-s">
+      <h2 class="gv-h">About the poster</h2>
+      <div class="gv-sel">
+        <span class="gv-av">@if($poster->avatar_url)<img src="{{ $poster->avatar_url }}" alt="">@else{{ strtoupper(substr($poster->name, 0, 1)) }}@endif</span>
+        <div class="gv-si">
+          <b>{{ $poster->username ? '@'.$poster->username : $poster->name }}@if($poster->is_verified_seller)<i data-lucide="badge-check"></i>@endif</b>
+          @if($poster->skills)<small>{{ $poster->skills }}</small>@endif
+          <small>Member since {{ $poster->created_at->format('M Y') }}</small>
+        </div>
+        @if($gig->whatsappLink())<a href="{{ $gig->whatsappLink() }}" target="_blank" class="gv-wa" aria-label="WhatsApp"><i data-lucide="message-circle"></i></a>@endif
+      </div>
+      <div class="gv-st">
+        <div><b>{{ $posterCompletedCount }}</b>Completed</div>
+        <div><b>{{ !empty($posterRating) ? $posterRating . ' ★' : '—' }}</b>Rating</div>
+        <div><b>{{ $gxLvl ?: 'New' }}</b>Level</div>
+      </div>
+    </section>
+  @endif
+
+  <section class="gv-s">
+    <h2 class="gv-h">Reviews</h2>
+    @forelse($gxRev->take(5) as $gr)
+      <div class="gv-rv">
+        <span class="gv-ra">{{ strtoupper(substr(optional($gr->reviewer)->name ?? 'U', 0, 1)) }}</span>
+        <div>
+          <div class="gv-rh"><b>{{ optional($gr->reviewer)->name ?? 'User' }}</b><span>{{ str_repeat('★', (int) $gr->rating) }}{{ str_repeat('☆', 5 - (int) $gr->rating) }}</span></div>
+          <small>{{ $gr->created_at->format('M j, Y') }}</small>
+          @if($gr->comment)<p>{{ $gr->comment }}</p>@endif
+        </div>
+      </div>
+    @empty
+      <p class="gv-muted">No reviews yet. Reviews appear after the work is completed.</p>
+    @endforelse
+  </section>
+</div>
+<script>
+(function () {
+  var t = document.getElementById('gvTabs'); if (!t) return;
+  t.addEventListener('click', function (e) {
+    var b = e.target.closest('.gv-tab'); if (!b) return;
+    var i = b.getAttribute('data-i');
+    [].slice.call(t.querySelectorAll('.gv-tab')).forEach(function (x) { x.classList.toggle('on', x === b); });
+    [].slice.call(document.querySelectorAll('.gv-pk')).forEach(function (x) { x.hidden = x.getAttribute('data-i') !== i; });
+  });
+  if (window.lucide) lucide.createIcons();
+})();
+</script>
+
+@if(in_array($gig->status, ['in_progress', 'delivered', 'awaiting_worker_signup', 'completed']) && ($acceptedByUser || $gig->guest_name))
     <div class="glass-card p-5 mt-4 flex items-center gap-3 reveal-on-scroll">
         <div class="w-12 h-12 rounded-full bg-card flex items-center justify-center font-semibold overflow-hidden">
             @if($acceptedByUser && $acceptedByUser->avatar_url)<img src="{{ $acceptedByUser->avatar_url }}" class="w-full h-full object-cover">@else{{ strtoupper(substr($acceptedByUser->name ?? $gig->guest_name, 0, 1)) }}@endif

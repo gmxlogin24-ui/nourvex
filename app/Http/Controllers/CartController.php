@@ -20,9 +20,21 @@ class CartController extends Controller
         // Drop any stale IDs (sold/removed since being added) from the session cart.
         Session::put('cart', $listings->pluck('id')->values()->all());
 
+        try {
+            $saved = Auth::user()->favoriteListings()
+                ->where('listings.status', 'available')
+                ->where('listings.user_id', '!=', Auth::id())
+                ->whereNotIn('listings.id', $listings->pluck('id')->all())
+                ->latest('listing_favorites.created_at')
+                ->get();
+        } catch (\Throwable $e) {
+            $saved = collect();
+        }
+
         return view('cart.index', [
             'listings' => $listings,
             'total' => $listings->sum('amount'),
+            'saved' => $saved,
         ]);
     }
 
@@ -41,6 +53,7 @@ class CartController extends Controller
             Session::put('cart', $cart);
         }
 
+        $listing->favoritedBy()->syncWithoutDetaching([Auth::id()]);
         return back()->with('status', 'Added to cart.');
     }
 
@@ -49,6 +62,7 @@ class CartController extends Controller
         $cart = Session::get('cart', []);
         Session::put('cart', array_values(array_diff($cart, [$listing->id])));
 
+        $listing->favoritedBy()->detach(Auth::id());
         return back()->with('status', 'Removed from cart.');
     }
 

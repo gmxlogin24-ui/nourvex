@@ -6,13 +6,20 @@ use App\Models\News;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class NewsController extends Controller
 {
-    // Duration options in days => price in naira. tier1 (Plus) cannot post ads — requires tier2+.
+    // Duration options in days => price in naira. Posting needs Gold (tier2) or above; admins post free.
     const AD_PRICING = [3 => 1500, 7 => 3000, 14 => 5000];
+    const AD_CATEGORIES = ['Food', 'Fashion', 'Electronics', 'Books', 'Services', 'Rentals', 'Events', 'Beauty', 'Education', 'Other'];
+
+    private function canPostAds($user): bool
+    {
+        return $user->is_admin || in_array($user->tier, ['tier2', 'tier3'], true);
+    }
 
     public function index()
     {
@@ -31,51 +38,55 @@ class NewsController extends Controller
 
     public function createAd()
     {
-        abort_if(Auth::user()->tier === 'tier1', 403, 'Ads aren\'t available on the Silver plan — upgrade to Gold to post one.');
-        return view('news.create-ad', ['pricing' => self::AD_PRICING]);
+        abort_unless($this->canPostAds(Auth::user()), 403, 'Posting is available on the Gold plan and above.');
+        return view('news.create-ad', ['pricing' => config('qcoin.ad_prices')]);
     }
 
     public function storeAd(Request $request)
     {
         $user = Auth::user();
-        abort_if($user->tier === 'tier1', 403, 'Ads aren\'t available on the Silver plan — upgrade to Gold to post one.');
+        abort_unless($this->canPostAds($user), 403, 'Posting is available on the Gold plan and above.');
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'category' => 'required|string|max:100',
-            'body' => 'required|string',
+            'category' => 'required|in:' . implode(',', self::AD_CATEGORIES),
+            'body' => 'required|string|max:600',
             'duration' => 'required|integer|in:3,7,14',
+            'start_at' => 'nullable|date',
             'image' => 'nullable|image|max:6144',
         ]);
 
-        $cost = self::AD_PRICING[(int) $validated['duration']];
+        $free = (bool) $user->is_admin;
+        $cost = $free ? 0 : config('qcoin.ad_prices')[(int) $validated['duration']];
+
+        $start = now();
+        if ($start->lt(now())) {
+            $start = now();
+        }
+        $scheduled = $start->gt(now()->addMinute());
 
         $imageUrl = null;
         if ($request->hasFile('image')) {
             $imageUrl = '/storage/' . $request->file('image')->store('news', 'public');
         }
 
-        // Balance check + decrement + ad creation must be one atomic unit,
-        // otherwise concurrent submissions can both pass the balance check
-        // before either decrements (race condition -> negative balance).
-        $news = DB::transaction(function () use ($user, $validated, $cost, $imageUrl) {
-            $lockedUser = User::where('id', $user->id)->lockForUpdate()->first();
+        // Balance check + decrement + ad creation are one atomic unit so
+        // concurrent submissions cannot overspend the wallet.
+        $news = DB::transaction(function () use ($user, $validated, $cost, $free, $imageUrl, $start) {
+            $locked = User::where('id', $user->id)->lockForUpdate()->first();
 
-            if ($lockedUser->wallet_restricted) {
-                return null;
+            if (!$free) {
+                if ($locked->wallet_restricted || $locked->q_coin_balance < $cost) {
+                    return null;
+                }
+                $locked->decrement('q_coin_balance', $cost);
+                Transaction::create([
+                    'user_id' => $locked->id,
+                    'type' => 'ad_post',
+                    'amount' => -$cost,
+                    'description' => $validated['duration'] . '-day ad: ' . $validated['title'],
+                ]);
             }
-            if ($lockedUser->wallet_balance < $cost) {
-                return null;
-            }
-
-            $lockedUser->decrement('wallet_balance', $cost);
-
-            Transaction::create([
-                'user_id' => $lockedUser->id,
-                'type' => 'ad_post',
-                'amount' => -$cost,
-                'description' => $validated['duration'] . '-day ad: ' . $validated['title'],
-            ]);
 
             return News::create([
                 'title' => $validated['title'],
@@ -83,10 +94,10 @@ class NewsController extends Controller
                 'body' => $validated['body'],
                 'image_url' => $imageUrl,
                 'type' => 'ad',
-                'created_by' => $lockedUser->id,
-                'published_at' => now(),
-                'expires_at' => now()->addDays((int) $validated['duration']),
-                'is_featured' => $lockedUser->tier === 'tier3',
+                'created_by' => $locked->id,
+                'published_at' => $start,
+                'expires_at' => $start->copy()->addDays((int) $validated['duration']),
+                'is_featured' => $locked->tier === 'tier3' || (bool) $locked->is_admin,
             ]);
         });
 
@@ -95,10 +106,12 @@ class NewsController extends Controller
             if ($user->wallet_restricted) {
                 return back()->withErrors(['balance' => 'Your wallet is restricted due to an unresolved payment issue. Clear your balance to post ads.'])->withInput();
             }
-            return back()->withErrors(['balance' => 'Insufficient wallet balance. This ad costs ₦' . number_format($cost) . '. Top up your wallet first.'])->withInput();
+            return back()->withErrors(['balance' => 'Not enough Q Coins. This ad costs ' . number_format($cost) . ' Q Coins.'])->withInput();
         }
 
-        return redirect()->route('news.index')->with('status', 'Ad is live for ' . $validated['duration'] . ' days.');
+        return redirect()
+            ->route('pulse.index', $scheduled ? ['filter' => 'upcoming'] : [])
+            ->with('status', $scheduled ? 'Ad scheduled.' : 'Ad is live for ' . $validated['duration'] . ' days.');
     }
 
     public function store(Request $request)
@@ -111,6 +124,7 @@ class NewsController extends Controller
             'body' => 'required|string',
             'type' => 'nullable|in:news,ad',
             'source_url' => 'nullable|url',
+            'publish_at' => 'nullable|date',
             'image' => 'nullable|image|max:6144',
             'video' => 'nullable|mimetypes:video/mp4,video/quicktime|max:20480',
         ]);
@@ -121,13 +135,13 @@ class NewsController extends Controller
         if ($request->hasFile('video')) {
             $validated['video_url'] = '/storage/' . $request->file('video')->store('news', 'public');
         }
-        unset($validated['image'], $validated['video']);
+        unset($validated['image'], $validated['video'], $validated['publish_at']);
 
         News::create([
             ...$validated,
             'type' => $validated['type'] ?? 'news',
             'created_by' => Auth::id(),
-            'published_at' => now(),
+            'published_at' => $request->filled('publish_at') ? Carbon::parse($request->input('publish_at'), 'Africa/Lagos')->setTimezone('UTC') : now(),
         ]);
 
         return redirect()->route('news.index');

@@ -1,0 +1,82 @@
+/* World switcher */
+.wsw{display:flex;gap:6px;overflow-x:auto;margin:0 0 12px;padding-bottom:2px;scrollbar-width:none}
+.wsw::-webkit-scrollbar{display:none}
+.wsw a{white-space:nowrap;font-size:12px;font-weight:700;padding:7px 12px;border-radius:999px;text-decoration:none;color:inherit;background:rgba(128,128,128,.12)}
+.wsw a.on{background:var(--user-accent,#0a84ff);color:#fff}
+
+/* Market: falling sponsor deck with write-up */
+.wm-stack-row{display:flex;align-items:center;gap:14px;margin:0 0 16px}
+.wm-write{flex:1;min-width:0;padding:6px 4px}
+.wm-eyebrow{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--user-accent,#0a84ff);margin:0 0 6px}
+.wm-write h3{font-size:18px;font-weight:800;margin:0 0 4px;line-height:1.2}
+.wm-price{font-size:15px;font-weight:700;margin:0 0 6px}
+.wm-desc{font-size:12px;line-height:1.5;opacity:.8;margin:0 0 10px;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+.wm-go{font-size:12px;font-weight:700;color:var(--user-accent,#0a84ff);text-decoration:none}
+
+/* Gigs: swipe deck */
+.ws-wrap{margin:0 0 16px}
+.ws-deck{position:relative;height:300px;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.ws-card{position:absolute;left:0;right:0;top:0;bottom:0;border-radius:22px;overflow:hidden;background:#000;box-shadow:0 18px 36px -18px rgba(0,0,0,.45);display:block;text-decoration:none;color:#fff}
+.ws-card img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.ws-shade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.7))}
+.ws-info{position:absolute;left:16px;right:16px;bottom:16px;display:flex;flex-direction:column;gap:3px}
+.ws-eye{font-size:10px;text-transform:uppercase;letter-spacing:.08em;opacity:.85}
+.ws-title{font-size:17px;font-weight:800;line-height:1.2}
+.ws-sub{font-size:12px;opacity:.9}
+.ws-hint{text-align:center;font-size:10px;color:#8e8e93;margin-top:8px;letter-spacing:.04em}
+.ws-dots{display:flex;justify-content:center;gap:6px;margin-top:6px}
+.ws-dots span{width:6px;height:6px;border-radius:99px;background:rgba(128,128,128,.4);transition:width .3s}
+.ws-dots span.on{background:var(--user-accent,#0a84ff);width:16px}
+
+/* Market deck: contained, so falling cards drop out of view inside the deck instead of over the sections below */
+.wm-stack-row{position:relative;overflow:hidden;padding:4px 0 8px}
+.wm-stack-row .sponsor-stack{overflow:hidden;position:relative}
+.wm-stack-row .sponsor-card{inset:0 34px 52px 0}
+.wm-stack-row .sponsor-card.falling{transform:translate(40px,140%) rotate(14deg) scale(.9);opacity:0}
+@media (max-width:640px){
+  .wm-stack-row .sponsor-stack:not(.compact){height:190px;width:min(160px,46%)}
+}
+
+/* Hustles deck: shorter so it doesn't dominate the page */
+.ws-wrap{margin:0 0 12px}
+.ws-deck{height:210px}
+.ws-card{border-radius:18px}
+@media (min-width:641px){
+  .ws-deck{height:240px;max-width:340px;margin:0 auto}
+}
+
+/* Market: white cards, no outline, small shadow, no dark box behind the deck */
+.wm-stack-row, .wm-stack-row .sponsor-stack{background:transparent !important}
+.wm-stack-row .sponsor-card{background:#fff !important;border:none !important;box-shadow:0 2px 6px rgba(0,0,0,.08) !important}
+.wm-stack-row .sponsor-card img{background:#fff}
+
+/* Last peeking card: deeper shadow so the stack reads as depth */
+.wm-stack-row .sponsor-card.stack-2{box-shadow:0 16px 30px -6px rgba(0,0,0,.28) !important}
+
+/* Write-up beside the deck: meta line, fuller description, fade on change */
+.wm-write{transition:opacity .25s ease}
+.wm-write.swap{opacity:0}
+.wm-meta{font-size:11px;opacity:.7;margin:0 0 6px;line-height:1.4}
+.wm-desc{-webkit-line-clamp:8}
+.wm-verified{color:var(--user-accent,#0a84ff);font-weight:700}
+
+/* Marketplace selected chips: white, not orange or black */
+.wp-market .wp-chip.on{background:#fff !important;color:#111 !important;border:1px solid #e5e7eb !important;box-shadow:0 4px 12px rgba(0,0,0,.08) !important}
+
+/* Desktop layouts (900px and up): capped width, real grids, deck beside its write-up */
+@media (min-width:900px){
+  .wp.wp-market,.wp.wp-gigs{max-width:1180px;margin:0 auto;padding-left:24px;padding-right:24px}
+  .wp.wp-market .mk-grid{display:grid !important;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+  .wp.wp-gigs .wp-list{display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .wp.wp-market .wm-stack-row{max-width:1000px;margin:0 auto 20px;gap:36px;align-items:center}
+  .wp.wp-market .wm-write{padding:12px 8px}
+  .wp.wp-market .wm-write h3{font-size:28px}
+  .wp.wp-market .wm-desc{font-size:14px;-webkit-line-clamp:6}
+  .wp.wp-gigs .ws-wrap{max-width:1000px;margin:0 auto 20px}
+  .ws-deck{height:260px;max-width:360px;margin:0 auto}
+  .ws-hint{text-align:center}
+}
+
+/* wsw wrap: switcher chips sit in the same padded frame as Market and Hustles */
+.wsw-wrap{ max-width:1100px; margin:0 auto; padding:12px 14px 0; }
+.wsw-wrap .wsw{ margin:0; }

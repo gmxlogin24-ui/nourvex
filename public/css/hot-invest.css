@@ -1,0 +1,11 @@
+.hi-wrap{ margin:0 0 14px; }
+.hi-head{ display:flex; align-items:center; justify-content:space-between; margin:0 2px 8px; }
+.hi-head b{ font-size:15px; font-weight:800; color:var(--ink,#0A0A0A); }
+.hi-head a{ font-size:12px; font-weight:700; color:var(--mute,#6B6B6B); text-decoration:none; }
+.hi-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+.hi-card{ display:flex; flex-direction:column; gap:3px; padding:12px; border-radius:18px; text-decoration:none; min-height:84px; }
+.hi-fire{ width:28px; height:28px; border-radius:10px; display:grid; place-items:center; background:linear-gradient(145deg,#4A4A4A,#000); color:#fff; margin-bottom:4px; }
+.hi-fire svg{ width:15px; height:15px; }
+.hi-card b{ font-size:13px; font-weight:800; color:var(--ink,#0A0A0A); }
+.hi-card small{ font-size:11px; color:var(--mute,#6B6B6B); }
+@media (min-width:900px){ .hi-grid{ grid-template-columns:repeat(4,1fr); } }

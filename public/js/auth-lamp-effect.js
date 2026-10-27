@@ -11,7 +11,7 @@
     if (!shell || !form) return;
 
     function setIntensity(v) {
-      shell.style.setProperty('--lamp-intensity', v);
+      shell.style.setProperty('--lamp-intensity', v); document.body.style.setProperty('--lamp-intensity', v);
     }
 
     function passwordScore(val) {

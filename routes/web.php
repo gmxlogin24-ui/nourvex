@@ -39,7 +39,7 @@ Route::get('/', function () {
     $newsFeed = $allNews->where('type', '!=', 'ad')->take(10)->map(fn($n) => [
         'title' => $n->title,
         'body' => $n->body,
-        'tag' => 'Campus Buzz',
+        'tag' => 'Naurvex',
         'time' => $n->published_at,
     ])->values();
 
@@ -73,17 +73,24 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('
 Route::post('/webhooks/paystack', [PaystackWebhookController::class, 'handle']);
 
 // Public pages
-Route::get('/features', [FeaturesController::class, 'index'])->name('features');
-Route::view('/safety', 'safety')->name('safety');
+Route::get('/features', [FeaturesController::class, 'index'])->middleware('auth')->name('features');
+Route::view('/safety', 'safety')->middleware('auth')->name('safety');
 
 // Public browsing — guests can look, not act
 Route::get('/buzz', function () {
     if (!auth()->check() || !auth()->user()->is_admin) {
-        return redirect()->route('pulse.index');
+        return redirect()->route('dashboard');
     }
     return app(NewsController::class)->index(request());
 })->name('news.index');
-Route::get('/pulse', [PulseController::class, 'index'])->name('pulse.index');
+Route::redirect('/pulse', '/dashboard')->name('pulse.index');
+Route::post('/pulse/{news}/view', [PulseController::class, 'view'])->middleware('throttle:180,1')->middleware('auth')->name('pulse.view');
+Route::get('/pulse/{news}/go', [PulseController::class, 'go'])->middleware('throttle:60,1')->middleware('auth')->name('pulse.go');
+Route::get('/pulse/{news}/comments', [\App\Http\Controllers\PulseCommentController::class, 'index'])->middleware('throttle:120,1')->middleware('auth')->name('pulse.comments');
+Route::post('/pulse/{news}/comments', [\App\Http\Controllers\PulseCommentController::class, 'store'])->middleware(['auth', 'throttle:12,1'])->name('pulse.comments.store');
+Route::delete('/pulse/{news}/comments/{comment}', [\App\Http\Controllers\PulseCommentController::class, 'destroy'])->middleware('auth')->name('pulse.comments.destroy');
+Route::post('/pulse/{news}/like', [\App\Http\Controllers\PulseLikeController::class, 'toggle'])->middleware(['auth', 'throttle:60,1'])->name('pulse.like');
+Route::post('/pulse/{news}/comments/{comment}/like', [\App\Http\Controllers\PulseCommentController::class, 'like'])->middleware(['auth', 'throttle:60,1'])->name('pulse.comments.like');
 
 
 Route::middleware(['auth', 'signup.paid'])->group(function () {
@@ -101,6 +108,7 @@ Route::middleware(['auth', 'signup.paid'])->group(function () {
     Route::post('/tour/complete', [\App\Http\Controllers\TourController::class, 'complete'])->middleware('auth')->name('tour.complete');
     Route::get('/dashboard', [\App\Http\Controllers\OverviewController::class, 'index'])->name('dashboard');
 Route::get('/profile-preview', [ProfileController::class, 'preview'])->middleware('auth')->name('profile.preview');
+Route::get('/u/{user}', [ProfileController::class, 'show'])->middleware('auth')->name('profile.public');
 Route::get('/welcome', [\App\Http\Controllers\WelcomeTourController::class, 'show'])->middleware('auth')->name('welcome.show');
 
     Route::get('/q-coin', [\App\Http\Controllers\QCoinController::class, 'index'])->name('qcoin.index');
@@ -108,6 +116,10 @@ Route::get('/welcome', [\App\Http\Controllers\WelcomeTourController::class, 'sho
     Route::post('/concierge/message', [\App\Http\Controllers\ConciergeController::class, 'sendMessage'])->name('concierge.message');
     Route::get('/concierge', [\App\Http\Controllers\ConciergeController::class, 'show'])->name('concierge.show');
     Route::get('/chat', [\App\Http\Controllers\ChatController::class, 'index'])->name('chat.index');
+    Route::post('/chat/start', [\App\Http\Controllers\ChatController::class, 'start'])->name('chat.start');
+    Route::get('/chat/{conversation}', [\App\Http\Controllers\ChatController::class, 'show'])->whereNumber('conversation')->name('chat.show');
+    Route::get('/chat/{conversation}/messages', [\App\Http\Controllers\ChatController::class, 'messages'])->whereNumber('conversation')->name('chat.messages');
+    Route::post('/chat/{conversation}/message', [\App\Http\Controllers\ChatController::class, 'send'])->whereNumber('conversation')->name('chat.send');
 
 
     Route::post('/gigs/{gig}/complete', [GigController::class, 'complete'])->name('gigs.complete');
@@ -141,6 +153,8 @@ Route::get('/welcome', [\App\Http\Controllers\WelcomeTourController::class, 'sho
     Route::post('/marketplace/{listing}/meetup-propose', [MarketplaceController::class, 'proposeMeetup'])->name('marketplace.meetup.propose');
     Route::post('/marketplace/{listing}/meetup-respond/{message}', [MarketplaceController::class, 'respondMeetup'])->name('marketplace.meetup.respond');
     Route::post('/marketplace/{listing}/favorite', [MarketplaceController::class, 'toggleFavorite'])->name('marketplace.favorite');
+Route::post('/marketplace/{listing}/love', [\App\Http\Controllers\MarketplaceController::class, 'love'])->name('marketplace.love');
+    Route::get('/marketplace/inbox', [MarketplaceController::class, 'inbox'])->name('marketplace.inbox');
     Route::get('/marketplace/favorites', [MarketplaceController::class, 'favorites'])->name('marketplace.favorites');
     Route::get('/marketplace/orders', [MarketplaceController::class, 'myOrders'])->name('marketplace.orders');
 
@@ -259,6 +273,7 @@ Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index
     Route::post('/leaderboard/toggle', [LeaderboardController::class, 'toggleOptIn'])->name('leaderboard.toggle');
 
     Route::get('/services', [ServicesController::class, 'index'])->name('services.index');
+    Route::get('/services/{service}', [ServicesController::class, 'show'])->where('service', 'airtime|data|cable')->name('services.show');
     Route::get('/services/data-plans', [ServicesController::class, 'dataPlans'])->name('services.data-plans');
     Route::post('/services/airtime', [ServicesController::class, 'buyAirtime'])->name('services.airtime');
     Route::post('/services/data', [ServicesController::class, 'buyData'])->name('services.data');
@@ -280,6 +295,8 @@ Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index
     Route::get('/referrals', [ReferralController::class, 'index'])->name('referrals.index');
     Route::get('/money-tracker', [WalletController::class, 'moneyTracker'])->name('money-tracker.index');
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
+    Route::get('/wallet/deposit', [\App\Http\Controllers\WalletController::class, 'deposit'])->name('wallet.deposit');
+    Route::get('/wallet/deposit/status/{reference}', [\App\Http\Controllers\WalletController::class, 'depositStatus'])->name('wallet.deposit.status');
     Route::post('/wallet/send', [WalletController::class, 'sendMoney'])->name('wallet.send');
     Route::get('/wallet/transactions/{id}', [WalletController::class, 'showTransaction'])->name('wallet.transaction.show');
     Route::get('/wallet/send', [WalletController::class, 'sendMoneyForm'])->name('wallet.send.form');
@@ -383,11 +400,63 @@ Route::middleware('auth')->group(function () {
     Route::post('/area', [\App\Http\Controllers\AreaController::class, 'update'])->name('area.update');
 });
 
-// ===== NOURVEX SEO pages =====
-Route::view('/about', 'about')->name('about');
-Route::view('/faq', 'faq')->name('faq');
+// ===== NAURVEX SEO pages =====
+Route::view('/about', 'about')->middleware('auth')->name('about');
+Route::view('/faq', 'faq')->middleware('auth')->name('faq');
 Route::get('/robots.txt', [\App\Http\Controllers\SeoController::class, 'robots']);
 Route::get('/sitemap.xml', [\App\Http\Controllers\SeoController::class, 'sitemap']);
-Route::redirect('/features', '/#features');
 
 Route::redirect('/overview', '/dashboard');
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/profit', [\App\Http\Controllers\Admin\ProfitStatsController::class, 'index'])->name('profit.index');
+    Route::get('/profit/users/{user}', [\App\Http\Controllers\Admin\ProfitStatsController::class, 'user'])->name('profit.user');
+});
+
+Route::middleware(['auth', 'signup.paid'])->prefix('investment')->name('investment.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\InvestmentController::class, 'index'])->name('index');
+    Route::get('/create', [\App\Http\Controllers\InvestmentController::class, 'create'])->name('create');
+    Route::post('/projects', [\App\Http\Controllers\InvestmentController::class, 'store'])->name('store');
+    Route::get('/projects/{project}', [\App\Http\Controllers\InvestmentController::class, 'show'])->name('show');
+    Route::post('/projects/{project}/invest', [\App\Http\Controllers\InvestmentController::class, 'invest'])->name('invest')->middleware('throttle:20,1');
+    Route::post('/verification', [\App\Http\Controllers\InvestmentController::class, 'submitVerification'])->name('verification');
+});
+
+Route::middleware(['auth', 'admin'])->prefix('admin/investment')->name('admin.investment.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\InvestmentAdminController::class, 'index'])->name('index');
+    Route::post('/verifications/{verification}', [\App\Http\Controllers\InvestmentAdminController::class, 'reviewVerification'])->name('verifications.review');
+    Route::post('/projects/{project}/approve', [\App\Http\Controllers\InvestmentAdminController::class, 'approve'])->name('projects.approve');
+    Route::post('/projects/{project}/release', [\App\Http\Controllers\InvestmentAdminController::class, 'release'])->name('projects.release');
+    Route::post('/projects/{project}/returns', [\App\Http\Controllers\InvestmentAdminController::class, 'reportReturns'])->name('projects.returns');
+    Route::post('/projects/{project}/distribute', [\App\Http\Controllers\InvestmentAdminController::class, 'distribute'])->name('projects.distribute');
+    Route::post('/projects/{project}/cancel', [\App\Http\Controllers\InvestmentAdminController::class, 'cancel'])->name('projects.cancel');
+});
+
+Route::middleware(['auth', 'signup.paid'])->group(function () {
+    Route::get('/golfvex', [\App\Http\Controllers\GolfVexController::class, 'index'])->name('golfvex.index');
+    Route::get('/games', [\App\Http\Controllers\GamesController::class, 'index'])->name('games.index');
+    Route::get('/games/play/{slug}', [\App\Http\Controllers\GamesController::class, 'play'])->name('games.play');
+    Route::post('/golfvex/play', [\App\Http\Controllers\GolfVexController::class, 'play'])->name('golfvex.play')->middleware('throttle:30,1');
+});
+
+Route::middleware('auth')->get('/all-services', fn () => view('all-services'))->name('services.all');
+
+Route::middleware('auth')->get('/profile-new', fn () => view('profile-layout'))->name('profile.layout');
+
+Route::middleware('auth')->get('/assets-new', function () {
+    $r = app('router')->getRoutes()->getByName('wallet.index');
+    $res = $r ? app()->call($r->getAction('uses')) : null;
+    if ($res instanceof \Illuminate\Http\RedirectResponse) { return $res; }
+    $data = ($res instanceof \Illuminate\View\View) ? $res->getData() : [];
+    return view('assets-layout', $data);
+})->name('assets.new');
+
+Route::get('/gx/{slug}/{path?}', [\App\Http\Controllers\GamesController::class, 'file'])->where('path', '.*')->name('games.file');
+
+// ANNOUNCEMENTS (admin posts, shown on the overview)
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/announcements', [\App\Http\Controllers\Admin\AnnouncementController::class, 'index'])->name('announcements.index');
+    Route::post('/announcements', [\App\Http\Controllers\Admin\AnnouncementController::class, 'store'])->name('announcements.store');
+    Route::post('/announcements/{announcement}/toggle', [\App\Http\Controllers\Admin\AnnouncementController::class, 'toggle'])->name('announcements.toggle');
+    Route::delete('/announcements/{announcement}', [\App\Http\Controllers\Admin\AnnouncementController::class, 'destroy'])->name('announcements.destroy');
+});

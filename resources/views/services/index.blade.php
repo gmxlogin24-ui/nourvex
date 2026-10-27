@@ -1,9 +1,34 @@
 @extends('layouts.app-authenticated')
 @section('content')
-<link rel="stylesheet" href="{{ asset('css/services.css') }}?v={{ time() }}">
+<link rel="stylesheet" href="{{ asset('css/services.css') }}?v={{ filemtime(public_path('css/services.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/services-redesign.css') }}?v={{ filemtime(public_path('css/services-redesign.css')) }}">
 
 <main class="max-w-2xl mx-auto p-6 svc-wrap {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-page' : '' }}" style="{{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'padding-top:0 !important;' : '' }}">
-    <div class="svc-balance-strip">
+    @php
+  $svcMeta = [
+    'airtime' => ['Buy Airtime', 'Top up any network instantly', 'smartphone', 'linear-gradient(145deg,#38BDF8,#2563EB)'],
+    'data' => ['Buy Data', 'Bundles for every network', 'wifi', 'linear-gradient(145deg,#34D399,#059669)'],
+    'cable' => ['Cable TV', 'GOTV, DSTV and StarTimes', 'tv', 'linear-gradient(145deg,#FB923C,#EA580C)'],
+  ];
+  $svcM = $svcMeta[$service];
+@endphp
+<div class="svcx-head">
+    <a href="{{ route('dashboard') }}" class="svcx-back"><i data-lucide="arrow-left"></i> Home</a>
+    <div class="svcx-title">
+        <span class="svcx-ico" style="--svcx:{{ $svcM[3] }}"><i data-lucide="{{ $svcM[2] }}"></i></span>
+        <div><h1>{{ $svcM[0] }}</h1><p>{{ $svcM[1] }}</p></div>
+    </div>
+</div>
+<nav class="svcx-switch" aria-label="Services">
+    @foreach(['airtime' => 'Airtime', 'data' => 'Data', 'cable' => 'Cable'] as $k => $l)
+    <a href="{{ route('services.show', $k) }}" class="svcx-pill {{ $service === $k ? 'on' : '' }}">{{ $l }}</a>
+    @endforeach
+    <span class="svcx-pill soon">Electricity</span>
+    <span class="svcx-pill soon">Betting</span>
+    <span class="svcx-pill soon">Education</span>
+    <a href="{{ route('services.index') }}" class="svcx-pill">All</a>
+</nav>
+<div class="svc-balance-strip">
         <div>
             <div class="svc-balance-label">Wallet Balance</div>
             <div class="svc-balance-amount">₦{{ number_format($balance, 2) }}</div>
@@ -25,14 +50,11 @@
         <div class="alert alert-error mb-4">{{ $errors->first() }}</div>
     @endif
 
-    <div class="svc-tabs">
-        <button type="button" class="svc-tab-btn active" onclick="showTab('airtime', event)">Airtime</button>
-        <button type="button" class="svc-tab-btn" onclick="showTab('data', event)">Data</button>
-        <button type="button" class="svc-tab-btn" onclick="showTab('cable', event)">Cable</button>
-    </div>
+
+    
 
     {{-- AIRTIME --}}
-    <div id="airtime-tab" class="stat-card p-6">
+    <div id="airtime-tab" class="stat-card p-6 svcx-card" style="{{ $service === 'airtime' ? '' : 'display:none;' }}">
         <form method="POST" action="{{ route('services.airtime') }}">
             @csrf
             <span class="svc-section-label">Network</span>
@@ -79,7 +101,7 @@
     </div>
 
     {{-- DATA --}}
-    <div id="data-tab" class="stat-card p-6" style="display:none;">
+    <div id="data-tab" class="stat-card p-6 svcx-card" style="{{ $service === 'data' ? '' : 'display:none;' }}">
         <form method="POST" action="{{ route('services.data') }}">
             @csrf
             <span class="svc-section-label">Network</span>
@@ -125,7 +147,7 @@
     </div>
 
     {{-- CABLE --}}
-    <div id="cable-tab" class="stat-card p-6" style="display:none;">
+    <div id="cable-tab" class="stat-card p-6 svcx-card" style="{{ $service === 'cable' ? '' : 'display:none;' }}">
         <form method="POST" action="{{ route('services.cable') }}">
             @csrf
             <span class="svc-section-label">Provider</span>
@@ -311,8 +333,8 @@ function loadCablePlans() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadPlans();
-    loadCablePlans();
+    @if($service === 'data') loadPlans(); @endif
+    @if($service === 'cable') loadCablePlans(); @endif
     lucide.createIcons();
 });
 </script>

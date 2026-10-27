@@ -1,10 +1,10 @@
-{{-- NOURVEX shell: one light/dark theme for every page that uses layouts.landing --}}
+{{-- NAURVEX shell: one light/dark theme for every page that uses layouts.landing --}}
 <link rel="stylesheet" href="{{ asset('css/nv-shell.css') }}?v={{ @filemtime(public_path('css/nv-shell.css')) }}">
 <script>
 (function () {
     var root = document.documentElement;
-    var light = true;
-    try { if (localStorage.getItem('nvTheme') === 'dark') light = false; } catch (e) {}
+    var light = false;
+    try { var sv = localStorage.getItem('nvTheme'); if (sv === 'light') light = true; else if (sv === 'dark') light = false; } catch (e) {}
     if (!/^\/(login|register|forgot|reset|password)/.test(location.pathname)) root.classList.add('nv-skin');
 
     function apply(l) {

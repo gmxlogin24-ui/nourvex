@@ -1,0 +1,61 @@
+.gp { --ink:#0A0A0A; --mute:#6B6B6B; --card:rgba(120,120,128,.1); --line:rgba(128,128,128,.28); --ac:var(--user-accent,#0F9D6E); max-width:640px; margin:0 auto; padding:calc(env(safe-area-inset-top,0px) + 8px) 14px 160px; box-sizing:border-box; color:var(--ink); }
+html[data-theme="dark"] .gp { --ink:#F2F4F8; --mute:#9AA3B5; --card:rgba(255,255,255,.07); --line:rgba(255,255,255,.14); }
+.gp *, .gp *::before, .gp *::after { box-sizing:border-box; }
+.gp-head { display:flex; align-items:center; gap:12px; margin:0 0 16px; }
+.gp-head h1 { margin:0; font-size:23px; font-weight:800; letter-spacing:-.01em; }
+.gp-head p { margin:2px 0 0; font-size:13px; color:var(--mute); }
+.gp-back { flex:none; width:44px; height:44px; display:grid; place-items:center; border-radius:50%; background:var(--card); border:1px solid var(--line); color:inherit; text-decoration:none; }
+.gp-back svg { width:21px; height:21px; }
+.gp-wallet { display:flex; align-items:center; gap:12px; margin:0 0 14px; padding:14px 16px; border-radius:24px; background:linear-gradient(135deg,var(--ac),#0b6f4e); color:#fff; }
+.gp-wi { flex:none; width:42px; height:42px; display:grid; place-items:center; border-radius:14px; background:rgba(255,255,255,.2); }
+.gp-wi svg { width:21px; height:21px; }
+.gp-wt { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.gp-wt b { font-size:19px; font-weight:800; }
+.gp-wt small { font-size:11.5px; line-height:1.3; opacity:.85; }
+.gp-wallet a { flex:none; padding:8px 14px; border-radius:99px; background:#fff; color:#0b6f4e; font-size:13px; font-weight:800; text-decoration:none; }
+.gp-err { display:flex; align-items:center; gap:10px; margin:0 0 14px; padding:12px 14px; border-radius:16px; background:rgba(239,68,68,.12); color:#ef4444; font-size:14px; font-weight:600; }
+.gp-err svg { width:19px; height:19px; flex:none; }
+.gp-card { padding:18px; border-radius:26px; margin:0 0 14px; }
+.gp-card h2 { display:flex; align-items:center; gap:9px; margin:0 0 4px; font-size:16px; font-weight:800; }
+.gp-card h2 svg { width:19px; height:19px; color:var(--ac); }
+.gp-card h2 em { margin-left:auto; font-style:normal; font-size:11.5px; font-weight:600; color:var(--mute); }
+.gp-l { display:block; margin:14px 0 7px; font-size:13px; font-weight:700; color:var(--mute); }
+.gp-l em { margin-left:4px; font-style:normal; font-size:11.5px; font-weight:600; opacity:.75; }
+.gp .input-field { display:block; width:100%; min-height:50px; margin-top:0; padding:0 14px; border:1px solid var(--line); border-radius:15px; background:var(--card); color:var(--ink); font:inherit; font-size:15px; outline:none; }
+.gp textarea.input-field { padding:12px 14px; min-height:110px; resize:vertical; }
+.gp select.input-field { -webkit-appearance:none; appearance:none; padding-right:40px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238a8f98' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; }
+.gp .input-field:focus { border-color:var(--ac); box-shadow:0 0 0 3px rgba(15,157,110,.18); }
+.gp #gigCategoryFields > * { margin-top:2px; }
+.gp #gigCategoryFields label, .gp #gigItemFields label { display:block; margin:14px 0 7px; font-size:13px; font-weight:700; color:var(--mute); }
+.gp .text-muted { color:var(--mute); }
+.gp-money { position:relative; }
+.gp-money > span { position:absolute; left:16px; top:50%; transform:translateY(-50%); font-weight:800; color:var(--mute); pointer-events:none; }
+.gp-money .input-field { padding-left:36px; font-size:19px; font-weight:800; }
+.gp-switch { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:16px; padding:12px 14px; border:1px solid var(--line); border-radius:16px; background:var(--card); cursor:pointer; }
+.gp-switch > span { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.gp-switch b { font-size:14px; font-weight:800; }
+.gp-switch small { font-size:12px; color:var(--mute); }
+.gp-switch input { -webkit-appearance:none; appearance:none; flex:none; position:relative; width:50px; height:30px; margin:0; border:0; border-radius:99px; background:rgba(128,128,128,.4); cursor:pointer; }
+.gp-switch input::after { content:""; position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:50%; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,.3); }
+.gp-switch input:checked { background:var(--ac); }
+.gp-switch input:checked::after { left:23px; }
+.gp #gigPackagesBuilder, .gp #gigItemFields { margin-top:12px; }
+.gp #gigPackagesBuilder > * + * { margin-top:10px; }
+.gp #gigPackagesBuilder .input-field { margin-top:8px; }
+.gp #gigPackagesBuilder .glass-card { padding:12px; border-radius:18px; }
+.gp-seg { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.gp-seg label { position:relative; cursor:pointer; }
+.gp-seg input { position:absolute; opacity:0; pointer-events:none; }
+.gp-seg span { display:flex; flex-direction:column; align-items:center; gap:6px; padding:13px 6px; border:1px solid var(--line); border-radius:16px; background:var(--card); font-size:13px; font-weight:700; }
+.gp-seg span svg { width:21px; height:21px; }
+.gp-seg input:checked + span { border-color:var(--ac); background:rgba(15,157,110,.16); color:var(--ac); }
+.gp-two { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.gp-two .gp-l { margin-top:12px; }
+.gp-file { display:flex; align-items:center; gap:12px; margin-top:12px; padding:14px; border:1.5px dashed var(--line); border-radius:16px; color:var(--mute); cursor:pointer; }
+.gp-file svg { width:22px; height:22px; flex:none; }
+.gp-file span { display:flex; flex-direction:column; gap:2px; font-size:14px; font-weight:700; min-width:0; overflow:hidden; text-overflow:ellipsis; }
+.gp-file small { font-size:11.5px; font-weight:600; opacity:.8; }
+.gp-file-in { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
+.gp-submit { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; height:58px; margin-top:6px; border:0; border-radius:99px; background:var(--ac); color:#fff; font:inherit; font-size:17px; font-weight:800; cursor:pointer; box-shadow:0 14px 28px -14px var(--ac); }
+.gp-submit svg { width:20px; height:20px; }
+.gp-note { margin:12px 0 0; text-align:center; font-size:12px; color:var(--mute); }

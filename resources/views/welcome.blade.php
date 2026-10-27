@@ -46,7 +46,7 @@
                         <div class="lp-post-img"></div>
                     @endif
                     <div class="lp-post-b">
-                        <span class="lp-chip lp-chip-v" style="align-self:flex-start">{{ $item['tag'] ?? 'Campus Buzz' }}</span>
+                        <span class="lp-chip lp-chip-v" style="align-self:flex-start">{{ $item['tag'] ?? 'Naurvex' }}</span>
                         <h4>{{ \Illuminate\Support\Str::limit($item['title'] ?? '', 70) }}</h4>
                         <p>{{ \Illuminate\Support\Str::limit(strip_tags($item['body'] ?? ''), 110) }}</p>
                         @if(!empty($item['time']))
@@ -65,7 +65,7 @@
     <section class="lp-wrap">
         <div class="lp-final lp-rv">
             <h2>Your campus hustle <span class="lp-grad">starts here.</span></h2>
-            <p>Join NOURVEX and put your skills, your stuff and your money to work.</p>
+            <p>Join NAURVEX and put your skills, your stuff and your money to work.</p>
             <a href="{{ route('register') }}" class="lp-btn lp-btn-primary">Create your free account <i data-lucide="arrow-right"></i></a>
         </div>
     </section>
@@ -75,7 +75,7 @@
         <div class="lp-wrap">
             <div class="lp-foot-grid">
                 <div>
-                    <div class="lp-foot-brand">NOURVEX</div>
+                    <div class="lp-foot-brand">NAURVEX</div>
                     <p class="lp-foot-note">Work, sell and get paid, all in one campus app.</p>
                 </div>
                 <div>
@@ -99,7 +99,7 @@
                     </ul>
                 </div>
             </div>
-            <div class="lp-copy">&copy; {{ date('Y') }} NOURVEX. All rights reserved.</div>
+            <div class="lp-copy">&copy; {{ date('Y') }} NAURVEX. All rights reserved.</div>
         </div>
     </footer>
 </main>

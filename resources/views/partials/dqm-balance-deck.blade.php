@@ -67,7 +67,7 @@
         </div>
         <div class="dqm-deck-fan dqm-deck-fan-near dqm-deck-fan-coral dqm-fan-bottomcard" id="dqmFanBottomNear" data-card="earnings">
             <div class="dqm-fan-label" data-role="label">Earnings</div>
-            <div class="dqm-fan-value" data-role="value">₦{{ number_format($earnings ?? 0) }}</div>
+            <div class="dqm-fan-value" data-role="value">{{ number_format(($earnings ?? 0) * config('qcoin.q_per_naira_display', 10)) }} Q<small style="display:block;font-size:.5em;font-weight:500;opacity:.4">₦{{ number_format($earnings ?? 0) }}</small></div>
             <span class="dqm-fan-masked-sm">•••• 3123</span>
         </div>
         <div class="dqm-deck-fan dqm-deck-fan-far dqm-deck-fan-amber dqm-fan-bottomcard" id="dqmFanBottomFar"><span class="dqm-fan-masked-sm">•••• 3123</span></div>
@@ -121,7 +121,7 @@
     }
     function openExpanded() {
         var rTop = peekTop.getBoundingClientRect(), rFront = front.getBoundingClientRect(), rBottom = peekBottom.getBoundingClientRect();
-        if (detailA) detailA.textContent = front.dataset.card === 'qcoin' ? '{{ $streakDays ?? 0 }} days' : '₦{{ number_format($earnings ?? 0) }}';
+        if (detailA) detailA.textContent = front.dataset.card === 'qcoin' ? '{{ $streakDays ?? 0 }} days' : '{{ number_format(($earnings ?? 0) * config('qcoin.q_per_naira_display', 10)) }} Q<small style="display:block;font-size:.5em;font-weight:500;opacity:.4">₦{{ number_format($earnings ?? 0) }}</small>';
         overlay.classList.add('open');
         requestAnimationFrame(function () {
             flipFrom(fanTopNear, rTop); flipFrom(fanCenter, rFront); flipFrom(fanBottomNear, rBottom);

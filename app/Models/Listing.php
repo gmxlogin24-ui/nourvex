@@ -13,7 +13,8 @@ class Listing extends Model
         'title', 'seller_name', 'description', 'amount', 'stock_quantity',
         'category', 'location', 'condition', 'image_url', 'is_verified_seller',
         'user_id', 'listing_type', 'store_name', 'whatsapp', 'phone',
-        'status', 'buyer_id', 'delivery_method', 'shipping_note', 'shipped_at',
+        'status', 'buyer_id', 'delivery_method', 'shipping_note', 'shipped_at', 'brand', 'highlights', 'whats_in_box', 'warranty', 'return_policy', 'negotiable',
+        'old_price', 'colors', 'sizes', 'specs',
     ];
 
     protected function casts(): array

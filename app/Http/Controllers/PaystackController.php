@@ -45,7 +45,7 @@ class PaystackController extends Controller
 
         WalletTopup::create(['user_id' => $user->id, 'tx_ref' => $txRef, 'amount' => $amount, 'status' => 'pending']);
 
-        $data = $this->initializeTransaction($txRef, $amount, $user->email, route('vendor.callback'), ['title' => 'NOURVEX Vendor Registration']);
+        $data = $this->initializeTransaction($txRef, $amount, $user->email, route('vendor.callback'), ['title' => 'NAURVEX Vendor Registration']);
 
         if (($data['status'] ?? false) === true) {
             return redirect($data['data']['authorization_url']);
@@ -121,7 +121,7 @@ class PaystackController extends Controller
         WalletTopup::create(['user_id' => $user->id, 'tx_ref' => $txRef, 'amount' => $amount, 'status' => 'pending']);
 
         try {
-            $data = $this->initializeTransaction($txRef, $amount, $user->email, route('signup-fee.callback'), ['title' => 'NOURVEX Account Activation']);
+            $data = $this->initializeTransaction($txRef, $amount, $user->email, route('signup-fee.callback'), ['title' => 'NAURVEX Account Activation']);
             if (($data['status'] ?? false) === true) {
                 return redirect($data['data']['authorization_url']);
             }
@@ -204,7 +204,7 @@ class PaystackController extends Controller
         $request->session()->put('pending_registration_txref', $txRef);
 
         try {
-            $data = $this->initializeTransaction($txRef, $amount, $pending['email'], route('register.pay.callback'), ['title' => 'Campulsy Account Activation']);
+            $data = $this->initializeTransaction($txRef, $amount, $pending['email'], route('register.pay.callback'), ['title' => 'Naurvex Account Activation']);
             if (($data['status'] ?? false) === true) {
                 return redirect($data['data']['authorization_url']);
             }
@@ -298,7 +298,7 @@ class PaystackController extends Controller
 
         $request->session()->forget(['pending_registration', 'pending_registration_txref']);
 
-        $msg = 'Welcome to Campulsy! Your account is active.' . ($settledCount > 0 ? ' ' . $settledCount . ' held gig payment(s) released to your wallet.' : '');
+        $msg = 'Welcome to Naurvex! Your account is active.' . ($settledCount > 0 ? ' ' . $settledCount . ' held gig payment(s) released to your wallet.' : '');
         return redirect()->route('onboarding.interests')->with('status', $msg);
     }
 
@@ -316,7 +316,7 @@ class PaystackController extends Controller
 
         $data = [];
         try {
-            $data = $this->initializeTransaction($txRef, $validated['amount'], $user->email, route('paystack.callback'), ['title' => 'NOURVEX Wallet Top Up']);
+            $data = $this->initializeTransaction($txRef, $validated['amount'], $user->email, route('paystack.callback'), ['title' => 'NAURVEX Wallet Top Up']);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('Wallet top-up init failed: ' . $e->getMessage());
         }
@@ -332,8 +332,8 @@ class PaystackController extends Controller
         $txRef = $request->query('reference') ?? $request->query('trxref');
         $topup = WalletTopup::where('tx_ref', $txRef)->first();
 
-        if (!$topup || (int) $topup->user_id !== (int) Auth::id()) return redirect()->route('wallet.index')->withErrors(['topup' => 'Transaction not found.']);
-        if ($topup->status === 'successful') return redirect()->route('dashboard')->with('status', 'Payment already processed.');
+        if (!$topup || (int) $topup->user_id !== (int) Auth::id()) return redirect()->route('wallet.deposit')->withErrors(['topup' => 'Transaction not found.']);
+        if ($topup->status === 'successful') return redirect()->route('wallet.deposit.status', $topup->tx_ref);
 
         $verifyData = $this->verifyTransaction($txRef);
         $verified = ($verifyData['status'] ?? false) === true
@@ -347,9 +347,7 @@ class PaystackController extends Controller
             if (in_array($psStatus, ['failed', 'abandoned', 'reversed'], true)) {
                 $topup->update(['status' => 'failed']);
             }
-            return redirect()->route('wallet.index')->withErrors(['topup' => $psStatus === 'success'
-                ? 'Payment verification failed.'
-                : 'Payment not confirmed yet. If you were charged, your wallet is credited automatically within a few minutes.']);
+            return redirect()->route('wallet.deposit.status', $topup->tx_ref);
         }
 
         DB::transaction(function () use ($topup) {
@@ -369,6 +367,6 @@ class PaystackController extends Controller
             \Illuminate\Support\Facades\Log::warning('WalletTopupCredited notify failed: ' . $e->getMessage());
         }
 
-        return redirect()->route('dashboard')->with('status', 'Wallet topped up successfully!');
+        return redirect()->route('wallet.deposit.status', $topup->tx_ref);
     }
 }

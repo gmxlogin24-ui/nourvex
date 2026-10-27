@@ -1,0 +1,25 @@
+/* NaGolf sits in its own card on the Q-Coin page. The course photo stays inside that card. */
+.qc-golf{ margin:28px 0 0; }
+.qc-golf-head{ display:flex; align-items:baseline; justify-content:space-between; padding:0 4px 10px; color:#0F1115; }
+.qc-golf-head span{ font-size:16px; font-weight:800; }
+.qc-golf-head small{ font-size:11px; color:#7C8596; font-weight:600; }
+.qc-golf-card{ position:relative; isolation:isolate; overflow:hidden; border-radius:26px; background:#0B1A10; box-shadow:0 18px 34px -22px rgba(7,20,11,.7); }
+.qc-golf-card .gv{ position:relative; border-radius:0; }
+.qc-golf-card .gv-field{ position:absolute; inset:0; background-size:cover !important; background-position:center center !important; }
+.qc-golf-card .gv-field::after{ background:linear-gradient(180deg, rgba(4,16,8,.35) 0%, rgba(4,16,8,0) 25%, rgba(4,16,8,0) 50%, rgba(4,16,8,.75) 100%) !important; }
+
+@media (max-width:899px){
+  .qc-golf-card .gv{ min-height:640px; }
+}
+@media (min-width:900px){
+  .qc-golf-card .gv{ min-height:700px; }
+  .qc-golf-card .gv-side{ left:24px; top:24px; width:300px; background:rgba(6,24,12,.36) !important; }
+  .qc-golf-card .gv-sheet{ right:24px; top:24px; width:360px; }
+  .qc-golf-card .gv-nav{ bottom:28px; }
+}
+
+/* Keep the swing controls above the bottom dock on the Q-Coin page. */
+.qc-golf{ margin-bottom:140px; }
+@media (min-width:900px){
+  .qc-golf{ margin-bottom:150px; }
+}

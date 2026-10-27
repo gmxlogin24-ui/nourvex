@@ -9,6 +9,6 @@
             <a href="{{ route('register') }}">Create account</a>
             <a href="{{ route('login') }}">Log in</a>
         </nav>
-        <div class="nvp-copy">&copy; {{ date('Y') }} NOURVEX LTD. All rights reserved.</div>
+        <div class="nvp-copy">&copy; {{ date('Y') }} NAURVEX LTD. All rights reserved.</div>
     </div>
 </footer>

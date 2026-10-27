@@ -1,4 +1,4 @@
-/* NOURVEX theme: light theme (main has class lp-light), nav colours, phone theme row */
+/* NAURVEX theme: light theme (main has class lp-light), nav colours, phone theme row */
 
 /* ---- old menu: purple -> black (dark) / white (light) ---- */
 body:has(main.lp){--nvn-bg:#000;--nvn-fg:#fff;--nvn-muted:rgba(255,255,255,.68);--nvn-line:rgba(255,255,255,.14);--nvn-hover:rgba(255,255,255,.08);--nvn-cta-bg:#fff;--nvn-cta-fg:#000}

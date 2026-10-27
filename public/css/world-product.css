@@ -1,0 +1,33 @@
+/* market product page in the Market format */
+.wp-page.wp-product{ max-width:640px; }
+.wp-product .mpd-page{ max-width:none; }
+.wp-product .mpd-topbar{ margin-bottom:12px; }
+.wp-product .mpd-icon-btn{ width:40px; height:40px; background:#fff; color:var(--ink); border:1px solid var(--line); }
+.wp-product .mpd-image-wrap{ height:auto; aspect-ratio:1 / 1; max-height:60vh; width:100%; border-radius:18px; background:var(--w-tint); border:1px solid var(--line); margin-bottom:10px; }
+.wp-product .mpd-image-wrap .mpd-image{ width:100%; height:100%; object-fit:cover; }
+.wp-product .mpd-image-placeholder{ color:var(--w-dark); }
+.wp-product .type-badge{ background:#fff; color:var(--w-dark); border:1px solid var(--line); border-radius:99px; padding:3px 10px; font-size:10px; font-weight:800; }
+.wp-product .mpd-thumb-row{ margin-bottom:14px; }
+.wp-product .mpd-thumb{ border:1px solid var(--line); border-radius:12px; }
+.wp-product .mpd-store{ color:var(--w-dark); font-size:11.5px; font-weight:700; }
+.wp-product .mpd-title{ font-size:20px; font-weight:800; letter-spacing:-.02em; color:var(--ink); }
+.wp-product .mpd-rating{ color:var(--w-dark); background:var(--w-tint); }
+.wp-product .mpd-meta-pill{ background:#fff; border:1px solid var(--line); color:var(--mute); }
+.wp-product .mpd-price{ font-size:26px; font-weight:800; color:var(--w-dark); margin-bottom:14px; }
+.wp-product .mpd-seller-card{ background:#fff; border:1px solid var(--line); border-radius:18px; }
+.wp-product .mpd-seller-avatar{ background:var(--w-tint); color:var(--w-dark); }
+.wp-product .mpd-seller-name{ color:var(--ink); }
+.wp-product .mpd-seller-verified{ color:#0B7A5A; }
+.wp-product .mpd-seller-sub, .wp-product .mpd-seller-chevron{ color:var(--mute); }
+.wp-product .mpd-description{ color:#3B4350; font-size:13px; }
+.wp-product .mpd-action-row{ gap:10px; margin-top:16px; }
+.wp-product .mpd-btn-ghost{ height:46px; padding:0 16px; background:var(--w); color:#fff; border:0; border-radius:12px; font-size:13.5px; font-weight:700; box-shadow:0 8px 16px -8px var(--w); }
+.wp-product .mpd-btn-solid{ height:46px; padding:0 16px; background:#fff; color:var(--w-dark); border:1.5px solid var(--w); border-radius:12px; font-size:13.5px; font-weight:700; box-shadow:none; }
+.wp-product .mpd-btn-full{ width:100%; }
+@media (min-width:900px){
+  .wp-page.wp-product{ max-width:1000px; }
+  .wp-product .mpd-page{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:0 28px; align-items:start; }
+  .wp-product .mpd-topbar{ grid-column:1 / -1; }
+  .wp-product .mpd-image-wrap, .wp-product .mpd-thumb-row{ grid-column:1; }
+  .wp-product .mpd-info{ grid-column:2; grid-row:2 / span 2; }
+}

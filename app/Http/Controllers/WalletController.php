@@ -96,7 +96,7 @@ class WalletController extends Controller
             $note = $validated['note'] ?? '';
 
             // Internal wallet-to-wallet transfer - no bank/Paystack is involved,
-            // so NOURVEX generates its own reference, shared by both legs of
+            // so NAURVEX generates its own reference, shared by both legs of
             // the transfer (same convention banks use between debit/credit legs).
             $reference = 'NRX' . now()->format('ymd') . strtoupper(substr(bin2hex(random_bytes(4)), 0, 6));
 
@@ -187,6 +187,33 @@ class WalletController extends Controller
             'categoryTotals' => $categoryTotals,
             'monthly' => $monthly,
             'transactions' => Transaction::where('user_id', $user->id)->latest()->take(30)->get(),
+        ]);
+    }
+
+    public function deposit()
+    {
+        $user = Auth::user();
+
+        return view('wallet.deposit', [
+            'user' => $user,
+            'balance' => $user->wallet_balance,
+            'hasVirtual' => (bool) $user->virtual_account_number,
+            'walletCapRemaining' => $user->virtual_account_number ? null : max(0, \App\Models\User::NO_BVN_WALLET_CAP - $user->wallet_balance),
+            'recent' => \App\Models\Transaction::where('user_id', $user->id)->where('type', 'wallet_topup')->latest()->limit(5)->get(),
+        ]);
+    }
+
+    public function depositStatus($reference)
+    {
+        $topup = \App\Models\WalletTopup::where('tx_ref', $reference)->where('user_id', Auth::id())->firstOrFail();
+        $tx = $topup->status === 'successful'
+            ? \App\Models\Transaction::where('user_id', Auth::id())->where('type', 'wallet_topup')->where('amount', $topup->amount)->latest()->first()
+            : null;
+
+        return view('wallet.deposit-status', [
+            'topup' => $topup,
+            'tx' => $tx,
+            'balance' => Auth::user()->wallet_balance,
         ]);
     }
 }

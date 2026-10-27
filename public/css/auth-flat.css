@@ -1,0 +1,40 @@
+/* flat transparent inputs on login and register: no blur, glow or inner effects */
+.glass-input,
+.glass-input:hover,
+.glass-input:focus,
+.glass-input:active,
+form input.glass-input,
+form select.glass-input,
+form textarea.glass-input{
+  background:transparent !important;
+  background-image:none !important;
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+  box-shadow:none !important;
+  filter:none !important;
+  text-shadow:none !important;
+  outline:0 !important;
+  border:1px solid rgba(128,128,128,.45) !important;
+  transition:border-color .15s !important;
+}
+.glass-input:focus{border-color:currentColor !important}
+.glass-input::placeholder{opacity:.55}
+.glass-input:-webkit-autofill,
+.glass-input:-webkit-autofill:focus{
+  -webkit-box-shadow:0 0 0 1000px transparent inset !important;
+  box-shadow:0 0 0 1000px transparent inset !important;
+  -webkit-text-fill-color:currentColor !important;
+  transition:background-color 9999s ease-out 0s !important;
+}
+.glass-input::before,.glass-input::after{display:none !important}
+select.glass-input option{color:#111;background:#fff}
+
+/* login-flat: login inputs without a glass-input class */
+form input[type="email"],form input[type="password"],form input[type="text"],form select{
+  background:transparent !important;background-image:none !important;
+  -webkit-backdrop-filter:none !important;backdrop-filter:none !important;
+  box-shadow:none !important;filter:none !important;outline:0 !important;
+  border:1px solid rgba(128,128,128,.45) !important;
+}
+form input[type="email"]:focus,form input[type="password"]:focus,form input[type="text"]:focus{border-color:currentColor !important}
+form input:-webkit-autofill{-webkit-box-shadow:0 0 0 1000px transparent inset !important;-webkit-text-fill-color:currentColor !important;transition:background-color 9999s ease-out 0s !important}

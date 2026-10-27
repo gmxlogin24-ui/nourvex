@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NOURVEX - @yield('title', 'Dashboard')</title>
+    <title>NAURVEX - @yield('title', 'Dashboard')</title>
     @include('partials.favicons')
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
@@ -14,6 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
+    @unless(request()->routeIs('games.*'))<script src="{{ asset('js/no-motion.js') }}"></script>@endunless
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -29,19 +30,22 @@
     <link rel="stylesheet" href="{{ asset('css/glass-dashboard.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/profile-glass.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/nav-authenticated-green.css') }}?v={{ time() }}">
-        <link rel="stylesheet" href="{{ asset('css/dashboard2.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/dashboard2.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/dashboard2-minimal.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/dashboard-premium.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/dashboard-v3.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/notifications.css') }}?v={{ time() }}">
     <script src="{{ asset('js/push.js') }}?v={{ time() }}" defer></script>
     <link rel="stylesheet" href="{{ asset('css/mobile-nav-styles.css') }}?v={{ time() }}">
-    <!-- old levi.css removed -->
+    <link rel="stylesheet" href="{{ asset('css/liquid-dock.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/nv-glass.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/preloader.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/dashboard-aurora.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/aurora-pages.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/scrollbar.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/worlds.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/dock-desktop.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/app-dark.css') }}?v={{ time() }}">
 
     <script>
         if (localStorage.getItem('theme') === 'dark') {
@@ -63,6 +67,13 @@
       .auth-page-shell, .app-push-content { margin-left: 0 !important; }
     }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/shell-fix.css') }}?v={{ time() }}">
+    <script>try{var c=localStorage.getItem('nvEdge');if(c)document.documentElement.style.setProperty('--ov-edge',c);}catch(e){}</script>
+<link rel="stylesheet" href="{{ asset('css/mono.css') }}?v={{ time() }}">
+<link rel="stylesheet" href="{{ asset('css/buttons-glass.css') }}?v={{ time() }}">
+<link rel="stylesheet" href="{{ asset('css/readable.css') }}?v={{ time() }}">
+<link rel="stylesheet" href="{{ asset('css/no-sidebar.css') }}?v={{ time() }}">
+<link rel="stylesheet" href="{{ asset('css/no-motion.css') }}?v={{ time() }}">
 </head>
 @php
     $routeName = request()->route() ? request()->route()->getName() : '';
@@ -72,8 +83,11 @@
     data-sidebar-style="{{ auth()->user()->sidebar_style ?? 'rail' }}"
     data-mobile-nav-style="{{ auth()->user()->mobile_nav_style ?? 'painted_pill' }}">
     @include('partials.preloader')
-    @if((auth()->user()->theme_style ?? 'glass') === 'plain')
-        @include('partials.dqm-topbar')
+    @include('partials.dg-lens')
+    @include('partials.page-bar')
+    <div class="nv-bg" aria-hidden="true"></div>
+    @if(($pageKey ?? '') === 'dashboard')
+        
     @endif
 
 <div class="app-shell-flex">
@@ -82,9 +96,8 @@
         @else
         @include('partials.nav-sidebar-classic', ['active' => $pageKey])
         @endif
-        @include('partials.nav-mobile-bar', ['active' => $pageKey])
-        @include('partials.nav-edge-dock', ['active' => $pageKey])
-        @include('partials.nav-halo-dock', ['active' => $pageKey])
+        {{-- One dock for every page (overview renders its own inside its layout) --}}
+        @include('partials.nv-dock')
             <div class="auth-page-shell">
                 <div class="app-push-content auth-reveal-content" id="appPushContent">
                     @unless(($pageKey ?? '') === 'dashboard' || ($pageKey ?? '') === 'overview')
@@ -95,12 +108,15 @@
                             @include('partials.levi-bubble-v2')
                         @endunless
                     @endunless
+@unless(in_array($pageKey ?? '', ['profile','dashboard','overview']))@endunless
                     @yield('content')
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="{{ asset('js/world-timing.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/world-motion.js') }}?v={{ time() }}" defer></script>
     <script src="{{ asset('js/charts.js') }}?v={{ time() }}"></script>
     <script src="{{ asset('js/reveal.js') }}?v={{ time() }}"></script>
     <script src="{{ asset('js/quick-actions-tilt.js') }}?v={{ time() }}"></script>
@@ -109,7 +125,6 @@
     <script src="{{ asset('js/balance-ledger.js') }}?v={{ time() }}"></script>
     <script src="{{ asset('js/mobile-settings-menu.js') }}?v={{ time() }}"></script>
     <script src="{{ asset('js/auth-shell.js') }}?v={{ time() }}"></script>
-    <!-- old levi-bubble.js removed -->
     <script src="{{ asset('js/levi-tour.js') }}?v={{ time() }}"></script>
     <script>
         lucide.createIcons();
@@ -143,9 +158,14 @@
     </script>
         <script src="{{ asset('js/preloader.js') }}?v={{ time() }}"></script>
     @yield('scripts')
-<!-- levi.js removed: duplicate of levi-bubble.js, was causing double message submission -->
 <script src="{{ asset('js/edge-dock.js') }}?v={{ time() }}"></script>
 <script src="{{ asset('js/holo-balance.js') }}?v={{ time() }}"></script>
 <script src="{{ asset('js/mnav-scroll-transparency.js') }}?v={{ time() }}"></script>
+    @include('partials.world-hover')
+    @include('partials.world-edge')
+<script src="/js/auto-contrast.js?v=3" defer></script>
+<script src="/js/glass-adapt.js?v=3" defer></script>
+<script src="/js/theme-btn.js?v=1" defer></script>
+<script src="/js/auto-dark.js?v=8" defer></script>
 </body>
 </html>

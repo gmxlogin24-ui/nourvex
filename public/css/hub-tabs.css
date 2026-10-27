@@ -1,0 +1,18 @@
+.hub-panel[hidden]{ display:none; }
+.hub-loading{ padding:18px; text-align:center; font-size:12px; opacity:.6; }
+.hub-bar{ display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:99px; margin:0 0 12px; }
+.hub-back, .hub-bell{ width:34px; height:34px; display:grid; place-items:center; border-radius:50%; flex:none; color:var(--ink,#0F1115); text-decoration:none; }
+.hub-bar svg{ width:18px; height:18px; }
+.hub-title{ flex:1; min-width:0; display:flex; flex-direction:column; line-height:1.15; }
+.hub-title b{ font-size:16px; font-weight:800; color:var(--ink,#0F1115); }
+.hub-title small{ font-size:11px; color:var(--mute,#6B7690); }
+.hub-nav{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px 6px; padding:14px 8px; border-radius:26px; margin:0 0 14px; }
+.hub-nav .dg-it{ align-items:center; text-align:center; gap:5px; color:var(--ink,#0F1115); }
+.hub-nav .dg-tile{ position:relative; width:46px; height:46px; border-radius:16px; }
+.hub-nav .dg-tile svg{ width:20px; height:20px; }
+.hub-nav .dg-it b{ font-size:10.5px; line-height:1.15; color:var(--ink,#0F1115); }
+.hub-nav .dg-it.on .dg-tile{ box-shadow:0 0 0 2px #fff, 0 0 0 4px #3F5BFF; }
+body.ws2 .ws2-main{ padding-bottom:28px; }
+.wp-market > .wp-top{ display:none; }
+.wp-market .wp-chips a[href$="/marketplace/favorites"], .wp-market .wp-chips a[href$="/marketplace/orders"], .wp-market .wp-sep{ display:none; }
+@media (min-width:900px){ .hub-nav{ grid-template-columns:repeat(8,1fr); } body.ws2 .ws2-main{ padding-left:24px; } }

@@ -2,7 +2,7 @@
 @section('content')
     <div class="flex items-center gap-3 mb-5">
         <div class="logo-badge"></div>
-        <h1 class="text-lg font-semibold">NOURVEX</h1>
+        <h1 class="text-lg font-semibold">NAURVEX</h1>
     </div>
     <p class="text-sm mb-6" style="opacity:0.75;">Where are you based? This puts you on the right leaderboard.</p>
     @if ($errors->any())

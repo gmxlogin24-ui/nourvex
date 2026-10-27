@@ -43,3 +43,4 @@
 @media (prefers-reduced-motion: reduce) {
   .qelvo-preloader-mark, .qelvo-mark-orbit { animation: none; }
 }
+.qelvo-preloader{display:none !important}

@@ -1,0 +1,30 @@
+.wg{ margin:0; background:#F7F8F7; color:#1C2B1C; font-family:'Sora',system-ui,-apple-system,sans-serif; --w:#14A800; --w-dark:#108A00; --w-tint:#E8F5E3; }
+.wg *{ box-sizing:border-box; }
+.wg a{ text-decoration:none; color:inherit; }
+.wg-head{ position:sticky; top:0; z-index:50; background:#fff; border-bottom:1px solid #E1E8E1; padding:calc(8px + env(safe-area-inset-top)) 12px 0; }
+.wg-row{ display:flex; align-items:center; gap:10px; }
+.wg-exit{ width:38px; height:38px; border-radius:50%; display:grid; place-items:center; background:#F1F5F1; border:1px solid #E1E8E1; }
+.wg-exit svg{ width:19px; height:19px; }
+.wg-logo{ flex:1; font-size:17px; font-weight:600; letter-spacing:-.02em; color:#1C2B1C; }
+.wg-logo b{ font-weight:800; color:var(--w); }
+.wg-post{ display:flex; align-items:center; gap:5px; padding:8px 14px; border-radius:99px; background:var(--w); color:#fff !important; font-size:12.5px; font-weight:700; }
+.wg-post svg{ width:15px; height:15px; }
+.wg-search{ display:flex; align-items:center; gap:8px; margin:10px 0 4px; padding:0 14px; height:42px; border-radius:99px; background:#F1F5F1; border:1px solid #E1E8E1; color:#5E6E5E; }
+.wg-search svg{ width:16px; height:16px; flex:none; }
+.wg-search input{ flex:1; min-width:0; border:0; outline:0; background:transparent; font:inherit; font-size:13.5px; color:#1C2B1C; }
+.wg-top{ display:flex; gap:22px; }
+.wg-top a{ padding:10px 2px 9px; font-size:13.5px; font-weight:700; color:#5E6E5E; border-bottom:2px solid transparent; }
+.wg-top a.on{ color:var(--w-dark); border-bottom-color:var(--w); }
+.wg-main{ max-width:900px; margin:0 auto; padding:12px 12px calc(96px + env(safe-area-inset-bottom)); }
+.wg-tabs{ position:fixed; left:50%; transform:translateX(-50%); bottom:calc(10px + env(safe-area-inset-bottom)); z-index:60; width:min(360px,calc(100vw - 24px)); display:flex; padding:6px; border-radius:30px; background:rgba(255,255,255,.72); border:1px solid rgba(255,255,255,.9); box-shadow:0 14px 30px -12px rgba(10,60,10,.35); -webkit-backdrop-filter:blur(18px) saturate(170%); backdrop-filter:blur(18px) saturate(170%); }
+.wg-tabs a{ flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:7px 0 6px; border-radius:24px; font-size:10.5px; font-weight:700; color:#5E6E5E; }
+.wg-tabs a svg{ width:19px; height:19px; }
+.wg-tabs a.on{ color:#fff; background:linear-gradient(180deg,#22B90E,#14A800); }
+.wg .wp-search,.wg .wsw{ display:none; }
+.wg .text-muted{ color:#5E6E5E; }
+.wg .glass-card,.wg .bg-card{ background:#fff; border:1px solid #E1E8E1; border-radius:16px; }
+.wg .card-rounded{ border-radius:16px; }
+.wg .text-accent{ color:var(--w-dark); }
+.wg .icon-badge{ width:44px; height:44px; border-radius:14px; display:grid; place-items:center; background:var(--w-tint); color:var(--w-dark); }
+.wg .tx-status{ display:inline-block; padding:4px 10px; border-radius:99px; font-size:11.5px; font-weight:700; background:#F1F5F1; color:#5E6E5E; }
+.wg .tx-status.done{ background:var(--w-tint); color:var(--w-dark); }

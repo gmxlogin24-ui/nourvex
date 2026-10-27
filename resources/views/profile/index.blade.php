@@ -1,463 +1,190 @@
-@extends('layouts.app-authenticated')
+@extends('layouts.world-shell')
+
+@section('world', 'profile')
+@section('title', 'Profile')
+
 @section('content')
+@php
+  $u = $user;
+  $go = function ($r, $p = []) { try { return \Illuminate\Support\Facades\Route::has($r) ? route($r, $p) : '#'; } catch (\Throwable $e) { return '#'; } };
+  $safe = function (callable $f) { try { return $f(); } catch (\Throwable $e) { return collect(); } };
+  $tierLabel = $u->tier === 'tier1' ? 'Plus' : ($u->tier === 'tier2' ? 'Pro' : ($u->tier === 'tier3' ? 'Premium' : 'Free'));
+  $qpn = config('qcoin.q_per_naira_display', 10);
+  $qBal = (int) ($u->q_coin_balance ?? 0);
+  $handle = $u->username ?? $u->name;
+  $initial = strtoupper(substr($u->name ?? 'U', 0, 1));
+  $note = $u->status_note ?? ($currentLevel?->name ?? ($tierLabel . ' member'));
+  $roleLine = implode(' · ', array_filter([$u->business_name ?? null, $tierLabel . ' member', $currentLevel?->name ?? null]));
+  $postsCount = (int) ($myListingsPosted ?? 0) + (int) ($myGigsPosted ?? 0);
+  try { $unread = (int) $u->unreadNotifications()->count(); } catch (\Throwable $e) { $unread = 0; }
 
-<main class="profile-shell p-6 {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-page' : '' }}" style="{{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'padding-top:0 !important;max-width:1240px;' : '' }}">
-    @if (session('status'))
-    <div class="bg-green-500/10 text-green-500 text-sm rounded-lg p-3 mb-4">{{ session('status') }}</div>
-    @endif
+  $pfListings = $safe(fn () => \App\Models\Listing::where('user_id', $u->id)->latest()->take(20)->get());
+  $pfGigs = $safe(fn () => \App\Models\Gig::where('user_id', $u->id)->latest()->take(20)->get());
+  $pfInv = $safe(fn () => \App\Models\Investment::where('user_id', $u->id)->latest()->take(20)->get());
+  $pfProj = $safe(fn () => \App\Models\InvestmentProject::whereIn('id', $pfInv->pluck('investment_project_id'))->get()->keyBy('id'));
+  $pfActs = $safe(fn () => \App\Models\UserActivity::where('user_id', $u->id)->latest()->take(60)->get());
 
-    <div class="profile-home-grid">
+  $market = []; $hustles = []; $invest = []; $games = []; $photos = [];
+  foreach ($pfListings as $l) {
+    $market[] = ['icon' => 'shopping-bag', 'title' => $l->title, 'meta' => implode(' · ', array_filter([$l->category ?? null, $l->status ?? null])), 'amt' => '₦' . number_format((float) $l->amount), 'img' => $l->image_url ?? null, 'url' => $go('marketplace.show', $l), 'at' => $l->created_at];
+    if (!empty($l->image_url)) $photos[] = ['img' => $l->image_url, 'url' => $go('marketplace.show', $l)];
+  }
+  foreach ($pfGigs as $g) {
+    $hustles[] = ['icon' => 'briefcase', 'title' => $g->title, 'meta' => implode(' · ', array_filter([$g->category ?? null, $g->status ?? null])), 'amt' => '₦' . number_format((float) $g->amount), 'url' => $go('gigs.show', $g), 'at' => $g->created_at];
+  }
+  foreach ($pfInv as $i) {
+    $p = $pfProj[$i->investment_project_id] ?? null;
+    $invest[] = ['icon' => 'trending-up', 'title' => $p->title ?? $p->name ?? 'Investment', 'meta' => $i->status ?? '', 'amt' => number_format((float) $i->amount_q) . ' Q', 'url' => $go('investment.index'), 'at' => $i->created_at];
+  }
+  foreach ($pfActs as $a) {
+    if (!preg_match('/game|golf|play/i', ($a->category ?? '') . ' ' . ($a->action ?? ''))) continue;
+    $games[] = ['icon' => 'gamepad-2', 'title' => ucfirst(str_replace(['_', '-'], ' ', $a->action ?? 'Game activity')), 'meta' => implode(' · ', array_filter([$a->category ?? null, optional($a->created_at)->diffForHumans()])), 'url' => $go('games.index'), 'at' => $a->created_at];
+  }
+  $all = array_merge($market, $hustles, $invest);
+  usort($all, fn ($a, $b) => strtotime((string) ($b['at'] ?? 0)) <=> strtotime((string) ($a['at'] ?? 0)));
 
-        <div class="profile-hero-card reveal-on-scroll"
-            @if($user->avatar_url) style="--hero-photo: url('{{ $user->avatar_url }}')" @endif>
-            @if((auth()->user()->theme_style ?? 'glass') === 'plain')
-            <div class="pfl-hero-time">{{ now()->format('g:i A') }}</div>
-            @endif
-            <div class="profile-hero-top">
-                <div class="profile-hero-avatar">
-                    @if($user->avatar_url)
-                    <img src="{{ $user->avatar_url }}">
-                    @else
-                    <span>{{ strtoupper(substr($user->name, 0, 1)) }}</span>
-                    @endif
-                </div>
-                <p class="profile-hero-name">{{ $user->name }} <span class="merchant-badge">Merchant</span></p>
-                @if((auth()->user()->theme_style ?? 'glass') === 'plain')
-                <div class="pfl-hero-status"><span class="pfl-status-dot"></span> {{ $user->is_verified_seller ? 'Verified & Active' : 'Active on Campulsy' }}</div>
-                @endif
-                <a href="{{ route('levels-badges.show') }}" class="block mt-2 mb-1 p-3 rounded-lg bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition {{ (auth()->user()->theme_style ?? 'glass') === 'plain' ? 'dqm-badge-strip' : '' }}">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-sm font-semibold flex items-center gap-1.5">
-                            <i class="ph ph-medal w-4 h-4 text-blue-500"></i>
-                            {{ $currentLevel?->name ?? 'Unranked' }}
-                        </span>
-                        <span class="text-xs text-muted flex items-center gap-1">
-                            {{ $totalBadgesEarned }} badges <i class="ph ph-caret-right w-3.5 h-3.5"></i>
-                        </span>
-                    </div>
-                    @if($earnedBadges->count())
-                    <div class="flex gap-2">
-                        @foreach($earnedBadges as $badge)
-                        <span class="w-7 h-7 rounded-full bg-blue-500/10 flex items-center justify-center" title="{{ $badge->name }}">
-                            <i class="ph ph-{{ ph_icon($badge->icon ?? 'award') }} w-3.5 h-3.5 text-blue-600"></i>
-                        </span>
-                        @endforeach
-                    </div>
-                    @else
-                    <p class="text-xs text-muted">Complete activities to earn your first badge</p>
-                    @endif
-                </a>
-                <p class="profile-hero-tier">
-                    {{ $user->tier === 'tier1' ? 'Plus' : ($user->tier === 'tier2' ? 'Pro' : strtoupper($user->tier)) }}
-                    @if($user->is_verified_seller) · Verified @endif
-                </p>
-                <p class="profile-hero-ref">Referral code: {{ $user->referral_code }}</p>
-            </div>
+  $tabs = [
+    ['all', 'layout-grid', null, 'All Posts', $all],
+    ['market', null, 'Market Post', 'Market Posts', $market],
+    ['invest', null, 'Investments', 'Investments', $invest],
+    ['hustles', null, 'Hustles', 'Hustles', $hustles],
+    ['games', null, 'Game Activities', 'Game Activities', $games],
+    ['media', 'camera', null, 'Photos', $photos],
+  ];
+  $cta = ['all' => [$go('marketplace.index'), 'Explore the marketplace'], 'market' => [$go('marketplace.index'), 'Open marketplace'], 'invest' => [$go('investment.index'), 'See investments'], 'hustles' => [$go('gigs.index'), 'Find hustles'], 'games' => [$go('games.index'), 'Play games'], 'media' => [$go('marketplace.index'), 'Open marketplace']];
+  $isAdmin = ($u->is_admin ?? false) || (($u->role ?? '') === 'admin');
+@endphp
+<link rel="stylesheet" href="{{ asset('css/profile-new.css') }}?v={{ @filemtime(public_path('css/profile-new.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/pfn-chat.css') }}?v={{ time() }}">
 
-            @if((auth()->user()->theme_style ?? 'glass') === 'plain')
-            <div class="pfl-hero-pills">
-                <a href="{{ route('wallet.index') }}" class="pfl-hero-pill"><i class="ph ph-plus-circle w-4 h-4"></i> Send Money</a>
-                <a href="{{ route('referrals.index') }}" class="pfl-hero-pill"><i class="ph ph-copy w-4 h-4"></i> Copy Code</a>
-            </div>
-            @php
-                $pflAccent = $user->accent_color ?? '#0F9D6E';
-            @endphp
-            <div class="pfl-hero-strip" style="background: linear-gradient(135deg, {{ $pflAccent }}, color-mix(in srgb, {{ $pflAccent }} 70%, black));">
-                <i class="ph ph-lightning w-4 h-4"></i> {{ $workerLevel['label'] ?? 'Rising Hustler' }} · {{ $completedGigsCount }} jobs completed
-            </div>
-            @endif
-            <div class="profile-hero-stats">
-                <div>
-                    <p class="profile-hero-stat-val">{{ $completedGigsCount }}</p>
-                    <p class="profile-hero-stat-lbl"><i class="ph ph-briefcase w-3.5 h-3.5"></i> Jobs</p>
-                </div>
-                <div>
-                    <p class="profile-hero-stat-val">
-                        @if($averageRating)<i class="ph ph-fill ph-star w-3.5 h-3.5" style="color:#fbbf24;"></i> {{ $averageRating }}@else —@endif
-                    </p>
-                    <p class="profile-hero-stat-lbl">Rating</p>
-                </div>
-                <div>
-                    <p class="profile-hero-stat-val">{{ $reviewsReceivedCount }}</p>
-                    <p class="profile-hero-stat-lbl"><i class="ph ph-medal w-3.5 h-3.5"></i> Reviews</p>
-                </div>
-            </div>
+<div class="pfn">
+  @if (session('status'))<div class="pfn-empty" style="padding:10px 0">{{ session('status') }}</div>@endif
 
-            <div class="profile-hero-curve" aria-hidden="true">
-                <svg viewBox="0 0 400 60" preserveAspectRatio="none"><path d="M0,60 C100,0 300,0 400,60 L400,60 L0,60 Z"></path></svg>
-            </div>
-        </div>
+  <header class="pfn-top">
+    <button type="button" class="pfn-ic" data-sheet="pfnCreate" aria-label="Create"><i data-lucide="plus"></i></button>
+    <b class="pfn-handle">{{ $handle }}</b>
+    <a href="{{ $go('chat.index') }}" class="pfn-chat" aria-label="Messages"><i data-lucide="send"></i>@if(($navUnreadChats ?? 0) > 0)<em>{{ $navUnreadChats > 99 ? '99+' : $navUnreadChats }}</em>@endif</a>
+    <a href="{{ $go('notifications.index') }}" class="pfn-ic" aria-label="Notifications"><i data-lucide="bell"></i>@if($unread)<em>{{ $unread > 99 ? '99+' : $unread }}</em>@endif</a>
+    <button type="button" class="pfn-ic" data-sheet="pfnMenu" aria-label="Menu"><i data-lucide="menu"></i></button>
+  </header>
 
-        @if((auth()->user()->theme_style ?? 'glass') === 'plain')
-        <div class="pfl-hero-stats-card">
-            <div><span class="v">{{ $completedGigsCount }}</span><span class="l">Jobs</span></div>
-            <div><span class="v">@if($averageRating)★ {{ $averageRating }}@else —@endif</span><span class="l">Rating</span></div>
-            <div><span class="v">{{ $reviewsReceivedCount }}</span><span class="l">Reviews</span></div>
-        </div>
-        @endif
-
-        @php
-            $pflThemeLabels = ['glass' => 'Glass', 'neumorphic' => 'Neumorphic', 'plain' => 'Minimal', 'aurora' => 'Aurora'];
-            $pflTierLabel = $user->tier === 'tier1' ? 'Plus' : ($user->tier === 'tier2' ? 'Pro' : ($user->tier === 'tier3' ? 'Premium' : 'Free'));
-        @endphp
-
-        @if((auth()->user()->theme_style ?? 'glass') === 'plain')
-        <div class="pfl-flat-list">
-            <div class="pfl-section-label">Wallet</div>
-            <div class="pfl-inline-card">
-                <div class="pfl-inline-top">
-                    <span class="pfl-flat-icon pfl-flat-blue"><i class="ph ph-wallet w-4 h-4"></i></span>
-                    <div class="pfl-inline-top-text">
-                        <span class="pfl-flat-title">Wallet Balance</span>
-                        <span class="pfl-inline-amount">₦{{ number_format($user->wallet_balance ?? 0, 2) }}</span>
-                    </div>
-                </div>
-                @if($user->virtual_account_number)
-                <div class="pfl-inline-row"><span class="l">Account</span><span class="v">•••• {{ substr($user->virtual_account_number, -4) }} · {{ $user->virtual_account_bank }}</span></div>
-                @endif
-                <div class="pfl-inline-actions">
-                    <a href="{{ route('wallet.index') }}" class="pfl-inline-btn pfl-inline-btn-primary">Send / Withdraw</a>
-                    <a href="{{ route('wallet.index') }}" class="pfl-inline-btn">Full Wallet</a>
-                </div>
-            </div>
-
-            <div class="pfl-section-label">Reputation</div>
-            <div class="pfl-inline-card">
-                <div class="pfl-stat-row">
-                    <div class="pfl-stat"><span class="v">{{ $completedGigsCount }}</span><span class="l">Jobs done</span></div>
-                    <div class="pfl-stat"><span class="v">{{ $averageRating ?: '—' }}</span><span class="l">Rating</span></div>
-                    <div class="pfl-stat"><span class="v">{{ $reviewsReceivedCount }}</span><span class="l">Reviews</span></div>
-                </div>
-                @forelse($recentReviews as $review)
-                    <div class="pfl-review-row">
-                        <span class="pfl-review-name">{{ $review->reviewer->name ?? 'Anonymous' }}</span>
-                        <span class="pfl-review-stars">{{ str_repeat('★', (int) $review->rating) }}{{ str_repeat('☆', 5 - (int) $review->rating) }}</span>
-                        @if($review->comment)<p class="pfl-review-comment">{{ \Illuminate\Support\Str::limit($review->comment, 70) }}</p>@endif
-                    </div>
-                @empty
-                    <p class="pfl-note">No reviews yet.</p>
-                @endforelse
-                <a href="{{ route('profile.reputation') }}" class="pfl-open-link">See full reputation <i class="ph ph-arrow-right w-3.5 h-3.5"></i></a>
-            </div>
-
-            <div class="pfl-section-label">Plan</div>
-            <div class="pfl-flat-card">
-                <span class="pfl-flat-icon pfl-flat-purple"><i class="ph ph-crown w-4 h-4"></i></span>
-                <span class="pfl-flat-text">
-                    <span class="pfl-flat-title">{{ $user->tier === 'tier1' ? 'Plus' : ($user->tier === 'tier2' ? 'Pro' : ($user->tier === 'tier3' ? 'Premium' : 'Free')) }}</span>
-                    <span class="pfl-flat-sub">@if($user->subscription_expires_at) Expires {{ $user->subscription_expires_at->format('M j, Y') }} @else No active subscription @endif</span>
-                </span>
-                <a href="{{ route('subscriptions.index') }}" class="pfl-flat-chevron"><i class="ph ph-caret-right w-4 h-4"></i></a>
-            </div>
-
-            <div class="pfl-section-label">Referrals</div>
-            <div class="pfl-inline-card">
-                <div class="pfl-inline-top">
-                    <span class="pfl-flat-icon pfl-flat-orange"><i class="ph ph-users w-4 h-4"></i></span>
-                    <div class="pfl-inline-top-text">
-                        <span class="pfl-flat-title">Your code</span>
-                        <span class="pfl-inline-amount" style="font-size:16px;">{{ $user->referral_code }}</span>
-                    </div>
-                    <button type="button" class="pfl-flat-copy-btn" data-pfl-copy="{{ $user->referral_code }}"><i class="ph ph-copy w-4 h-4"></i></button>
-                </div>
-                <div class="pfl-stat-row">
-                    <div class="pfl-stat"><span class="v">{{ $allReferralsCount ?? 0 }}</span><span class="l">Total</span></div>
-                    <div class="pfl-stat"><span class="v">{{ $activeReferralsCount ?? 0 }}</span><span class="l">Active</span></div>
-                </div>
-                @forelse(($recentReferrals ?? collect())->take(4) as $ref)
-                    <div class="pfl-review-row"><span class="pfl-review-name">{{ $ref->name }}</span><span class="pfl-flat-sub">{{ $ref->tier === 'free' ? 'Free' : ucfirst($ref->tier) }}</span></div>
-                @empty
-                    <p class="pfl-note">No referrals yet — share your code above.</p>
-                @endforelse
-                <a href="{{ route('referrals.index') }}" class="pfl-open-link">Full referral details <i class="ph ph-arrow-right w-3.5 h-3.5"></i></a>
-            </div>
-            <div class="pfl-section-label">Appearance</div>
-            <div class="pfl-inline-card">
-                <div class="pfl-inline-top">
-                    <span class="pfl-flat-icon pfl-flat-gold"><i class="ph ph-palette w-4 h-4"></i></span>
-                    <div class="pfl-inline-top-text">
-                        <span class="pfl-flat-title">{{ ['glass'=>'Glass','neumorphic'=>'Neumorphic','plain'=>'Minimal','aurora'=>'Aurora'][$user->theme_style ?? 'glass'] ?? 'Glass' }} theme</span>
-                        <span class="pfl-flat-sub">Accent · Nav style</span>
-                    </div>
-                    <span class="pfl-swatch-lg" style="background:{{ $user->accent_color ?? '#0F9D6E' }};"></span>
-                </div>
-                <div class="pfl-inline-row"><span class="l">Accent Color</span><span class="v">{{ $user->accent_color ?? '#0F9D6E' }}</span></div>
-                <div class="pfl-inline-row"><span class="l">Nav Style</span><span class="v">{{ ['edge_dock' => 'Edge Dock', 'halo_dock' => 'Halo Dock'][$user->mobile_nav_style ?? ''] ?? 'Painted Pill' }}</span></div>
-                <a href="{{ route('profile.appearance') }}" class="pfl-open-link">Customize appearance <i class="ph ph-arrow-right w-3.5 h-3.5"></i></a>
-            </div>
-
-            <div class="pfl-section-label">Money Tracker</div>
-            <div class="pfl-inline-card">
-                <div class="pfl-stat-row">
-                    <div class="pfl-stat"><span class="v" style="color:#16a34a;">₦{{ number_format($monthIn ?? 0) }}</span><span class="l">In this month</span></div>
-                    <div class="pfl-stat"><span class="v" style="color:#dc2626;">₦{{ number_format($monthOut ?? 0) }}</span><span class="l">Out this month</span></div>
-                </div>
-                <a href="{{ route('money-tracker.index') }}" class="pfl-open-link">Full money tracker <i class="ph ph-arrow-right w-3.5 h-3.5"></i></a>
-            </div>
-
-            <div class="pfl-section-label">My Posts</div>
-            <div class="pfl-inline-card">
-                <div class="pfl-stat-row">
-                    <div class="pfl-stat"><span class="v">{{ $myGigsPosted ?? 0 }}</span><span class="l">Gigs posted</span></div>
-                    <div class="pfl-stat"><span class="v">{{ $myListingsPosted ?? 0 }}</span><span class="l">Listings posted</span></div>
-                </div>
-                <a href="{{ route('posts.index') }}" class="pfl-open-link">View all my posts <i class="ph ph-arrow-right w-3.5 h-3.5"></i></a>
-            </div>
-
-            <div class="pfl-section-label">Leaderboard</div>
-            <div class="pfl-flat-card">
-                <span class="pfl-flat-icon pfl-flat-blue"><i class="ph ph-trophy w-4 h-4"></i></span>
-                <span class="pfl-flat-text">
-                    <span class="pfl-flat-title">{{ ($profileLeaderboardRank ?? null) ? 'Ranked #' . $profileLeaderboardRank . ' this week' : 'Not ranked yet' }}</span>
-                    <span class="pfl-flat-sub">{{ ($profileLeaderboardRank ?? null) ? 'Keep earning to climb higher' : 'Opt in to appear on the leaderboard' }}</span>
-                </span>
-                <a href="{{ route('leaderboard.index') }}" class="pfl-flat-chevron"><i class="ph ph-caret-right w-4 h-4"></i></a>
-            </div>
-            <div class="pfl-flat-card">
-                <span class="pfl-flat-icon pfl-flat-orange"><i class="ph ph-user w-4 h-4"></i></span>
-                <span class="pfl-flat-text">
-                    <span class="pfl-flat-title">Account</span>
-                    <span class="pfl-flat-sub">{{ $user->email }}</span>
-                </span>
-                <a href="{{ route('profile.account') }}" class="pfl-flat-chevron"><i class="ph ph-caret-right w-4 h-4"></i></a>
-            </div>
-            @if($user->is_admin ?? false)
-            <div class="pfl-flat-card">
-                <span class="pfl-flat-icon pfl-flat-pink"><i class="ph ph-shield w-4 h-4"></i></span>
-                <span class="pfl-flat-text"><span class="pfl-flat-title">Admin</span></span>
-                <a href="{{ route('admin.index') }}" class="pfl-flat-chevron"><i class="ph ph-caret-right w-4 h-4"></i></a>
-            </div>
-            @endif
-
-            <form method="POST" action="{{ route('logout') }}" class="pfl-logout-form">
-                @csrf
-                <button type="submit" class="pfl-logout-btn"><i class="ph ph-sign-out w-4 h-4"></i> Log Out</button>
-            </form>
-        </div>
-        @else
-        <div class="glass-card pfl-accordion reveal-on-scroll" style="overflow:hidden;">
-
-            <div class="pfl-item">
-                <button type="button" class="profile-list-row pfl-trigger" data-pfl-target="pflReputation">
-                    <span class="profile-list-row-icon"><i class="ph ph-star w-4 h-4"></i></span>
-                    <span class="profile-list-row-text">
-                        <span class="profile-list-row-title">Reputation</span>
-                        <span class="profile-list-row-sub">Jobs completed, rating, reviews</span>
-                    </span>
-                    <i class="ph ph-caret-down w-4 h-4 profile-list-row-chevron pfl-chevron"></i>
-                </button>
-                <div class="pfl-panel" id="pflReputation">
-                    <div class="pfl-stat-row">
-                        <div class="pfl-stat"><span class="v">{{ $completedGigsCount }}</span><span class="l">Jobs done</span></div>
-                        <div class="pfl-stat"><span class="v">{{ $averageRating ?: '—' }}</span><span class="l">Rating</span></div>
-                        <div class="pfl-stat"><span class="v">{{ $reviewsReceivedCount }}</span><span class="l">Reviews</span></div>
-                    </div>
-                    <a href="{{ route('profile.reputation') }}" class="pfl-open-link">Open full reputation page <i class="ph ph-arrow-right w-3.5 h-3.5"></i></a>
-                </div>
-            </div>
-
-            <div class="pfl-item">
-                <button type="button" class="profile-list-row pfl-trigger" data-pfl-target="pflAccount">
-                    <span class="profile-list-row-icon"><i class="ph ph-user w-4 h-4"></i></span>
-                    <span class="profile-list-row-text">
-                        <span class="profile-list-row-title">Account Details</span>
-                        <span class="profile-list-row-sub">Name, email, password</span>
-                    </span>
-                    <i class="ph ph-caret-down w-4 h-4 profile-list-row-chevron pfl-chevron"></i>
-                </button>
-                <div class="pfl-panel" id="pflAccount">
-                    <div class="pfl-kv"><span class="l">Name</span><span class="v">{{ $user->name }}</span></div>
-                    <div class="pfl-kv"><span class="l">Email</span><span class="v">{{ $user->email }}</span></div>
-                    <a href="{{ route('profile.account') }}" class="pfl-open-link">Edit account details <i class="ph ph-arrow-right w-3.5 h-3.5"></i></a>
-                </div>
-            </div>
-
-            <div class="pfl-item">
-                <button type="button" class="profile-list-row pfl-trigger" data-pfl-target="pflAppearance">
-                    <span class="profile-list-row-icon"><i class="ph ph-palette w-4 h-4"></i></span>
-                    <span class="profile-list-row-text">
-                        <span class="profile-list-row-title">Appearance</span>
-                        <span class="profile-list-row-sub">Theme, accent color, dock, sidebar, dark mode</span>
-                    </span>
-                    <i class="ph ph-caret-down w-4 h-4 profile-list-row-chevron pfl-chevron"></i>
-                </button>
-                <div class="pfl-panel" id="pflAppearance">
-                    <div class="pfl-kv"><span class="l">Current theme</span><span class="v">{{ $pflThemeLabels[$user->theme_style ?? 'glass'] ?? 'Glass' }}</span></div>
-                    <div class="pfl-kv"><span class="l">Accent color</span><span class="v"><span class="pfl-swatch" style="background:{{ $user->accent_color ?? '#0F9D6E' }};"></span> {{ $user->accent_color ?? '#0F9D6E' }}</span></div>
-                    <a href="{{ route('profile.appearance') }}" class="pfl-open-link">Change appearance <i class="ph ph-arrow-right w-3.5 h-3.5"></i></a>
-                </div>
-            </div>
-
-            <div class="pfl-item">
-                <button type="button" class="profile-list-row pfl-trigger" data-pfl-target="pflWallet">
-                    <span class="profile-list-row-icon"><i class="ph ph-wallet w-4 h-4"></i></span>
-                    <span class="profile-list-row-text"><span class="profile-list-row-title">Wallet</span></span>
-                    <i class="ph ph-caret-down w-4 h-4 profile-list-row-chevron pfl-chevron"></i>
-                </button>
-                <div class="pfl-panel" id="pflWallet">
-                    <div class="pfl-kv"><span class="l">Balance</span><span class="v">₦{{ number_format($user->wallet_balance ?? 0, 2) }}</span></div>
-                    @if($user->virtual_account_number)
-                    <div class="pfl-kv"><span class="l">Account</span><span class="v">•••• {{ substr($user->virtual_account_number, -4) }} · {{ $user->virtual_account_bank }}</span></div>
-                    @endif
-                    <a href="{{ route('wallet.index') }}" class="pfl-open-link">Open wallet <i class="ph ph-arrow-right w-3.5 h-3.5"></i></a>
-                </div>
-            </div>
-
-            <div class="pfl-item">
-                <button type="button" class="profile-list-row pfl-trigger" data-pfl-target="pflReferrals">
-                    <span class="profile-list-row-icon"><i class="ph ph-users w-4 h-4"></i></span>
-                    <span class="profile-list-row-text"><span class="profile-list-row-title">Referrals</span></span>
-                    <i class="ph ph-caret-down w-4 h-4 profile-list-row-chevron pfl-chevron"></i>
-                </button>
-                <div class="pfl-panel" id="pflReferrals">
-                    <div class="pfl-kv"><span class="l">Your code</span><span class="v">{{ $user->referral_code }}</span></div>
-                    <button type="button" class="pfl-quick-btn" data-pfl-copy="{{ $user->referral_code }}">
-                        <i class="ph ph-copy w-3.5 h-3.5"></i> Copy referral code
-                    </button>
-                    <a href="{{ route('referrals.index') }}" class="pfl-open-link">View referral details <i class="ph ph-arrow-right w-3.5 h-3.5"></i></a>
-                </div>
-            </div>
-
-            <div class="pfl-item">
-                <button type="button" class="profile-list-row pfl-trigger" data-pfl-target="pflUpgrade">
-                    <span class="profile-list-row-icon"><i class="ph-fill ph-crown"></i></span>
-                    <span class="profile-list-row-text"><span class="profile-list-row-title">Upgrade</span></span>
-                    <i class="ph ph-caret-down w-4 h-4 profile-list-row-chevron pfl-chevron"></i>
-                </button>
-                <div class="pfl-panel" id="pflUpgrade">
-                    <div class="pfl-kv"><span class="l">Current plan</span><span class="v">{{ $pflTierLabel }}</span></div>
-                    @if($user->subscription_expires_at)
-                    <div class="pfl-kv"><span class="l">Renews / expires</span><span class="v">{{ $user->subscription_expires_at->format('M j, Y') }}</span></div>
-                    @endif
-                    <a href="{{ route('subscriptions.index') }}" class="pfl-open-link">See plans <i class="ph ph-arrow-right w-3.5 h-3.5"></i></a>
-                </div>
-            </div>
-
-            <div class="pfl-item">
-                <button type="button" class="profile-list-row pfl-trigger" data-pfl-target="pflMoney">
-                    <span class="profile-list-row-icon"><i class="ph ph-chart-line w-4 h-4"></i></span>
-                    <span class="profile-list-row-text"><span class="profile-list-row-title">Money Tracker</span></span>
-                    <i class="ph ph-caret-down w-4 h-4 profile-list-row-chevron pfl-chevron"></i>
-                </button>
-                <div class="pfl-panel" id="pflMoney">
-                    <p class="pfl-note">Track your income and spending patterns over time.</p>
-                    <a href="{{ route('money-tracker.index') }}" class="pfl-open-link">Open money tracker <i class="ph ph-arrow-right w-3.5 h-3.5"></i></a>
-                </div>
-            </div>
-
-            <div class="pfl-item">
-                <button type="button" class="profile-list-row pfl-trigger" data-pfl-target="pflPosts">
-                    <span class="profile-list-row-icon"><i class="ph ph-file-text w-4 h-4"></i></span>
-                    <span class="profile-list-row-text"><span class="profile-list-row-title">My Posts</span></span>
-                    <i class="ph ph-caret-down w-4 h-4 profile-list-row-chevron pfl-chevron"></i>
-                </button>
-                <div class="pfl-panel" id="pflPosts">
-                    <p class="pfl-note">Gigs and listings you've posted.</p>
-                    <a href="{{ route('posts.index') }}" class="pfl-open-link">View my posts <i class="ph ph-arrow-right w-3.5 h-3.5"></i></a>
-                </div>
-            </div>
-
-            <div class="pfl-item">
-                <button type="button" class="profile-list-row pfl-trigger" data-pfl-target="pflLeaderboard">
-                    <span class="profile-list-row-icon"><i class="ph ph-trophy w-4 h-4"></i></span>
-                    <span class="profile-list-row-text"><span class="profile-list-row-title">Leaderboard</span></span>
-                    <i class="ph ph-caret-down w-4 h-4 profile-list-row-chevron pfl-chevron"></i>
-                </button>
-                <div class="pfl-panel" id="pflLeaderboard">
-                    <p class="pfl-note">See how you rank against other students this week.</p>
-                    <a href="{{ route('leaderboard.index') }}" class="pfl-open-link">View leaderboard <i class="ph ph-arrow-right w-3.5 h-3.5"></i></a>
-                </div>
-            </div>
-
-            <div class="pfl-item">
-                <button type="button" class="profile-list-row pfl-trigger" data-pfl-target="pflServices">
-                    <span class="profile-list-row-icon"><i class="ph ph-lightbulb w-4 h-4"></i></span>
-                    <span class="profile-list-row-text"><span class="profile-list-row-title">Services</span></span>
-                    <i class="ph ph-caret-down w-4 h-4 profile-list-row-chevron pfl-chevron"></i>
-                </button>
-                <div class="pfl-panel" id="pflServices">
-                    <p class="pfl-note">Buy airtime, data, cable and electricity.</p>
-                    <a href="{{ route('services.index') }}" class="pfl-open-link">Open services <i class="ph ph-arrow-right w-3.5 h-3.5"></i></a>
-                </div>
-            </div>
-
-            <div class="pfl-item">
-                <button type="button" class="profile-list-row pfl-trigger" data-pfl-target="pflPulse">
-                    <span class="profile-list-row-icon"><i class="ph ph-lightning w-4 h-4"></i></span>
-                    <span class="profile-list-row-text"><span class="profile-list-row-title">Pulse</span></span>
-                    <i class="ph ph-caret-down w-4 h-4 profile-list-row-chevron pfl-chevron"></i>
-                </button>
-                <div class="pfl-panel" id="pflPulse">
-                    <p class="pfl-note">Platform activity and performance insights.</p>
-                    <a href="{{ route('pulse.index') }}" class="pfl-open-link">Open pulse <i class="ph ph-arrow-right w-3.5 h-3.5"></i></a>
-                </div>
-            </div>
-
-            @if($user->is_admin ?? false)
-            <a href="{{ route('admin.index') }}" class="profile-list-row">
-                <span class="profile-list-row-icon"><i class="ph ph-shield w-4 h-4"></i></span>
-                <span class="profile-list-row-text"><span class="profile-list-row-title">Admin</span></span>
-                <i class="ph ph-caret-right w-4 h-4 profile-list-row-chevron"></i>
-            </a>
-            @endif
-        </div>
-        @endif
-
+  <section class="pfn-head">
+    <div class="pfn-info">
+      <div class="pfn-name">{{ $u->username ? '@'.$u->username : $u->name }}@if($u->is_verified_seller ?? false)<i data-lucide="badge-check"></i>@endif</div>
+      <div class="pfn-stats">
+        <div><b>{{ number_format($postsCount) }}</b><span>posts</span></div>
+        <div><b>{{ number_format(\Illuminate\Support\Facades\Schema::hasTable('profile_views') ? \App\Models\ProfileView::where('profile_user_id', $u->id)->count() : 0) }}</b><span>profile views</span></div>
+        <div><b>{{ number_format($reviewsReceivedCount ?? 0) }}</b><span>reviews</span></div>
+      </div>
     </div>
-</main>
+    <div class="pfn-av">
+      <span class="pfn-note">{{ $note }}</span>
+      <span class="pfn-pic">@if($u->avatar_url)<img src="{{ $u->avatar_url }}" alt="">@else{{ $initial }}@endif</span>
+    </div>
+  </section>
 
-<style>
-.pfl-item{border-bottom:1px solid var(--border-color, rgba(0,0,0,0.06));}
-.pfl-item:last-child{border-bottom:none;}
-.pfl-trigger{width:100%;background:none;border:none;cursor:pointer;text-align:left;}
-.pfl-chevron{transition:transform 0.25s ease;}
-.pfl-item.pfl-open .pfl-chevron{transform:rotate(180deg);}
-.pfl-panel{max-height:0;overflow:hidden;transition:max-height 0.3s ease, padding 0.3s ease;padding:0 1rem;}
-.pfl-item.pfl-open .pfl-panel{max-height:260px;padding:0 1rem 1rem;}
-.pfl-stat-row{display:flex;gap:0.75rem;margin-bottom:0.75rem;}
-.pfl-stat{flex:1;background:var(--color-bg, rgba(0,0,0,0.03));border-radius:0.75rem;padding:0.6rem;text-align:center;}
-.pfl-stat .v{display:block;font-size:1rem;font-weight:700;}
-.pfl-stat .l{display:block;font-size:0.7rem;color:var(--text-muted, #8a8a8a);margin-top:2px;}
-.pfl-kv{display:flex;justify-content:space-between;align-items:center;font-size:0.85rem;padding:0.4rem 0;}
-.pfl-kv .l{color:var(--text-muted, #8a8a8a);}
-.pfl-kv .v{font-weight:600;display:flex;align-items:center;gap:6px;}
-.pfl-swatch{width:14px;height:14px;border-radius:50%;display:inline-block;}
-.pfl-note{font-size:0.85rem;color:var(--text-muted, #8a8a8a);margin:0.5rem 0;}
-.pfl-quick-btn{display:flex;align-items:center;gap:6px;background:var(--color-accent, #0F9D6E);color:#fff;border:none;border-radius:999px;padding:0.5rem 0.9rem;font-size:0.8rem;font-weight:600;margin:0.4rem 0 0.6rem;cursor:pointer;}
-.pfl-quick-btn.pfl-copied{background:#16a34a;}
-.pfl-open-link{display:flex;align-items:center;gap:6px;font-size:0.8rem;font-weight:600;color:var(--color-accent, #0F9D6E);text-decoration:none;margin-top:0.5rem;}
-</style>
+  @if($roleLine)<div class="pfn-role">{{ $roleLine }}</div>@endif
+  @if(!empty($u->bio))<p class="pfn-bio">{{ $u->bio }}</p>@endif
+
+  @if(empty($u->bio))<a href="{{ $go('profile.account') }}" class="pfn-addbio">Add a bio</a>@endif
+<div class="pfn-hl">
+  <button type="button" data-goto="market"><span><i data-lucide="shopping-bag"></i></span><small>Market</small></button>
+  <button type="button" data-goto="hustles"><span><i data-lucide="briefcase"></i></span><small>Hustles</small></button>
+  <button type="button" data-goto="media"><span><i data-lucide="camera"></i></span><small>Photos</small></button>
+  <a href="{{ $go('profile.reputation') }}"><span><i data-lucide="star"></i></span><small>Reviews</small></a>
+  <a href="{{ $go('profile.public', ['user' => $u->id]) }}#viewers"><span><i data-lucide="eye"></i></span><small>Viewers</small></a>
+</div>
+
+  <div class="pfn-btns">
+    <a href="{{ $go('profile.account') }}" class="pfn-btn">Edit profile</a>
+    <button type="button" class="pfn-btn" id="pfnShare" data-url="{{ $go('profile.preview') }}">Share profile</button>
+  </div>
+
+  <nav class="pfn-tabs" id="pfnTabs">
+    @foreach($tabs as $i => $t)
+      <a href="#{{ $t[0] }}" data-pf="{{ $t[0] }}" class="{{ $i === 0 ? 'on' : '' }}" aria-label="{{ $t[3] }}">@if($t[1])<i data-lucide="{{ $t[1] }}"></i>@else{{ $t[2] }}@endif</a>
+    @endforeach
+  </nav>
+
+  @foreach($tabs as $i => $t)
+    <section class="pfn-panel" id="pfnP-{{ $t[0] }}" @if($i) hidden @endif>
+      @if(count($t[4]) === 0)
+        <div class="pfn-empty"><b>{{ $t[3] }}</b>Nothing here yet.<br><a href="{{ $cta[$t[0]][0] }}">{{ $cta[$t[0]][1] }}</a></div>
+      @elseif($t[0] === 'media')
+        <div class="pfn-grid">@foreach($t[4] as $ph)<a href="{{ $ph['url'] }}"><img src="{{ $ph['img'] }}" alt="" loading="lazy"></a>@endforeach</div>
+      @else
+        <div class="pfn-list">@foreach($t[4] as $it)@include('profile.row', ['it' => $it])@endforeach</div>
+      @endif
+    </section>
+  @endforeach
+</div>
+
+<div class="pfn-sheet" id="pfnCreate" hidden>
+  <div class="pfn-back" data-close></div>
+  <div class="pfn-pane" role="dialog" aria-modal="true">
+    <div class="pfn-grab"></div>
+    <h3>Create</h3>
+    @if($go('marketplace.create') !== '#')<a class="pfn-mi" href="{{ $go('marketplace.create') }}"><i data-lucide="shopping-bag"></i><span>Sell an item</span></a>@endif
+    @if($go('gigs.create') !== '#')<a class="pfn-mi" href="{{ $go('gigs.create') }}"><i data-lucide="briefcase"></i><span>Post a hustle</span></a>@endif
+    @if($go('posts.index') !== '#')<a class="pfn-mi" href="{{ $go('posts.index') }}"><i data-lucide="file-text"></i><span>My posts</span></a>@endif
+    <a class="pfn-mi" href="{{ $go('marketplace.index') }}"><i data-lucide="store"></i><span>Open marketplace</span></a>
+    <a class="pfn-mi" href="{{ $go('gigs.index') }}"><i data-lucide="search"></i><span>Find hustles</span></a>
+  </div>
+</div>
+
+<div class="pfn-sheet" id="pfnMenu" hidden>
+  <div class="pfn-back" data-close></div>
+  <div class="pfn-pane" role="dialog" aria-modal="true">
+    <div class="pfn-grab"></div>
+    <h3>Menu</h3>
+    @if($isAdmin)<a class="pfn-mi" href="{{ \Illuminate\Support\Facades\Route::has('admin.index') ? route('admin.index') : url('/admin') }}"><i data-lucide="shield-check"></i><span>Admin panel</span></a>@endif
+    <a class="pfn-mi" href="{{ $go('profile.account') }}"><i data-lucide="user-cog"></i><span>Account</span></a>
+    <a class="pfn-mi" href="{{ $go('profile.appearance') }}"><i data-lucide="palette"></i><span>Appearance</span></a>
+    <a class="pfn-mi" href="{{ $go('profile.reputation') }}"><i data-lucide="star"></i><span>Reputation</span><small>{{ $averageRating ?: '—' }} · {{ $reviewsReceivedCount ?? 0 }} reviews</small></a>
+    <a class="pfn-mi" href="{{ $go('profile.public', ['user' => $u->id]) }}#viewers"><i data-lucide="eye"></i><span>Who viewed you</span></a>
+    <a class="pfn-mi" href="{{ $go('levels-badges.show') }}"><i data-lucide="award"></i><span>Level and badges</span><small>{{ $currentLevel?->name ?? 'Unranked' }}</small></a>
+    <a class="pfn-mi" href="{{ $go('subscriptions.index') }}"><i data-lucide="crown"></i><span>Plan</span><small>{{ $tierLabel }}@if($u->subscription_expires_at) · {{ $u->subscription_expires_at->format('M j, Y') }}@endif</small></a>
+    <a class="pfn-mi" href="{{ $go('referrals.index') }}"><i data-lucide="users"></i><span>Referrals</span><small>{{ $allReferralsCount ?? 0 }} · {{ $activeReferralsCount ?? 0 }} active</small></a>
+    @if(!empty($u->referral_code))<button type="button" class="pfn-mi" id="pfnCode" data-code="{{ $u->referral_code }}"><i data-lucide="copy"></i><span>Copy referral code</span><small>{{ $u->referral_code }}</small></button>@endif
+    <a class="pfn-mi" href="{{ $go('money-tracker.index') }}"><i data-lucide="line-chart"></i><span>Money tracker</span></a>
+    <a class="pfn-mi" href="{{ $go('qcoin.index') }}"><i data-lucide="gem"></i><span>Q-Coin</span><small>{{ number_format($qBal) }} Q</small></a>
+    <a class="pfn-mi" href="{{ $go('wallet.index') }}"><i data-lucide="wallet"></i><span>Wallet</span></a>
+    <a class="pfn-mi" href="{{ $go('leaderboard.index') }}"><i data-lucide="trophy"></i><span>Rankings</span><small>{{ ($profileLeaderboardRank ?? null) ? '#' . $profileLeaderboardRank : 'Join the board' }}</small></a>
+    <form method="POST" action="{{ route('logout') }}">@csrf<button type="submit" class="pfn-mi out"><i data-lucide="log-out"></i><span>Log out</span></button></form>
+  </div>
+</div>
 
 <script>
-(function(){
-    document.querySelectorAll('.pfl-trigger').forEach(function(btn){
-        btn.addEventListener('click', function(){
-            var item = btn.closest('.pfl-item');
-            var wasOpen = item.classList.contains('pfl-open');
-            document.querySelectorAll('.pfl-item.pfl-open').forEach(function(open){ open.classList.remove('pfl-open'); });
-            if (!wasOpen) item.classList.add('pfl-open');
-        });
-    });
+(function () {
+  var bar = document.querySelector('.pb-bar'); if (bar) bar.style.setProperty('display', 'none', 'important');
+  document.body.style.setProperty('padding-top', '0', 'important');
+  var tabs = [].slice.call(document.querySelectorAll('#pfnTabs a'));
+  function show(k) {
+    if (!tabs.some(function (a) { return a.dataset.pf === k; })) k = 'all';
+    tabs.forEach(function (a) { a.classList.toggle('on', a.dataset.pf === k); });
+    [].forEach.call(document.querySelectorAll('.pfn-panel'), function (p) { p.hidden = (p.id !== 'pfnP-' + k); });
+  }
+  tabs.forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); show(a.dataset.pf); }); });
+  show((location.hash || '').replace('#', ''));
 
-    document.querySelectorAll('[data-pfl-copy]').forEach(function(btn){
-        btn.addEventListener('click', function(e){
-            e.stopPropagation();
-            var text = btn.dataset.pflCopy;
-            navigator.clipboard.writeText(text).then(function(){
-                var original = btn.innerHTML;
-                btn.classList.add('pfl-copied');
-                btn.innerHTML = '<i class="ph ph-check w-3.5 h-3.5"></i> Copied!';
-                setTimeout(function(){
-                    btn.classList.remove('pfl-copied');
-                    btn.innerHTML = original;
-                }, 1500);
-            });
-        });
-    });
+  var open = null;
+  [].forEach.call(document.querySelectorAll('.pfn-sheet'), function (s) { document.body.appendChild(s); });
+  function openS(id) { var s = document.getElementById(id); if (!s) return; open = s; s.hidden = false; void s.offsetWidth; s.classList.add('open'); document.body.style.overflow = 'hidden'; if (window.lucide) lucide.createIcons(); }
+  function closeS() { if (!open) return; var s = open; open = null; s.classList.remove('open'); document.body.style.overflow = ''; setTimeout(function () { s.hidden = true; }, 230); }
+  [].forEach.call(document.querySelectorAll('[data-sheet]'), function (b) { b.addEventListener('click', function () { openS(b.dataset.sheet); }); });
+  [].forEach.call(document.querySelectorAll('.pfn-sheet [data-close]'), function (b) { b.addEventListener('click', closeS); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeS(); });
 
-    document.querySelectorAll('.pfl-open-link').forEach(function(link){
-        link.addEventListener('click', function(e){ e.stopPropagation(); });
-    });
+  var sh = document.getElementById('pfnShare');
+  if (sh) sh.addEventListener('click', function () {
+    var u = sh.dataset.url && sh.dataset.url !== '#' ? sh.dataset.url : location.href.split('#')[0];
+    if (navigator.share) { navigator.share({ title: document.title, url: u }).catch(function () {}); }
+    else if (navigator.clipboard) { navigator.clipboard.writeText(u); sh.textContent = 'Link copied'; }
+  });
+  var cc = document.getElementById('pfnCode');
+  if (cc) cc.addEventListener('click', function () { if (navigator.clipboard) { navigator.clipboard.writeText(cc.dataset.code); cc.querySelector('span').textContent = 'Copied'; } });
+  [].forEach.call(document.querySelectorAll('.pfn-hl [data-goto]'), function (b) { b.addEventListener('click', function () { var t = document.querySelector('#pfnTabs a[data-pf="' + b.dataset.goto + '"]'); if (t) { t.click(); t.scrollIntoView({ behavior: 'smooth', block: 'center' }); } }); });
+  if (window.lucide) lucide.createIcons();
 })();
 </script>
 @endsection

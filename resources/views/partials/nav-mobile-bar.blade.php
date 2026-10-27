@@ -16,10 +16,7 @@
         @if($cartCount)<span class="mnav-badge">{{ $cartCount }}</span>@endif
         <span class="mnav-label">Market</span>
     </a>
-    <a href="{{ route('pulse.index') }}" class="mnav-item mnav-item-pulse {{ ($active ?? '') == 'pulse' ? 'active' : '' }}">
-        <i class="bi bi-lightning-charge-fill mnav-icon"></i>
-        <span class="mnav-label">Pulse</span>
-    </a>
+    <a href="{{ route('pulse.index') }}" class="mnav-item"><i class="bi bi-lightning-charge-fill mnav-icon"></i><span class="mnav-label">Pulse</span></a>
     <a href="{{ route('profile.index') }}" class="mnav-item {{ ($active ?? '') == 'profile' ? 'active' : '' }}">
         <i class="bi bi-person-circle mnav-icon"></i>
         <span class="mnav-label">Profile</span>

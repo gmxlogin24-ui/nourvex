@@ -1,0 +1,4 @@
+html body{ --mute:#3F3F46; --color-muted:#4B4B55; --dqm-text-2:#3F3F46; --dqm-text-3:#52525B; font-weight:500; -webkit-font-smoothing:antialiased; }
+html[data-theme="dark"] body{ --mute:#D4D4D8; --color-muted:#C4C4CC; --dqm-text-2:#D4D4D8; --dqm-text-3:#B4B4BC; }
+html body :is(h1,h2,h3,h4,b,strong,th,label){ font-weight:800; }
+html body ::placeholder{ opacity:1; font-weight:500; }
