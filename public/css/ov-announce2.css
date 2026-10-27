@@ -1,0 +1,42 @@
+/* dashboard announcements strip */
+.an-sec{margin:14px 0}
+.an-hd{display:flex;align-items:center;justify-content:space-between;padding:0 4px 8px}
+.an-hd b{display:flex;align-items:center;gap:6px;font-size:15px;font-weight:800}
+.an-hd b svg{width:17px;height:17px}
+.an-hd a{display:flex;align-items:center;gap:2px;font-size:12.5px;font-weight:700;color:inherit;text-decoration:none;opacity:.7}
+.an-hd a svg{width:15px;height:15px}
+.an-row{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.an-row::-webkit-scrollbar{display:none}
+.an-c{position:relative;flex:0 0 78%;max-width:300px;min-height:160px;scroll-snap-align:start;border-radius:22px;padding:14px;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;color:#fff !important;text-decoration:none;overflow:hidden;background-size:cover;background-position:center;box-shadow:0 10px 22px -12px rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.25);-webkit-tap-highlight-color:transparent}
+.an-c::after{content:'';position:absolute;top:-40px;right:-40px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.14);pointer-events:none}
+.an-c:active{transform:scale(.98)}
+.an-top{position:absolute;top:12px;left:12px;right:12px;display:flex;align-items:center;justify-content:space-between;z-index:1}
+.an-ic{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.4);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.an-ic svg{width:17px;height:17px;color:#fff !important;stroke:#fff !important}
+.an-new{padding:3px 9px;border-radius:99px;background:#fff;color:#C2410C;font-size:10.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase}
+.an-c strong{position:relative;z-index:1;font-size:16px;font-weight:800;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.an-sub{position:relative;z-index:1;font-size:12px;line-height:1.35;opacity:.88;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.an-more{position:relative;z-index:1;display:flex;align-items:center;gap:4px;margin-top:6px;font-size:11.5px;font-weight:800}
+.an-more svg{width:13px;height:13px;color:#fff !important;stroke:#fff !important}
+
+/* all announcements page */
+.ap{max-width:640px;margin:0 auto;padding:6px 16px 120px}
+.ap-top{display:flex;align-items:center;gap:10px;margin:0 0 14px}
+.ap-top h1{font-size:20px;font-weight:800;margin:0}
+.ap-back{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:inherit;text-decoration:none;border:1px solid rgba(128,128,128,.35)}
+.ap-back svg{width:18px;height:18px}
+.ap-c{border-radius:22px;overflow:hidden;margin:0 0 14px;border:1px solid rgba(128,128,128,.28);background:rgba(128,128,128,.07);scroll-margin-top:90px}
+.ap-c.hl{border-color:#F97316;box-shadow:0 0 0 3px rgba(249,115,22,.25)}
+.ap-banner{position:relative;height:110px;background-size:cover;background-position:center;padding:12px;display:flex;align-items:flex-start;justify-content:space-between}
+.ap-body{padding:14px}
+.ap-body h2{font-size:16.5px;font-weight:800;line-height:1.25;margin:0 0 6px}
+.ap-body p{font-size:13.5px;line-height:1.5;opacity:.85;margin:0 0 10px;white-space:pre-line}
+.ap-meta{display:flex;flex-wrap:wrap;gap:12px;font-size:11.5px;font-weight:600;opacity:.65}
+.ap-meta span{display:flex;align-items:center;gap:4px}
+.ap-meta svg{width:13px;height:13px}
+.ap-btn{margin-top:12px;display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 16px;border-radius:12px;font-size:13px;font-weight:800;text-decoration:none;color:#fff !important;background:linear-gradient(145deg,#FB923C,#EA580C);border:1px solid rgba(255,255,255,.4)}
+.ap-btn svg{width:15px;height:15px;color:#fff !important;stroke:#fff !important}
+.ap-sub{font-size:13px;font-weight:800;opacity:.6;margin:20px 4px 10px;text-transform:uppercase;letter-spacing:.5px}
+.ap-old{opacity:.7}
+.ap-empty{text-align:center;padding:50px 0;opacity:.6}
+.ap-empty svg{width:34px;height:34px;margin:0 auto 8px;display:block}

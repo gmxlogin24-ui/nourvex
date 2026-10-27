@@ -460,3 +460,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/announcements/{announcement}/toggle', [\App\Http\Controllers\Admin\AnnouncementController::class, 'toggle'])->name('announcements.toggle');
     Route::delete('/announcements/{announcement}', [\App\Http\Controllers\Admin\AnnouncementController::class, 'destroy'])->name('announcements.destroy');
 });
+
+// ANNOUNCEMENTS (all, for users)
+Route::middleware('auth')->get('/announcements', [\App\Http\Controllers\AnnouncementsController::class, 'index'])->name('announcements.index');

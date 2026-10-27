@@ -17,7 +17,8 @@
   @else
   <a href="{{ $pbHas('search') ? route('search') : '#' }}" class="pb-search" aria-label="Search"><i data-lucide="search"></i><span>Search</span></a>
   @endif
-  <a href="{{ $pbHas('chat.index') ? route('chat.index') : '#' }}" class="pb-ic" aria-label="Messages"><i data-lucide="message-circle"></i>@if(($navUnreadChats ?? 0) > 0)<em class="nv-badge">{{ $navUnreadChats > 99 ? '99+' : $navUnreadChats }}</em>@endif</a>
+  <a href="{{ $pbHas('referrals.index') ? route('referrals.index') : '#' }}" class="pb-ic pb-inv" aria-label="Invite friends"><i data-lucide="user-plus"></i></a>
+  <a href="{{ $pbHas('chat.index') ? route('chat.index') : '#' }}" class="pb-ic pb-tg" aria-label="Messages"><i data-lucide="send"></i>@if(($navUnreadChats ?? 0) > 0)<em class="nv-badge">{{ $navUnreadChats > 99 ? '99+' : $navUnreadChats }}</em>@endif</a>
   <button type="button" class="pb-ic" data-theme-btn aria-label="Light or dark mode"><i data-lucide="sun-moon"></i></button>
 </header>
 <script src="{{ asset('js/page-bar.js') }}?v={{ time() }}"></script>

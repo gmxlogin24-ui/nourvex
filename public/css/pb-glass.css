@@ -26,3 +26,9 @@ body:not(.ws2) .pb-bar{ background:transparent !important; border-color:transpar
 body.pb-on{ padding-top:var(--pb-h,64px) !important; }
 body.pb-on .dg > .dg-in{ padding-top:var(--pb-h,64px) !important; }
 body.pb-on:has(.pfn){ padding-top:0 !important; }
+
+/* top bar: telegram-style chat + invite friends */
+.pb-tg{background:linear-gradient(145deg,#37AEE2,#1E96C8) !important;border-radius:50% !important;box-shadow:0 4px 12px rgba(30,150,200,.4) !important}
+.pb-tg svg{color:#fff !important;stroke:#fff !important;transform:translate(-1px,1px) rotate(-8deg)}
+.pb-tg .nv-badge{top:-4px !important;right:-4px !important}
+.pb-inv{border-radius:50% !important;border:1px solid rgba(128,128,128,.35) !important}
