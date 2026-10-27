@@ -22,7 +22,7 @@
     @php
       $bg = $oa->image_url
         ? "linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.55) 100%),url('" . $oa->image_url . "')"
-        : ($apGrad[$oa->color] ?? $apGrad['orange']);
+        : ($apGrad[$oa->color] ?? $apGrad['blue']);
     @endphp
     <article class="ap-c {{ $openId === $oa->id ? 'hl' : '' }}" id="ann-{{ $oa->id }}">
       <div class="ap-banner" style="background-image:{{ $bg }}">

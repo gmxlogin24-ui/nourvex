@@ -21,7 +21,7 @@
       @php
         $oaBg = $oa->image_url
           ? "linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.78) 100%),url('" . $oa->image_url . "')"
-          : ($oaGrad[$oa->color] ?? $oaGrad['orange']);
+          : ($oaGrad[$oa->color] ?? $oaGrad['blue']);
         $oaNew = $oa->created_at && $oa->created_at->gt(now()->subDays(3));
       @endphp
       <a href="{{ route('announcements.index', ['a' => $oa->id]) }}" class="an-c" style="background-image:{{ $oaBg }}">

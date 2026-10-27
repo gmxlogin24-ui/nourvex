@@ -87,13 +87,6 @@
   @if(!empty($u->bio))<p class="pfn-bio">{{ $u->bio }}</p>@endif
 
   @if(empty($u->bio))<a href="{{ $go('profile.account') }}" class="pfn-addbio">Add a bio</a>@endif
-<div class="pfn-hl">
-  <button type="button" data-goto="market"><span><i data-lucide="shopping-bag"></i></span><small>Market</small></button>
-  <button type="button" data-goto="hustles"><span><i data-lucide="briefcase"></i></span><small>Hustles</small></button>
-  <button type="button" data-goto="media"><span><i data-lucide="camera"></i></span><small>Photos</small></button>
-  <a href="{{ $go('profile.reputation') }}"><span><i data-lucide="star"></i></span><small>Reviews</small></a>
-  <a href="{{ $go('profile.public', ['user' => $u->id]) }}#viewers"><span><i data-lucide="eye"></i></span><small>Viewers</small></a>
-</div>
 
   <div class="pfn-btns">
     <a href="{{ $go('profile.account') }}" class="pfn-btn">Edit profile</a>
