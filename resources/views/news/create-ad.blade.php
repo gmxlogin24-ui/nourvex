@@ -4,7 +4,18 @@
 @php
     $u = auth()->user();
     $free = (bool) $u->is_admin;
+    $qRate = (int) config('qcoin.q_per_naira_display', 20);
+    $walletBal = (float) $u->wallet_balance;
+    $qBal = (int) $u->q_coin_balance;
     $firstDays = old('duration', array_key_first($pricing));
+    $opts = [];
+    foreach ($pricing as $days => $naira) {
+        $naira = (float) $naira;
+        $qCost = (int) round($naira * $qRate);
+        $wOk = $free || (!$u->wallet_restricted && $walletBal >= $naira && !\App\Services\SpendLimit::blockedReason($u, $naira));
+        $qOk = $free || $qBal >= $qCost;
+        $opts[$days] = ['naira' => $naira, 'q' => $qCost, 'wallet' => $wOk, 'qok' => $qOk];
+    }
 @endphp
 <link rel="stylesheet" href="{{ asset('css/ad-create.css') }}?v={{ time() }}">
 
@@ -62,10 +73,13 @@
             <h2>How long should it run?</h2>
             <div class="ad-f">
                 <div class="ad-dur">
-                    @foreach($pricing as $days => $price)
+                    @foreach($opts as $days => $o)
                     <label class="ad-d">
-                        <input type="radio" name="duration" value="{{ $days }}" data-price="{{ $price }}" {{ (int) $firstDays === (int) $days ? 'checked' : '' }} required>
-                        <span><b>{{ $days }} days</b><i>{{ number_format($price) }} Q</i></span>
+                        <input type="radio" name="duration" value="{{ $days }}"
+                            data-naira="{{ $o['naira'] }}" data-q="{{ $o['q'] }}"
+                            data-wallet="{{ $o['wallet'] ? 1 : 0 }}" data-qok="{{ $o['qok'] ? 1 : 0 }}"
+                            {{ (int) $firstDays === (int) $days ? 'checked' : '' }} required>
+                        <span><b>{{ $days }} days</b><i>₦{{ number_format($o['naira']) }}</i><small>or {{ number_format($o['q']) }} Q</small></span>
                     </label>
                     @endforeach
                 </div>
@@ -82,12 +96,15 @@
         <div class="ad-sum">
             <div class="ad-row"><span>Runs for</span><b id="sumDays">{{ $firstDays }} days</b></div>
             @unless($free)
-            <div class="ad-row"><span>Q Coin balance</span><b id="sumBal" data-bal="{{ (int) $u->q_coin_balance }}">{{ number_format($u->q_coin_balance) }} Q</b></div>
+            <div class="ad-row"><span>Wallet balance</span><b>₦{{ number_format($walletBal) }}</b></div>
+            <div class="ad-row"><span>Q Coin balance</span><b>{{ number_format($qBal) }} Q</b></div>
             @endunless
-            <div class="ad-row tot"><span>{{ $free ? 'Cost' : 'Total' }}</span><b id="sumTot">{{ number_format($pricing[$firstDays] ?? 0).' Q' }}{{ $free ? ' (free for you)' : '' }}</b></div>
+            <div class="ad-row"><span>Pay with</span><b id="sumPay"></b></div>
+            <div class="ad-row tot"><span>{{ $free ? 'Cost' : 'Total' }}</span><b id="sumTot"></b></div>
         </div>
 
         <button type="submit" class="ad-go" id="adGo">{{ $free ? 'Publish ad' : 'Pay and go live' }}</button>
+        <a href="{{ route('wallet.deposit') }}" class="ad-go" id="adTop" style="display:none;text-align:center;text-decoration:none;">Top up wallet</a>
     </form>
 </main>
 
@@ -95,8 +112,9 @@
 (function () {
   var FREE = {{ $free ? 'true' : 'false' }};
   var $ = function (id) { return document.getElementById(id); };
-  var prev = $('adPrev');
+  function money(n) { return Math.round(n).toLocaleString(); }
   function txt(id, v, d) { $(id).textContent = v && v.trim() ? v : d; }
+
   function sync() {
     txt('pvTitle', $('adTitle').value, 'Your headline');
     txt('pvCat', $('adCat').value, 'Category');
@@ -106,17 +124,42 @@
   ['adTitle', 'adCat', 'adBody'].forEach(function (id) { $(id).addEventListener('input', sync); });
   $('adCat').addEventListener('change', sync);
 
-  function money(n) { return Math.round(n).toLocaleString() + ' Q'; }
   function price() {
     var r = document.querySelector('input[name="duration"]:checked');
     if (!r) return;
-    var days = r.value, p = parseFloat(r.getAttribute('data-price')) || 0;
+    var days = r.value;
+    var naira = parseFloat(r.getAttribute('data-naira')) || 0;
+    var q = parseFloat(r.getAttribute('data-q')) || 0;
+    var wOk = r.getAttribute('data-wallet') === '1';
+    var qOk = r.getAttribute('data-qok') === '1';
+    var go = $('adGo'), top = $('adTop');
+
     $('sumDays').textContent = days + ' days';
     $('pvEnds').textContent = days + ' day run';
-    if (FREE) { var dd = document.querySelector('input[name="duration"]:checked'); var pr = @json($pricing); $('sumTot').textContent = Math.round(pr[dd ? dd.value : Object.keys(pr)[0]]).toLocaleString() + ' Q (free for you)'; return; }
-    $('sumTot').textContent = money(p);
-    var bal = parseFloat($('sumBal').getAttribute('data-bal')) || 0;
-    $('sumTot').classList.toggle('ad-low', bal < p);
+
+    if (FREE) {
+      $('sumPay').textContent = 'Free (admin)';
+      $('sumTot').textContent = 'Free for you';
+      $('sumTot').classList.remove('ad-low');
+      go.disabled = false; top.style.display = 'none';
+      return;
+    }
+    if (wOk) {
+      $('sumPay').textContent = 'Wallet';
+      $('sumTot').textContent = '₦' + money(naira);
+      $('sumTot').classList.remove('ad-low');
+      go.disabled = false; top.style.display = 'none';
+    } else if (qOk) {
+      $('sumPay').textContent = 'Q Coin';
+      $('sumTot').textContent = money(q) + ' Q';
+      $('sumTot').classList.remove('ad-low');
+      go.disabled = false; top.style.display = 'none';
+    } else {
+      $('sumPay').textContent = 'Not enough. Top up your wallet.';
+      $('sumTot').textContent = '₦' + money(naira);
+      $('sumTot').classList.add('ad-low');
+      go.disabled = true; top.style.display = 'block';
+    }
   }
   document.querySelectorAll('input[name="duration"]').forEach(function (r) { r.addEventListener('change', price); });
 
@@ -124,12 +167,14 @@
     var f = this.files && this.files[0];
     if (!f) { $('adImgName').textContent = 'Add a picture'; return; }
     $('adImgName').textContent = f.name;
-    prev.style.setProperty('background-image', 'url(' + URL.createObjectURL(f) + ')', 'important');
+    $('adPrev').style.setProperty('background-image', 'url(' + URL.createObjectURL(f) + ')', 'important');
   });
 
   $('adForm').addEventListener('submit', function () {
-    var b = $('adGo'); setTimeout(function () { b.disabled = true; b.textContent = 'Please wait...'; }, 0);
+    var b = $('adGo');
+    setTimeout(function () { b.disabled = true; b.textContent = 'Please wait...'; }, 0);
   });
+
   sync(); price();
 })();
 </script>

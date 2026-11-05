@@ -75,4 +75,14 @@ document.addEventListener('DOMContentLoaded', function () {
     fields.forEach(f => f.addEventListener('input', update));
 });
 </script>
+
+<script>
+// ref-prefill: fill the referral code from ?ref= in the link
+(function(){
+  var f = document.querySelector('input[name="referral_code"]');
+  if (!f || f.value) return;
+  var r = new URLSearchParams(location.search).get('ref');
+  if (r) f.value = r.trim().toUpperCase();
+})();
+</script>
 @endsection

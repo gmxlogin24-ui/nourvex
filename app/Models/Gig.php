@@ -21,6 +21,8 @@ class Gig extends Model
         'packages', 'chosen_package',
     ];
 
+    public function user() { return $this->belongsTo(User::class, 'user_id'); }
+
     protected function casts(): array
     {
         return [

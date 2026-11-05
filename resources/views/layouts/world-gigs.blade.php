@@ -41,6 +41,6 @@
 @yield('scripts')
     @include('partials.world-edge')
 <script src="/js/auto-contrast.js?v=3" defer></script>
-<script src="/js/auto-dark.js?v=8" defer></script>
+<script src="/js/auto-dark.js?v=9" defer></script>
 </body>
 </html>

@@ -74,6 +74,8 @@
 <link rel="stylesheet" href="{{ asset('css/readable.css') }}?v={{ time() }}">
 <link rel="stylesheet" href="{{ asset('css/no-sidebar.css') }}?v={{ time() }}">
 <link rel="stylesheet" href="{{ asset('css/no-motion.css') }}?v={{ time() }}">
+<link rel="stylesheet" href="{{ asset('css/dark-fixes.css') }}?v=1">
+<link rel="stylesheet" href="{{ asset('css/feed-steady.css') }}?v=1">
 </head>
 @php
     $routeName = request()->route() ? request()->route()->getName() : '';
@@ -166,6 +168,6 @@
 <script src="/js/auto-contrast.js?v=3" defer></script>
 <script src="/js/glass-adapt.js?v=3" defer></script>
 <script src="/js/theme-btn.js?v=1" defer></script>
-<script src="/js/auto-dark.js?v=8" defer></script>
+<script src="/js/auto-dark.js?v=9" defer></script>
 </body>
 </html>

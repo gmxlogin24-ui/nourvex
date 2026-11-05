@@ -9,8 +9,7 @@
   $go = function ($r, $p = []) { try { return \Illuminate\Support\Facades\Route::has($r) ? route($r, $p) : '#'; } catch (\Throwable $e) { return '#'; } };
   $safe = function (callable $f) { try { return $f(); } catch (\Throwable $e) { return collect(); } };
   $tierLabel = $u->tier === 'tier1' ? 'Plus' : ($u->tier === 'tier2' ? 'Pro' : ($u->tier === 'tier3' ? 'Premium' : 'Free'));
-  $qpn = config('qcoin.q_per_naira_display', 10);
-  $qBal = (int) ($u->q_coin_balance ?? 0);
+  $qBal = (int) floor((float) ($u->wallet_balance ?? 0));
   $handle = $u->username ?? $u->name;
   $initial = strtoupper(substr($u->name ?? 'U', 0, 1));
   $note = $u->status_note ?? ($currentLevel?->name ?? ($tierLabel . ' member'));
@@ -34,7 +33,7 @@
   }
   foreach ($pfInv as $i) {
     $p = $pfProj[$i->investment_project_id] ?? null;
-    $invest[] = ['icon' => 'trending-up', 'title' => $p->title ?? $p->name ?? 'Investment', 'meta' => $i->status ?? '', 'amt' => number_format((float) $i->amount_q) . ' Q', 'url' => $go('investment.index'), 'at' => $i->created_at];
+    $invest[] = ['icon' => 'trending-up', 'title' => $p->title ?? $p->name ?? 'Investment', 'meta' => $i->status ?? '', 'amt' => '₦' . number_format((float) $i->amount_q), 'url' => $go('investment.index'), 'at' => $i->created_at];
   }
   foreach ($pfActs as $a) {
     if (!preg_match('/game|golf|play/i', ($a->category ?? '') . ' ' . ($a->action ?? ''))) continue;
@@ -62,15 +61,15 @@
 
   <header class="pfn-top">
     <button type="button" class="pfn-ic" data-sheet="pfnCreate" aria-label="Create"><i data-lucide="plus"></i></button>
-    <b class="pfn-handle">{{ $handle }}</b>
-    <a href="{{ $go('chat.index') }}" class="pfn-chat" aria-label="Messages"><i data-lucide="send"></i>@if(($navUnreadChats ?? 0) > 0)<em>{{ $navUnreadChats > 99 ? '99+' : $navUnreadChats }}</em>@endif</a>
+    <b class="pfn-handle">{{ $u->name }}</b>
+    <a href="{{ $go('cx.index') }}" class="pfn-chat" aria-label="Messages"><i data-lucide="send"></i>@if(($navUnreadChats ?? 0) > 0)<em>{{ $navUnreadChats > 99 ? '99+' : $navUnreadChats }}</em>@endif</a>
     <a href="{{ $go('notifications.index') }}" class="pfn-ic" aria-label="Notifications"><i data-lucide="bell"></i>@if($unread)<em>{{ $unread > 99 ? '99+' : $unread }}</em>@endif</a>
     <button type="button" class="pfn-ic" data-sheet="pfnMenu" aria-label="Menu"><i data-lucide="menu"></i></button>
   </header>
 
   <section class="pfn-head">
     <div class="pfn-info">
-      <div class="pfn-name">{{ $u->username ? '@'.$u->username : $u->name }}@if($u->is_verified_seller ?? false)<i data-lucide="badge-check"></i>@endif</div>
+      <div class="pfn-name">{{ $u->username ? '@'.$u->username : '' }}@if($u->is_verified_seller ?? false)<i data-lucide="badge-check"></i>@endif</div>
       <div class="pfn-stats">
         <div><b>{{ number_format($postsCount) }}</b><span>posts</span></div>
         <div><b>{{ number_format(\Illuminate\Support\Facades\Schema::hasTable('profile_views') ? \App\Models\ProfileView::where('profile_user_id', $u->id)->count() : 0) }}</b><span>profile views</span></div>
@@ -87,6 +86,23 @@
   @if(!empty($u->bio))<p class="pfn-bio">{{ $u->bio }}</p>@endif
 
   @if(empty($u->bio))<a href="{{ $go('profile.account') }}" class="pfn-addbio">Add a bio</a>@endif
+
+  @php
+    $pdV30 = 0; $pdVAll = 0;
+    try {
+      if (\Illuminate\Support\Facades\Schema::hasTable('profile_views')) {
+        $pdVAll = (int) \App\Models\ProfileView::where('profile_user_id', $u->id)->count();
+        if (\Illuminate\Support\Facades\Schema::hasColumn('profile_views', 'created_at')) {
+          $pdV30 = (int) \App\Models\ProfileView::where('profile_user_id', $u->id)->where('created_at', '>=', now()->subDays(30))->count();
+        }
+      }
+    } catch (\Throwable $e) { $pdV30 = 0; $pdVAll = 0; }
+  @endphp
+  <link rel="stylesheet" href="{{ asset('css/pfn-dash.css') }}?v={{ time() }}">
+  <a href="{{ $go('insights.dashboard') }}" class="pfn-dash">
+    <div class="pfn-dash-hd"><b><i data-lucide="trending-up"></i>Your dashboard</b><i data-lucide="chevron-right"></i></div>
+    <div class="pfn-dash-sub">{{ number_format($pdV30) }} {{ $pdV30 === 1 ? 'view' : 'views' }} in the last 30 days.</div>
+  </a>
 
   <div class="pfn-btns">
     <a href="{{ $go('profile.account') }}" class="pfn-btn">Edit profile</a>

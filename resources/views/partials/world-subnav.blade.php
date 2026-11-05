@@ -2,7 +2,7 @@
   $isM = ($world ?? 'market') === 'market';
   $cartN = count(session('cart', []));
   $items = $isM
-    ? [['shop', 'Shop', route('marketplace.index')], ['saved', 'Saved', route('marketplace.favorites')], ['cart', 'Cart' . ($cartN ? ' (' . $cartN . ')' : ''), route('cart.index')], ['orders', 'Orders', route('marketplace.orders')]]
+    ? [['shop', 'Shop', route('marketplace.index')], ['saved', 'Wishlist', route('marketplace.favorites')], ['cart', 'Cart' . ($cartN ? ' (' . $cartN . ')' : ''), route('cart.index')], ['orders', 'Orders', route('marketplace.orders')]]
     : [['jobs', 'Hustles', route('gigs.index')], ['posts', 'My posts', route('posts.index')]];
   if ($isM && auth()->user()->planAllows('market_sell')) $items[] = ['sell', 'Sell', route('marketplace.create')];
   if (!$isM && auth()->user()->planAllows('gigs_post')) $items[] = ['post', 'Post', route('gigs.create')];

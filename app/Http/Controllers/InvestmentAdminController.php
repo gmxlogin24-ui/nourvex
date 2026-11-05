@@ -49,7 +49,7 @@ class InvestmentAdminController extends Controller
         $data = $request->validate(['amount_q' => 'required|integer|min:1']);
 
         try {
-            $svc->release($project, (int) $data['amount_q']);
+            throw new RuntimeException('Funds are released by milestone. Open the project due diligence page.');
         } catch (RuntimeException $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -80,7 +80,7 @@ class InvestmentAdminController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-        return back()->with('status', 'Paid ' . number_format($result['paid']) . ' Q to investors. Platform kept ' . number_format($result['platform']) . ' Q.');
+        return back()->with('status', 'Paid ₦' . number_format($result['paid']) . ' to investors. Platform kept ₦' . number_format($result['platform']) . '.');
     }
 
     public function cancel(InvestmentProject $project, InvestmentService $svc)

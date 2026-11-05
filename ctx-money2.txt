@@ -1,0 +1,985 @@
+=== resources/views/admin/transactions.blade.php ===
+@extends('layouts.app-admin')
+@section('content')
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Transactions</h1>
+        <a href="{{ route('admin.index') }}" class="text-accent text-sm">← Back</a>
+    </div>
+
+    <form method="GET" class="flex gap-2 mb-4">
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search user" class="balance-chip" style="background:var(--color-card);border:1px solid var(--border-color);">
+        <button class="balance-chip primary">Filter</button>
+    </form>
+
+    <div class="stat-card overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-left text-muted border-b" style="border-color:var(--border-color);">
+                    <th class="py-2 pr-4">User</th>
+                    <th class="py-2 pr-4">Type</th>
+                    <th class="py-2 pr-4">Amount</th>
+                    <th class="py-2 pr-4">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach($transactions as $t)
+                <tr class="border-b" style="border-color:var(--border-color);">
+                    <td class="py-2 pr-4">{{ $t->user->name ?? '—' }}</td>
+                    <td class="py-2 pr-4 text-muted">{{ $t->type }}</td>
+                    <td class="py-2 pr-4" style="color:{{ $t->amount >= 0 ? '#4ade80' : '#ff6b6b' }};">₦{{ number_format($t->amount, 2) }}</td>
+                    <td class="py-2 pr-4 text-muted">{{ $t->created_at->format('M j, Y g:ia') }}</td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-4">{{ $transactions->links() }}</div>
+</div>
+@endsection
+
+=== resources/views/admin/users.blade.php ===
+@extends('layouts.app-admin')
+@section('content')
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Users</h1>
+        <a href="{{ route('admin.index') }}" class="text-accent text-sm">← Back</a>
+    </div>
+
+    @if(session('status'))
+    <div class="stat-card mb-4" style="border-color:var(--color-accent);"><p>{{ session('status') }}</p></div>
+    @endif
+
+    <form method="GET" class="flex gap-2 mb-4 flex-wrap">
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name or email" class="balance-chip" style="background:var(--color-card);border:1px solid var(--border-color);">
+        <select name="tier" class="balance-chip" style="background:var(--color-card);border:1px solid var(--border-color);">
+            <option value="">All tiers</option>
+            <option value="tier1" @selected(request('tier')==='tier1')>Tier 1</option>
+        </select>
+        <button class="balance-chip primary">Filter</button>
+    </form>
+
+    <div class="stat-card overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-left text-muted border-b" style="border-color:var(--border-color);">
+                    <th class="py-2 pr-4">Name</th>
+                    <th class="py-2 pr-4">Email</th>
+                    <th class="py-2 pr-4">Tier</th>
+                    <th class="py-2 pr-4">Balance</th>
+                    <th class="py-2 pr-4">Status</th>
+                    <th class="py-2 pr-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach($users as $u)
+                <tr class="border-b" style="border-color:var(--border-color);">
+                    <td class="py-2 pr-4">{{ $u->name }}</td>
+                    <td class="py-2 pr-4 text-muted">{{ $u->email }}</td>
+                    <td class="py-2 pr-4">{{ $u->tier }}</td>
+                    <td class="py-2 pr-4">₦{{ number_format($u->wallet_balance, 2) }}</td>
+                    <td class="py-2 pr-4">
+                        {{ $u->is_admin ? 'Admin' : ($u->role === 'customer_care' ? 'Customer Care' : 'User') }}{{ $u->is_banned ? ' · Banned' : '' }}
+                    </td>
+                    <td class="py-2 pr-4 flex gap-2 flex-wrap">
+                        <form method="POST" action="{{ route('admin.toggle-admin', $u) }}">
+                            @csrf
+                            <button class="balance-chip" style="font-size:0.75rem;">{{ $u->is_admin ? 'Remove Admin' : 'Make Admin' }}</button>
+                        </form>
+                        <form method="POST" action="{{ route('admin.toggle-ban', $u) }}">
+                            @csrf
+                            <button class="balance-chip" style="font-size:0.75rem;">{{ $u->is_banned ? 'Unban' : 'Ban' }}</button>
+                        </form>
+                        @if(!$u->is_admin)
+                        <form method="POST" action="{{ route('admin.toggle-customer-care', $u) }}">
+                            @csrf
+                            <button class="balance-chip" style="font-size:0.75rem;">{{ $u->role === 'customer_care' ? 'Remove Customer Care' : 'Make Customer Care' }}</button>
+                        </form>
+                        @endif
+                        @if($u->role === 'customer_care')
+                        <form method="POST" action="{{ route('admin.users.cc-permissions', $u) }}" class="flex flex-wrap items-center gap-2" style="font-size:0.7rem;background:var(--color-card);border:1px solid var(--border-color);border-radius:0.5rem;padding:0.3rem 0.5rem;">
+                            @csrf
+                            @method('PUT')
+                            @php $perms = $u->customer_care_permissions ?? []; @endphp
+                            @foreach(['orders'=>'Orders','gig_disputes'=>'Gig Disp.','listing_disputes'=>'Mkt Disp.','user_lookup'=>'Lookup','flags'=>'Flags'] as $key => $label)
+                                <label style="display:flex;align-items:center;gap:2px;">
+                                    <input type="checkbox" name="permissions[]" value="{{ $key }}" @checked(in_array($key, $perms))>
+                                    {{ $label }}
+                                </label>
+                            @endforeach
+                            <button class="balance-chip primary" style="font-size:0.7rem;">Save Access</button>
+                        </form>
+                        @endif
+                        <form method="POST" action="{{ route('admin.adjust-balance', $u) }}" class="flex gap-1">
+                            @csrf
+                            <input type="number" step="0.01" name="amount" placeholder="+/- amt" style="width:90px;background:var(--color-card);border:1px solid var(--border-color);border-radius:0.5rem;padding:0 0.4rem;font-size:0.75rem;">
+                            <button class="balance-chip primary" style="font-size:0.75rem;">Apply</button>
+                        </form>
+                    </td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-4">{{ $users->links() }}</div>
+</div>
+@endsection
+
+=== resources/views/admin/revenue.blade.php ===
+@extends('layouts.app-admin')
+@section('content')
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Platform Revenue</h1>
+        <a href="{{ route('admin.index') }}" class="text-accent text-sm">← Back</a>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="stat-card">
+            <p class="text-muted text-xs">All-Time</p>
+            <p class="text-2xl font-bold mt-1">₦{{ number_format($totalAllTime, 2) }}</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-muted text-xs">This Month</p>
+            <p class="text-2xl font-bold mt-1">₦{{ number_format($totalThisMonth, 2) }}</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-muted text-xs">This Week</p>
+            <p class="text-2xl font-bold mt-1">₦{{ number_format($totalThisWeek, 2) }}</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-muted text-xs">Today</p>
+            <p class="text-2xl font-bold mt-1">₦{{ number_format($totalToday, 2) }}</p>
+        </div>
+    </div>
+
+    <div class="stat-card mb-6 overflow-x-auto">
+        <h2 class="font-semibold mb-3">By Source</h2>
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-left text-muted border-b" style="border-color:var(--border-color);">
+                    <th class="py-2 pr-4">Source</th>
+                    <th class="py-2 pr-4">Total Earned</th>
+                    <th class="py-2 pr-4">Transactions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($bySource as $row)
+                <tr class="border-b" style="border-color:var(--border-color);">
+                    <td class="py-2 pr-4">{{ ucfirst($row->source) }}</td>
+                    <td class="py-2 pr-4">₦{{ number_format($row->total, 2) }}</td>
+                    <td class="py-2 pr-4">{{ $row->count }}</td>
+                </tr>
+                @empty
+                <tr><td colspan="3" class="py-4 text-center text-muted">No revenue recorded yet.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="stat-card overflow-x-auto">
+        <h2 class="font-semibold mb-3">Recent Entries</h2>
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-left text-muted border-b" style="border-color:var(--border-color);">
+                    <th class="py-2 pr-4">Source</th>
+                    <th class="py-2 pr-4">Amount</th>
+                    <th class="py-2 pr-4">Description</th>
+                    <th class="py-2 pr-4">When</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($recent as $entry)
+                <tr class="border-b" style="border-color:var(--border-color);">
+                    <td class="py-2 pr-4">{{ ucfirst($entry->source) }}</td>
+                    <td class="py-2 pr-4">₦{{ number_format($entry->amount, 2) }}</td>
+                    <td class="py-2 pr-4 text-muted">{{ $entry->description }}</td>
+                    <td class="py-2 pr-4 text-muted">{{ $entry->created_at->diffForHumans() }}</td>
+                </tr>
+                @empty
+                <tr><td colspan="4" class="py-4 text-center text-muted">Nothing yet.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
+@endsection
+
+=== resources/views/admin/index.blade.php ===
+@extends('layouts.app-admin')
+@section('content')
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Admin Overview</h1>
+        <a href="{{ route('admin.invites') }}" class="balance-chip primary">+ Invites</a>
+        <a href="{{ route('admin.announcements.index') }}" class="balance-chip">Announcements</a>
+    </div>
+
+    @if(session('status'))
+    <div class="stat-card mb-4" style="border-color:var(--color-accent);"><p>{{ session('status') }}</p></div>
+    @endif
+
+    <div class="grid md:grid-cols-4 gap-4 mb-6">
+        <div class="stat-card"><p class="text-xs text-muted">Users</p><p class="text-2xl font-bold">{{ $userCount }}</p><p class="text-xs text-muted">{{ $bannedCount }} banned</p></div>
+        <div class="stat-card"><p class="text-xs text-muted">Wallet Balance (all)</p><p class="text-2xl font-bold">₦{{ number_format($totalWalletBalance, 2) }}</p></div>
+        <div class="stat-card"><p class="text-xs text-muted">Open Gigs</p><p class="text-2xl font-bold">{{ $openGigCount }}</p><p class="text-xs text-muted">{{ $gigCount }} total</p></div>
+        <div class="stat-card"><p class="text-xs text-muted">Listings</p><p class="text-2xl font-bold">{{ $listingCount }}</p></div>
+    </div>
+
+    <div class="split-view-wrap mb-6">
+        <div class="split-view-list-card">
+            <div class="split-view-list-header">
+                <span>Recent Users</span>
+                <a href="{{ route('admin.users') }}" class="text-accent text-xs">View all →</a>
+            </div>
+            @foreach($recentUsers as $i => $u)
+            <div class="split-list-row {{ $i === 0 ? 'active' : '' }}" data-target="user-detail-{{ $u->id }}" data-name="{{ $u->name }}" data-tier="{{ $u->tier }}">
+                <div class="split-list-avatar">{{ strtoupper(substr($u->name, 0, 1)) }}</div>
+                <div class="split-list-meta">
+                    <p class="split-list-name">{{ $u->name }}</p>
+                    <p class="split-list-sub">{{ $u->tier }}{{ $u->is_banned ? ' · banned' : '' }}</p>
+                </div>
+            </div>
+            @endforeach
+        </div>
+
+        <div class="split-view-detail-card">
+            @foreach($recentUsers as $i => $u)
+            @php $level = $u->workerLevel(); @endphp
+            <div class="split-detail-panel {{ $i === 0 ? 'active' : '' }}" id="user-detail-{{ $u->id }}">
+                <div class="split-detail-header">
+                    <div class="split-detail-avatar">{{ strtoupper(substr($u->name, 0, 1)) }}</div>
+                    <div>
+                        <p class="split-detail-name">{{ $u->name }}</p>
+                        <p class="split-detail-email">{{ $u->email }}</p>
+                    </div>
+                    <div class="split-detail-badge" data-badge="{{ $level['key'] }}">
+                        <i data-lucide="{{ $level['icon'] }}"></i>
+                        <span>{{ $level['label'] }}</span>
+                    </div>
+                </div>
+
+                <div class="split-detail-stats">
+                    <div class="split-detail-stat">
+                        <i data-lucide="briefcase"></i>
+                        <div>
+                            <p class="split-detail-stat-value">{{ $u->completedGigsCount() }}</p>
+                            <p class="split-detail-stat-label">Gigs Done</p>
+                        </div>
+                    </div>
+                    <div class="split-detail-stat">
+                        <i data-lucide="star"></i>
+                        <div>
+                            <p class="split-detail-stat-value">{{ $u->averageRatingReceived() ? number_format($u->averageRatingReceived(), 1) : '—' }}</p>
+                            <p class="split-detail-stat-label">Avg Rating</p>
+                        </div>
+                    </div>
+                    <div class="split-detail-stat">
+                        <i data-lucide="message-square"></i>
+                        <div>
+                            <p class="split-detail-stat-value">{{ $u->reviewsReceivedCount() }}</p>
+                            <p class="split-detail-stat-label">Reviews</p>
+                        </div>
+                    </div>
+                    <div class="split-detail-stat">
+                        <i data-lucide="flame"></i>
+                        <div>
+                            <p class="split-detail-stat-value">{{ $u->streak_days ?? 0 }}</p>
+                            <p class="split-detail-stat-label">Day Streak</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="split-detail-chips">
+                    <div class="split-detail-chip">
+                        <p class="text-xs text-muted">Tier</p>
+                        <p class="font-semibold">{{ $u->tier }}</p>
+                    </div>
+                    <div class="split-detail-chip">
+                        <p class="text-xs text-muted">Status</p>
+                        <p class="font-semibold">{{ $u->is_banned ? 'Banned' : 'Active' }}</p>
+                    </div>
+                    <div class="split-detail-chip">
+                        <p class="text-xs text-muted">Role</p>
+                        <p class="font-semibold">{{ $u->is_admin ? 'Admin' : ($u->role === 'customer_care' ? 'Customer Care' : 'User') }}</p>
+                    </div>
+                </div>
+                <a href="{{ route('admin.users') }}?search={{ urlencode($u->email) }}" class="split-detail-action">Manage in Users →</a>
+            </div>
+            @endforeach
+        </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6 mb-6">
+        <div class="stat-card">
+            <h2 class="font-semibold mb-3">Subscriptions Expiring Soon (14d)</h2>
+            @forelse($expiringSoon as $s)
+            <div class="flex justify-between text-sm py-2 border-b" style="border-color:var(--border-color);">
+                <span>{{ $s->user->name ?? 'Unknown' }}</span>
+                <span class="text-muted">{{ $s->expires_at->diffForHumans() }}</span>
+            </div>
+            @empty
+            <p class="text-sm text-muted">None expiring soon.</p>
+            @endforelse
+        </div>
+        <div class="stat-card">
+            <h2 class="font-semibold mb-3">Stuck Pending Payments (&gt;2h)</h2>
+            @forelse($stuckPending as $s)
+            <div class="flex justify-between text-sm py-2 border-b" style="border-color:var(--border-color);">
+                <span>{{ $s->user->name ?? 'Unknown' }}</span>
+                <span class="text-muted">₦{{ number_format($s->amount) }}</span>
+            </div>
+            @empty
+            <p class="text-sm text-muted">None stuck.</p>
+            @endforelse
+        </div>
+    </div>
+</div>
+@endsection
+
+@section('scripts')
+<script>
+function updateTopbarSelectedUser(name, tier) {
+    var slot = document.getElementById('admin-topbar-selec
+=== resources/views/partials/glass-balance-card.blade.php ===
+<div class="balance-folder reveal-on-scroll" id="balanceFolder">
+    <span class="folder-tab"></span>
+    <div class="folder-stack-edge"></div>
+
+    <div class="folder-card-slot" id="folderCardSlot">
+        <div class="glass-balance-card" id="glassBalanceCard">
+            <div class="glass-balance-eyebrow">
+                <span><span class="live-dot"></span>Total Balance</span>
+                <span>{{ now()->format('M j') }}</span>
+            </div>
+            <p class="glass-balance-amount" id="glassBalanceAmount" data-target="{{ (float) ($balance ?? 0) }}">₦0.00</p>
+            <p class="glass-balance-sub">Available across wallet &amp; virtual account</p>
+            <div class="glass-balance-actions">
+                <a href="{{ route('wallet.index') }}" class="glass-chip primary"><i data-lucide="plus" class="w-4 h-4"></i> Top Up</a>
+                <a href="{{ route('wallet.index') }}" class="glass-chip"><i data-lucide="arrow-down-to-line" class="w-4 h-4"></i> Withdraw</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="folder-front"></div>
+</div>
+
+<script>
+(function(){
+    var folder = document.getElementById('balanceFolder');
+    var slot = document.getElementById('folderCardSlot');
+    if (!folder || !slot) return;
+
+    var tapTimer = null, tapCount = 0;
+
+    function openFull(){ folder.classList.remove('is-peek'); folder.classList.add('is-open'); }
+    function peek(){ folder.classList.toggle('is-peek'); }
+    function closeAll(){ folder.classList.remove('is-open','is-peek'); }
+
+    function handleTap(e){
+        var link = e.target.closest('a,button');
+        if (link) {
+            if (!folder.classList.contains('is-open')) { e.preventDefault(); }
+            else { return; }
+        }
+        tapCount++;
+        if (tapCount === 1) {
+            tapTimer = setTimeout(function(){
+                tapCount = 0;
+                folder.classList.contains('is-open') ? closeAll() : peek();
+            }, 280);
+        } else if (tapCount === 2) {
+            clearTimeout(tapTimer);
+            tapCount = 0;
+            folder.classList.contains('is-open') ? closeAll() : openFull();
+        }
+    }
+
+    slot.addEventListener('click', handleTap);
+    document.addEventListener('click', function(e){
+        if (folder.classList.contains('is-open') && !folder.contains(e.target)) closeAll();
+    });
+})();
+</script>
+
+=== resources/views/partials/dqm-balance-deck.blade.php ===
+@php
+    $dqmDeckName = auth()->user()?->name ?? 'Guest';
+    $dqmDeckCirc = 2 * pi() * 40;
+    $dqmDeckMilestone = $nextStreakMilestone ?? 7;
+    $dqmDeckPct = $dqmDeckMilestone > 0 ? min(100, round((($streakDays ?? 0) / $dqmDeckMilestone) * 100)) : 0;
+    $dqmDeckOffset = $dqmDeckCirc * (1 - $dqmDeckPct / 100);
+@endphp
+<div class="dqm-balance-wrap" id="dqmBalanceWrap">
+    <div class="dqm-balance-side-actions">
+        @if(auth()->user()->planAllows('gigs_post'))<a href="{{ Route::has('gigs.create') ? route('gigs.create') : '#' }}" class="dqm-side-btn">Post a Hustle</a>@endif
+        @if($qCoinClaimedToday ?? false)
+            <span class="dqm-side-btn dqm-side-btn-static">Claimed</span>
+        @else
+            <form method="POST" action="{{ Route::has('qcoin.claim') ? route('qcoin.claim') : '#' }}">
+                @csrf
+                <button type="submit" class="dqm-side-btn dqm-side-btn-ghost">Claim</button>
+            </form>
+        @endif
+    </div>
+    <div class="dqm-deck-collapsed" id="dqmDeckCollapsed">
+        <div class="dqm-deck-peek dqm-deck-peek-top" id="dqmPeekTop"></div>
+        <div class="dqm-deck-peek dqm-deck-peek-bottom" id="dqmPeekBottom"></div>
+        <div class="dqm-deck-card dqm-deck-next" id="dqmDeckNext" data-card="qcoin">
+            <div class="dqm-bal-card-inner">
+                <span class="dqm-hero-label">Q Coin Balance</span>
+                <span class="dqm-hero-value dqm-countup" data-value="{{ $qCoinBalance ?? 0 }}" data-suffix=" Q">0 Q</span>
+                <div class="dqm-hero-ring">
+                    <svg viewBox="0 0 96 96">
+                        <circle class="dqm-ring-track" cx="48" cy="48" r="40"></circle>
+                        <circle class="dqm-ring-fill" cx="48" cy="48" r="40" stroke-dasharray="{{ $dqmDeckCirc }}" stroke-dashoffset="{{ $dqmDeckOffset }}"></circle>
+                    </svg>
+                    <div class="dqm-ring-center"><span>{{ $streakDays ?? 0 }}</span><small>day streak</small></div>
+                </div>
+            </div>
+        </div>
+        <div class="dqm-deck-card dqm-deck-front" id="dqmDeckFront" data-card="qcoin">
+            <div class="dqm-bal-card-inner">
+                <span class="dqm-hero-label">Q Coin Balance</span>
+                <span class="dqm-hero-value dqm-countup" data-value="{{ $qCoinBalance ?? 0 }}" data-suffix=" Q">0 Q</span>
+                <div class="dqm-hero-ring">
+                    <svg viewBox="0 0 96 96">
+                        <circle class="dqm-ring-track" cx="48" cy="48" r="40"></circle>
+                        <circle class="dqm-ring-fill" cx="48" cy="48" r="40" stroke-dasharray="{{ $dqmDeckCirc }}" stroke-dashoffset="{{ $dqmDeckOffset }}"></circle>
+                    </svg>
+                    <div class="dqm-ring-center"><span>{{ $streakDays ?? 0 }}</span><small>day streak</small></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="dqm-deck-overlay" id="dqmDeckOverlay">
+    <button type="button" class="dqm-deck-overlay-back" id="dqmDeckOverlayBack"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back</button>
+    <div class="dqm-deck-center-wrap">
+    <div class="dqm-deck-expanded" id="dqmDeckExpanded">
+        <div class="dqm-deck-fan dqm-deck-fan-far dqm-deck-fan-purple dqm-fan-topcard" id="dqmFanTopFar"><div class="dqm-fan-chip"></div><div class="dqm-fan-dot"></div></div>
+        <div class="dqm-deck-fan dqm-deck-fan-near dqm-deck-fan-teal dqm-fan-topcard" id="dqmFanTopNear" data-card="gigs">
+            <div class="dqm-fan-chip"></div><div class="dqm-fan-dot"></div>
+            <div class="dqm-fan-label" data-role="label">Active Gigs</div>
+            <div class="dqm-fan-value" data-role="value">{{ $myOpenGigs ?? 0 }}</div>
+        </div>
+        <div class="dqm-deck-fan-center" id="dqmFanCenter" data-card="qcoin">
+            <div class="dqm-bal-card-inner" id="dqmFanCenterInner">
+                <span class="dqm-hero-label" data-role="label">Q Coin Balance</span>
+                <span class="dqm-hero-value" data-role="value">{{ number_format($qCoinBalance ?? 0) }} Q</span>
+            </div>
+            <div class="dqm-fan-masked">•••• •••• •••• 3123</div>
+        </div>
+        <div class="dqm-deck-fan dqm-deck-fan-near dqm-deck-fan-coral dqm-fan-bottomcard" id="dqmFanBottomNear" data-card="earnings">
+            <div class="dqm-fan-label" data-role="label">Earnings</div>
+            <div class="dqm-fan-value" data-role="value">{{ number_format(($earnings ?? 0) * config('qcoin.q_per_naira_display', 10)) }} Q<small style="display:block;font-size:.5em;font-weight:500;opacity:.4">₦{{ number_format($earnings ?? 0) }}</small></div>
+            <span class="dqm-fan-masked-sm">•••• 3123</span>
+        </div>
+        <div class="dqm-deck-fan dqm-deck-fan-far dqm-deck-fan-amber dqm-fan-bottomcard" id="dqmFanBottomFar"><span class="dqm-fan-masked-sm">•••• 3123</span></div>
+    </div>
+    </div>
+    <div class="dqm-deck-detail" id="dqmDeckDetail">
+        <div><p class="dqm-deck-detail-label">Streak</p><p class="dqm-deck-detail-value" id="dqmDeckDetailA">{{ $streakDays ?? 0 }} days</p></div>
+        <div><p class="dqm-deck-detail-label">Holder</p><p class="dqm-deck-detail-value">{{ explode(' ', $dqmDeckName)[0] }}</p></div>
+    </div>
+</div>
+<script>
+(function () {
+    var overlay = document.getElementById('dqmDeckOverlay');
+    var overlayBack = document.getElementById('dqmDeckOverlayBack');
+    var front = document.getElementById('dqmDeckFront');
+    var next = document.getElementById('dqmDeckNext');
+    var peekTop = document.getElementById('dqmPeekTop');
+    var peekBottom = document.getElementById('dqmPeekBottom');
+    var fanTopFar = document.getElementById('dqmFanTopFar');
+    var fanTopNear = document.getElementById('dqmFanTopNear');
+    var fanCenter = document.getElementById('dqmFanCenter');
+    var fanBottomNear = document.getElementById('dqmFanBottomNear');
+    var fanBottomFar = document.getElementById('dqmFanBottomFar');
+    var detailA = document.getElementById('dqmDeckDetailA');
+    if (!overlay || !front || !next || !fanCenter) return;
+    var MAX_DRAG = 50, SWAP_DISTANCE = 80, COMMIT_RATIO = 0.5, DOUBLE_TAP_MS = 320;
+    var CARD_HTML = { qcoin: front.innerHTML };
+    function htmlFor(key) { return CARD_HTML[key]; }
+    function otherKey(key) { return key; }
+    function setFrontCard(key) { front.innerHTML = htmlFor(key); front.dataset.card = key; if (window.lucide) lucide.createIcons(); }
+    function resetLayers(instant) {
+        if (instant) { front.style.transition = 'none'; next.style.transition = 'none'; }
+        front.style.opacity = 1; front.style.transform = '';
+        next.style.opacity = 0; next.style.transform = 'translateY(0)';
+        if (instant) requestAnimationFrame(function () { front.style.transition = ''; next.style.transition = ''; });
+    }
+    function flipFrom(el, startRect) {
+        var endRect = el.getBoundingCli
+=== resources/views/wallet/receipt.blade.php ===
+@extends('layouts.app-authenticated')
+@section('content')
+
+<main class="max-w-md mx-auto p-6">
+    <a href="{{ route('wallet.index') }}" class="text-muted text-sm flex items-center gap-1 mb-4">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Wallet
+    </a>
+
+    <div class="glass-card p-6 text-center">
+        <div class="receipt-check">
+            <i data-lucide="check" class="w-6 h-6"></i>
+        </div>
+        <p class="text-muted text-sm mt-3">{{ $tx->amount >= 0 ? 'Money Received' : 'Money Sent' }}</p>
+        <p class="text-2xl font-bold {{ $tx->amount >= 0 ? 'text-accent' : '' }}">
+            {{ $tx->amount >= 0 ? '+' : '-' }}₦{{ number_format(abs($tx->amount), 2) }}
+        </p>
+        <p class="text-xs text-muted mt-1 capitalize">{{ $tx->status ?? 'successful' }}</p>
+    </div>
+
+    <div class="glass-card p-6 mt-4">
+        <div class="flex items-center justify-between py-2 border-b" style="border-color:rgba(255,255,255,0.06);">
+            <span class="text-muted text-sm">Reference</span>
+            <span class="font-mono text-sm">{{ $tx->reference ?? '—' }}</span>
+        </div>
+        <div class="flex items-center justify-between py-2 border-b" style="border-color:rgba(255,255,255,0.06);">
+            <span class="text-muted text-sm">{{ $tx->amount >= 0 ? 'From' : 'To' }}</span>
+            <span class="text-sm font-medium">{{ $tx->relatedUser->name ?? '—' }}</span>
+        </div>
+        <div class="flex items-center justify-between py-2 border-b" style="border-color:rgba(255,255,255,0.06);">
+            <span class="text-muted text-sm">Description</span>
+            <span class="text-sm text-right">{{ $tx->description }}</span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+            <span class="text-muted text-sm">Date</span>
+            <span class="text-sm">{{ $tx->created_at->format('d M Y, h:ia') }}</span>
+        </div>
+    </div>
+
+    <button type="button" id="shareReceiptBtn" class="btn-primary w-full justify-center mt-4">Share Receipt</button>
+</main>
+
+<style>
+.receipt-check{
+  width:56px; height:56px; border-radius:50%; margin:0 auto;
+  background: var(--color-accent, #0F9D6E); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+}
+</style>
+
+<script>
+(function(){
+    var btn = document.getElementById('shareReceiptBtn');
+    if (!btn) return;
+    btn.addEventListener('click', function(){
+        var text = @json("NAURVEX Pay Receipt\nRef: " . ($tx->reference ?? '-') . "\n" . $tx->description . "\nAmount: ₦" . number_format(abs($tx->amount), 2) . "\nStatus: " . ($tx->status ?? 'successful') . "\nDate: " . $tx->created_at->format('d M Y, h:ia'));
+        if (navigator.share) {
+            navigator.share({ text: text }).catch(function(){});
+        } else if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(function(){
+                var o = btn.textContent; btn.textContent = 'Copied!';
+                setTimeout(function(){ btn.textContent = o; }, 1500);
+            });
+        }
+    });
+})();
+</script>
+@endsection
+
+=== resources/views/wallet/send.blade.php ===
+@extends('layouts.app-authenticated')
+@section('content')
+
+<main class="max-w-md mx-auto p-6">
+    <h1 class="text-2xl font-semibold mb-6">Send Money</h1>
+
+    @if(session('status'))
+    <div class="bg-card card-rounded p-4 mb-4 text-sm text-accent">{{ session('status') }}</div>
+    @endif
+    @if($errors->any())
+    <div class="bg-card card-rounded p-4 mb-4 text-sm text-red-500">{{ $errors->first() }}</div>
+    @endif
+
+    <div class="glass-card p-6" id="detailsStep">
+        <label class="text-sm font-medium mb-1 block">Recipient Email</label>
+        <input type="text" id="recipientInput" placeholder="Recipient email" required class="input-field !mt-0 mb-3">
+
+        <div id="resolveStatus" class="text-sm mb-3"></div>
+
+        <label class="text-sm font-medium mb-1 block">Amount (₦)</label>
+        <input type="number" id="amountInput" min="1" required class="input-field !mt-0 mb-3">
+
+        <label class="text-sm font-medium mb-1 block">Note (optional)</label>
+        <input type="text" id="noteInput" placeholder="Note (optional)" class="input-field !mt-0 mb-3">
+
+        @unless($hasPin ?? false)
+        <p class="text-sm text-muted mb-3">You need a transaction PIN before sending money. <a href="{{ route('wallet.pin.edit') }}" class="underline font-semibold">Set one now</a>.</p>
+        @endunless
+
+        <button type="button" id="continueBtn" class="btn-primary w-full justify-center" disabled {{ ($hasPin ?? false) ? '' : 'disabled' }}>Continue</button>
+        <a href="{{ route('wallet.index') }}" class="text-muted text-sm mt-3 w-full text-center block">Cancel</a>
+    </div>
+
+    <div class="glass-card p-6" id="pinStep" style="display:none;">
+        <button type="button" id="backBtn" class="text-muted text-sm mb-4">&larr; Back</button>
+        <p class="text-sm text-muted mb-1">Sending</p>
+        <p class="text-2xl font-semibold mb-1" id="pinAmountLabel"></p>
+        <p class="text-sm text-muted mb-6" id="pinRecipientLabel"></p>
+
+        <p class="text-center text-sm font-medium mb-4">Enter your transaction PIN</p>
+        <div class="pin-dots" id="pinDots">
+            <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
+            <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
+        </div>
+        <p id="pinError" class="text-sm text-red-500 text-center mb-3" style="min-height:1.25rem;"></p>
+
+        <div class="pin-keypad">
+            <button type="button" class="pin-key" data-key="1">1</button>
+            <button type="button" class="pin-key" data-key="2">2</button>
+            <button type="button" class="pin-key" data-key="3">3</button>
+            <button type="button" class="pin-key" data-key="4">4</button>
+            <button type="button" class="pin-key" data-key="5">5</button>
+            <button type="button" class="pin-key" data-key="6">6</button>
+            <button type="button" class="pin-key" data-key="7">7</button>
+            <button type="button" class="pin-key" data-key="8">8</button>
+            <button type="button" class="pin-key" data-key="9">9</button>
+            <div></div>
+            <button type="button" class="pin-key" data-key="0">0</button>
+            <button type="button" class="pin-key" id="pinBackspace">&#9003;</button>
+        </div>
+    </div>
+
+    <form id="sendMoneyForm" method="POST" action="{{ route('wallet.send') }}" style="display:none;">
+        @csrf
+        <input type="hidden" name="recipient_identifier" id="hiddenRecipient">
+        <input type="hidden" name="amount" id="hiddenAmount">
+        <input type="hidden" name="note" id="hiddenNote">
+        <input type="hidden" name="pin" id="hiddenPin">
+    </form>
+</main>
+
+<style>
+.pin-dots { display: flex; justify-content: center; gap: 14px; margin-bottom: 24px; }
+.pin-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--color-accent, #7c5cf0); background: transparent; transition: background 0.15s; }
+.pin-dot.filled { background: var(--color-accent, #7c5cf0); }
+.pin-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 260px; margin: 0 auto; }
+.pin-key { font-size: 1.25rem; font-weight: 600; padding: 18px 0; border-radius: 50%; background: var(--color-card, #f3f2fb); border: none; }
+.pin-key:active { background: var(--color-accent, #7c5cf0); color: #fff; }
+</style>
+
+<script>
+(function () {
+    const recipientInput = document.getElementById('recipientInput');
+    const amountInput = document.getElementById('amountInput');
+    const noteInput = document.getElementById('noteInput');
+    const resolveStatus = document.getElementById('resolveStatus');
+    const continueBtn = document.getElementById('continueBtn');
+    const hasPin = {{ ($hasPin ?? false) ? 'true' : 'false' }};
+    let resolveTimer = null;
+    let resolvedName = null;
+
+    function tryResolve() {
+        continueBtn.disabled = true;
+        resolvedName = null;
+        resolveStatus.textContent = '';
+
+        const identifier = recipientInput.value.trim();
+        if (!identifier) return;
+
+        resolveStatus.textContent = 'Looking up recipient...';
+        resolveStatus.className = 'text-sm mb-3 text-muted';
+
+        fetch('{{ route("wallet.send.resolve") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ recipient_identifier: identifier }),
+        })
+        .then(res => res.json().then(data => ({ ok: res.ok, data })))
+        .then(({ ok, data }) => {
+            if (!ok) {
+                resolveStatus.textContent = data.error || 'Could not find recipient.';
+                resolveStatus.className = 'text-sm mb-3 text-red-500';
+                return;
+            }
+            resolvedName = data.name;
+            resolveStatus.textContent = 'Sending to: ' + data.name;
+            resolveStatus.className = 'text-sm mb-3 text-accent';
+            maybeEnableContinue();
+        })
+        .catch(() => {
+            resolveStatus.textContent = 'Could not verify recipient. Check your connection and try again.';
+            resolveStatus.className = 'text-sm mb-3 text-red-500';
+        });
+    }
+
+    function maybeEnableContinue() {
+        continueBtn.disabled = !(hasPin && resolvedName && amountInput.value && Number(amountInput.value) > 0);
+    }
+
+    function debounceResolve() {
+        clearTimeout(resolveTimer);
+        resolveTimer = setTimeout(tryResolve, 500);
+    }
+
+    recipientInput.addEventListener('input', debounceResolve);
+    amountInput.addEventListener('input', maybeEnableContinue);
+
+    // ---- Step transition ----
+    const detailsStep = document.getElementById('detailsStep');
+    const pinStep = document.getElementById('pinStep');
+    const pinAmountLabel = document.getElementById
+=== resources/views/gigs/index.blade.php ===
+@extends('layouts.app-authenticated')
+
+@section('title', 'Hustles')
+
+@section('content')
+@php
+  $list = isset($gigsPage) ? $gigsPage : $gigs;
+  $all = collect($gigs);
+  $gfCat = [
+    'Tutoring' => ['graduation-cap', '#7C5CF0'], 'Typing & Printing' => ['printer', '#2563EB'],
+    'Hair & Beauty' => ['scissors', '#DB2777'], 'Repairs' => ['wrench', '#EA580C'],
+    'Laundry' => ['shirt', '#0EA5A4'], 'Errands & Delivery' => ['truck', '#16A34A'],
+    'Photography' => ['camera', '#CA8A04'],
+  ];
+  $cats = collect(array_keys((array) config('gig_categories', [])))->merge(collect($categories ?? []))->filter()->unique()->values();
+  $q = trim((string) request('search')); $cat = request('category'); $sort = request('sort');
+  $min = request('min_price'); $max = request('max_price');
+  $filtered = $q !== '' || $cat || $sort || $min || $max;
+  $u = function ($extra = []) {
+    $p = array_merge(request()->only(['search', 'category', 'sort', 'min_price', 'max_price']), $extra);
+    return route('gigs.index', array_filter($p, fn ($v) => $v !== null && $v !== ''));
+  };
+  $from = function ($g) {
+    $pk = is_array($g->packages) ? $g->packages : [];
+    return count($pk) ? min(array_map(fn ($x) => (float) ($x['price'] ?? 0), $pk)) : (float) $g->amount;
+  };
+  $ago = function ($v) { try { return $v ? \Illuminate\Support\Carbon::parse($v)->diffForHumans() : ''; } catch (\Throwable $e) { return ''; } };
+  $open = $all->where('status', 'open');
+  $fresh = $open->sortByDesc('created_at')->take(10)->values();
+  $top = $open->filter(fn ($g) => !empty($g->avg_rating))->sortByDesc('avg_rating')->take(10)->values();
+  $cheap = $open->filter(fn ($g) => $from($g) <= 5000)->sortBy(fn ($g) => $from($g))->take(10)->values();
+  $rails = [['Just posted', $fresh], ['Top rated', $top], ['Budget friendly', $cheap]];
+@endphp
+<link rel="stylesheet" href="{{ asset('css/gig-feed.css') }}?v={{ time() }}">
+<div class="gf-feed" id="gfFeed">
+
+  <div class="gf-top">
+    <form method="GET" action="{{ route('gigs.index') }}" class="gf-search">
+      <i data-lucide="search"></i>
+      <input type="text" name="search" value="{{ request('search') }}" placeholder="Search typing, tutoring, repairs, errands...">
+      @if($cat)<input type="hidden" name="category" value="{{ $cat }}">@endif
+      @if($sort)<input type="hidden" name="sort" value="{{ $sort }}">@endif
+    </form>
+  </div>
+
+  <section class="gf-sec">
+    <div class="gf-cats">
+      @foreach($cats as $c)
+        @php $cm = $gfCat[$c] ?? ['briefcase', '#64748B']; @endphp
+        <a href="{{ $u(['category' => $c]) }}" class="gf-cat {{ $cat === $c ? 'on' : '' }}"><span style="background:{{ $cm[1] }}"><i data-lucide="{{ $cm[0] }}"></i></span><small>{{ $c }}</small></a>
+      @endforeach
+    </div>
+  </section>
+
+  <div class="gf-chips">
+    <a href="{{ $u(['min_price' => null, 'max_price' => null]) }}" class="gf-chip {{ !$min && !$max ? 'on' : '' }}">Any price</a>
+    <a href="{{ $u(['min_price' => null, 'max_price' => 5000]) }}" class="gf-chip {{ $max == 5000 && !$min ? 'on' : '' }}">Under ₦5k</a>
+    <a href="{{ $u(['min_price' => 5000, 'max_price' => 20000]) }}" class="gf-chip {{ $min == 5000 && $max == 20000 ? 'on' : '' }}">₦5k to 20k</a>
+    <a href="{{ $u(['min_price' => 20000, 'max_price' => null]) }}" class="gf-chip {{ $min == 20000 && !$max ? 'on' : '' }}">₦20k+</a>
+    <span class="gf-sep"></span>
+    <a href="{{ $u(['sort' => null]) }}" class="gf-chip {{ !$sort ? 'on' : '' }}">Best match</a>
+    <a href="{{ $u(['sort' => 'newest']) }}" class="gf-chip {{ $sort === 'newest' ? 'on' : '' }}">Newest</a>
+    <a href="{{ $u(['sort' => 'highest']) }}" class="gf-chip {{ $sort === 'highest' ? 'on' : '' }}">Highest pay</a>
+  </div>
+
+  @unless($filtered)
+    @foreach($rails as $r)
+      @if($r[1]->count())
+        <section class="gf-sec">
+          <div class="gf-sh"><b>{{ $r[0] }}</b></div>
+          <div class="gf-rail">
+            @foreach($r[1] as $gig)@include('gigs.partials.gf-card', ['gig' => $gig, 'gfCat' => $gfCat])@endforeach
+          </div>
+        </section>
+      @endif
+    @endforeach
+  @endunless
+
+  <section class="gf-sec">
+    <div class="gf-sh">
+      <b>{{ $q !== '' ? 'Results for “' . $q . '”' : ($cat ?: 'All hustles') }}</b>
+      @if($filtered)<a href="{{ route('gigs.index') }}" class="gf-clear">Clear</a>@endif
+    </div>
+    <p class="gf-n">{{ $all->count() }} {{ $all->count() === 1 ? 'hustle' : 'hustles' }}</p>
+
+    @forelse($list as $gig)
+      @php
+        $jPk = is_array($gig->packages) ? $gig->packages : [];
+        $jM = $gfCat[$gig->category] ?? ['briefcase', '#64748B'];
+        $jD = trim((string) ($gig->description ?? ''));
+      @endphp
+      <a href="{{ route('gigs.show', $gig->id) }}" class="gf-j">
+        <span class="gf-jh">
+          <span class="gf-jc"><i data-lucide="{{ $jM[0] }}" style="color:{{ $jM[1] }}"></i>{{ $gig->category ?? 'Gig' }}</span>
+          <span>{{ $ago($gig->created_at) }}</span>
+        </span>
+        <b class="gf-jt">{{ $gig->title }}</b>
+        @if($jD !== '')<p class="gf-jd">{{ \Illuminate\Support\Str::limit($jD, 130) }}</p>@endif
+        <span class="gf-tags">
+          <em class="gf-bud">{{ count($jPk) ? 'From ' : '' }}₦{{ number_format($from($gig)) }}</em>
+          @if(count($jPk))<em>{{ count($jPk) }} packages</em>@endif
+          @if($gig->deadline)<em><i data-lucide="calendar"></i>Due {{ $gig->deadline->format('M j') }}</em>@endif
+          @if($gig->location_type)<em>{{ ucfirst($gig->location_type) }}</em>@endif
+        </span>
+        <span class="gf-jf">
+          <span class="gf-jp">{{ $gig->poster_name ?? 'User' }}@if(!empty($gig->poster_verified))<i data-lucide="badge-check"></i>@endif</span>
+          @if(!empty($gig->avg_rating))<span class="gf-jr"><i data-lucide="star"></i>{{ $gig->avg_rating }}</span>@endif
+          <span class="gf-st {{ $gig->status === 'open' ? 'ok' : '' }}">{{ $gig->status === 'open' ? 'Open' : 'Taken' }}</span>
+        </span>
+      </a>
+    @empty
+      <div class="gf-empty"><b>No hustles here yet</b>Try another category or price. New hustles appear as people post them.</div>
+    @endforelse
+
+    @if(method_exists($list, 'hasPages') && $list->hasPages())
+      <div class="gf-pages">{{ $list->links() }}</div>
+    @endif
+  </section>
+</div>
+@endsection
+
+=== resources/views/gigs/partials/gf-card.blade.php ===
+@php
+  $gcPk = is_array($gig->packages) ? $gig->packages : [];
+  $gcFrom = count($gcPk) ? min(array_map(fn ($x) => (float) ($x['price'] ?? 0), $gcPk)) : (float) $gig->amount;
+  $gcMeta = $gfCat[$gig->category] ?? ['briefcase', '#64748B'];
+  $gcPos = $gig->poster ?? null;
+  $gcLvl = data_get($gig->poster_level ?? null, 'label');
+@endphp
+<a href="{{ route('gigs.show', $gig->id) }}" class="gf-c">
+  <span class="gf-ci" style="background:linear-gradient(145deg,{{ $gcMeta[1] }},#111827)">
+    <i data-lucide="{{ $gcMeta[0] }}"></i>
+    <em>{{ $gig->category }}</em>
+    @if(count($gcPk))<span class="gf-pkt">{{ count($gcPk) }} packages</span>@endif
+  </span>
+  <span class="gf-cb">
+    <span class="gf-by">
+      <span class="gf-av">@if($gcPos && $gcPos->avatar_url)<img src="{{ $gcPos->avatar_url }}" alt="">@else{{ strtoupper(substr($gig->poster_name ?? 'U', 0, 1)) }}@endif</span>
+      <b>{{ \Illuminate\Support\Str::limit($gig->poster_name ?? 'User', 14) }}</b>
+      @if(!empty($gig->poster_verified))<i data-lucide="badge-check" class="gf-vf"></i>@endif
+    </span>
+    <span class="gf-t">{{ $gig->title }}</span>
+    <span class="gf-rt">
+      @if(!empty($gig->avg_rating))<i data-lucide="star"></i><b>{{ $gig->avg_rating }}</b><small>({{ $gig->review_count }})</small>@else<small>New</small>@endif
+      @if($gcLvl)<small class="gf-lv">{{ $gcLvl }}</small>@endif
+    </span>
+    <span class="gf-f"><small>{{ count($gcPk) ? 'Starting at' : 'Budget' }}</small><strong>₦{{ number_format($gcFrom) }}</strong></span>
+  </span>
+</a>
+
+=== resources/views/marketplace/partials/mk2-card.blade.php ===
+@php
+  $img = $imgOf($item);
+  $rt = $mkRates[$item->id] ?? null;
+  $left = (int) ($item->stock_quantity ?? 0);
+@endphp
+<div class="mk2-p">
+  <a href="{{ route('marketplace.show', $item->id) }}" class="mk2-link">
+    <span class="mk2-i">
+      @if($img)<img src="{{ $img }}" alt="" loading="lazy">@else<i data-lucide="{{ $cats[$item->category][0] ?? 'shopping-bag' }}"></i>@endif
+      @if($item->user_id && in_array($item->user_id, $mkVerified))<span class="mk2-ver" aria-label="Verified seller"><i data-lucide="badge-check"></i></span>@endif
+    </span>
+    <span class="mk2-b">
+      <span class="mk2-t">{{ $item->title }}</span>
+      <span class="mk2-pr">₦{{ number_format($item->amount) }}</span>
+      @if($rt)<span class="mk2-r"><i data-lucide="star"></i>{{ number_format($rt->a, 1) }} <small>({{ $rt->c }})</small></span>@endif
+      @if($left > 0 && $left <= 5)<span class="mk2-low">Only {{ $left }} left</span>@endif
+      @if(!empty($item->location))<span class="mk2-l"><i data-lucide="map-pin"></i>{{ $item->location }}</span>@endif
+    </span>
+  </a>
+  <button type="button" class="mk2-heart {{ in_array($item->id, $mkLoved) ? 'on' : '' }}" data-url="{{ route('marketplace.love', $item->id) }}" aria-label="Add to wishlist"><i data-lucide="heart"></i></button>
+</div>
+
+=== AdminController ===
+20:    public function revenue()
+36:        return view('admin.revenue', [
+46:    private function guard()
+51:    public function index()
+60:        return view('admin.index', [
+89:    public function users(Request $r)
+99:        return view('admin.users', ['users' => $q->latest()->paginate(25)->withQueryString()]);
+102:    public function grantAccess(Request $r)
+110:        return view('admin.grant-access', ['users' => $users, 'search' => $r->search]);
+113:    public function grantAccessStore(Request $r)
+132:    public function toggleAdmin(User $user)
+140:    public function toggleBan(User $user)
+153:    public function toggleCustomerCare(User $user)
+166:    public function invites()
+169:        return view('admin.invites', ['invites' => Invite::with(['creator', 'usedBy'])->latest()->paginate(25)]);
+172:    public function invitesStore(Request $r)
+180:    public function invitesRevoke(Invite $invite)
+190:    public function adjustBalance(Request $r, User $user)
+195:        DB::transaction(function () use ($data, $user) {
+211:    public function gigs(Request $r)
+216:        return view('admin.gigs', ['gigs' => $q->paginate(25)->withQueryString()]);
+219:    public function deleteGig(Gig $gig)
+227:    public function listings(Request $r)
+232:        return view('admin.listings', ['listings' => $q->paginate(25)->withQueryString()]);
+235:    public function deleteListing(Listing $listing)
+243:    public function transactions(Request $r)
+251:        return view('admin.transactions', ['transactions' => $q->paginate(30)->withQueryString()]);
+255:    public function subscriptions(Request $r)
+260:        return view('admin.subscriptions', ['subscriptions' => $q->paginate(25)->withQueryString()]);
+263:    public function cancelSubscription(Subscription $subscription)
+271:    public function news()
+274:        return view('admin.news', ['posts' => News::latest('published_at')->paginate(25)]);
+277:    public function deleteNews(News $news)
+285:    public function blog()
+288:        return view('admin.blog', ['posts' => Blog::with('user')->latest()->paginate(25)]);
+291:    public function deleteBlog(Blog $blog)
+=== routes ===
+18:use App\Http\Controllers\AdminController;
+81:    if (!auth()->check() || !auth()->user()->is_admin) {
+173:    Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
+183:        Route::post('/disputes/assign', [App\Http\Controllers\Admin\DisputeAssignmentController::class, 'assign'])->name('disputes.assign');
+185:        Route::get('/', [AdminController::class, 'index'])->name('index');
+187:        Route::get('/users', [AdminController::class, 'users'])->name('users');
+188:        Route::post('/users/{user}/toggle-admin', [AdminController::class, 'toggleAdmin'])->name('toggle-admin');
+189:        Route::post('/users/{user}/toggle-ban', [AdminController::class, 'toggleBan'])->name('toggle-ban');
+190:        Route::post('/users/{user}/toggle-customer-care', [AdminController::class, 'toggleCustomerCare'])->name('toggle-customer-care');
+191:        Route::put('/users/{user}/cc-permissions', [App\Http\Controllers\Admin\CustomerCarePermissionController::class, 'update'])->name('users.cc-permissions');
+192:        Route::get('/invites', [AdminController::class, 'invites'])->name('invites');
+193:        Route::post('/invites', [AdminController::class, 'invitesStore'])->name('invites.store');
+194:        Route::delete('/invites/{invite}', [AdminController::class, 'invitesRevoke'])->name('invites.revoke');
+195:        Route::post('/users/{user}/adjust-balance', [AdminController::class, 'adjustBalance'])->name('adjust-balance');
+197:        Route::get('/grant-access', [AdminController::class, 'grantAccess'])->name('grant-access');
+198:        Route::post('/grant-access', [AdminController::class, 'grantAccessStore'])->name('grant-access.store');
+200:        Route::get('/gigs', [AdminController::class, 'gigs'])->name('gigs');
+201:        Route::get('/conversations', [\App\Http\Controllers\Admin\ConversationController::class, 'index'])->name('conversations.index');
+202:        Route::get('/conversations/{conversation}', [\App\Http\Controllers\Admin\ConversationController::class, 'show'])->name('conversations.show');
+203:        Route::delete('/conversations/{conversation}/messages/{message}', [\App\Http\Controllers\Admin\ConversationController::class, 'destroyMessage'])->name('conversations.messages.delete');
+204:        Route::delete('/gigs/{gig}', [AdminController::class, 'deleteGig'])->name('gigs.delete');
+206:        Route::get('/listings', [AdminController::class, 'listings'])->name('listings');
+207:        Route::delete('/listings/{listing}', [AdminController::class, 'deleteListing'])->name('listings.delete');
+209:        Route::get('/transactions', [AdminController::class, 'transactions'])->name('transactions');
+210:        Route::get('/revenue', [AdminController::class, 'revenue'])->name('revenue');
+212:        Route::get('/subscriptions', [AdminController::class, 'subscriptions'])->name('subscriptions');
+213:        Route::post('/subscriptions/{subscription}/cancel', [AdminController::class, 'cancelSubscription'])->name('subscriptions.cancel');
+215:        Route::get('/news', [AdminController::class, 'news'])->name('news');
+216:        Route::delete('/news/{news}', [AdminController::class, 'deleteNews'])->name('news.delete');
+218:        Route::get('/blog', [AdminController::class, 'blog'])->name('blog');
+219:        Route::delete('/blog/{blog}', [AdminController::class, 'deleteBlog'])->name('blog.delete');
+221:        // Feature gates - admin on/off toggle + tier requirement per feature
+222:        Route::get('/feature-gates', [App\Http\Controllers\Admin\FeatureGateController::class, 'index'])->name('feature-gates.index');
+223:        Route::post('/feature-gates/{featureGate}/toggle', [App\Http\Controllers\Admin\FeatureGateController::class, 'toggle'])->name('feature-gates.toggle');
+224:        Route::put('/feature-gates/{featureGate}', [App\Http\Controllers\Admin\FeatureGateController::class, 'update'])->name('feature-gates.update');
+226:        Route::get('/settings/appearance', [App\Http\Controllers\Admin\SiteSettingsController::class, 'index'])->name('settings.appearance');
+227:        Route::post('/settings/appearance/background', [App\Http\Controllers\Admin\SiteSettingsController::class, 'updateBackground'])->name('settings.appearance.background');
+228:        Route::post('/settings/appearance/background/reset', [App\Http\Controllers\Admin\SiteSettingsController::class, 'resetBackground'])->name('settings.appearance.background.reset');
+229:        Route::post('/settings/appearance/animations', [App\Http\Controllers\Admin\SiteSettingsController::class, 'updateAnimations'])->name('settings.appearance.animations');
+356:// Admin Level & Badge Management Routes
+357:Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+360:        Route::get('/', [\App\Http\Controllers\AdminLevelBadgeController::class, 'levels'])->name('index');
+361:        Route::get('/create', [\App\Http\Controllers\AdminLevelBadgeController::class, 'createLevel'])->name('create

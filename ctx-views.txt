@@ -1,0 +1,1690 @@
+=== resources/views/wallet/index.blade.php ===
+@extends('layouts.app-authenticated')
+@section('title', 'Wallet')
+@section('content')
+@php
+  $wlDark = (auth()->user()->theme_style ?? '') === 'qelvo-dark';
+  $wlTxCount = count($transactions);
+  $wlTier = auth()->user()->tier ?? 'free';
+@endphp
+<link rel="stylesheet" href="{{ asset('css/wallet-redesign.css') }}?v={{ time() }}">
+<div class="wl {{ $wlDark ? 'wl-dark' : '' }}">
+  <header class="wl-head">
+    <h1>Wallet</h1>
+    <p>Money in, money out, all in one place.</p>
+  </header>
+
+  @if(session('status'))<div class="wl-flash ok">{{ session('status') }}</div>@endif
+  @if($errors->any())<div class="wl-flash bad">{{ $errors->first() }}</div>@endif
+  @if(!($isVerified ?? true))
+    <div class="wl-notice">
+      <b>Unverified wallet limit</b>
+      <span>You can hold up to ₦{{ number_format($walletCapRemaining ?? 0) }} more before you need to verify your BVN. Earnings from gigs, sales and referrals aren't affected.</span>
+    </div>
+  @endif
+
+  <div class="wl-grid">
+    <div class="wl-col-a">
+      <section class="wl-balance">
+        <p class="wl-lbl">Total balance</p>
+        <p class="wl-amt">₦{{ number_format($balance, 2) }}</p>
+        <div class="wl-actions">
+          <button type="button" class="wl-act primary" onclick="document.getElementById('withdrawModal').classList.add('open')"><i data-lucide="arrow-down-to-line"></i><span>Withdraw</span></button>
+          <a href="{{ route('wallet.deposit') }}" class="wl-act"><i data-lucide="plus"></i><span>Top up</span></a>
+          <a href="{{ route('wallet.send.form') }}" class="wl-act"><i data-lucide="send"></i><span>Send</span></a>
+        </div>
+      </section>
+
+      <a href="{{ route('wallet.virtual-account') }}" class="wl-link">
+        <span class="ib"><i data-lucide="landmark"></i></span>
+        <span><b>Activate NAURVEX Pay</b><small>Fund your wallet by bank transfer, anytime</small></span>
+        <i data-lucide="chevron-right" class="go"></i>
+      </a>
+
+      <a href="{{ route('wallet.bank-account.edit') }}" class="wl-link">
+        <span class="ib"><i data-lucide="building-2"></i></span>
+        <span><b>{{ $hasBankAccount ? 'Payout bank account' : 'Add payout bank account' }}</b><small>{{ $hasBankAccount ? 'Where your withdrawals are sent' : 'Required before you can withdraw' }}</small></span>
+        <i data-lucide="chevron-right" class="go"></i>
+      </a>
+
+      @if(in_array($wlTier, ['tier2', 'tier3'], true))
+      <a href="{{ route('money-tracker.index') }}" class="wl-link">
+        <span class="ib"><i data-lucide="trending-up"></i></span>
+        <span><b>Money Tracker</b><small>See your cash flow by month</small></span>
+        <i data-lucide="chevron-right" class="go"></i>
+      </a>
+      @endif
+    </div>
+
+    <div class="wl-col-b">
+      <section class="wl-card">
+        <div class="wl-card-head"><h2>Transaction history</h2><span>{{ $wlTxCount }} {{ $wlTxCount === 1 ? 'entry' : 'entries' }}</span></div>
+        @if($wlTxCount === 0)
+          <p class="wl-empty">No transactions yet. Earnings from gigs, sales and referrals will show up here.</p>
+        @else
+          <div class="wl-list">
+            @foreach($transactions as $tx)
+            <a href="{{ route('wallet.transaction.show', $tx->id) }}" class="wl-row">
+              <span style="min-width:0">
+                <span class="wl-rt" style="display:block">{{ $tx->description }}</span>
+                <span class="wl-rs">{{ $tx->created_at->diffForHumans() }}{{ $tx->reference ? ' · ' . $tx->reference : '' }}</span>
+              </span>
+              <span class="wl-amt-row {{ $tx->amount >= 0 ? 'in' : '' }}">{{ $tx->amount >= 0 ? '+' : '' }}₦{{ number_format($tx->amount, 2) }}</span>
+            </a>
+            @endforeach
+          </div>
+        @endif
+      </section>
+    </div>
+  </div>
+</div>
+
+<div id="topupModal" class="modal-overlay">
+    <div class="glass-card p-6 max-w-sm mx-auto mt-24">
+        <h3 class="font-semibold mb-3">Top Up Wallet</h3>
+        <form method="POST" action="{{ route('paystack.initiate') }}">
+            @csrf
+            <input type="number" name="amount" min="100" max="1000000" step="0.01" inputmode="decimal" autocomplete="off" placeholder="Amount (₦)" required class="input-field !mt-0 mb-3">
+            <button type="submit" class="btn-primary w-full justify-center">Continue to Payment</button>
+        </form>
+        <button onclick="document.getElementById('topupModal').classList.remove('open')" class="text-muted text-sm mt-3 w-full text-center">Cancel</button>
+    </div>
+</div>
+
+<div id="withdrawModal" class="modal-overlay">
+    <div class="glass-card p-6 max-w-sm mx-auto mt-24">
+        <h3 class="font-semibold mb-3">Withdraw Funds</h3>
+        @unless($hasPin ?? false)
+        <p class="text-sm text-muted mb-3">You need a transaction PIN before withdrawing. <a href="{{ route('wallet.pin.edit') }}" class="underline font-semibold">Set one now</a>.</p>
+        @endunless
+        @unless($hasBankAccount ?? false)
+        <p class="text-sm text-muted mb-3">Add a payout bank account before withdrawing. <a href="{{ route('wallet.bank-account.edit') }}" class="underline font-semibold">Add one now</a>.</p>
+        @endunless
+        <form method="POST" action="{{ route('wallet.withdraw') }}" onsubmit="return confirm('Withdraw this amount to your bank account? This cannot be reversed once submitted.');">
+            @csrf
+            <input type="number" name="amount" min="100" max="1000000" step="0.01" inputmode="decimal" autocomplete="off" placeholder="Amount (₦)" required class="input-field !mt-0 mb-3">
+            <input type="password" name="pin" inputmode="numeric" maxlength="6" placeholder="Transaction PIN" required class="input-field !mt-0 mb-3">
+            <button type="submit" class="btn-primary w-full justify-center" {{ (($hasPin ?? false) && ($hasBankAccount ?? false)) ? '' : 'disabled' }}>Confirm Withdraw</button>
+        </form>
+        <button onclick="document.getElementById('withdrawModal').classList.remove('open')" class="text-muted text-sm mt-3 w-full text-center">Cancel</button>
+    </div>
+</div>
+@endsection
+
+=== resources/views/wallet/send.blade.php ===
+@extends('layouts.app-authenticated')
+@section('content')
+
+<main class="max-w-md mx-auto p-6">
+    <h1 class="text-2xl font-semibold mb-6">Send Money</h1>
+
+    @if(session('status'))
+    <div class="bg-card card-rounded p-4 mb-4 text-sm text-accent">{{ session('status') }}</div>
+    @endif
+    @if($errors->any())
+    <div class="bg-card card-rounded p-4 mb-4 text-sm text-red-500">{{ $errors->first() }}</div>
+    @endif
+
+    <div class="glass-card p-6" id="detailsStep">
+        <label class="text-sm font-medium mb-1 block">Recipient Email</label>
+        <input type="text" id="recipientInput" placeholder="Recipient email" required class="input-field !mt-0 mb-3">
+
+        <div id="resolveStatus" class="text-sm mb-3"></div>
+
+        <label class="text-sm font-medium mb-1 block">Amount (₦)</label>
+        <input type="number" id="amountInput" min="1" required class="input-field !mt-0 mb-3">
+
+        <label class="text-sm font-medium mb-1 block">Note (optional)</label>
+        <input type="text" id="noteInput" placeholder="Note (optional)" class="input-field !mt-0 mb-3">
+
+        @unless($hasPin ?? false)
+        <p class="text-sm text-muted mb-3">You need a transaction PIN before sending money. <a href="{{ route('wallet.pin.edit') }}" class="underline font-semibold">Set one now</a>.</p>
+        @endunless
+
+        <button type="button" id="continueBtn" class="btn-primary w-full justify-center" disabled {{ ($hasPin ?? false) ? '' : 'disabled' }}>Continue</button>
+        <a href="{{ route('wallet.index') }}" class="text-muted text-sm mt-3 w-full text-center block">Cancel</a>
+    </div>
+
+    <div class="glass-card p-6" id="pinStep" style="display:none;">
+        <button type="button" id="backBtn" class="text-muted text-sm mb-4">&larr; Back</button>
+        <p class="text-sm text-muted mb-1">Sending</p>
+        <p class="text-2xl font-semibold mb-1" id="pinAmountLabel"></p>
+        <p class="text-sm text-muted mb-6" id="pinRecipientLabel"></p>
+
+        <p class="text-center text-sm font-medium mb-4">Enter your transaction PIN</p>
+        <div class="pin-dots" id="pinDots">
+            <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
+            <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
+        </div>
+        <p id="pinError" class="text-sm text-red-500 text-center mb-3" style="min-height:1.25rem;"></p>
+
+        <div class="pin-keypad">
+            <button type="button" class="pin-key" data-key="1">1</button>
+            <button type="button" class="pin-key" data-key="2">2</button>
+            <button type="button" class="pin-key" data-key="3">3</button>
+            <button type="button" class="pin-key" data-key="4">4</button>
+            <button type="button" class="pin-key" data-key="5">5</button>
+            <button type="button" class="pin-key" data-key="6">6</button>
+            <button type="button" class="pin-key" data-key="7">7</button>
+            <button type="button" class="pin-key" data-key="8">8</button>
+            <button type="button" class="pin-key" data-key="9">9</button>
+            <div></div>
+            <button type="button" class="pin-key" data-key="0">0</button>
+            <button type="button" class="pin-key" id="pinBackspace">&#9003;</button>
+        </div>
+    </div>
+
+    <form id="sendMoneyForm" method="POST" action="{{ route('wallet.send') }}" style="display:none;">
+        @csrf
+        <input type="hidden" name="recipient_identifier" id="hiddenRecipient">
+        <input type="hidden" name="amount" id="hiddenAmount">
+        <input type="hidden" name="note" id="hiddenNote">
+        <input type="hidden" name="pin" id="hiddenPin">
+    </form>
+</main>
+
+<style>
+.pin-dots { display: flex; justify-content: center; gap: 14px; margin-bottom: 24px; }
+.pin-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--color-accent, #7c5cf0); background: transparent; transition: background 0.15s; }
+.pin-dot.filled { background: var(--color-accent, #7c5cf0); }
+.pin-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 260px; margin: 0 auto; }
+.pin-key { font-size: 1.25rem; font-weight: 600; padding: 18px 0; border-radius: 50%; background: var(--color-card, #f3f2fb); border: none; }
+.pin-key:active { background: var(--color-accent, #7c5cf0); color: #fff; }
+</style>
+
+<script>
+(function () {
+    const recipientInput = document.getElementById('recipientInput');
+    const amountInput = document.getElementById('amountInput');
+    const noteInput = document.getElementById('noteInput');
+    const resolveStatus = document.getElementById('resolveStatus');
+    const continueBtn = document.getElementById('continueBtn');
+    const hasPin = {{ ($hasPin ?? false) ? 'true' : 'false' }};
+    let resolveTimer = null;
+    let resolvedName = null;
+
+    function tryResolve() {
+        continueBtn.disabled = true;
+        resolvedName = null;
+        resolveStatus.textContent = '';
+
+        const identifier = recipientInput.value.trim();
+        if (!identifier) return;
+
+        resolveStatus.textContent = 'Looking up recipient...';
+        resolveStatus.className = 'text-sm mb-3 text-muted';
+
+        fetch('{{ route("wallet.send.resolve") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ recipient_identifier: identifier }),
+        })
+        .then(res => res.json().then(data => ({ ok: res.ok, data })))
+        .then(({ ok, data }) => {
+            if (!ok) {
+                resolveStatus.textContent = data.error || 'Could not find recipient.';
+                resolveStatus.className = 'text-sm mb-3 text-red-500';
+                return;
+            }
+            resolvedName = data.name;
+            resolveStatus.textContent = 'Sending to: ' + data.name;
+            resolveStatus.className = 'text-sm mb-3 text-accent';
+            maybeEnableContinue();
+        })
+        .catch(() => {
+            resolveStatus.textContent = 'Could not verify recipient. Check your connection and try again.';
+            resolveStatus.className = 'text-sm mb-3 text-red-500';
+        });
+    }
+
+    function maybeEnableContinue() {
+        continueBtn.disabled = !(hasPin && resolvedName && amountInput.value && Number(amountInput.value) > 0);
+    }
+
+    function debounceResolve() {
+        clearTimeout(resolveTimer);
+        resolveTimer = setTimeout(tryResolve, 500);
+    }
+
+    recipientInput.addEventListener('input', debounceResolve);
+    amountInput.addEventListener('input', maybeEnableContinue);
+
+    // ---- Step transition ----
+    const detailsStep = document.getElementById('detailsStep');
+    const pinStep = document.getElementById('pinStep');
+    const pinAmountLabel = document.getElementById('pinAmountLabel');
+    const pinRecipientLabel = document.getElementById('pinRecipientLabel');
+    const pinError = document.getElementById('pinError');
+    const dots = document.querySelectorAll('.pin-dot');
+    let pin = '';
+
+    continueBtn.addEventListener('click', function () {
+        pinAmountLabel.textContent = '₦' + Number(amountInput.value).toLocaleString();
+        pinRecipientLabel.textContent = 'to ' + resolvedName;
+        detailsStep.style.display = 'none';
+        pinStep.style.display = 'block';
+    });
+
+    document.getElementById('backBtn').addEventListener('click', function () {
+        pin = '';
+        renderDots();
+        pinError.textContent = '';
+        pinStep.style.display = 'none';
+        detailsStep.style.display = 'block';
+    });
+
+    function renderDots() {
+        dots.forEach((d, i) => d.classList.toggle('filled', i < pin.length));
+    }
+
+    document.querySelectorAll('.pin-key').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            if (pin.length >= 6) return;
+            pin += btn.dataset.key;
+            renderDots();
+            if (pin.length === 6) submitTransfer();
+        });
+    });
+
+    document.getElementById('pinBackspace').addEventListener('click', function () {
+        pin = pin.slice(0, -1);
+        renderDots();
+    });
+
+    function submitTransfer() {
+        if (!confirm('Send this money? Wallet transfers cannot be reversed.')) {
+            pin = '';
+            renderDots();
+            return;
+        }
+        document.getElementById('hiddenRecipient').value = recipientInput.value.trim();
+        document.getElementById('hiddenAmount').value = amountInput.value;
+        document.getElementById('hiddenNote').value = noteInput.value;
+        document.getElementById('hiddenPin').value = pin;
+        document.getElementById('sendMoneyForm').submit();
+    }
+})();
+</script>
+@endsection
+
+=== resources/views/wallet/receipt.blade.php ===
+@extends('layouts.app-authenticated')
+@section('content')
+
+<main class="max-w-md mx-auto p-6">
+    <a href="{{ route('wallet.index') }}" class="text-muted text-sm flex items-center gap-1 mb-4">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Wallet
+    </a>
+
+    <div class="glass-card p-6 text-center">
+        <div class="receipt-check">
+            <i data-lucide="check" class="w-6 h-6"></i>
+        </div>
+        <p class="text-muted text-sm mt-3">{{ $tx->amount >= 0 ? 'Money Received' : 'Money Sent' }}</p>
+        <p class="text-2xl font-bold {{ $tx->amount >= 0 ? 'text-accent' : '' }}">
+            {{ $tx->amount >= 0 ? '+' : '-' }}₦{{ number_format(abs($tx->amount), 2) }}
+        </p>
+        <p class="text-xs text-muted mt-1 capitalize">{{ $tx->status ?? 'successful' }}</p>
+    </div>
+
+    <div class="glass-card p-6 mt-4">
+        <div class="flex items-center justify-between py-2 border-b" style="border-color:rgba(255,255,255,0.06);">
+            <span class="text-muted text-sm">Reference</span>
+            <span class="font-mono text-sm">{{ $tx->reference ?? '—' }}</span>
+        </div>
+        <div class="flex items-center justify-between py-2 border-b" style="border-color:rgba(255,255,255,0.06);">
+            <span class="text-muted text-sm">{{ $tx->amount >= 0 ? 'From' : 'To' }}</span>
+            <span class="text-sm font-medium">{{ $tx->relatedUser->name ?? '—' }}</span>
+        </div>
+        <div class="flex items-center justify-between py-2 border-b" style="border-color:rgba(255,255,255,0.06);">
+            <span class="text-muted text-sm">Description</span>
+            <span class="text-sm text-right">{{ $tx->description }}</span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+            <span class="text-muted text-sm">Date</span>
+            <span class="text-sm">{{ $tx->created_at->format('d M Y, h:ia') }}</span>
+        </div>
+    </div>
+
+    <button type="button" id="shareReceiptBtn" class="btn-primary w-full justify-center mt-4">Share Receipt</button>
+</main>
+
+<style>
+.receipt-check{
+  width:56px; height:56px; border-radius:50%; margin:0 auto;
+  background: var(--color-accent, #0F9D6E); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+}
+</style>
+
+<script>
+(function(){
+    var btn = document.getElementById('shareReceiptBtn');
+    if (!btn) return;
+    btn.addEventListener('click', function(){
+        var text = @json("NAURVEX Pay Receipt\nRef: " . ($tx->reference ?? '-') . "\n" . $tx->description . "\nAmount: ₦" . number_format(abs($tx->amount), 2) . "\nStatus: " . ($tx->status ?? 'successful') . "\nDate: " . $tx->created_at->format('d M Y, h:ia'));
+        if (navigator.share) {
+            navigator.share({ text: text }).catch(function(){});
+        } else if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(function(){
+                var o = btn.textContent; btn.textContent = 'Copied!';
+                setTimeout(function(){ btn.textContent = o; }, 1500);
+            });
+        }
+    });
+})();
+</script>
+@endsection
+
+=== resources/views/partials/glass-balance-card.blade.php ===
+<div class="balance-folder reveal-on-scroll" id="balanceFolder">
+    <span class="folder-tab"></span>
+    <div class="folder-stack-edge"></div>
+
+    <div class="folder-card-slot" id="folderCardSlot">
+        <div class="glass-balance-card" id="glassBalanceCard">
+            <div class="glass-balance-eyebrow">
+                <span><span class="live-dot"></span>Total Balance</span>
+                <span>{{ now()->format('M j') }}</span>
+            </div>
+            <p class="glass-balance-amount" id="glassBalanceAmount" data-target="{{ (float) ($balance ?? 0) }}">₦0.00</p>
+            <p class="glass-balance-sub">Available across wallet &amp; virtual account</p>
+            <div class="glass-balance-actions">
+                <a href="{{ route('wallet.index') }}" class="glass-chip primary"><i data-lucide="plus" class="w-4 h-4"></i> Top Up</a>
+                <a href="{{ route('wallet.index') }}" class="glass-chip"><i data-lucide="arrow-down-to-line" class="w-4 h-4"></i> Withdraw</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="folder-front"></div>
+</div>
+
+<script>
+(function(){
+    var folder = document.getElementById('balanceFolder');
+    var slot = document.getElementById('folderCardSlot');
+    if (!folder || !slot) return;
+
+    var tapTimer = null, tapCount = 0;
+
+    function openFull(){ folder.classList.remove('is-peek'); folder.classList.add('is-open'); }
+    function peek(){ folder.classList.toggle('is-peek'); }
+    function closeAll(){ folder.classList.remove('is-open','is-peek'); }
+
+    function handleTap(e){
+        var link = e.target.closest('a,button');
+        if (link) {
+            if (!folder.classList.contains('is-open')) { e.preventDefault(); }
+            else { return; }
+        }
+        tapCount++;
+        if (tapCount === 1) {
+            tapTimer = setTimeout(function(){
+                tapCount = 0;
+                folder.classList.contains('is-open') ? closeAll() : peek();
+            }, 280);
+        } else if (tapCount === 2) {
+            clearTimeout(tapTimer);
+            tapCount = 0;
+            folder.classList.contains('is-open') ? closeAll() : openFull();
+        }
+    }
+
+    slot.addEventListener('click', handleTap);
+    document.addEventListener('click', function(e){
+        if (folder.classList.contains('is-open') && !folder.contains(e.target)) closeAll();
+    });
+})();
+</script>
+
+=== resources/views/partials/dashboard-minimal.blade.php ===
+@php
+    $dqmAvatar = auth()->user()?->avatar_url;
+    $dqmName = auth()->user()?->name ?? 'Guest';
+    $dqmInitial = strtoupper(substr($dqmName, 0, 1));
+
+    $dqmMiniStats = [
+        ['label' => 'Earnings', 'value' => number_format(($earnings ?? 0) * config('qcoin.q_per_naira_display', 10)) . ' Q', 'icon' => 'trending-up', 'tint' => 'green', 'seed' => (int)(($earnings ?? 0)/1000)+5],
+        ['label' => 'Active Gigs', 'value' => (string) ($myOpenGigs ?? 0), 'icon' => 'briefcase', 'tint' => 'purple', 'seed' => ($myOpenGigs ?? 0)+2],
+        ['label' => 'Q Coin', 'value' => number_format($qCoinBalance ?? 0) . ' Q', 'icon' => 'gem', 'tint' => 'gold', 'seed' => (int)(($qCoinBalance ?? 0)/10)+7],
+        ['label' => 'Rating', 'value' => $avgRating ? number_format($avgRating, 1) . ' ★' : '—', 'icon' => 'star', 'tint' => 'blue', 'seed' => (int)(($avgRating ?? 1)*10)+1],
+    ];
+
+    $dqmWaveSeed = max(1, (int) (($netFlow ?? 0) + ($totalIn ?? 0) + ($totalOut ?? 0)));
+    $dqmWavePts = [];
+    for ($i = 0; $i <= 6; $i++) {
+        $n = sin($i * 1.3 + ($dqmWaveSeed % 7)) * 20 + cos($i * 0.7) * 12;
+        $dqmWavePts[] = round(50 - $n, 1);
+    }
+    $dqmWaveLine = '';
+    foreach ($dqmWavePts as $i => $y) {
+        $x = $i * 50;
+        $dqmWaveLine .= ($i === 0 ? "M{$x},{$y} " : "L{$x},{$y} ");
+    }
+    $dqmWaveFillPath = "M0,100 L0,{$dqmWavePts[0]} ";
+    foreach ($dqmWavePts as $i => $y) {
+        if ($i === 0) continue;
+        $x = $i * 50;
+        $dqmWaveFillPath .= "L{$x},{$y} ";
+    }
+    $dqmWaveFillPath .= "L300,100 Z";
+
+    $dqmQuickSend = ($recentConversations ?? collect())->take(6);
+@endphp
+
+<div class="dqp-page">
+
+    <div class="dqp-hero-card dqp-anim" style="--i:1">
+        <div class="dqp-hero-noise"></div>
+        <div class="dqp-shine"></div>
+        <div class="dqp-hero-top">
+            <span class="dqp-hero-label">Total Balance</span>
+            <i data-lucide="wallet" class="w-4 h-4"></i>
+        </div>
+        <div class="dqp-hero-chip"></div>
+        <div class="dqp-hero-amount"><span class="dqm-countup" data-value="{{ ($balance ?? 0) * config('qcoin.q_per_naira_display', 10) }}">0</span> Q<small style="display:block;font-size:.5em;font-weight:500;opacity:.4">₦{{ number_format($balance ?? 0) }}</small></div>
+        @if($user->virtual_account_number ?? false)
+            <div class="dqp-hero-masked">•••• •••• {{ substr($user->virtual_account_number, -4) }}</div>
+            <div class="dqp-hero-holder-row">
+                <span class="dqp-hero-holder">Card holder<b>{{ $dqmName }}</b></span>
+            </div>
+        @else
+            <div class="dqp-hero-holder-row">
+                <a href="{{ route('wallet.virtual-account') }}" class="dqp-hero-holder" style="text-decoration:none;">Activate NAURVEX Pay to fund your wallet</a>
+            </div>
+        @endif
+        <div class="dqp-hero-actions">
+            <a href="{{ Route::has('wallet.index') ? route('wallet.index') : '#' }}" class="dqp-btn dqp-btn-primary"><i data-lucide="arrow-up-right" class="w-4 h-4"></i> Send</a>
+            <a href="{{ Route::has('wallet.index') ? route('wallet.index') : '#' }}" class="dqp-btn dqp-btn-ghost">Withdraw</a>
+            <a href="{{ Route::has('wallet.index') ? route('wallet.index') : '#' }}" class="dqp-btn dqp-btn-icon"><i data-lucide="more-horizontal" class="w-4 h-4"></i></a>
+        </div>
+    </div>
+
+    <div class="dqp-mini-row dqp-anim" style="--i:2">
+        @foreach($dqmMiniStats as $stat)
+            <div class="dqp-mini-card dqp-tint-{{ $stat['tint'] }}">
+                <i data-lucide="{{ $stat['icon'] }}" class="w-4 h-4"></i>
+                <span class="v">{{ $stat['value'] }}</span>
+                <span class="l">{{ $stat['label'] }}</span>
+                @php
+                    $sp = [];
+                    for ($j=0;$j<=8;$j++){ $n=sin($j*1.1+$stat['seed'])*8+cos($j*0.6+$stat['seed'])*5; $sp[]=round(20-$n,1); }
+                    $spPath=''; foreach($sp as $j=>$y){ $x=$j*10; $spPath.=($j===0?"M{$x},{$y} ":"L{$x},{$y} "); }
+                @endphp
+                <svg class="dqp-spark" viewBox="0 0 80 28" preserveAspectRatio="none"><path d="{{ $spPath }}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+        @endforeach
+    </div>
+
+    <div class="dqp-services-row dqp-anim" style="--i:3">
+        <a href="{{ route('services.index') }}" class="dqp-service"><div class="icon dqp-svc-blue"><i data-lucide="smartphone" class="w-5 h-5"></i></div><span>Airtime</span></a>
+        <a href="{{ route('services.index') }}" class="dqp-service"><div class="icon dqp-svc-green"><i data-lucide="wifi" class="w-5 h-5"></i></div><span>Data</span></a>
+        <a href="{{ route('services.index') }}" class="dqp-service"><div class="icon dqp-svc-purple"><i data-lucide="tv" class="w-5 h-5"></i></div><span>Cable TV</span></a>
+        <a href="{{ route('services.index') }}" class="dqp-service"><div class="icon dqp-svc-orange"><i data-lucide="plug-zap" class="w-5 h-5"></i></div><span>Electricity</span></a>
+    </div>
+
+    <div class="dqp-card dqp-chart-card dqp-anim" style="--i:4">
+        <div class="dqp-chart-top">
+            <span class="dqp-flow-pill dqp-flow-pill-in"><i data-lucide="arrow-down" class="w-3 h-3"></i> In {{ number_format(($totalIn ?? 0) * config('qcoin.q_per_naira_display', 10)) }} Q<small style="display:block;font-size:.5em;font-weight:500;opacity:.4">₦{{ number_format($totalIn ?? 0) }}</small></span>
+            <span class="dqp-flow-pill dqp-flow-pill-out"><i data-lucide="arrow-up" class="w-3 h-3"></i> Out {{ number_format(($totalOut ?? 0) * config('qcoin.q_per_naira_display', 10)) }} Q<small style="display:block;font-size:.5em;font-weight:500;opacity:.4">₦{{ number_format($totalOut ?? 0) }}</small></span>
+        </div>
+        <div class="dqp-card-head"><span>Money Flow</span><span class="dqp-flow-net">{{ number_format(($netFlow ?? 0) * config('qcoin.q_per_naira_display', 10)) }} Q<small style="display:block;font-size:.5em;font-weight:500;opacity:.4">₦{{ number_format($netFlow ?? 0) }}</small> net</span></div>
+        <div class="dqp-wave-wrap">
+            <svg class="dqp-wave-svg" viewBox="0 0 300 100" preserveAspectRatio="none">
+                <defs>
+                    <linearGradient id="dqpWaveFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="var(--user-accent, #7c5cf0)" stop-opacity="0.45"/>
+                        <stop offset="100%" stop-color="var(--user-accent, #7c5cf0)" stop-opacity="0"/>
+                    </linearGradient>
+                    <linearGradient id="dqpWaveStroke" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="var(--user-accent, #7c5cf0)"/>
+                        <stop offset="100%" stop-color="#22c55e"/>
+                    </linearGradient>
+                </defs>
+                <path d="{{ $dqmWaveFillPath }}" fill="url(#dqpWaveFill)"></path>
+                <path class="dqp-wave-line" d="{{ $dqmWaveLine }}" fill="none" stroke="url(#dqpWaveStroke)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                <circle cx="150" cy="{{ $dqmWavePts[3] }}" r="4" fill="#fff"></circle>
+            </svg>
+        </div>
+    </div>
+
+    @if($dqmQuickSend->count() > 0)
+    <div class="dqp-card dqp-anim" style="--i:5">
+        <div class="dqp-card-head"><span>Quick Send</span><a href="{{ route('chat.index') }}">View all</a></div>
+        <div class="dqp-quick-row">
+            <div class="dqp-quick-item"><a href="{{ route('chat.index') }}" class="dqp-quick-avatar dqp-quick-add"><i data-lucide="plus" class="w-4 h-4"></i></a><span>Add</span></div>
+            @foreach($dqmQuickSend as $conv)
+                <div class="dqp-quick-item">
+                    <a href="{{ route('chat.index') }}" class="dqp-quick-avatar">
+                        @if($conv['other_avatar'])<img src="{{ $conv['other_avatar'] }}" alt="">@else<span>{{ strtoupper(substr($conv['other_name'],0,1)) }}</span>@endif
+                    </a>
+                    <span>{{ \Illuminate\Support\Str::limit($conv['other_name'], 8, '') }}</span>
+                </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    <div class="dqp-card dqp-anim" style="--i:6">
+        <div class="dqp-card-head"><span>Recent Gigs</span><a href="{{ route('gigs.index') }}">View all</a></div>
+        @forelse($topGigs as $gig)
+            <a href="{{ route('gigs.show', $gig->id) }}" class="dqp-tx-row">
+                <div class="dqp-tx-icon"><i data-lucide="briefcase" class="w-4 h-4"></i></div>
+                <div class="dqp-tx-body">
+                    <span class="t">{{ $gig->title }}</span>
+                    <span class="s">{{ ucfirst($gig->status ?? '') }}</span>
+                </div>
+                <span class="dqp-tx-amount">{{ number_format(($gig->amount) * config('qcoin.q_per_naira_display', 10)) }} Q<small style="display:block;font-size:.5em;font-weight:500;opacity:.4">₦{{ number_format($gig->amount) }}</small></span>
+            </a>
+        @empty
+            <p class="dqp-empty">No gigs yet.</p>
+        @endforelse
+    </div>
+
+    <div class="dqp-card dqp-anim" style="--i:7">
+        <div class="dqp-card-head"><span>Marketplace</span><a href="{{ route('marketplace.index') }}">Open</a></div>
+        <div class="dqp-mp-row">
+            <div class="dqp-mp-item"><span class="v">{{ $myListings }}</span><span class="l">Active Listings</span></div>
+            <div class="dqp-mp-item dqp-mp-soon"><span class="v">Soon</span><span class="l">Sales</span></div>
+            <div class="dqp-mp-item dqp-mp-soon"><span class="v">Soon</span><span class="l">Orders</span></div>
+        </div>
+    </div>
+
+    <div class="dqp-profile-card dqp-anim" style="--i:8">
+        <div class="dqp-profile-photo">
+            @if($dqmAvatar)<img src="{{ $dqmAvatar }}" alt="">@else<span>{{ $dqmInitial }}</span>@endif
+        </div>
+        <div class="dqp-profile-scrim"></div>
+        <div class="dqp-profile-info">
+            <p class="name">{{ $dqmName }}</p>
+            <p class="level">{{ auth()->user()->workerLevel()['label'] }}</p>
+            <div class="stats"><span>{{ $myCompletedGigs }} Gigs</span><span>{{ $avgRating ? number_format($avgRating, 1) : '—' }} ({{ $reviewCount }})</span></div>
+            <a href="{{ route('profile.index') }}" class="edit">Edit Profile</a>
+            <a href="{{ route('kyc.show') }}" class="edit">Verify account</a>
+        </div>
+    </div>
+
+    <div class="dqp-card dqp-anim" style="--i:9">
+        <div class="dqp-card-head"><span>Activity</span></div>
+        @forelse($todayFeed->take(5) as $item)
+            <a href="{{ $item['url'] }}" class="dqp-activity-row">
+                <span class="dqp-dot dqp-dot-{{ $item['type'] }}"></span>
+                <span class="t">{{ $item['title'] }}</span>
+                <span class="time">{{ \Carbon\Carbon::parse($item['time'])->diffForHumans() }}</span>
+            </a>
+        @empty
+            <p class="dqp-empty">Nothing new yet.</p>
+        @endforelse
+    </div>
+
+    <div class="dqp-card dqp-anim" style="--i:10">
+        <div class="dqp-card-head"><span>Messages</span><a href="{{ route('chat.index') }}">Open chat</a></div>
+        @forelse($dqmQuickSend as $conv)
+            <a href="{{ route('chat.index') }}" class="dqp-chat-row">
+                <div class="dqp-chat-avatar">
+                    @if($conv['other_avatar'])<img src="{{ $conv['other_avatar'] }}" alt="">@else<span>{{ strtoupper(substr($conv['other_name'],0,1)) }}</span>@endif
+                </div>
+                <div class="dqp-chat-body">
+                    <span class="name">{{ $conv['other_name'] }}</span>
+                    <span class="snippet">{{ \Illuminate\Support\Str::limit($conv['last_body'], 42) }}</span>
+                </div>
+                <div class="dqp-chat-meta">
+                    <span class="t
+=== resources/views/admin/transactions.blade.php ===
+@extends('layouts.app-admin')
+@section('content')
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Transactions</h1>
+        <a href="{{ route('admin.index') }}" class="text-accent text-sm">← Back</a>
+    </div>
+
+    <form method="GET" class="flex gap-2 mb-4">
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search user" class="balance-chip" style="background:var(--color-card);border:1px solid var(--border-color);">
+        <button class="balance-chip primary">Filter</button>
+    </form>
+
+    <div class="stat-card overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-left text-muted border-b" style="border-color:var(--border-color);">
+                    <th class="py-2 pr-4">User</th>
+                    <th class="py-2 pr-4">Type</th>
+                    <th class="py-2 pr-4">Amount</th>
+                    <th class="py-2 pr-4">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach($transactions as $t)
+                <tr class="border-b" style="border-color:var(--border-color);">
+                    <td class="py-2 pr-4">{{ $t->user->name ?? '—' }}</td>
+                    <td class="py-2 pr-4 text-muted">{{ $t->type }}</td>
+                    <td class="py-2 pr-4" style="color:{{ $t->amount >= 0 ? '#4ade80' : '#ff6b6b' }};">₦{{ number_format($t->amount, 2) }}</td>
+                    <td class="py-2 pr-4 text-muted">{{ $t->created_at->format('M j, Y g:ia') }}</td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-4">{{ $transactions->links() }}</div>
+</div>
+@endsection
+
+=== resources/views/admin/users.blade.php ===
+@extends('layouts.app-admin')
+@section('content')
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Users</h1>
+        <a href="{{ route('admin.index') }}" class="text-accent text-sm">← Back</a>
+    </div>
+
+    @if(session('status'))
+    <div class="stat-card mb-4" style="border-color:var(--color-accent);"><p>{{ session('status') }}</p></div>
+    @endif
+
+    <form method="GET" class="flex gap-2 mb-4 flex-wrap">
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name or email" class="balance-chip" style="background:var(--color-card);border:1px solid var(--border-color);">
+        <select name="tier" class="balance-chip" style="background:var(--color-card);border:1px solid var(--border-color);">
+            <option value="">All tiers</option>
+            <option value="tier1" @selected(request('tier')==='tier1')>Tier 1</option>
+        </select>
+        <button class="balance-chip primary">Filter</button>
+    </form>
+
+    <div class="stat-card overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-left text-muted border-b" style="border-color:var(--border-color);">
+                    <th class="py-2 pr-4">Name</th>
+                    <th class="py-2 pr-4">Email</th>
+                    <th class="py-2 pr-4">Tier</th>
+                    <th class="py-2 pr-4">Balance</th>
+                    <th class="py-2 pr-4">Status</th>
+                    <th class="py-2 pr-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach($users as $u)
+                <tr class="border-b" style="border-color:var(--border-color);">
+                    <td class="py-2 pr-4">{{ $u->name }}</td>
+                    <td class="py-2 pr-4 text-muted">{{ $u->email }}</td>
+                    <td class="py-2 pr-4">{{ $u->tier }}</td>
+                    <td class="py-2 pr-4">₦{{ number_format($u->wallet_balance, 2) }}</td>
+                    <td class="py-2 pr-4">
+                        {{ $u->is_admin ? 'Admin' : ($u->role === 'customer_care' ? 'Customer Care' : 'User') }}{{ $u->is_banned ? ' · Banned' : '' }}
+                    </td>
+                    <td class="py-2 pr-4 flex gap-2 flex-wrap">
+                        <form method="POST" action="{{ route('admin.toggle-admin', $u) }}">
+                            @csrf
+                            <button class="balance-chip" style="font-size:0.75rem;">{{ $u->is_admin ? 'Remove Admin' : 'Make Admin' }}</button>
+                        </form>
+                        <form method="POST" action="{{ route('admin.toggle-ban', $u) }}">
+                            @csrf
+                            <button class="balance-chip" style="font-size:0.75rem;">{{ $u->is_banned ? 'Unban' : 'Ban' }}</button>
+                        </form>
+                        @if(!$u->is_admin)
+                        <form method="POST" action="{{ route('admin.toggle-customer-care', $u) }}">
+                            @csrf
+                            <button class="balance-chip" style="font-size:0.75rem;">{{ $u->role === 'customer_care' ? 'Remove Customer Care' : 'Make Customer Care' }}</button>
+                        </form>
+                        @endif
+                        @if($u->role === 'customer_care')
+                        <form method="POST" action="{{ route('admin.users.cc-permissions', $u) }}" class="flex flex-wrap items-center gap-2" style="font-size:0.7rem;background:var(--color-card);border:1px solid var(--border-color);border-radius:0.5rem;padding:0.3rem 0.5rem;">
+                            @csrf
+                            @method('PUT')
+                            @php $perms = $u->customer_care_permissions ?? []; @endphp
+                            @foreach(['orders'=>'Orders','gig_disputes'=>'Gig Disp.','listing_disputes'=>'Mkt Disp.','user_lookup'=>'Lookup','flags'=>'Flags'] as $key => $label)
+                                <label style="display:flex;align-items:center;gap:2px;">
+                                    <input type="checkbox" name="permissions[]" value="{{ $key }}" @checked(in_array($key, $perms))>
+                                    {{ $label }}
+                                </label>
+                            @endforeach
+                            <button class="balance-chip primary" style="font-size:0.7rem;">Save Access</button>
+                        </form>
+                        @endif
+                        <form method="POST" action="{{ route('admin.adjust-balance', $u) }}" class="flex gap-1">
+                            @csrf
+                            <input type="number" step="0.01" name="amount" placeholder="+/- amt" style="width:90px;background:var(--color-card);border:1px solid var(--border-color);border-radius:0.5rem;padding:0 0.4rem;font-size:0.75rem;">
+                            <button class="balance-chip primary" style="font-size:0.75rem;">Apply</button>
+                        </form>
+                    </td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-4">{{ $users->links() }}</div>
+</div>
+@endsection
+
+=== resources/views/admin/revenue.blade.php ===
+@extends('layouts.app-admin')
+@section('content')
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Platform Revenue</h1>
+        <a href="{{ route('admin.index') }}" class="text-accent text-sm">← Back</a>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="stat-card">
+            <p class="text-muted text-xs">All-Time</p>
+            <p class="text-2xl font-bold mt-1">₦{{ number_format($totalAllTime, 2) }}</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-muted text-xs">This Month</p>
+            <p class="text-2xl font-bold mt-1">₦{{ number_format($totalThisMonth, 2) }}</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-muted text-xs">This Week</p>
+            <p class="text-2xl font-bold mt-1">₦{{ number_format($totalThisWeek, 2) }}</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-muted text-xs">Today</p>
+            <p class="text-2xl font-bold mt-1">₦{{ number_format($totalToday, 2) }}</p>
+        </div>
+    </div>
+
+    <div class="stat-card mb-6 overflow-x-auto">
+        <h2 class="font-semibold mb-3">By Source</h2>
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-left text-muted border-b" style="border-color:var(--border-color);">
+                    <th class="py-2 pr-4">Source</th>
+                    <th class="py-2 pr-4">Total Earned</th>
+                    <th class="py-2 pr-4">Transactions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($bySource as $row)
+                <tr class="border-b" style="border-color:var(--border-color);">
+                    <td class="py-2 pr-4">{{ ucfirst($row->source) }}</td>
+                    <td class="py-2 pr-4">₦{{ number_format($row->total, 2) }}</td>
+                    <td class="py-2 pr-4">{{ $row->count }}</td>
+                </tr>
+                @empty
+                <tr><td colspan="3" class="py-4 text-center text-muted">No revenue recorded yet.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="stat-card overflow-x-auto">
+        <h2 class="font-semibold mb-3">Recent Entries</h2>
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-left text-muted border-b" style="border-color:var(--border-color);">
+                    <th class="py-2 pr-4">Source</th>
+                    <th class="py-2 pr-4">Amount</th>
+                    <th class="py-2 pr-4">Description</th>
+                    <th class="py-2 pr-4">When</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($recent as $entry)
+                <tr class="border-b" style="border-color:var(--border-color);">
+                    <td class="py-2 pr-4">{{ ucfirst($entry->source) }}</td>
+                    <td class="py-2 pr-4">₦{{ number_format($entry->amount, 2) }}</td>
+                    <td class="py-2 pr-4 text-muted">{{ $entry->description }}</td>
+                    <td class="py-2 pr-4 text-muted">{{ $entry->created_at->diffForHumans() }}</td>
+                </tr>
+                @empty
+                <tr><td colspan="4" class="py-4 text-center text-muted">Nothing yet.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
+@endsection
+
+=== resources/views/admin/coin.blade.php ===
+@extends('layouts.app-admin')
+@section('title', 'Coin Lab')
+@section('content')
+<link rel="stylesheet" href="{{ asset('css/admin-home.css') }}?v={{ time() }}">
+<main class="cl" id="coinSim">
+  <h1 class="cl-h">Coin Lab <small>Q-coin economy</small></h1>
+  <section class="cl-live" id="clLive"></section>
+  <section class="cl-card">
+    <h2>Simulator <small>nothing is saved</small></h2>
+    <div class="cl-in" id="clIn"></div>
+  </section>
+  <section class="cl-card">
+    <h2>Result</h2>
+    <div class="cl-out" id="clOut"></div>
+    <canvas id="clCv" class="cl-cv" height="220"></canvas>
+    <div class="cl-leg"><span><s style="background:#0B0C10"></s>Coin liability (₦)</span><span><s style="background:#9A9DA5"></s>Cumulative revenue (₦)</span></div>
+    <p class="cl-verdict" id="clV"></p>
+  </section>
+  <section class="cl-card">
+    <h2>Last 30 days by type</h2>
+    <div class="cl-types" id="clTy"></div>
+  </section>
+  <section class="cl-card">
+    <h2>Current config <small>read only</small></h2>
+    <div class="cl-types" id="clCfg"></div>
+  </section>
+</main>
+<script>
+(function () {
+  var D = @json($data);
+  var $ = function (i) { return document.getElementById(i); };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function f(v) { v = Number(v) || 0; var a = Math.abs(v); return a >= 1e9 ? (v / 1e9).toFixed(2) + 'B' : a >= 1e6 ? (v / 1e6).toFixed(2) + 'M' : a >= 1e4 ? (v / 1e3).toFixed(1) + 'K' : Math.round(v * 100) / 100 + ''; }
+
+  $('clLive').innerHTML = [['Q in wallets', f(D.supply)], ['Holders', f(D.holders)], ['Q txs 24h', f(D.tx24)], ['Q issued 24h', f(D.in24)], ['Q spent 24h', f(Math.abs(D.out24))], ['Rate', D.rate + ' Q = ₦1']]
+    .map(function (x) { return '<div><small>' + x[0] + '</small><b>' + x[1] + '</b></div>'; }).join('');
+  $('clTy').innerHTML = D.types.length ? D.types.map(function (t) { return '<div><span>' + esc(t.type || '—') + '</span><b>' + f(t.c) + ' txs · ' + f(t.s) + ' Q</b></div>'; }).join('') : '<p class="cm-dim">No Q-coin transactions yet.</p>';
+  var cfg = Object.keys(D.cfg);
+  $('clCfg').innerHTML = (cfg.length ? cfg.map(function (k) { return '<div><span>' + esc(k) + '</span><b>' + esc(String(D.cfg[k])) + '</b></div>'; }).join('') : '') + '<div><span>investment.platform_fee_percent</span><b>' + D.platformFee + '</b></div>';
+
+  var cnt = [0, 0, 0, 0], tot = 0;
+  Object.keys(D.tiers || {}).forEach(function (k) { var n = parseInt(k, 10), c = Number(D.tiers[k]) || 0; if (k !== '' && n >= 0 && n <= 3) { cnt[n] += c; tot += c; } });
+  var mix = tot ? cnt.map(function (c) { return Math.round(c / tot * 100); }) : [100, 0, 0, 0];
+  var spec = [
+    ['rate', 'Q per ₦1 (rate)', D.rate, 1, 200, 1], ['users', 'Users today', D.users, 0, Math.max(1000, D.users * 20), 1],
+    ['dau', 'Daily active %', 30, 1, 100, 1], ['grow', 'User growth % / week', 3, 0, 40, 0.5],
+    ['m1', 'Tier 1 share %', mix[1], 0, 100, 1], ['m2', 'Tier 2 share %', mix[2], 0, 100, 1], ['m3', 'Tier 3 share %', mix[3], 0, 100, 1],
+    ['d0', 'Daily Q, free tier', D.daily[0], 0, 200, 1], ['d1', 'Daily Q, tier 1', D.daily[1], 0, 200, 1], ['d2', 'Daily Q, tier 2', D.daily[2], 0, 200, 1], ['d3', 'Daily Q, tier 3', D.daily[3], 0, 200, 1],
+    ['spend', 'Q spent back to platform %', 40, 0, 100, 1], ['avg', '₦ spent per active user / day', 500, 0, 20000, 50], ['fee', 'Platform fee %', D.platformFee, 0, 30, 0.5], ['days', 'Days to project', 90, 7, 365, 1]
+  ];
+  $('clIn').innerHTML = spec.map(function (s) {
+    return '<label><span>' + s[1] + '<b id="v_' + s[0] + '">' + s[2] + '</b></span><input type="range" id="i_' + s[0] + '" min="' + s[3] + '" max="' + s[4] + '" step="' + s[5] + '" value="' + s[2] + '"></label>';
+  }).join('');
+  function val() { var o = {}; spec.forEach(function (s) { o[s[0]] = parseFloat($('i_' + s[0]).value) || 0; $('v_' + s[0]).textContent = $('i_' + s[0]).value; }); return o; }
+
+  function calc() {
+    var v = val(), m = [Math.max(0, 100 - v.m1 - v.m2 - v.m3), v.m1, v.m2, v.m3], avg = 0, i;
+    for (i = 0; i < 4; i++) avg += m[i] / 100 * v['d' + i];
+    var s = D.supply || 0, cm = 0, cr = 0, L = [], R = [], day1 = 0;
+    for (var d = 1; d <= v.days; d++) {
+      var act = v.users * Math.pow(1 + v.grow / 100, d / 7) * v.dau / 100, mint = act * avg;
+      if (d === 1) day1 = mint;
+      s += mint * (1 - v.spend / 100); cm += mint; cr += act * v.avg * v.fee / 100;
+      L.push(s / v.rate); R.push(cr);
+    }
+    var cost = cm / v.rate, cov = cost > 0 ? cr / cost : 0;
+    $('clOut').innerHTML = [['Q minted / day', f(day1)], ['Mint cost / day', '₦' + f(day1 / v.rate)], ['Supply at end', f(s) + ' Q'], ['Liability at end', '₦' + f(s / v.rate)], ['Revenue (period)', '₦' + f(cr)], ['Revenue ÷ mint cost', cov.toFixed(2) + '×']]
+      .map(function (x) { return '<div><small>' + x[0] + '</small><b>' + x[1] + '</b></div>'; }).join('');
+    $('clV').textContent = cost === 0 ? 'No coins are being minted with these settings.' : cov >= 1.5 ? 'Healthy: revenue covers coin issuance with room to spare.' : cov >= 1 ? 'Tight: revenue only just covers coin issuance. Watch growth.' : 'Danger: issuing coins costs more than you earn. Lower daily Q, raise the rate, or raise the spend sink.';
+    $('clV').className = 'cl-verdict ' + (cov >= 1.5 ? 'ok' : cov >= 1 ? 'mid' : 'bad');
+    chart(L, R);
+  }
+  function chart(L, R) {
+    var c = $('clCv'), r = window.devicePixelRatio || 1, w = c.clientWidth, h = 220;
+    c.width = w * r; c.height = h * r; var x = c.getContext('2d'); x.scale(r, r); x.clearRect(0, 0, w, h);
+    var mx = Math.max.apply(null, L.concat(R).concat([1])), n = L.length;
+    x.strokeStyle = 'rgba(15,17,21,.08)'; x.lineWidth = 1;
+    for (var g = 0; g < 5; g++) { var yy = 10 + (h - 30) * g / 4; x.beginPath(); x.moveTo(0, yy); x.lineTo(w, yy); x.stroke(); }
+    [[L, '#0B0C10'], [R, '#9A9DA5']].forEach(function (a) {
+      x.strokeStyle = a[1]; x.lineWidth = 2.2; x.beginPath();
+      a[0].forEach(function (y, i) { var px = n > 1 ? i / (n - 1) * (w - 4) + 2 : 2, py = h - 20 - y / mx * (h - 30); if (i) x.lineTo(px, py); else x.moveTo(px, py); });
+      x.stroke();
+    });
+    x.fillStyle = 'rgba(15,17,21,.55)'; x.font = '11px system-ui'; x.fillText('₦' + f(mx), 4, 12); x.fillText('day ' + n, w - 52, h - 4);
+  }
+  $('clIn').addEventListener('input', calc);
+  window.addEventListener('resize', calc);
+  calc();
+})();
+</script>
+@endsection
+
+=== resources/views/gigs/show.blade.php ===
+@extends('layouts.world-shell')
+@section('world', 'gigs')
+@section('content')
+<link rel="stylesheet" href="{{ asset('css/world-pages.css') }}?v={{ @filemtime(public_path('css/world-pages.css')) }}"><link rel="stylesheet" href="{{ asset('css/world-page.css') }}?v={{ @filemtime(public_path('css/world-page.css')) }}">
+<main class="wp-page wp-gigs">
+    <a href="{{ route('gigs.index') }}" class="text-muted text-sm flex items-center gap-1 mb-4">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Gigs
+    </a>
+
+    @if (session('status'))
+    <div class="bg-green-500/10 text-green-500 text-sm rounded-lg p-3 mb-4">{{ session('status') }}</div>
+    @endif
+    @if ($errors->any())
+    <p class="text-red-500 text-sm mb-4">{{ $errors->first() }}</p>
+    @endif
+
+    @php
+  $gxPk = is_array($gig->packages) ? array_values($gig->packages) : [];
+  $gxSt = ['open' => 'Open', 'in_progress' => 'In progress', 'delivered' => 'Delivered', 'awaiting_worker_signup' => 'Payment held', 'completed' => 'Completed'];
+  $gxIcons = ['Typing & Printing' => 'printer', 'Hair & Beauty' => 'scissors', 'Repairs' => 'wrench', 'Errands & Delivery' => 'truck', 'Tutoring' => 'graduation-cap', 'Photography' => 'camera', 'Laundry' => 'shirt'];
+  $gxRev = collect();
+  try { $gxRev = $gig->reviews()->with('reviewer')->latest()->get(); } catch (\Throwable $e) { $gxRev = collect(); }
+  $gxAvg = $gxRev->count() ? round($gxRev->avg('rating'), 1) : null;
+  $gxLvl = data_get($posterLevel ?? null, 'label');
+  $gxOwner = auth()->check() && $gig->user_id === auth()->id();
+  $gxFrom = count($gxPk) ? min(array_map(fn ($x) => (float) ($x['price'] ?? 0), $gxPk)) : (float) $gig->amount;
+  $gxTier = ['Basic', 'Standard', 'Premium'];
+@endphp
+<link rel="stylesheet" href="{{ asset('css/gig-show2.css') }}?v={{ time() }}">
+<div class="gv">
+  <section class="gv-s gv-hero" id="gvHero">
+    <div class="gv-top">
+      <span class="gv-ic"><i data-lucide="{{ $gxIcons[$gig->category] ?? 'briefcase' }}"></i></span>
+      <span class="gv-chip {{ $gig->status === 'open' ? 'ok' : '' }}">{{ $gxSt[$gig->status] ?? $gig->status }}</span>
+      @auth
+        @if($gxOwner && $gig->status === 'open')
+          <a href="{{ route('gigs.edit', $gig->id) }}" class="gv-edit"><i data-lucide="pencil"></i>Edit</a>
+        @endif
+      @endauth
+    </div>
+    <h1 class="gv-title">{{ $gig->title }}</h1>
+    <div class="gv-meta">
+      <span>{{ $gig->category }}</span>
+      <span>Posted {{ $gig->created_at->diffForHumans() }}</span>
+      @if($gxAvg)<span class="gv-star"><i data-lucide="star"></i>{{ $gxAvg }} ({{ $gxRev->count() }})</span>@endif
+      @if($gig->deadline)<span><i data-lucide="calendar"></i>Due {{ $gig->deadline->format('M j') }}</span>@endif
+    </div>
+  </section>
+
+  <section class="gv-s">
+    @if(count($gxPk))
+      <div class="gv-tabs" id="gvTabs">
+        @foreach($gxPk as $gi => $gp)
+          <button type="button" class="gv-tab {{ $gi === 0 ? 'on' : '' }}" data-i="{{ $gi }}">{{ $gp['name'] ?? ($gxTier[$gi] ?? 'Package') }}</button>
+        @endforeach
+      </div>
+      @foreach($gxPk as $gi => $gp)
+        <div class="gv-pk" data-i="{{ $gi }}" {{ $gi === 0 ? '' : 'hidden' }}>
+          <div class="gv-pp">₦{{ number_format((float) ($gp['price'] ?? 0)) }}</div>
+          @if(!empty($gp['description']))<p class="gv-pd">{{ $gp['description'] }}</p>@endif
+          @if($gig->chosen_package === ($gp['name'] ?? null))<span class="gv-chip ok">Chosen</span>@endif
+        </div>
+      @endforeach
+      <p class="gv-note"><i data-lucide="shield-check"></i>Pick your package in the claim form below. Payment stays in escrow until the work is approved.</p>
+    @else
+      <div class="gv-pp">₦{{ number_format((float) $gig->amount) }}</div>
+      <p class="gv-note"><i data-lucide="shield-check"></i>Payment stays in escrow until the work is approved.</p>
+    @endif
+  </section>
+
+  <section class="gv-s">
+    <h2 class="gv-h">About this hustle</h2>
+    @if(trim((string) $gig->description) !== '')
+      <p class="gv-desc">{!! nl2br(e($gig->description)) !!}</p>
+    @else
+      <p class="gv-muted">The poster has not added a description. Message them to ask what is needed.</p>
+    @endif
+  </section>
+
+  @if($gig->deadline || $gig->location_type || $gig->location || $gig->phone || $gig->attachment_path || !empty($gig->details) || $gig->has_item)
+    <section class="gv-s">
+      <h2 class="gv-h">Job details</h2>
+      <dl class="gv-dl">
+        @if($gig->deadline)<div><dt>Deadline</dt><dd>{{ $gig->deadline->format('M j, Y') }}</dd></div>@endif
+        @if($gig->location_type)<div><dt>Where</dt><dd>{{ ucfirst($gig->location_type) }}</dd></div>@endif
+        @if($gig->location)<div><dt>Location</dt><dd>{{ $gig->location }}</dd></div>@endif
+        @if($gig->phone)<div><dt>Call</dt><dd>{{ $gig->phone }}</dd></div>@endif
+        @if(!empty($gig->details))
+          @foreach($gig->details as $gk => $gv)
+            @if($gv)<div><dt>{{ ucfirst(str_replace('_', ' ', $gk)) }}</dt><dd>{{ $gv }}</dd></div>@endif
+          @endforeach
+        @endif
+        @if($gig->has_item)
+          <div><dt>Item</dt><dd>{{ $gig->item_name }}{{ $gig->item_qty ? ' x ' . $gig->item_qty : '' }}</dd></div>
+          @if($gig->item_cost)<div><dt>Item cost</dt><dd>₦{{ number_format($gig->item_cost) }} (not in escrow, arrange directly)</dd></div>@endif
+          @if($gig->delivery_address)<div><dt>Deliver to</dt><dd>{{ $gig->delivery_address }}</dd></div>@endif
+          @if($gig->item_delivery_method)<div><dt>Delivery</dt><dd>{{ $gig->item_delivery_method === 'ship' ? 'Ship / send' : 'Meet on campus' }}</dd></div>@endif
+        @endif
+      </dl>
+      @if($gig->attachment_path)<a href="/storage/{{ $gig->attachment_path }}" target="_blank" class="gv-link"><i data-lucide="paperclip"></i>View attached brief</a>@endif
+      @if($gig->delivery_attachment_path)<a href="/storage/{{ $gig->delivery_attachment_path }}" target="_blank" class="gv-link"><i data-lucide="package-check"></i>View delivered file</a>@endif
+    </section>
+  @endif
+
+  @if($poster)
+    <section class="gv-s">
+      <h2 class="gv-h">About the poster</h2>
+      <div class="gv-sel">
+        <span class="gv-av">@if($poster->avatar_url)<img src="{{ $poster->avatar_url }}" alt="">@else{{ strtoupper(substr($poster->name, 0, 1)) }}@endif</span>
+        <div class="gv-si">
+          <b>{{ $poster->username ? '@'.$poster->username : $poster->name }}@if($poster->is_verified_seller)<i data-lucide="badge-check"></i>@endif</b>
+          @if($poster->skills)<small>{{ $poster->skills }}</small>@endif
+          <small>Member since {{ $poster->created_at->format('M Y') }}</small>
+        </div>
+        @if($gig->whatsappLink())<a href="{{ $gig->whatsappLink() }}" target="_blank" class="gv-wa" aria-label="WhatsApp"><i data-lucide="message-circle"></i></a>@endif
+      </div>
+      <div class="gv-st">
+        <div><b>{{ $posterCompletedCount }}</b>Completed</div>
+        <div><b>{{ !empty($posterRating) ? $posterRating . ' ★' : '—' }}</b>Rating</div>
+        <div><b>{{ $gxLvl ?: 'New' }}</b>Level</div>
+      </div>
+    </section>
+  @endif
+
+  <section class="gv-s">
+    <h2 class="gv-h">Reviews</h2>
+    @forelse($gxRev->take(5) as $gr)
+      <div class="gv-rv">
+        <span class="gv-ra">{{ strtoupper(substr(optional($gr->reviewer)->name ?? 'U', 0, 1)) }}</span>
+        <div>
+          <div class="gv-rh"><b>{{ optional($gr->reviewer)->name ?? 'User' }}</b><span>{{ str_repeat('★', (int) $gr->rating) }}{{ str_repeat('☆', 5 - (int) $gr->rating) }}</span></div>
+          <small>{{ $gr->created_at->format('M j, Y') }}</small>
+          @if($gr->comment)<p>{{ $gr->comment }}</p>@endif
+        </div>
+      </div>
+    @empty
+      <p class="gv-muted">No reviews yet. Reviews appear after the work is completed.</p>
+    @endforelse
+  </section>
+</div>
+<script>
+(function () {
+  var t = document.getElementById('gvTabs'); if (!t) return;
+  t.addEventListener('click', function (e) {
+    var b = e.target.closest('.gv-tab'); if (!b) return;
+    var i = b.getAttribute('data-i');
+    [].slice.call(t.querySelectorAll('.gv-tab')).forEach(function (x) { x.classList.toggle('on', x === b); });
+    [].slice.call(document.querySelectorAll('.gv-pk')).forEach(function (x) { x.hidden = x.getAttribute('data-i') !== i; });
+  });
+  if (window.lucide) lucide.createIcons();
+})();
+</script>
+
+@if(in_array($gig->status, ['in_progress', 'delivered', 'awaiting_worker_signup', 'completed']) && ($acceptedByUser || $gig->guest_name))
+    <div class="glass-card p-5 mt-4 flex items-center gap-3 reveal-on-scroll">
+        <div class="w-12 h-12 rounded-full bg-card flex items-center justify-center font-semibold overflow-hidden">
+            @if($acceptedByUser && $acceptedByUser->avatar_url)<img src="{{ $acceptedByUser->avatar_url }}" class="w-full h-full object-cover">@else{{ strtoupper(substr($acceptedByUser->name ?? $gig->guest_name, 0, 1)) }}@endif
+        </div>
+        <div class="flex-1">
+            <p class="font-medium text-sm">Claimed by {{ $acceptedByUser->name ?? $gig->guest_name }}
+                @if(!$acceptedByUser)<span class="text-xs text-muted">(no account yet)</span>@endif
+            </p>
+            @if($acceptedByUser)
+            <p class="text-xs text-muted">{{ $workerCompletedCount }} gig{{ $workerCompletedCount === 1 ? '' : 's' }} completed</p>
+            @else
+            <p class="text-xs text-muted">Not verified — hasn't created an account</p>
+            @endif
+        </div>
+    </div>
+    @endif
+
+    @if($gig->status === 'delivered' && $gig->delivery_note)
+    <div class="glass-card p-5 mt-4 reveal-on-scroll">
+        <h2 class="font-semibold mb-2 flex items-center gap-2"><i data-lucide="package-check" class="w-4 h-4"></i> Delivery Note</h2>
+        <p class="text-sm text-muted">{{ $gig->delivery_note }}</p>
+    </div>
+    @endif
+
+    @if($gig->status === 'in_progress' && $gig->rejection_note)
+    <div class="glass-card p-5 mt-4 reveal-on-scroll" style="border:1px solid #f59e0b;">
+        <h2 class="font-semibold mb-2 flex items-center gap-2"><i data-lucide="rotate-ccw" class="w-4 h-4" style="color:#f59e0b;"></i> Changes Requested</h2>
+        <p class="text-sm text-muted">{{ $gig->rejection_note }}</p>
+    </div>
+    @endif
+
+    {{-- OPEN --}}
+    @if($gig->status === 'open')
+        @auth
+            @if($gig->user_id === auth()->id())
+            <p class="text-muted text-sm mt-6 text-center">Your posted gig — waiting for someone to claim it.</p>
+            @else
+            <form method="POST" action="{{ route('gigs.accept', $gig->id) }}" onsubmit="return confirm('Claim this gig? You won\'t get paid until the poster confirms the delivered work.');">
+                @csrf
+                @if(!empty($gig->packages))
+                <div class="space-y-2 mb-3">
+                    <p class="text-sm text-muted">Choose a package:</p>
+                    @foreach($gig->packages as $i => $pkg)
+                    <label class="flex items-center gap-2 text-sm">
+                        <input type="radio" name="package_index" value="{{ $i }}" required>
+                        {{ $pkg['name'] }} — ₦{{ number_format($pkg['price']) }}
+                        @if(!empty($pkg['description']))<span class="text-muted">({{ $pkg['description'] }})</span>@endif
+                    </label>
+                    @endforeach
+                </div>
+                @endif
+                <button type="submit" class="btn-primary mt-6 w-full justify-center">Claim This Gig</button>
+            </form>
+            @endif
+        @else
+            @if($guestGigsUsed >= 2)
+            <div class="glass-card p-5 mt-6 text-center reveal-on-scroll">
+                <p class="text-sm mb-3">You've used your 2 free gigs. Create an account to keep taking gigs.</p>
+                <a href="{{ route('register') }}" class="btn-primary w-full justify-center">Create Account</a>
+            </div>
+            @else
+            <div class="glass-card p-5 mt-6 reveal
+=== app/Http/Controllers/AdminController.php ===
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use App\Models\Transaction;
+use App\Models\Gig;
+use App\Models\Listing;
+use App\Models\Subscription;
+use App\Models\News;
+use App\Models\Blog;
+use App\Models\PlatformRevenue;
+use App\Models\Invite;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+
+class AdminController extends Controller
+{
+    public function revenue()
+    {
+        $this->guard();
+
+        $totalAllTime = PlatformRevenue::sum('amount');
+        $totalThisMonth = PlatformRevenue::where('created_at', '>=', now()->startOfMonth())->sum('amount');
+        $totalThisWeek = PlatformRevenue::where('created_at', '>=', now()->startOfWeek())->sum('amount');
+        $totalToday = PlatformRevenue::where('created_at', '>=', now()->startOfDay())->sum('amount');
+
+        $bySource = PlatformRevenue::selectRaw('source, SUM(amount) as total, COUNT(*) as count')
+            ->groupBy('source')
+            ->orderByDesc('total')
+            ->get();
+
+        $recent = PlatformRevenue::latest()->take(50)->get();
+
+        return view('admin.revenue', [
+            'totalAllTime' => $totalAllTime,
+            'totalThisMonth' => $totalThisMonth,
+            'totalThisWeek' => $totalThisWeek,
+            'totalToday' => $totalToday,
+            'bySource' => $bySource,
+            'recent' => $recent,
+        ]);
+    }
+
+    private function guard()
+    {
+        abort_unless(Auth::check() && Auth::user()->is_admin, 403);
+    }
+
+    public function index()
+    {
+        $this->guard();
+        $subStatusCounts = Subscription::selectRaw('status, COUNT(*) as total')->groupBy('status')->pluck('total', 'status');
+        $subMethodRevenue = Subscription::where('status', 'active')
+            ->selectRaw('payment_method, SUM(amount) as total')
+            ->groupBy('payment_method')
+            ->pluck('total', 'payment_method');
+
+        return view('admin.index', [
+            'userCount' => User::count(),
+            'bannedCount' => User::where('is_banned', true)->count(),
+            'tierCounts' => User::selectRaw('tier, COUNT(*) as total')->groupBy('tier')->pluck('total', 'tier'),
+            'totalWalletBalance' => User::sum('wallet_balance'),
+            'gigCount' => Gig::count(),
+            'openGigCount' => Gig::where('status', 'open')->count(),
+            'listingCount' => Listing::count(),
+            'newsCount' => News::count(),
+            'blogCount' => Blog::count(),
+            'recentUsers' => User::latest()->take(8)->get(),
+            'recentTx' => Transaction::latest()->take(10)->get(),
+            'totalRevenue' => Transaction::whereIn('type', ['tier_upgrade'])->sum('amount') * -1,
+            'subActive' => $subStatusCounts['active'] ?? 0,
+            'subPending' => $subStatusCounts['pending_payment'] ?? 0,
+            'subExpired' => $subStatusCounts['expired'] ?? 0,
+            'subCancelled' => $subStatusCounts['cancelled'] ?? 0,
+            'subWalletRevenue' => $subMethodRevenue['wallet'] ?? 0,
+            'subPaystackRevenue' => $subMethodRevenue['paystack'] ?? 0,
+            'expiringSoon' => Subscription::active()
+                ->whereBetween('expires_at', [now(), now()->addDays(14)])
+                ->with('user')->orderBy('expires_at')->take(10)->get(),
+            'stuckPending' => Subscription::where('status', 'pending_payment')
+                ->where('created_at', '<', now()->subHours(2))
+                ->with('user')->latest()->take(10)->get(),
+        ]);
+    }
+
+    // ===== USERS =====
+    public function users(Request $r)
+    {
+        $this->guard();
+        $q = User::query();
+        if ($r->filled('search')) {
+            $q->where(fn($w) => $w->where('name', 'like', "%{$r->search}%")->orWhere('email', 'like', "%{$r->search}%"));
+        }
+        if ($r->filled('tier')) $q->where('tier', $r->tier);
+        if ($r->filled('banned')) $q->where('is_banned', $r->banned === '1');
+
+        return view('admin.users', ['users' => $q->latest()->paginate(25)->withQueryString()]);
+    }
+
+    public function grantAccess(Request $r)
+    {
+        $this->guard();
+        $users = collect();
+        if ($r->filled('search')) {
+            $users = User::where(fn($w) => $w->where('name', 'like', "%{$r->search}%")->orWhere('email', 'like', "%{$r->search}%"))
+                ->limit(20)->get();
+        }
+        return view('admin.grant-access', ['users' => $users, 'search' => $r->search]);
+    }
+
+    public function grantAccessStore(Request $r)
+    {
+        $this->guard();
+        $validated = $r->validate([
+            'user_id' => 'required|exists:users,id',
+            'tier' => 'required|in:tier1,tier2,tier3',
+        ]);
+
+        $user = User::findOrFail($validated['user_id']);
+        $user->update([
+            'signup_fee_paid' => true,
+            'badge_tier' => 'bronze',
+            'tier' => $validated['tier'],
+            'tier_upgraded_at' => now(),
+        ]);
+
+        return back()->with('status', "Granted {$validated['tier']} access to {$user->name}.");
+    }
+
+    public function toggleAdmin(User $user)
+    {
+        $this->guard();
+        abort_if($user->id === Auth::id(), 403, 'You cannot remove your own admin access.');
+        $user->update(['is_admin' => !$user->is_admin]);
+        return back()->with('status', $user->name . ' admin status updated.');
+    }
+
+    public function toggleBan(User $user)
+    {
+        $this->guard();
+        abort_if($user->id === Auth::id(), 403, 'You cannot ban yourself.');
+        $user->update(['is_banned' => !$user->is_banned]);
+        if ($user->is_banned) {
+            $user->notify(new \App\Notifications\AccountBanned());
+        }
+        return back()->with('status', $user->name . ($user->is_banned ? ' banned.' : ' unbanned.'));
+    }
+
+    // Flips a user in/out of the customer_care role. Does not touch is_admin -
+    // customer_care is a separate, lesser-privileged role, not an admin variant.
+    public function toggleCustomerCare(User $user)
+    {
+        $this->guard();
+        abort_if($user->id === Auth::id(), 403, 'You cannot change your own role.');
+        abort_if($user->isAdmin(), 403, 'Admins are not eligible for the customer_care role.');
+
+        $newRole = $user->role === 'customer_care' ? 'user' : 'customer_care';
+        $user->update(['role' => $newRole]);
+
+        return back()->with('status', $user->name . ' is now ' . ($newRole === 'customer_care' ? 'Customer Care.' : 'a regular user.'));
+    }
+
+    // ===== CUSTOMER CARE INVITES =====
+    public function invites()
+    {
+        $this->guard();
+        return view('admin.invites', ['invites' => Invite::with(['creator', 'usedBy'])->latest()->paginate(25)]);
+    }
+
+    public function invitesStore(Request $r)
+    {
+        $this->guard();
+        $r->validate(['expires_in_days' => 'nullable|integer|min:1|max:30']);
+        Invite::generate(Auth::id(), 'customer_care', $r->input('expires_in_days', 7));
+        return back()->with('status', 'Invite link generated.');
+    }
+
+    public function invitesRevoke(Invite $invite)
+    {
+        $this->guard();
+        abort_if($invite->used_at, 403, 'This invite has already been used and cannot be revoked.');
+        $invite->delete();
+        return back()->with('status', 'Invite revoked.');
+    }
+
+    // Locked to prevent this admin write from racing with a concurrent user-side wallet
+    // operation (topup, purchase, gig payout) on the same account and losing an update.
+    public function adjustBalance(Request $r, User $user)
+    {
+        $this->guard();
+        $data = $r->validate(['amount' => 'required|numeric', 'note' => 'nullable|string|max:255']);
+
+        DB::transaction(function () use ($data, $user) {
+            $lockedUser = User::where('id', $user->id)->lockForUpdate()->first();
+            $lockedUser->increment('wallet_balance', $data['amount']);
+            Transaction::create([
+                'user_id' => $lockedUser->id,
+                'type' => 'admin_adjustment',
+                'amount' => $data['amount'],
+                'description' => $data['note'] ?? 'Admin balance adjustment',
+            ]);
+            $lockedUser->notify(new \App\Notifications\AdminBalanceAdjusted($data['amount'], $data['note'] ?? null));
+        });
+
+        return back()->with('status', 'Balance adjusted for ' . $user->name);
+    }
+
+    // ===== GIGS =====
+    public function gigs(Request $r)
+    {
+        $this->guard();
+        $q = Gig::with('user')->latest();
+        if ($r->filled('status')) $q->where('status', $r->status);
+        return view('admin.gigs', ['gigs' => $q->paginate(25)->withQueryString()]);
+    }
+
+    public function deleteGig(Gig $gig)
+    {
+        $this->guard();
+        $gig->delete();
+        return back()->with('status', 'Gig removed.');
+    }
+
+    // ===== LISTINGS =====
+    public function listings(Request $r)
+    {
+        $this->guard();
+        $q = Listing::with('user')->latest();
+        if ($r->filled('status')) $q->where('status', $r->status);
+        return view('admin.listings', ['listings' => $q->paginate(25)->withQueryString()]);
+    }
+
+    public function deleteListing(Listing $listing)
+    {
+        $this->guard();
+        $listing->delete();
+        return back()->with('status', 'Listing removed.');
+    }
+
+    // ===== TRANSACTIONS =====
+    public function transactions(Request $r)
+    {
+        $this->guard();
+        $q = Transaction::with('user')->latest();
+        if ($r->filled('type')) $q->where('type', $r->type);
+        if ($r->filled('search')) {
+            $q->whereHas('user', fn($w) => $w->where('name', 'like', "%{$r->search}%"));
+        }
+        return view('admin.transactions', ['transactions' => $q->paginate(30)->withQueryString()]);
+    }
+
+    // ===== SUBSCRIPTIONS =====
+    public function subscriptions(Request $r)
+    {
+        $this->guard();
+        $q = Subscription::with('user')->latest();
+        if ($r->filled('status')) $q->where('status', $r->status);
+        return view('admin.subscriptions', ['subscriptions' => $q->paginate(25)->withQueryString()]);
+    }
+
+    public function cancelSubscription(Subscription $subscription)
+    {
+        $this->guard();
+        $subscription->update(['status' => 'cancelled']);
+        return back()->with('status', 'Subscription cancelled.');
+    }
+
+    // ===== NEWS =====
+    public function news()
+    {
+        $this->guard();
+        return view('admin.news', ['posts' => News::latest('published_at')->paginate(25)]);
+    }
+
+    public function deleteNews(News $news)
+    {
+        $this->guard();
+        $news->delete();
+        return back()->with('status', 'Post removed.');
+    }
+
+    // ===== BLOG =====
+    public function blog()
+    {
+        $this->guard();
+        return view('admin.blog', ['posts' => Blog::with('user')->latest()->paginate(25)]);
+    }
+
+    public function deleteBlog(Blog $blog)
+    {
+        $this->guard();
+        $blog->delete();
+        return back()->with('status', 'Blog post removed.');
+    }
+}
+
+=== app/Providers/AppServiceProvider.php ===
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Event;
+use App\Events\TierUpgraded;
+use App\Listeners\RecordTierUpgradeReveal;
+
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        //
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        if (request()->header('X-Forwarded-Proto') === 'https' || request()->secure()) {
+            URL::forceScheme('https');
+        }
+
+        Event::listen(TierUpgraded::class, RecordTierUpgradeReveal::class);
+
+        View::composer('*', function ($view) {
+            if (auth()->check()) {
+                $user = auth()->user();
+                $view->with('navAvatar', $user->avatar_url);
+                $view->with('navInitial', strtoupper(substr($user->name ?? 'U', 0, 1)));
+                $view->with('navQCoinBalance', $user->q_coin_balance ?? 0);
+                $unreadChats = \App\Models\ConversationParticipant::where('user_id', $user->id)
+                    ->whereHas('conversation', fn($q) => $q->where('type', 'business'))
+                    ->with('conversation')
+                    ->get()
+                    ->sum(fn($p) => $p->conversation->unreadCountFor($user->id));
+                $view->with('navUnreadChats', $unreadChats);
+                $view->with('navUnreadNotifications', $user->unreadNotifications()->count());
+            }
+        });
+    }
+}
+
+=== composer.json ===
+{
+    "$schema": "https://getcomposer.org/schema.json",
+    "name": "laravel/laravel",
+    "type": "project",
+    "description": "The skeleton application for the Laravel framework.",
+    "keywords": [
+        "laravel",
+        "framework"
+    ],
+    "license": "MIT",
+    "require": {
+        "php": "^8.3",
+        "barryvdh/laravel-dompdf": "^3.1",
+        "laravel-notification-channels/webpush": "^12.1",
+        "laravel/framework": "^13.8",
+        "laravel/socialite": "^5.29",
+        "laravel/tinker": "^3.0",
+        "resend/resend-php": "^1.13"
+    },
+    "require-dev": {
+        "fakerphp/faker": "^1.23",
+        "laravel/pail": "^1.2.5",
+        "laravel/pao": "^1.0.6",
+        "laravel/pint": "^1.27",
+        "mockery/mockery": "^1.6",
+        "nunomaduro/collision": "^8.6",
+        "phpunit/phpunit": "^12.5.12"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
+        },
+        "files": [
+            "app/Helpers/icons.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "setup": [
+            "composer install",
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
+            "@php artisan key:generate",
+            "@php artisan migrate --force",
+            "npm install --ignore-scripts",
+            "npm run build"
+        ],
+        "dev": [
+            "Composer\\Config::disableProcessTimeout",
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1 --timeout=0\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite --kill-others"
+        ],
+        "test": [
+            "@php artisan config:clear --ansi @no_additional_args",
+            "@php artisan test"
+        ],
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php artisan package:discover --ansi"
+        ],
+        "post-update-cmd": [
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+        ],
+        "post-root-package-install": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ],
+        "post-create-project-cmd": [
+            "@php artisan key:generate --ansi",
+            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
+            "@php artisan migrate --graceful --ansi"
+        ],
+        "pre-package-uninstall": [
+            "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "dont-discover": []
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
+
+resources/views/overview.blade.php
+resources/views/profile/public.blade.php
+resources/views/profile/index.blade.php
+resources/views/assets-layout.blade.php
+resources/views/investment/show.blade.php
+resources/views/investment/create.blade.php
+resources/views/investment/index.blade.php
+resources/views/rewards/achievements.blade.php
+resources/views/auth/vendor-activate.blade.php
+resources/views/auth/signup-fee-activate.blade.php
+resources/views/auth/register-pay.blade.php
+resources/views/auth/register-vendor.blade.php
+resources/views/auth/register.blade.php
+resources/views/auth/plan-gate.blade.php
+resources/views/profile-layout.blade.php
+resources/views/cart/index.blade.php
+resources/views/insights/dashboard.blade.php
+resources/views/insights/page.blade.php
+resources/views/money-tracker/index.blade.php
+resources/views/q-coin/partials/page.blade.php
+resources/views/dashboard-glass.blade.php
+resources/views/welcome-tour.blade.php
+resources/views/marketplace/show.blade.php
+resources/views/marketplace/orders.blade.php
+resources/views/marketplace/favorites.blade.php
+resources/views/marketplace/create.blade.php
+resources/views/marketplace/edit.blade.php
+resources/views/marketplace/partials/pd-row.blade.php
+resources/views/marketplace/partials/marketplace-aurora.blade.php
+resources/views/marketplace/partials/mk2-card.blade.php
+resources/views/marketplace/partials/marketplace-minimal.blade.php
+resources/views/partials/dqm-topbar.blade.php
+resources/views/partials/nav-icons.blade.php
+resources/views/partials/levi-inline.blade.php
+resources/views/partials/dashboard-minimal.blade.php
+resources/views/partials/reveal.blade.php
+resources/views/partials/mk-sponsor.blade.php
+resources/views/partials/dashboard-aurora.blade.php
+resources/views/partials/world-hover.blade.php
+resources/views/partials/glass-balance-card.blade.php
+resources/views/partials/user-flow.blade.php
+resources/views/partials/levi-bubble.blade.php
+resources/views/partials/dg-desktop.blade.php
+resources/views/partials/world-market-stack.blade.php
+resources/views/partials/dqm-balance-deck.blade.php
+resources/views/partials/ov-hot-investments.blade.php
+resources/views/partials/world-gigs-swipe.blade.php
+resources/views/golfvex/index.blade.php
+resources/views/subscriptions/index.blade.php
+resources/views/pulse.blade.php
+resources/views/services/index.blade.php
+resources/views/services/hub.blade.php
+resources/views/services/receipt.blade.php
+resources/views/leaderboard/index.blade.php
+resources/views/wallet/send.blade.php
+resources/views/wallet/index.blade.php
+resources/views/wallet/deposit.blade.php
+resources/views/wallet/receipt.blade.php
+resources/views/wallet/deposit-status.blade.php
+resources/views/posts/index.blade.php
+resources/views/admin/badges/index.blade.php
+resources/views/admin/coin.blade.php
+resources/views/admin/subscriptions.blade.php
+resources/views/admin/users.blade.php
+resources/views/admin/revenue.blade.php
+resources/views/admin/profit/index.blade.php
+resources/views/admin/profit/user.blade.php
+resources/views/admin/disputes/index.blade.php
+resources/views/admin/overview-studio.blade.php
+resources/views/admin/investment/index.blade.php
+resources/views/admin/listings.blade.php
+resources/views/admin/command.blade.php
+resources/views/admin/levels/index.blade.php
+resources/views/admin/gigs.blade.php
+resources/views/admin/index.blade.php
+resources/views/admin/transactions.blade.php
+resources/views/admin/marketplace-disputes/index.blade.php
+resources/views/gigs/show.blade.php
+resources/views/gigs/partials/gigs-aurora.blade.php
+resources/views/gigs/partials/gf-card.blade.php
+resources/views/gigs/partials/gigs-minimal.blade.php
+resources/views/gigs/index.blade.php
+resources/views/gigs/create.blade.php
+resources/views/gigs/edit.blade.php
+resources/views/features/index.blade.php
+resources/views/concierge/index.blade.php
+resources/views/news/create-ad.blade.php

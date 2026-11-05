@@ -1,0 +1,6 @@
+/* Keep Pulse feed thumbnails at their normal size. Top card (.dgf-lead) is unchanged. */
+html body[data-page="dashboard"] #dgFeed .dgf-card:not(.dgf-lead) .dgf-img {
+  width: 92px !important;
+  height: 92px !important;
+  transition: none !important;
+}

@@ -57,7 +57,7 @@ html.nv-lens .nv-dock-fixed{ backdrop-filter:url(#nvLens) saturate(190%) brightn
 html.nv-lens .pfx-liquid{ backdrop-filter:url(#nvLens) blur(3px) saturate(190%) brightness(1.04); -webkit-backdrop-filter:url(#nvLens) blur(3px) saturate(190%) brightness(1.04); }
 html.nv-lens .pfx-liquid{ background:radial-gradient(circle at 25% 12%, rgba(255,255,255,.7), rgba(255,255,255,.22) 60%, rgba(255,255,255,.1)); }
 .nv-dock-fixed .ovd-tile{ transition:transform .3s cubic-bezier(.3,1.5,.5,1); }
-.nv-dock-fixed .ovd-btn.on .ovd-tile, .nv-dock-fixed .ovd-btn:hover .ovd-tile{ transform:scale(1.12); }
+.nv-dock-fixed .ovd-btn.on .ovd-tile, .nv-dock-fixed .ovd-btn:hover .ovd-tile{ transform:none; }
 
 /* dock buttons: one colour, glass */
 .ovd .ovd-tile{ background:rgba(255,255,255,.42); border:1px solid rgba(255,255,255,.9);

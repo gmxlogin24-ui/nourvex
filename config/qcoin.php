@@ -5,7 +5,7 @@ return [
     'mode' => env('QCOIN_MODE', 'test'),
 
     // Display rate: how many Q equal ₦1. Naira stays the stored balance.
-    'q_per_naira_display' => 10,
+    'q_per_naira_display' => 20,
 
     // Daily streak bonus: +step_bonus every step_days consecutive days, capped at max_bonus.
     'streak_step_days' => 7,
@@ -18,5 +18,5 @@ return [
     ],
 
     // Q Coin price per ad duration (days => coins). Edit here.
-    'ad_prices' => [3 => 10000, 7 => 20000, 14 => 30000],
+    'ad_prices' => [3 => 1500, 7 => 3000, 30 => 10000],
 ];

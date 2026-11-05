@@ -33,10 +33,11 @@ class QCoinProfitShare extends Command
             return self::SUCCESS;
         }
 
-        $revenue = (float) PlatformRevenue::whereBetween('created_at', [$start, $end])->sum('amount');
-        $costs = (float) $this->option('costs');
+        $fin = app(\App\Services\FinanceService::class)->summary($start, $end);
+        $revenue = (float) $fin['revenue_total'];
+        $costs = (float) $this->option('costs') ?: (float) $fin['costs_total'];
         $profit = max(0, $revenue - $costs);
-        $share = (float) config('qcoin.profit_share.pool_share', 0.4);
+        $share = $fin['percent'] / 100;
         $rate = (float) config('qcoin.profit_share.q_per_naira', 100);
         $pool = round($profit * $share, 2);
         $poolQ = (int) floor($pool * $rate);

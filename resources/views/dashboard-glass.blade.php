@@ -11,7 +11,7 @@
   $dgMktE = (float) (clone $dgTx)->where('type', 'marketplace_sale')->where('amount', '>', 0)->sum('amount');
   $dgPhoto = $navAvatar ?? $dgUser->avatar_url ?? null;
   $dgInit = $navInitial ?? strtoupper(substr($dgUser->name ?? 'U', 0, 1));
-  $dgQ = (int) ($navQCoinBalance ?? $dgUser->q_coin_balance ?? 0);
+  $dgQ = (int) ($navQCoinBalance ?? $dgUser->wallet_balance ?? 0);
   $ovGrid = [
     ['Airtime', route('services.show', 'airtime'), 'smartphone', 'linear-gradient(145deg,#38BDF8,#2563EB)'],
     ['Data', route('services.show', 'data'), 'wifi', 'linear-gradient(145deg,#34D399,#059669)'],
@@ -39,6 +39,9 @@
 <link rel="stylesheet" href="{{ asset('css/ovm-layout.css') }}?v={{ time() }}">
 <link rel="stylesheet" href="{{ asset('css/mono.css') }}?v={{ time() }}">
 <link rel="stylesheet" href="{{ asset('css/grid-fit.css') }}?v={{ time() }}">
+<link rel="stylesheet" href="{{ asset('css/dg-white.css') }}?v={{ time() }}">
+<script src="{{ asset('js/dg-pin.js') }}?v={{ time() }}" defer></script>
+<script src="{{ asset('js/dg-focus.js') }}?v={{ time() }}" defer></script>
 
 <div class="dg-bgs" id="dgBgs" aria-hidden="true">
   @foreach($dgWorlds as $i => $w)<i class="dg-bg {{ $i === 0 ? 'on' : '' }}" style="background-image:url('{{ $w[3] }}')"></i>@endforeach
@@ -51,7 +54,7 @@
       <a href="{{ route('profile.index') }}" class="dg-av">@if($dgPhoto)<img src="{{ $dgPhoto }}" alt="">@else<span>{{ $dgInit }}</span>@endif</a>
       <a href="{{ route('search') }}" class="ovm-search"><i data-lucide="search"></i><span>Naurvex AI</span></a>
       <a href="{{ route('referrals.index') }}" class="ovm-ic" aria-label="Invite friends"><i data-lucide="user-plus"></i></a>
-      <a href="{{ route('chat.index') }}" class="ovm-ic ovm-bell" aria-label="Messages"><i data-lucide="message-circle"></i>@if(($navUnreadChats ?? 0) > 0)<em class="nv-badge">{{ $navUnreadChats > 99 ? '99+' : $navUnreadChats }}</em>@endif</a>
+      <a href="{{ route('cx.index') }}" class="ovm-ic ovm-bell" aria-label="Messages"><i data-lucide="message-circle"></i>@if(($navUnreadChats ?? 0) > 0)<em class="nv-badge">{{ $navUnreadChats > 99 ? '99+' : $navUnreadChats }}</em>@endif</a>
       <button type="button" class="ovm-ic" data-theme-btn aria-label="Light or dark mode"><i data-lucide="sun-moon"></i></button>
     </header>
 

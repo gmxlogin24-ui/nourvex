@@ -2,7 +2,7 @@
 @php
   $hwPage = $pageKey ?? '';
   $hwCount = (int) ($gigCount ?? \App\Models\Gig::where('status', 'open')->count());
-  $hwQ = (int) (optional(auth()->user())->q_coin_balance ?? 0);
+  $hwQ = (int) (optional(auth()->user())->wallet_balance ?? 0);
 @endphp
 @unless(in_array($hwPage, ['overview'], true))
 <style>

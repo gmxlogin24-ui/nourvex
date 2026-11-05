@@ -418,3 +418,6 @@ body[data-page="dashboard"] .dqm-topbar-fixed{
 #dgDrop, #dgCoin { visibility:hidden !important; pointer-events:none !important; }
 /* ui-fixes-q13 */
 .dg-drop,.dg-coin{visibility:hidden !important;pointer-events:none !important}
+
+/* Stop the slow zoom on dashboard card images and backgrounds. */
+.dg-card img, .dg-bg { animation: none !important; }

@@ -13,7 +13,7 @@
 
     <div class="grid md:grid-cols-4 gap-4 mb-6">
         <div class="stat-card"><p class="text-xs text-muted">Users</p><p class="text-2xl font-bold">{{ $userCount }}</p><p class="text-xs text-muted">{{ $bannedCount }} banned</p></div>
-        <div class="stat-card"><p class="text-xs text-muted">Wallet Balance (all)</p><p class="text-2xl font-bold">₦{{ number_format($totalWalletBalance, 2) }}</p></div>
+        <div class="stat-card"><p class="text-xs text-muted">Wallet Balance (all)</p><p class="text-2xl font-bold">{!! \App\Support\Money::coin($totalWalletBalance) !!}</p></div>
         <div class="stat-card"><p class="text-xs text-muted">Open Gigs</p><p class="text-2xl font-bold">{{ $openGigCount }}</p><p class="text-xs text-muted">{{ $gigCount }} total</p></div>
         <div class="stat-card"><p class="text-xs text-muted">Listings</p><p class="text-2xl font-bold">{{ $listingCount }}</p></div>
     </div>
@@ -119,7 +119,7 @@
             @forelse($stuckPending as $s)
             <div class="flex justify-between text-sm py-2 border-b" style="border-color:var(--border-color);">
                 <span>{{ $s->user->name ?? 'Unknown' }}</span>
-                <span class="text-muted">₦{{ number_format($s->amount) }}</span>
+                <span class="text-muted">{!! \App\Support\Money::coin($s->amount) !!}</span>
             </div>
             @empty
             <p class="text-sm text-muted">None stuck.</p>

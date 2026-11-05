@@ -215,7 +215,7 @@ class ServicesController extends Controller
             return back()->withErrors(['pin' => 'Set a transaction PIN before making purchases.']);
         }
         if (!$user->verifyTransactionPin($pin)) {
-            return back()->withErrors(['pin' => 'Incorrect transaction PIN.']);
+            return back()->withErrors(['pin' => $user->pinErrorMessage()]);
         }
 
         $reference = strtoupper($type) . '-' . $userId . '-' . time() . '-' . Str::random(4);
@@ -223,6 +223,10 @@ class ServicesController extends Controller
         // Balance check + decrement + purchase record must be one atomic
         // unit under a row lock, otherwise concurrent requests can both
         // pass the balance check before either decrements.
+        if ($reason = \App\Services\SpendLimit::blockedReason(\App\Models\User::find($userId), (float) $amount)) {
+            return back()->withErrors(['amount' => $reason]);
+        }
+
         $purchase = DB::transaction(function () use ($userId, $type, $network, $phone, $amount, $planId, $reference, $idempotencyKey, $cost) {
             $user = User::where('id', $userId)->lockForUpdate()->first();
 

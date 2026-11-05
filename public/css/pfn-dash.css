@@ -1,0 +1,27 @@
+/* profile: full name on top, dashboard card */
+.pfn-handle{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pfn-dash{display:block;margin:12px 0;padding:12px 14px;border-radius:14px;background:rgba(128,128,128,.14);border:1px solid rgba(128,128,128,.25);color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent}
+.pfn-dash:active{transform:scale(.99)}
+.pfn-dash-hd{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pfn-dash-hd b{display:flex;align-items:center;gap:7px;font-size:14.5px;font-weight:800}
+.pfn-dash-hd b svg{width:16px;height:16px}
+.pfn-dash-hd > svg{width:17px;height:17px;opacity:.55}
+.pfn-dash-sub{margin-top:2px;font-size:12.5px;font-weight:600;opacity:.65}
+.pfn-dash-chips{display:flex;gap:8px;margin-top:10px}
+.pfn-dash-chips div{flex:1;padding:8px 10px;border-radius:11px;background:rgba(128,128,128,.12);border:1px solid rgba(128,128,128,.2)}
+.pfn-dash-chips b{display:block;font-size:15px;font-weight:800;line-height:1.1}
+.pfn-dash-chips span{display:block;margin-top:2px;font-size:11px;font-weight:600;opacity:.65}
+
+/* pftight: less space around role line and bio */
+.pfn-head{margin-bottom:0 !important;padding-bottom:0 !important}
+.pfn-role{margin-top:2px !important;margin-bottom:2px !important;padding-top:0 !important;padding-bottom:0 !important;line-height:1.25 !important}
+.pfn-bio{margin-top:2px !important;margin-bottom:6px !important;padding-top:0 !important;line-height:1.35 !important}
+.pfn-addbio{margin-top:2px !important;margin-bottom:6px !important}
+.pfn-dash{margin-top:8px !important}
+
+/* pftight2: avatar column was the tall part pushing role and bio down */
+.pfn-av{padding-top:22px !important}
+.pfn-pic{width:76px !important;height:76px !important;font-size:28px !important}
+.pfn-note{padding:5px 10px !important}
+.pfn-role{margin-top:-4px !important}
+.pfn-bio{margin-top:0 !important}

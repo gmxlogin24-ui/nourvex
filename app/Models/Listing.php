@@ -17,6 +17,8 @@ class Listing extends Model
         'old_price', 'colors', 'sizes', 'specs',
     ];
 
+    public function user() { return $this->belongsTo(User::class, 'user_id'); }
+
     protected function casts(): array
     {
         return [

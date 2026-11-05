@@ -20,31 +20,34 @@
 
   <section class="inv-hero">
     <p class="inv-lbl">Raised</p>
-    <p class="inv-amt">{{ number_format($project->raised_q) }} Q</p>
-    <p style="color:rgba(255,255,255,.7);font-size:12px;margin:0">of {{ number_format($project->goal_q) }} Q goal · {{ \App\Services\InvestmentService::naira($project->raised_q) }} raised</p>
+    <p class="inv-amt">₦{{ number_format($project->raised_q) }}</p>
+    <p style="color:rgba(255,255,255,.7);font-size:12px;margin:0">of ₦{{ number_format($project->goal_q) }} goal · {{ \App\Services\InvestmentService::naira($project->raised_q) }} raised</p>
     <div class="inv-bar" style="margin-top:14px;background:rgba(255,255,255,.12)"><span style="width: {{ $project->progressPercent() }}%"></span></div>
     <div class="inv-stats">
-      <div><small>Released to owner</small><b>{{ number_format($project->released_q) }} Q</b></div>
-      <div><small>Returns paid</small><b>{{ number_format($project->returns_distributed_q) }} Q</b></div>
+      <div><small>Released to owner</small><b>₦{{ number_format($project->released_q) }}</b></div>
+      <div><small>Returns paid</small><b>₦{{ number_format($project->returns_distributed_q) }}</b></div>
     </div>
   </section>
 
   <section class="inv-glass inv-section">
     <h2>About this project</h2>
     <p class="inv-muted" style="white-space:pre-line;color:var(--ink);font-size:13px">{{ $project->description }}</p>
-    <p class="inv-muted">Per-investor limit: {{ number_format($project->max_invest_q) }} Q · Minimum: {{ number_format($project->min_invest_q) }} Q</p>
+    <p class="inv-muted">Per-investor limit: ₦{{ number_format($project->max_invest_q) }} · Minimum: ₦{{ number_format($project->min_invest_q) }}</p>
   </section>
+
+  @include('investment._project-extras')
 
   @if($canInvest)
     <section class="inv-glass inv-section">
       <h2>Invest</h2>
-      <p class="inv-muted">Your balance: {{ number_format($qBalance) }} Q · You can still invest up to {{ number_format($maxAllowed) }} Q here.</p>
+      <p class="inv-muted">Your balance: ₦{{ number_format($qBalance) }} · You can still invest up to ₦{{ number_format($maxAllowed) }} here.</p>
       <form method="POST" action="{{ route('investment.invest', $project) }}">
         @csrf
         <input type="hidden" name="idempotency_key" value="{{ $idemKey }}">
+        @include('investment._invest-fields')
         <input class="inv-input" type="number" name="amount_q" min="{{ $project->min_invest_q }}" max="{{ $maxAllowed }}" step="1" required value="{{ old('amount_q', $project->min_invest_q) }}">
         @error('amount_q')<div class="inv-err">{{ $message }}</div>@enderror
-        <button class="inv-btn" type="submit">Invest {{ number_format(old('amount_q', $project->min_invest_q)) }} Q</button>
+        <button class="inv-btn" type="submit">Invest ₦{{ number_format(old('amount_q', $project->min_invest_q)) }}</button>
       </form>
     </section>
   @elseif($project->status === 'open' && ! $isOwner && $maxAllowed <= 0)
@@ -57,7 +60,7 @@
       @foreach($mine as $inv)
         <div class="inv-row">
           <span>{{ $inv->created_at->format('M j, Y') }}</span>
-          <span>{{ number_format($inv->amount_q) }} Q <span class="inv-status {{ $inv->status === 'active' ? '' : 'off' }}">{{ ucfirst($inv->status) }}</span></span>
+          <span>₦{{ number_format($inv->amount_q) }} <span class="inv-status {{ $inv->status === 'active' ? '' : 'off' }}">{{ ucfirst($inv->status) }}</span></span>
         </div>
       @endforeach
     </section>

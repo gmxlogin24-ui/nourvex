@@ -231,7 +231,8 @@ class MarketplaceController extends Controller
     public function favorites()
     {
         $listings = Auth::user()->favoriteListings()->latest('listing_favorites.created_at')->get();
-        return redirect()->route('cart.index');
+        $listings->load('images');
+        return view('marketplace.favorites', ['listings' => $listings]);
     }
 
     // Seller marks a ship-method listing as sent. Buyer sees this on the
@@ -496,6 +497,9 @@ class MarketplaceController extends Controller
                 return back()->withErrors(['balance' => 'This listing is no longer available.']);
             }
 
+            if ($reason = \App\Services\SpendLimit::blockedReason($lockedBuyer, (float) $lockedListing->amount)) {
+                return back()->withErrors(['balance' => $reason]);
+            }
             if ($lockedBuyer->wallet_balance < $lockedListing->amount) {
                 return back()->withErrors(['balance' => 'Insufficient wallet balance. Top up your wallet first.']);
             }
@@ -556,21 +560,11 @@ class MarketplaceController extends Controller
             $seller = $lockedListing->user_id ? User::where('id', $lockedListing->user_id)->lockForUpdate()->first() : null;
 
             if ($seller) {
-                $rate = match ($seller->tier) {
-                    'tier2', 'tier3' => 0,
-                    'tier1' => 0.03,
-                    default => 0.05,
-                };
+                $rate = (float) config('marketplace.commission.' . ($seller->tier ?: 'free'), config('marketplace.commission.default'));
                 $commission = round($lockedListing->amount * $rate, 2);
                 $payout = $lockedListing->amount - $commission;
 
-                $seller->increment('wallet_balance', $payout);
-                Transaction::create([
-                    'user_id' => $seller->id,
-                    'type' => 'marketplace_sale',
-                    'amount' => $payout,
-                    'description' => 'Sold: ' . $lockedListing->title . ($commission > 0 ? ' (after ₦' . number_format($commission) . ' platform fee)' : ''),
-                ]);
+                \App\Services\SalePayout::pay($seller, (float) $payout, $lockedListing ?? $listing);
                 \App\Models\PlatformRevenue::record('marketplace', $commission, 'Commission: ' . $lockedListing->title, 'listing', $lockedListing->id);
                 $seller->notify(new \App\Notifications\MarketplaceSaleCompleted($lockedListing, $payout));
             }
@@ -604,21 +598,11 @@ class MarketplaceController extends Controller
             $seller = $listing->user_id ? User::where('id', $listing->user_id)->lockForUpdate()->first() : null;
 
             if ($seller) {
-                $rate = match ($seller->tier) {
-                    'tier2', 'tier3' => 0,
-                    'tier1' => 0.03,
-                    default => 0.05,
-                };
+                $rate = (float) config('marketplace.commission.' . ($seller->tier ?: 'free'), config('marketplace.commission.default'));
                 $commission = round($lockedOrder->amount * $rate, 2);
                 $payout = $lockedOrder->amount - $commission;
 
-                $seller->increment('wallet_balance', $payout);
-                Transaction::create([
-                    'user_id' => $seller->id,
-                    'type' => 'marketplace_sale',
-                    'amount' => $payout,
-                    'description' => 'Sold (unit): ' . $listing->title . ($commission > 0 ? ' (after ₦' . number_format($commission) . ' platform fee)' : ''),
-                ]);
+                \App\Services\SalePayout::pay($seller, (float) $payout, $lockedListing ?? $listing);
                 \App\Models\PlatformRevenue::record('marketplace', $commission, 'Commission (unit): ' . $listing->title, 'listing_order', $lockedOrder->id);
                 $seller->notify(new \App\Notifications\MarketplaceSaleCompleted($listing, $payout));
             }
@@ -833,14 +817,9 @@ class MarketplaceController extends Controller
         $cart = \Illuminate\Support\Facades\Session::get('cart', []);
         if ($loved) {
             $listing->favoritedBy()->detach($user->id);
-            \Illuminate\Support\Facades\Session::put('cart', array_values(array_diff($cart, [$listing->id])));
             $now = false;
         } else {
             $listing->favoritedBy()->syncWithoutDetaching([$user->id]);
-            if (!$own && $listing->status === 'available' && !in_array($listing->id, $cart, true)) {
-                $cart[] = $listing->id;
-                \Illuminate\Support\Facades\Session::put('cart', $cart);
-            }
             $now = true;
         }
 

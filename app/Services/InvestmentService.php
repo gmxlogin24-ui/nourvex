@@ -13,7 +13,7 @@ use RuntimeException;
 class InvestmentService
 {
     // Lock order everywhere: project row first, then user rows (QCoinService locks the user).
-    public function __construct(protected QCoinService $qcoin) {}
+    public function __construct(protected InvestmentWallet $qcoin) {}
 
     public static function naira(int $q): string
     {
@@ -27,7 +27,9 @@ class InvestmentService
 
     public function capFor(User $user): int
     {
-        return $this->isVerified($user)
+        $kyc = DB::table('kyc_profiles')->where('user_id', $user->id)->where('status', 'approved')->exists();
+
+        return ($this->isVerified($user) || $kyc)
             ? (int) config('investment.cap_verified_q')
             : (int) config('investment.cap_unverified_q');
     }
@@ -74,6 +76,7 @@ class InvestmentService
             throw new RuntimeException('You already have the maximum number of active projects.');
         }
 
+        app(\App\Services\InvestorGate::class)->assertCanList($owner);
         $goal = (int) $data['goal_q'];
         if ($goal < (int) config('investment.min_goal_q') || $goal > (int) config('investment.max_goal_q')) {
             throw new RuntimeException('Goal is outside the allowed range.');
@@ -120,6 +123,7 @@ class InvestmentService
                 throw new RuntimeException('The deadline has passed. The owner must submit again.');
             }
 
+            app(\App\Services\InvestorGate::class)->assertDiligenceComplete($p);
             $p->status = 'open';
             $p->approved_at = now();
             $p->save();
@@ -152,10 +156,10 @@ class InvestmentService
                 throw new RuntimeException('You cannot invest in your own project.');
             }
             if ($amount < $p->min_invest_q) {
-                throw new RuntimeException('Minimum investment is ' . number_format($p->min_invest_q) . ' Q.');
+                throw new RuntimeException('Minimum investment is ₦' . number_format($p->min_invest_q) . '.');
             }
             if ($amount > $p->remainingGoal()) {
-                throw new RuntimeException('Only ' . number_format($p->remainingGoal()) . ' Q is left to raise.');
+                throw new RuntimeException('Only ₦' . number_format($p->remainingGoal()) . ' is left to raise.');
             }
 
             $already = (int) Investment::where('user_id', $user->id)
@@ -165,7 +169,7 @@ class InvestmentService
             $limit = min($this->capFor($user), $p->max_invest_q);
             if ($already + $amount > $limit) {
                 $room = max(0, $limit - $already);
-                throw new RuntimeException('You can still invest up to ' . number_format($room) . ' Q in this project.');
+                throw new RuntimeException('You can still invest up to ₦' . number_format($room) . ' in this project.');
             }
 
             $inv = Investment::create([
@@ -203,7 +207,7 @@ class InvestmentService
                 throw new RuntimeException('Funds can only be released from a funded project.');
             }
             if ($amount > $p->availableToRelease()) {
-                throw new RuntimeException('Amount is more than the escrow balance (' . number_format($p->availableToRelease()) . ' Q).');
+                throw new RuntimeException('Amount is more than the escrow balance (₦' . number_format($p->availableToRelease()) . ').');
             }
 
             $owner = User::whereKey($p->owner_id)->lockForUpdate()->firstOrFail();
@@ -248,7 +252,7 @@ class InvestmentService
                 throw new RuntimeException('Returns can only be paid on a funded project.');
             }
             if ($gross > $p->availableReturns()) {
-                throw new RuntimeException('Amount is more than the reported returns not yet paid (' . number_format($p->availableReturns()) . ' Q).');
+                throw new RuntimeException('Amount is more than the reported returns not yet paid (₦' . number_format($p->availableReturns()) . ').');
             }
 
             $investments = Investment::where('investment_project_id', $p->id)
@@ -284,6 +288,7 @@ class InvestmentService
                 $paid += $share;
             }
 
+            \App\Models\PlatformRevenue::record('investments', (float) ($gross - $paid), 'Fee on returns: ' . $p->title, 'investment', $p->id);
             $p->returns_distributed_q += $gross;
             $p->save();
 

@@ -10,6 +10,9 @@ class SocialAuthController extends Controller
 {
     public function redirect()
     {
+        if (request()->filled('ref')) {
+            session(['google_ref' => strtoupper(trim((string) request('ref')))]);
+        }
         return Socialite::driver('google')->redirect();
     }
 
@@ -29,7 +32,10 @@ class SocialAuthController extends Controller
             }
         } else {
             $isNewUser = true;
+            $refCode = session()->pull('google_ref');
+            $referrer = $refCode ? User::where('referral_code', $refCode)->first() : null;
             $user = User::create([
+                'referred_by' => $referrer?->id,
                 'name' => $googleUser->getName() ?: $googleUser->getNickname() ?: 'Student',
                 'email' => $googleUser->getEmail(),
                 'google_id' => $googleUser->getId(),

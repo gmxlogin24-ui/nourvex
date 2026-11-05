@@ -1,0 +1,6 @@
+/* the CSS logo badge (auth, landing, admin) shows the K logo */
+html body .logo-badge{
+  background:#000 url('/images/naurvex-logo-512.png') center / cover no-repeat !important;
+  border-radius:24% !important; aspect-ratio:1 / 1; -webkit-mask:none !important; mask:none !important; filter:none !important;
+}
+html body .logo-badge::before, html body .logo-badge::after{ content:none !important; display:none !important; }

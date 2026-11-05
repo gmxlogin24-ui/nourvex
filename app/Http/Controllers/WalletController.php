@@ -59,7 +59,7 @@ class WalletController extends Controller
             return back()->withErrors(['pin' => 'Set a transaction PIN before sending money.'])->withInput();
         }
         if (!$sender->verifyTransactionPin($validated['pin'])) {
-            return back()->withErrors(['pin' => 'Incorrect transaction PIN.'])->withInput();
+            return back()->withErrors(['pin' => $sender->pinErrorMessage()])->withInput();
         }
 
         $recipient = User::where('email', $validated['recipient_identifier'])
@@ -72,6 +72,10 @@ class WalletController extends Controller
 
         if ($recipient->id === $sender->id) {
             return back()->withErrors(['recipient_identifier' => 'You cannot send money to yourself.'])->withInput();
+        }
+
+        if ($reason = \App\Services\SpendLimit::blockedReason($sender, (float) $validated['amount'])) {
+            return back()->withErrors(['amount' => $reason])->withInput();
         }
 
         $result = DB::transaction(function () use ($sender, $recipient, $validated) {
@@ -148,7 +152,7 @@ class WalletController extends Controller
             'hasPin' => $user->hasTransactionPin(),
             'hasBankAccount' => (bool) $user->payout_account_number,
             'isVerified' => (bool) $user->virtual_account_number,
-            'walletCapRemaining' => $user->virtual_account_number ? null : max(0, \App\Models\User::NO_BVN_WALLET_CAP - $user->wallet_balance),
+            'walletCapRemaining' => $user->walletCap() === null ? null : max(0, $user->walletCap() - $user->wallet_balance),
         ]);
     }
 
@@ -198,7 +202,7 @@ class WalletController extends Controller
             'user' => $user,
             'balance' => $user->wallet_balance,
             'hasVirtual' => (bool) $user->virtual_account_number,
-            'walletCapRemaining' => $user->virtual_account_number ? null : max(0, \App\Models\User::NO_BVN_WALLET_CAP - $user->wallet_balance),
+            'walletCapRemaining' => $user->walletCap() === null ? null : max(0, $user->walletCap() - $user->wallet_balance),
             'recent' => \App\Models\Transaction::where('user_id', $user->id)->where('type', 'wallet_topup')->latest()->limit(5)->get(),
         ]);
     }

@@ -411,6 +411,10 @@ class GigController extends Controller
             $attachmentPath = $request->file('attachment')->store('gig-attachments', 'public');
         }
 
+        if ($reason = \App\Services\SpendLimit::blockedReason(\App\Models\User::find($posterId), (float) $deposit)) {
+            return back()->withErrors(['amount' => $reason])->withInput();
+        }
+
         $gig = DB::transaction(function () use ($posterId, $validated, $deposit, $attachmentPath, $packages, $computedAmount) {
             $lockedPoster = User::where('id', $posterId)->lockForUpdate()->first();
 

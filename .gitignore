@@ -50,3 +50,8 @@ routes.txt
 storage/backups/
 *.sqlite
 .env
+vendor/
+node_modules/
+storage/logs/
+*.bak
+*.bak-*

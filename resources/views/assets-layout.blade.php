@@ -18,7 +18,7 @@
   $balRaw = $pick(['balance']);
   $bal = is_numeric($balRaw) ? (float) $balRaw : (float) ($au->wallet_balance ?? $au->balance ?? 0);
   $qRaw = $pick(['navQCoinBalance', 'qCoinBalance']);
-  $qc = is_numeric($qRaw) ? (int) $qRaw : (int) ($au->q_coin_balance ?? 0);
+  $qc = is_numeric($qRaw) ? (int) $qRaw : (int) ($au->wallet_balance ?? 0);
   $gigE = 0; $mktE = 0; $refE = 0; $series = [];
   try {
     $txq = \App\Models\Transaction::where('user_id', $au->id);

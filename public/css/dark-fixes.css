@@ -1,0 +1,9 @@
+/* Dark mode only. Card colours now live in app-dark.css. */
+html[data-theme="dark"] .ovd .ovd-tile {
+  background: rgba(255,255,255,.54) !important;
+}
+
+/* Light mode only: dock tiles about half less transparent (0.12 to 0.56). */
+html:not([data-theme="dark"]) .nv-dock-fixed .ovd .ovd-tile {
+  background: rgba(255,255,255,.56) !important;
+}

@@ -1,0 +1,237 @@
+/* MB-REWRITE-V12: one clean sheet for Merged Bar and Black Footer.
+   Settings: --mb-bg footer colour, --mb-pill selected pill, --mb-accent More button,
+   --mb-lx / --mb-ly size of the bottom-left curve, --mb-side width of the side strips. */
+:root{
+  --mb-bg:#0E1016; --mb-ink:#FFFFFF; --mb-dim:rgba(255,255,255,.66);
+  --mb-pill:rgba(255,255,255,.15); --mb-accent:#FF9A00;
+  --mb-lx:96px; --mb-ly:44px; --mb-rx:1px; --mb-ry:1px; --mb-side:5px;
+}
+html[data-theme="dark"], html.nv-dark{
+  --mb-bg:#FFFFFF; --mb-ink:#0F1115; --mb-dim:rgba(15,17,21,.62); --mb-pill:#E8EAF0;
+}
+
+@media (max-width:899px){
+  /* the top bar is merged into the bottom bar */
+  html body[data-mobile-nav-style^="merged_"] .pb-bar{ display:none !important; }
+  html body[data-mobile-nav-style^="merged_"].pb-on{ padding-top:calc(env(safe-area-inset-top,0px) + 12px) !important; }
+  html body[data-mobile-nav-style^="merged_"].pb-on .dg > .dg-in{ padding-top:calc(env(safe-area-inset-top,0px) + 12px) !important; }
+  html body[data-mobile-nav-style^="merged_"] .dg{ padding-bottom:calc(100px + env(safe-area-inset-bottom,0px)) !important; }
+  html body[data-mobile-nav-style^="merged_"] .app-push-content,
+  html body[data-mobile-nav-style^="merged_"] .ws2-main{ padding-bottom:calc(104px + env(safe-area-inset-bottom,0px)) !important; }
+
+  /* the bar itself */
+  html body[data-mobile-nav-style^="merged_"] #nvDock.nv-dock-fixed{
+    display:block !important; position:fixed !important; z-index:1800 !important; overflow:visible !important;
+    background:var(--mb-bg) !important; border:0 !important; box-shadow:none !important; filter:none !important; animation:none !important;
+    backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+    padding:7px 10px calc(7px + env(safe-area-inset-bottom,0px)) !important;
+  }
+  html body[data-mobile-nav-style^="merged_"] #nvDock.nv-dock-fixed::before,
+  html body[data-mobile-nav-style^="merged_"] #nvDock.nv-dock-fixed::after{ display:none !important; content:none !important; }
+
+  /* Merged Bar: small floating bar */
+  html body[data-mobile-nav-style="merged_bar"] #nvDock.nv-dock-fixed{
+    left:50% !important; right:auto !important; transform:translateX(-50%) !important;
+    width:min(380px, calc(100vw - 24px)) !important; bottom:calc(12px + env(safe-area-inset-bottom,0px)) !important;
+    border-radius:30px !important; padding:7px 10px !important; box-shadow:0 14px 28px -12px rgba(0,0,0,.5) !important;
+  }
+
+  /* Black Footer: full width, page curves into it on the bottom-left */
+  html body[data-mobile-nav-style="merged_footer"] #nvDock.nv-dock-fixed{
+    left:0 !important; right:0 !important; bottom:0 !important; width:auto !important; transform:none !important; border-radius:0 !important;
+  }
+  html body[data-mobile-nav-style="merged_footer"] #nvDock.nv-dock-fixed::before{
+    display:block !important; content:'' !important; position:absolute !important;
+    left:var(--mb-side) !important; right:var(--mb-side) !important; top:auto !important; bottom:calc(100% - 1px) !important;
+    width:auto !important; height:calc(var(--mb-ly) + 1px) !important; pointer-events:none !important;
+    background:
+      radial-gradient(ellipse var(--mb-lx) var(--mb-ly) at 100% 0, transparent 99%, var(--mb-bg) 100%) left top / var(--mb-lx) calc(var(--mb-ly) + 1px) no-repeat,
+      radial-gradient(ellipse var(--mb-rx) var(--mb-ry) at 0 0, transparent 99%, var(--mb-bg) 100%) right top / var(--mb-rx) calc(var(--mb-ry) + 1px) no-repeat !important;
+  }
+  html body[data-mobile-nav-style="merged_footer"] #nvDock.nv-dock-fixed::after{
+    display:block !important; content:'' !important; position:absolute !important; left:0 !important; right:0 !important; bottom:0 !important; z-index:-1 !important;
+    height:100vh; height:100dvh; box-sizing:border-box; pointer-events:none !important;
+    border-left:var(--mb-side) solid var(--mb-bg); border-right:var(--mb-side) solid var(--mb-bg);
+  }
+
+  /* buttons: icon only, selected one is a pill with its label */
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd{
+    display:flex !important; flex-direction:row !important; align-items:center !important; justify-content:space-between !important; gap:2px !important; width:100% !important;
+  }
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn{
+    width:38px !important; min-width:38px !important; max-width:none !important; height:38px !important; flex:0 0 auto !important; margin:0 !important; padding:0 !important;
+    border:0 !important; border-radius:19px !important; background:transparent !important; box-shadow:none !important; outline:0 !important; transform:none !important; filter:none !important;
+    backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+    display:flex !important; flex-direction:row !important; align-items:center !important; justify-content:center !important; gap:6px !important;
+    font:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent; text-decoration:none;
+  }
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.mb-hid{ display:none !important; }
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn:active{ opacity:.7 !important; }
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn .ovd-tile{
+    width:auto !important; height:auto !important; padding:0 !important; margin:0 !important; border:0 !important; border-radius:0 !important;
+    background:none !important; box-shadow:none !important; outline:0 !important; transform:none !important;
+    backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+    position:relative !important; display:flex !important; align-items:center; justify-content:center;
+  }
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn .ovd-in{
+    width:22px !important; height:22px !important; padding:0 !important; border-radius:0 !important; background:none !important; box-shadow:none !important;
+    display:flex !important; align-items:center; justify-content:center; color:var(--mb-dim) !important; text-shadow:none !important;
+  }
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn .ovd-in svg{
+    width:20px !important; height:20px !important; stroke-width:1.9 !important; color:var(--mb-dim) !important; stroke:var(--mb-dim) !important;
+  }
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn .ovd-in svg *{ stroke:var(--mb-dim) !important; }
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn .ovd-lbl{
+    display:none !important; margin:0 !important; font-size:11.5px !important; font-weight:700 !important; line-height:1 !important; letter-spacing:0 !important;
+    color:var(--mb-ink) !important; text-shadow:none !important; white-space:nowrap;
+  }
+
+  /* selected: pill with icon and label */
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.on{
+    width:auto !important; padding:0 14px 0 11px !important; background:var(--mb-pill) !important;
+  }
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.on .ovd-lbl{ display:block !important; }
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.on .ovd-in{ color:var(--mb-ink) !important; }
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.on .ovd-in svg{ color:var(--mb-ink) !important; stroke:var(--mb-ink) !important; }
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.on .ovd-in svg *{ stroke:var(--mb-ink) !important; }
+
+  /* More: round orange button */
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.mb-more{ width:38px !important; padding:0 !important; border-radius:50% !important; background:var(--mb-accent) !important; }
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.mb-more .ovd-in{ color:#fff !important; }
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.mb-more .ovd-in svg{ width:18px !important; height:18px !important; fill:#fff !important; stroke:none !important; color:#fff !important; }
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.mb-more .ovd-lbl{ display:none !important; }
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.mb-more[aria-expanded="true"]{ filter:brightness(.9) !important; }
+
+  /* profile photo and badges */
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.mb-prof .ovd-in{ width:24px !important; height:24px !important; }
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.mb-prof .ovd-in img{ width:24px; height:24px; border-radius:50%; object-fit:cover; display:block; }
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.mb-prof .ovd-in span{ width:24px; height:24px; border-radius:50%; display:grid; place-items:center; background:rgba(128,128,128,.3); color:var(--mb-ink); font-size:12px; font-weight:800; }
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn .ovd-tile .nv-badge{ position:absolute !important; top:-7px !important; right:-9px !important; }
+
+  /* More menu: no card, small glass bubbles that burst out of More */
+  .mb-sheet[hidden]{ display:none !important; }
+  .mb-sheet{ position:fixed; inset:0; z-index:1790; }
+  .mb-back{ position:absolute; inset:0; background:rgba(6,8,18,.46); -webkit-backdrop-filter:blur(7px); backdrop-filter:blur(7px); }
+  .mb-panel{ position:absolute; left:14px; right:14px; max-width:380px; margin:0 auto; bottom:calc(86px + env(safe-area-inset-bottom,0px)); padding:0; background:none; border:0; box-shadow:none; }
+  .mb-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px 6px; }
+  .mb-row{ display:flex; flex-direction:column; align-items:center; gap:6px; background:none; border:0; padding:0; color:#fff; text-decoration:none; font:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent; will-change:transform,opacity; }
+  .mb-ic{ position:relative; width:52px; height:52px; border-radius:19px; display:grid; place-items:center;
+    background:linear-gradient(180deg, rgba(36,40,54,.92), rgba(14,16,24,.94)); border:1px solid rgba(255,255,255,.18);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.24), 0 14px 22px -10px rgba(0,0,0,.75); }
+  .mb-ic svg{ width:22px; height:22px; color:#fff; stroke:#fff; }
+  .mb-ic img{ width:100%; height:100%; border-radius:19px; object-fit:cover; display:block; }
+  .mb-ic > span:not(.nv-badge){ color:#fff; font-weight:800; font-size:16px; }
+  .mb-ic .nv-badge{ position:absolute; top:-4px; right:-4px; }
+  .mb-lb{ font-size:10.5px; font-weight:700; color:#fff; text-align:center; line-height:1.15; text-shadow:0 1px 4px rgba(0,0,0,.75); }
+}
+
+/* MB-FIX-V13: cancel the old light-sweep effect on the curve, taller footer. Settings: --mb-pt / --mb-pb footer height, --mb-lx / --mb-ly curve size, --mb-rx / --mb-ry right curve (1px = square) */
+:root{ --mb-lx:110px; --mb-ly:50px; --mb-pt:22px; --mb-pb:20px; }
+@media (max-width:899px){
+  html body[data-mobile-nav-style="merged_footer"] #nvDock.nv-dock-fixed{ padding:var(--mb-pt) 10px calc(var(--mb-pb) + env(safe-area-inset-bottom,0px)) !important; }
+  html body[data-mobile-nav-style="merged_footer"] #nvDock.nv-dock-fixed::before,
+  html body[data-mobile-nav-style="merged_footer"] #nvDock.nv-dock-fixed::after{
+    transform:none !important; animation:none !important; filter:none !important; opacity:1 !important; margin:0 !important;
+    border-radius:0 !important; box-shadow:none !important; min-width:0 !important; max-width:none !important;
+  }
+  html body[data-mobile-nav-style="merged_footer"] #nvDock.nv-dock-fixed::before{ border:0 !important; }
+  html body[data-mobile-nav-style="merged_footer"] .dg{ padding-bottom:calc(132px + env(safe-area-inset-bottom,0px)) !important; }
+  html body[data-mobile-nav-style="merged_footer"] .app-push-content,
+  html body[data-mobile-nav-style="merged_footer"] .ws2-main{ padding-bottom:calc(136px + env(safe-area-inset-bottom,0px)) !important; }
+  html body[data-mobile-nav-style="merged_footer"] .mb-panel{ bottom:calc(124px + env(safe-area-inset-bottom,0px)); }
+}
+
+/* MB-HEIGHT-V14: yellow More button #FF9A00, footer 80px high */
+
+/* MB-DARK-V15: dark mode, the dock card, the curve, the sides and the pill are white (explicit colours, not variables) */
+@media (max-width:899px){
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock.nv-dock-fixed{
+    background:#FFFFFF !important; background-color:#FFFFFF !important; background-image:none !important;
+  }
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd{ background:transparent !important; background-image:none !important; }
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn:not(.on):not(.mb-more){ background:transparent !important; }
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn:not(.on):not(.mb-more) .ovd-in,
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn:not(.on):not(.mb-more) .ovd-in svg,
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn:not(.on):not(.mb-more) .ovd-in svg *{
+    color:rgba(15,17,21,.66) !important; stroke:rgba(15,17,21,.66) !important;
+  }
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.on{ background:#E8EAF0 !important; }
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.on .ovd-in,
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.on .ovd-in svg,
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.on .ovd-in svg *,
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.on .ovd-lbl{ color:#0F1115 !important; stroke:#0F1115 !important; }
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.mb-more{ background:var(--mb-accent, #FF9A00) !important; }
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.mb-more .ovd-in svg{ fill:#FFFFFF !important; stroke:none !important; }
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style="merged_footer"] #nvDock.nv-dock-fixed::before{
+    background:
+      radial-gradient(ellipse var(--mb-lx) var(--mb-ly) at 100% 0, transparent 99%, #FFFFFF 100%) left top / var(--mb-lx) calc(var(--mb-ly) + 1px) no-repeat,
+      radial-gradient(ellipse var(--mb-rx) var(--mb-ry) at 0 0, transparent 99%, #FFFFFF 100%) right top / var(--mb-rx) calc(var(--mb-ry) + 1px) no-repeat !important;
+  }
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style="merged_footer"] #nvDock.nv-dock-fixed::after{
+    border-left-color:#FFFFFF !important; border-right-color:#FFFFFF !important;
+  }
+}
+
+/* MB-DARK-V16: dark mode, white dock card, black label and black icon on the selected pill */
+@media (max-width:899px){
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.on .ovd-lbl{
+    color:#000000 !important; -webkit-text-fill-color:#000000 !important; text-shadow:none !important;
+  }
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.on .ovd-in,
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.on .ovd-in svg,
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.on .ovd-in svg *{ color:#000000 !important; stroke:#000000 !important; }
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn:not(.on):not(.mb-more) .ovd-lbl{
+    color:#000000 !important; -webkit-text-fill-color:#000000 !important;
+  }
+}
+
+/* MB-POLISH-V17: visual polish only, sizes and layout unchanged */
+@media (max-width:899px){
+  /* selected pill: raised, soft highlight */
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.on{
+    background-image:linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,0) 70%) !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.16), 0 6px 14px -8px rgba(0,0,0,.7) !important;
+  }
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.on{
+    background-image:linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,0) 75%) !important;
+    box-shadow:inset 0 1px 0 #FFFFFF, 0 6px 12px -8px rgba(15,17,21,.4) !important;
+  }
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.on .ovd-lbl{ letter-spacing:.01em !important; }
+
+  /* unselected icons: cleaner line, a touch brighter */
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn:not(.on):not(.mb-more) .ovd-in svg{ stroke-width:1.75 !important; }
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn:not(.on):not(.mb-more) .ovd-in,
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn:not(.on):not(.mb-more) .ovd-in svg,
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn:not(.on):not(.mb-more) .ovd-in svg *{ color:rgba(255,255,255,.78) !important; stroke:rgba(255,255,255,.78) !important; }
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn:not(.on):not(.mb-more) .ovd-in,
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn:not(.on):not(.mb-more) .ovd-in svg,
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn:not(.on):not(.mb-more) .ovd-in svg *{ color:rgba(15,17,21,.7) !important; stroke:rgba(15,17,21,.7) !important; }
+
+  /* More: glossy yellow with a warm glow */
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.mb-more{
+    background-image:linear-gradient(145deg, rgba(255,255,255,.34), rgba(255,255,255,0) 55%) !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.4), 0 8px 16px -7px rgba(255,154,0,.7) !important;
+  }
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.mb-more{
+    background-image:linear-gradient(145deg, rgba(255,255,255,.34), rgba(255,255,255,0) 55%) !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.4), 0 8px 16px -7px rgba(255,154,0,.55) !important;
+  }
+
+  /* profile photo ring */
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.mb-prof .ovd-in img{ box-shadow:0 0 0 1.5px rgba(255,255,255,.3) !important; }
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn.mb-prof .ovd-in img{ box-shadow:0 0 0 1.5px rgba(15,17,21,.22) !important; }
+
+  /* count badges: cut-out look */
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn .ovd-tile .nv-badge{
+    background:#FF4757 !important; color:#FFFFFF !important; min-width:16px !important; height:16px !important; padding:0 4px !important;
+    font-size:9px !important; font-weight:800 !important; line-height:16px !important; border-radius:99px !important; box-shadow:0 0 0 2px var(--mb-bg) !important;
+  }
+
+  /* tap feedback: soft round highlight */
+  html body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn:not(.on):not(.mb-more):active{ opacity:1 !important; background:rgba(255,255,255,.12) !important; }
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style^="merged_"] #nvDock .ovd .ovd-btn:not(.on):not(.mb-more):active{ background:rgba(15,17,21,.08) !important; }
+
+  /* floating Merged Bar: finer shadow and inner edge */
+  html body[data-mobile-nav-style="merged_bar"] #nvDock.nv-dock-fixed{ box-shadow:0 16px 32px -14px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08) !important; }
+  html:is([data-theme="dark"], .nv-dark) body[data-mobile-nav-style="merged_bar"] #nvDock.nv-dock-fixed{ box-shadow:0 16px 32px -14px rgba(0,0,0,.5), inset 0 0 0 1px rgba(15,17,21,.06) !important; }
+}

@@ -87,6 +87,9 @@ class CartController extends Controller
             }
 
             $total = $listings->sum('amount');
+            if ($reason = \App\Services\SpendLimit::blockedReason($lockedBuyer, (float) $total)) {
+                return back()->withErrors(['cart' => $reason]);
+            }
             if ($lockedBuyer->wallet_balance < $total) {
                 return back()->withErrors(['cart' => 'Insufficient wallet balance for all items in your cart. Top up first, or remove some items.']);
             }

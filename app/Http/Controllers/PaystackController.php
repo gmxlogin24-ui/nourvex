@@ -112,6 +112,8 @@ class PaystackController extends Controller
 
     public function initiateSignupFee(Request $request)
     {
+        return redirect()->route('dashboard'); // sign-up fee removed
+
         $user = Auth::user();
         if ($user->signup_fee_paid) return redirect()->route('dashboard');
 
@@ -189,6 +191,8 @@ class PaystackController extends Controller
 
     public function initiateRegistrationFee(Request $request)
     {
+        return redirect()->route('dashboard'); // sign-up fee removed
+
         $encrypted = $request->session()->get('pending_registration');
         if (!$encrypted) {
             return redirect()->route('register')->withErrors(['email' => 'Your registration session expired. Please fill the form again.']);

@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="{{ asset('css/world-product.css') }}?v={{ @filemtime(public_path('css/world-product.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/market-new.css') }}?v={{ time() }}">
 <link rel="stylesheet" href="{{ asset('css/mk-pd.css') }}?v={{ time() }}">
+<script src="{{ asset('js/pd-bk.js') }}?v={{ time() }}" defer></script>
 
 <main class="wp-page wp-market wp-product">
 @php
@@ -32,9 +33,9 @@
 <div class="pd pdw">
   <section class="pd-s pd-s0">
     <div class="pd-stage">
-      <a href="{{ route('marketplace.index') }}" class="pd-bk" aria-label="Back"><i data-lucide="arrow-left"></i></a>
+      <a href="{{ route('marketplace.index') }}" class="pd-bk" aria-label="Back"><i data-lucide="chevron-left"></i></a>
       @auth
-        <button type="button" class="pd-heart {{ $isLoved ? 'on' : '' }}" data-url="{{ route('marketplace.love', $listing->id) }}" data-token="{{ csrf_token() }}" aria-label="Save and add to cart"><i data-lucide="heart"></i></button>
+        <button type="button" class="pd-heart {{ $isLoved ? 'on' : '' }}" data-url="{{ route('marketplace.love', $listing->id) }}" data-token="{{ csrf_token() }}" aria-label="Add to wishlist"><i data-lucide="heart"></i></button>
       @endauth
       @if(count($pdGallery))
         <div class="pd-slides" id="pdSlides">@foreach($pdGallery as $pdG)<div class="pd-slide"><img src="{{ $pdG }}" alt="{{ $listing->title }}"></div>@endforeach</div>
@@ -149,7 +150,15 @@
           @csrf
           <button type="submit" class="btn-secondary pd-cart" aria-label="Add to cart"><i data-lucide="shopping-cart"></i></button>
         </form>
-        <form method="POST" action="{{ route('marketplace.purchase', $listing->id) }}" style="display:contents;" onsubmit="return confirm('Buy this item for ₦{{ number_format($listing->amount) }}? The money is held in escrow until you confirm delivery.');">
+        @if(auth()->check() && (int) auth()->id() !== (int) $listing->user_id && $listing->status === 'available')
+<form method="POST" action="{{ route('order.checkout.initiate') }}" style="display:contents;">
+  @csrf
+  <input type="hidden" name="kind" value="marketplace">
+  <input type="hidden" name="target_id" value="{{ $listing->id }}">
+  <button type="submit" class="btn-primary" style="flex:1;">Pay with card</button>
+</form>
+@endif
+<form method="POST" action="{{ route('marketplace.purchase', $listing->id) }}" style="display:contents;" onsubmit="return confirm('Buy this item for ₦{{ number_format($listing->amount) }}? The money is held in escrow until you confirm delivery.');">
           @csrf
           <button type="submit" class="btn-primary pd-buy">Buy Now</button>
         </form>
@@ -369,8 +378,6 @@
         .then(function (d) {
           if (typeof d.loved !== 'boolean') return;
           h.classList.toggle('on', d.loved);
-          var ci = document.getElementById('pdCartIn'), cf = document.getElementById('pdCartForm');
-          if (ci && cf) { ci.hidden = !d.loved; cf.hidden = d.loved; }
           var c = document.querySelector('.pb-ic[aria-label="Cart"]');
           if (c) {
             var em = c.querySelector('.nv-badge');

@@ -12,13 +12,14 @@
 <link rel="stylesheet" href="{{ asset('css/pb-glass.css') }}?v={{ time() }}">
 <header class="pb-bar" id="pbBar">
   <a href="{{ $pbHas('profile.index') ? route('profile.index') : '#' }}" class="pb-av" aria-label="Profile">@if($pbPhoto)<img src="{{ $pbPhoto }}" alt="">@else<span>{{ $pbInit }}</span>@endif</a>
-  @if(request()->routeIs('marketplace.*', 'cart.*'))
+  @if(request()->routeIs('marketplace.*', 'cart.*', 'inbox.market'))
   <form method="GET" action="{{ route('marketplace.index') }}" class="pb-search pb-search-f" role="search"><i data-lucide="search"></i><input type="search" name="q" value="{{ request()->routeIs('marketplace.index') ? request('q') : '' }}" placeholder="Search market" autocomplete="off" aria-label="Search market">@if(request()->routeIs('marketplace.index') && request('category'))<input type="hidden" name="category" value="{{ request('category') }}">@endif @if(request()->routeIs('marketplace.index') && request('type'))<input type="hidden" name="type" value="{{ request('type') }}">@endif</form>
   @else
   <a href="{{ $pbHas('search') ? route('search') : '#' }}" class="pb-search" aria-label="Search"><i data-lucide="search"></i><span>Search</span></a>
   @endif
-  <a href="{{ $pbHas('referrals.index') ? route('referrals.index') : '#' }}" class="pb-ic pb-inv" aria-label="Invite friends"><i data-lucide="user-plus"></i></a>
-  <a href="{{ $pbHas('chat.index') ? route('chat.index') : '#' }}" class="pb-ic pb-tg" aria-label="Messages"><i data-lucide="send"></i>@if(($navUnreadChats ?? 0) > 0)<em class="nv-badge">{{ $navUnreadChats > 99 ? '99+' : $navUnreadChats }}</em>@endif</a>
+  @if(request()->routeIs('marketplace.*', 'cart.*', 'inbox.market'))<a href="{{ $pbHas('marketplace.favorites') ? route('marketplace.favorites') : '#' }}" class="pb-ic pb-wl {{ request()->routeIs('marketplace.favorites') ? 'on' : '' }}" aria-label="Wishlist"><i data-lucide="heart"></i></a>@endif
+  @unless(request()->routeIs('marketplace.*', 'cart.*', 'inbox.market')){{-- pb-inv-hide --}}<a href="{{ $pbHas('referrals.index') ? route('referrals.index') : '#' }}" class="pb-ic pb-inv" aria-label="Invite friends"><i data-lucide="user-plus"></i></a>@endunless
+  <a href="{{ $pbHas('inbox.profile') ? route(request()->routeIs('profile.*', 'inbox.profile') ? 'inbox.profile' : (request()->routeIs('gigs.*', 'posts.*', 'inbox.hustles') ? 'inbox.hustles' : (request()->routeIs('marketplace.*', 'cart.*', 'inbox.market') ? 'inbox.market' : 'chat.index'))) : '#' }}" class="pb-ic pb-tg" aria-label="Messages"><i data-lucide="send"></i>@if(($navUnreadChats ?? 0) > 0)<em class="nv-badge">{{ $navUnreadChats > 99 ? '99+' : $navUnreadChats }}</em>@endif</a>
   <button type="button" class="pb-ic" data-theme-btn aria-label="Light or dark mode"><i data-lucide="sun-moon"></i></button>
 </header>
 <script src="{{ asset('js/page-bar.js') }}?v={{ time() }}"></script>

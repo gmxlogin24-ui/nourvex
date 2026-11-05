@@ -121,6 +121,8 @@ class AuthController extends Controller
 
     public function showRegistrationPay(Request $request)
     {
+        return redirect()->route('dashboard'); // sign-up fee removed
+
         $pending = $this->getPendingRegistration($request);
         if (!$pending) {
             return redirect()->route('register')->withErrors(['email' => 'Your registration session expired. Please fill the form again.']);

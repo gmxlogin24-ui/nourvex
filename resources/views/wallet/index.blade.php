@@ -18,7 +18,7 @@
   @if(!($isVerified ?? true))
     <div class="wl-notice">
       <b>Unverified wallet limit</b>
-      <span>You can hold up to ₦{{ number_format($walletCapRemaining ?? 0) }} more before you need to verify your BVN. Earnings from gigs, sales and referrals aren't affected.</span>
+      <span>You can hold up to {{ \App\Support\Money::q($walletCapRemaining ?? 0) }} more before you need to verify your BVN. Earnings from gigs, sales and referrals aren't affected.</span>
     </div>
   @endif
 
@@ -26,7 +26,7 @@
     <div class="wl-col-a">
       <section class="wl-balance">
         <p class="wl-lbl">Total balance</p>
-        <p class="wl-amt">₦{{ number_format($balance, 2) }}</p>
+        <p class="wl-amt">{!! \App\Support\Money::coin($balance) !!}</p>
         <div class="wl-actions">
           <button type="button" class="wl-act primary" onclick="document.getElementById('withdrawModal').classList.add('open')"><i data-lucide="arrow-down-to-line"></i><span>Withdraw</span></button>
           <a href="{{ route('wallet.deposit') }}" class="wl-act"><i data-lucide="plus"></i><span>Top up</span></a>
@@ -68,7 +68,7 @@
                 <span class="wl-rt" style="display:block">{{ $tx->description }}</span>
                 <span class="wl-rs">{{ $tx->created_at->diffForHumans() }}{{ $tx->reference ? ' · ' . $tx->reference : '' }}</span>
               </span>
-              <span class="wl-amt-row {{ $tx->amount >= 0 ? 'in' : '' }}">{{ $tx->amount >= 0 ? '+' : '' }}₦{{ number_format($tx->amount, 2) }}</span>
+              <span class="wl-amt-row {{ $tx->amount >= 0 ? 'in' : '' }}">{{ $tx->amount >= 0 ? '+' : '' }}{!! \App\Support\Money::forTx($tx->type, $tx->amount) !!}</span>
             </a>
             @endforeach
           </div>
@@ -101,7 +101,14 @@
         @endunless
         <form method="POST" action="{{ route('wallet.withdraw') }}" onsubmit="return confirm('Withdraw this amount to your bank account? This cannot be reversed once submitted.');">
             @csrf
-            <input type="number" name="amount" min="100" max="1000000" step="0.01" inputmode="decimal" autocomplete="off" placeholder="Amount (₦)" required class="input-field !mt-0 mb-3">
+            <input type="number" id="wdQ" min="{{ \App\Support\Money::toQ(100) }}" step="1" inputmode="decimal" autocomplete="off" placeholder="Amount (Q)" required class="input-field !mt-0 mb-1" oninput="wdSync(this)">
+        <input type="hidden" name="amount" id="wdNaira" value="">
+        <p id="wdPrev" class="text-sm text-muted mb-3">≈ ₦0.00 will be sent to your bank</p>
+        <script>
+        function wdSync(e){var r={{ \App\Support\Money::rate() }};var n=Math.round((parseFloat(e.value)||0)/r*100)/100;
+          document.getElementById('wdNaira').value=n;
+          document.getElementById('wdPrev').textContent='≈ ₦'+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+' will be sent to your bank';}
+        </script>
             <input type="password" name="pin" inputmode="numeric" maxlength="6" placeholder="Transaction PIN" required class="input-field !mt-0 mb-3">
             <button type="submit" class="btn-primary w-full justify-center" {{ (($hasPin ?? false) && ($hasBankAccount ?? false)) ? '' : 'disabled' }}>Confirm Withdraw</button>
         </form>

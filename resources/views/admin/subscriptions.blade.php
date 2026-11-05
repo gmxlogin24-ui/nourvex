@@ -26,7 +26,7 @@
             @foreach($subscriptions as $s)
                 <tr class="border-b" style="border-color:var(--border-color);">
                     <td class="py-2 pr-4">{{ $s->user->name ?? '—' }}</td>
-                    <td class="py-2 pr-4">₦{{ number_format($s->amount) }}</td>
+                    <td class="py-2 pr-4">{!! \App\Support\Money::coin($s->amount) !!}</td>
                     <td class="py-2 pr-4 text-muted">{{ $s->payment_method }}</td>
                     <td class="py-2 pr-4">{{ $s->status }}</td>
                     <td class="py-2 pr-4 text-muted">{{ $s->expires_at?->format('M j, Y') ?? '—' }}</td>

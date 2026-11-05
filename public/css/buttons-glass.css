@@ -1,6 +1,6 @@
 html body[data-page="cart"]{ --bt:linear-gradient(145deg,#FF8A2B 0%,#2A2A2A 42%,#000000 100%); --ti:#C2410C; }
 html[data-theme="dark"] body[data-page="cart"]{ --ti:#FB923C; }
-html:is(html,html[data-theme="dark"]) body :is(button.btn-primary,a.btn-primary,input.btn-primary,.svc-submit-btn,.mpd-btn-solid,.lp-btn-primary,.pfx-btn:not(.ghost),.pf2-btn,.nvp-cta,.inv-btn:not(.ghost),.meetup-respond-btn.btn-primary){
+html:not([data-theme="dark"]) body :is(button.btn-primary,a.btn-primary,input.btn-primary,.svc-submit-btn,.mpd-btn-solid,.lp-btn-primary,.pfx-btn:not(.ghost),.pf2-btn,.nvp-cta,.inv-btn:not(.ghost),.meetup-respond-btn.btn-primary){
   background-image:var(--bt-hi),var(--bt) !important;
   background-color:#000000 !important;
   color:#fff !important;
@@ -9,8 +9,8 @@ html:is(html,html[data-theme="dark"]) body :is(button.btn-primary,a.btn-primary,
   box-shadow:0 10px 20px -12px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.25) !important;
   transition:transform .3s cubic-bezier(.3,1.5,.5,1);
 }
-html:is(html,html[data-theme="dark"]) body :is(button.btn-primary,a.btn-primary,input.btn-primary,.svc-submit-btn,.mpd-btn-solid,.lp-btn-primary,.pfx-btn:not(.ghost),.pf2-btn,.nvp-cta,.inv-btn:not(.ghost),.meetup-respond-btn.btn-primary) :is(svg,i){ color:#fff !important; stroke:#fff !important; }
-html:is(html,html[data-theme="dark"]) body :is(button.btn-secondary,a.btn-secondary,.glass-btn,.pfx-btn.ghost,.inv-btn.ghost,.mpd-btn-ghost,.mpd-icon-btn,.meetup-respond-btn.btn-secondary){
+html:not([data-theme="dark"]) body :is(button.btn-primary,a.btn-primary,input.btn-primary,.svc-submit-btn,.mpd-btn-solid,.lp-btn-primary,.pfx-btn:not(.ghost),.pf2-btn,.nvp-cta,.inv-btn:not(.ghost),.meetup-respond-btn.btn-primary) :is(svg,i){ color:#fff !important; stroke:#fff !important; }
+html:not([data-theme="dark"]) body :is(button.btn-secondary,a.btn-secondary,.glass-btn,.pfx-btn.ghost,.inv-btn.ghost,.mpd-btn-ghost,.mpd-icon-btn,.meetup-respond-btn.btn-secondary){
   background-image:linear-gradient(180deg,rgba(255,255,255,.6) 0%,rgba(255,255,255,.14) 100%) !important;
   background-color:rgba(255,255,255,.2) !important;
   -webkit-backdrop-filter:blur(14px) saturate(1.5) !important;
@@ -21,13 +21,13 @@ html:is(html,html[data-theme="dark"]) body :is(button.btn-secondary,a.btn-second
   box-shadow:0 10px 20px -12px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.9), 0 0 0 1px rgba(128,128,128,.16) !important;
   transition:transform .3s cubic-bezier(.3,1.5,.5,1);
 }
-html[data-theme="dark"] body :is(button.btn-secondary,a.btn-secondary,.glass-btn,.pfx-btn.ghost,.inv-btn.ghost,.mpd-btn-ghost,.mpd-icon-btn,.meetup-respond-btn.btn-secondary){
+html[data-theme="dark"] body :is(button.btn-secondary,a.btn-secondary,.glass-btn,.pfx-btn.ghost,.inv-btn.ghost,.mpd-btn-ghost,.mpd-icon-btn,.meetup-respond-btn.btn-secondary){color:var(--ti,#F5F5F7) !important;border-radius:14px !important;
   background-image:linear-gradient(180deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,.05) 100%) !important;
   background-color:rgba(255,255,255,.06) !important;
   border:1px solid rgba(255,255,255,.2) !important;
   box-shadow:0 10px 20px -12px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.25) !important;
 }
-html:is(html,html[data-theme="dark"]) body :is(button.btn-secondary,a.btn-secondary,.glass-btn,.pfx-btn.ghost,.inv-btn.ghost,.mpd-btn-ghost,.mpd-icon-btn,.meetup-respond-btn.btn-secondary) :is(svg,i){ color:var(--ti,#111) !important; stroke:var(--ti,#111) !important; }
+html:not([data-theme="dark"]) body :is(button.btn-secondary,a.btn-secondary,.glass-btn,.pfx-btn.ghost,.inv-btn.ghost,.mpd-btn-ghost,.mpd-icon-btn,.meetup-respond-btn.btn-secondary) :is(svg,i){ color:var(--ti,#111) !important; stroke:var(--ti,#111) !important; }
 html body :is(button.btn-primary,a.btn-primary,.svc-submit-btn,.mpd-btn-solid,.lp-btn-primary,.pfx-btn,.pf2-btn,.nvp-cta,.inv-btn,button.btn-secondary,a.btn-secondary,.glass-btn,.mpd-btn-ghost,.mpd-icon-btn):active{ transform:scale(.96); }
 html:is(html,html[data-theme="dark"]) body .dg-it.on .dg-tile{
   background-image:linear-gradient(180deg,rgba(255,255,255,.7) 0%,rgba(255,255,255,.2) 100%) !important;
@@ -62,3 +62,11 @@ html:is(html,html[data-theme="dark"]) body a.ovm-dep.ovm-dep-money.ovm-dep-money
 html:is(html,html[data-theme="dark"]) body a.ovm-dep.ovm-dep-money.ovm-dep-money.ovm-dep-money svg{ width:18px; height:18px; stroke-width:2.8; }
 html:is(html,html[data-theme="dark"]) body a.ovm-dep.ovm-dep-money.ovm-dep-money.ovm-dep-money:is(:hover,:active){ background:#F97316 !important; transform:scale(.96); opacity:.9; box-shadow:none !important; }
 button.ovm-ic,button.pb-ic{ background:none; border:0; padding:0; cursor:pointer; font:inherit; }
+
+/* ---- dark theme buttons: orange primary, outlined secondary ---- */
+html[data-theme="dark"] body :is(button.btn-primary,a.btn-primary,input.btn-primary,.svc-submit-btn,.mpd-btn-solid,.lp-btn-primary,.pfx-btn:not(.ghost),.pf2-btn,.nvp-cta,.inv-btn:not(.ghost),.meetup-respond-btn.btn-primary){
+  background-color:#FF9A00 !important; background-image:none !important; color:#1A1203 !important;
+  border:1px solid transparent !important; border-radius:14px !important; box-shadow:none !important;
+  transition:transform .3s cubic-bezier(.3,1.5,.5,1);}
+html[data-theme="dark"] body :is(button.btn-primary,a.btn-primary,input.btn-primary,.svc-submit-btn,.mpd-btn-solid,.lp-btn-primary,.pfx-btn:not(.ghost),.pf2-btn,.nvp-cta,.inv-btn:not(.ghost),.meetup-respond-btn.btn-primary) :is(svg,i){ color:#1A1203 !important; stroke:#1A1203 !important; }
+html[data-theme="dark"] body :is(button.btn-secondary,a.btn-secondary,.glass-btn,.pfx-btn.ghost,.inv-btn.ghost,.mpd-btn-ghost,.mpd-icon-btn,.meetup-respond-btn.btn-secondary) :is(svg,i){ color:var(--ti,#F5F5F7) !important; stroke:var(--ti,#F5F5F7) !important; }

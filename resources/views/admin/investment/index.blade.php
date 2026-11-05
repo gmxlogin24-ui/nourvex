@@ -7,6 +7,7 @@
   <header>
     <p class="inv-kicker">Admin</p>
     <h1>Investments</h1>
+    @include('admin.investment._links')
   </header>
 
   @if(session('status'))<div class="inv-flash ok">{{ session('status') }}</div>@endif
@@ -33,7 +34,7 @@
     <h2>Projects waiting for review</h2>
     @forelse($pendingProjects as $p)
       <div class="inv-glass">
-        <b>{{ $p->title }}</b> <small>{{ $p->owner->name }} · {{ number_format($p->goal_q) }} Q goal</small>
+        <b>{{ $p->title }}</b> <small>{{ $p->owner->name }} · ₦{{ number_format($p->goal_q) }} goal</small>
         <form method="POST" action="{{ route('admin.investment.projects.approve', $p) }}">
           @csrf
           <button class="inv-btn small">Approve and open</button>
@@ -49,24 +50,24 @@
     @forelse($activeProjects as $p)
       <div class="inv-glass">
         <b>{{ $p->title }}</b>
-        <small>{{ $p->owner->name }} · {{ $p->status }} · raised {{ number_format($p->raised_q) }} / {{ number_format($p->goal_q) }} Q · escrow {{ number_format($p->availableToRelease()) }} Q · returns pending {{ number_format($p->availableReturns()) }} Q</small>
+        <small>{{ $p->owner->name }} · {{ $p->status }} · raised {{ number_format($p->raised_q) }} / ₦{{ number_format($p->goal_q) }} · escrow ₦{{ number_format($p->availableToRelease()) }} · returns pending ₦{{ number_format($p->availableReturns()) }}</small>
 
         @if($p->status === 'funded')
           <form method="POST" action="{{ route('admin.investment.projects.release', $p) }}" style="margin-top:10px">
             @csrf
-            <input class="inv-input" type="number" name="amount_q" min="1" max="{{ $p->availableToRelease() }}" placeholder="Amount to release (Q)" required>
+            <input class="inv-input" type="number" name="amount_q" min="1" max="{{ $p->availableToRelease() }}" placeholder="Amount to release (₦)" required>
             <button class="inv-btn small">Release to owner</button>
           </form>
 
           <form method="POST" action="{{ route('admin.investment.projects.returns', $p) }}" style="margin-top:10px">
             @csrf
-            <input class="inv-input" type="number" name="amount_q" min="1" placeholder="Income received (Q)" required>
+            <input class="inv-input" type="number" name="amount_q" min="1" placeholder="Income received (₦)" required>
             <button class="inv-btn small">Record returns</button>
           </form>
 
           <form method="POST" action="{{ route('admin.investment.projects.distribute', $p) }}" style="margin-top:10px">
             @csrf
-            <input class="inv-input" type="number" name="amount_q" min="1" max="{{ $p->availableReturns() }}" placeholder="Pay to investors (Q)" required>
+            <input class="inv-input" type="number" name="amount_q" min="1" max="{{ $p->availableReturns() }}" placeholder="Pay to investors (₦)" required>
             <button class="inv-btn small">Pay investors</button>
           </form>
         @endif

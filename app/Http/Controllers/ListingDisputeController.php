@@ -110,11 +110,7 @@ class ListingDisputeController extends Controller
             $seller = $listing->user_id ? User::where('id', $listing->user_id)->lockForUpdate()->first() : null;
 
             if ($seller) {
-                $rate = match ($seller->tier) {
-                    'tier2', 'tier3' => 0,
-                    'tier1' => 0.03,
-                    default => 0.05,
-                };
+                $rate = (float) config('marketplace.commission.' . ($seller->tier ?: 'free'), config('marketplace.commission.default'));
                 $commission = round($listing->amount * $rate, 2);
                 $payout = $listing->amount - $commission;
 

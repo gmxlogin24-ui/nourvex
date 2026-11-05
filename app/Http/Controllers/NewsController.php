@@ -39,7 +39,7 @@ class NewsController extends Controller
     public function createAd()
     {
         abort_unless($this->canPostAds(Auth::user()), 403, 'Posting is available on the Gold plan and above.');
-        return view('news.create-ad', ['pricing' => config('qcoin.ad_prices')]);
+        return view('news.create-ad', ['pricing' => \App\Support\Pricing::adPrices()]);
     }
 
     public function storeAd(Request $request)
@@ -51,13 +51,13 @@ class NewsController extends Controller
             'title' => 'required|string|max:255',
             'category' => 'required|in:' . implode(',', self::AD_CATEGORIES),
             'body' => 'required|string|max:600',
-            'duration' => 'required|integer|in:3,7,14',
+            'duration' => 'required|integer|in:3,7,30',
             'start_at' => 'nullable|date',
             'image' => 'nullable|image|max:6144',
         ]);
 
         $free = (bool) $user->is_admin;
-        $cost = $free ? 0 : config('qcoin.ad_prices')[(int) $validated['duration']];
+        $cost = $free ? 0 : \App\Support\Pricing::adPrices()[(int) $validated['duration']];
 
         $start = now();
         if ($start->lt(now())) {
@@ -76,16 +76,31 @@ class NewsController extends Controller
             $locked = User::where('id', $user->id)->lockForUpdate()->first();
 
             if (!$free) {
-                if ($locked->wallet_restricted || $locked->q_coin_balance < $cost) {
+                if ($locked->wallet_restricted) {
                     return null;
                 }
-                $locked->decrement('q_coin_balance', $cost);
-                Transaction::create([
-                    'user_id' => $locked->id,
-                    'type' => 'ad_post',
-                    'amount' => -$cost,
-                    'description' => $validated['duration'] . '-day ad: ' . $validated['title'],
-                ]);
+                $qCost = (int) round($cost * (float) config('qcoin.q_per_naira_display', 20));
+                $fromWallet = $locked->wallet_balance >= $cost
+                    && !\App\Services\SpendLimit::blockedReason($locked, (float) $cost);
+                if ($fromWallet) {
+                    $locked->decrement('wallet_balance', $cost);
+                    Transaction::create([
+                        'user_id' => $locked->id,
+                        'type' => 'ad_wallet',
+                        'amount' => -$cost,
+                        'description' => $validated['duration'] . '-day ad (wallet): ' . $validated['title'],
+                    ]);
+                } elseif ($locked->q_coin_balance >= $qCost) {
+                    $locked->decrement('q_coin_balance', $qCost);
+                    Transaction::create([
+                        'user_id' => $locked->id,
+                        'type' => 'ad_post',
+                        'amount' => -$qCost,
+                        'description' => $validated['duration'] . '-day ad (Q Coin): ' . $validated['title'],
+                    ]);
+                } else {
+                    return null;
+                }
             }
 
             return News::create([

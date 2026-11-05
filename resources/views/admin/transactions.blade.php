@@ -26,7 +26,7 @@
                 <tr class="border-b" style="border-color:var(--border-color);">
                     <td class="py-2 pr-4">{{ $t->user->name ?? '—' }}</td>
                     <td class="py-2 pr-4 text-muted">{{ $t->type }}</td>
-                    <td class="py-2 pr-4" style="color:{{ $t->amount >= 0 ? '#4ade80' : '#ff6b6b' }};">₦{{ number_format($t->amount, 2) }}</td>
+                    <td class="py-2 pr-4" style="color:{{ $t->amount >= 0 ? '#4ade80' : '#ff6b6b' }};">{!! \App\Support\Money::forTx($t->type, $t->amount) !!}</td>
                     <td class="py-2 pr-4 text-muted">{{ $t->created_at->format('M j, Y g:ia') }}</td>
                 </tr>
             @endforeach

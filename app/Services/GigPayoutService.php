@@ -27,13 +27,7 @@ class GigPayoutService
         $commission = round($baseAmount * $rate, 2);
         $payout = $baseAmount - $commission;
 
-        $worker->increment('wallet_balance', $payout);
-        Transaction::create([
-            'user_id' => $worker->id,
-            'type' => 'gig_earning',
-            'amount' => $payout,
-            'description' => 'Completed gig: ' . $gig->title . ($commission > 0 ? ' (after ₦' . number_format($commission) . ' platform fee)' : '') . ($overrideAmount !== null ? ' (partial payout)' : ''),
-        ]);
+        \App\Services\SalePayout::payGig($worker, (float) $payout, $gig->title . ($overrideAmount !== null ? ' (partial payout)' : ''));
         \App\Models\PlatformRevenue::record('gigs', $commission, 'Commission: ' . $gig->title, 'gig', $gig->id);
 
         try {

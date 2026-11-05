@@ -7,21 +7,23 @@
   <header>
     <p class="inv-kicker">Invest</p>
     <h1>Investments</h1>
-    <p class="inv-sub">Put your Q Coins to work in verified projects.</p>
+    <p class="inv-sub">Put your money to work in verified projects.</p>
   </header>
 
   @if(session('status'))<div class="inv-flash ok">{{ session('status') }}</div>@endif
   @if(session('error'))<div class="inv-flash bad">{{ session('error') }}</div>@endif
 
   <section class="inv-hero">
-    <p class="inv-lbl">Your Q Coins</p>
-    <p class="inv-amt">{{ number_format($qBalance) }} Q</p>
-    <p class="inv-sub2" style="color:rgba(255,255,255,.7)">≈ {{ \App\Services\InvestmentService::naira($qBalance) }} · {{ config('investment.qcoin_per_naira') }} Q = ₦1</p>
+    <p class="inv-lbl">Your wallet balance</p>
+    <p class="inv-amt">₦{{ number_format($qBalance) }}</p>
+    <p class="inv-sub2" style="color:rgba(255,255,255,.7)">Money comes from and returns to your wallet.</p>
     <div class="inv-stats">
-      <div><small>Invested now</small><b>{{ number_format($totalInvested) }} Q</b></div>
+      <div><small>Invested now</small><b>₦{{ number_format($totalInvested) }}</b></div>
       <div><small>Active positions</small><b>{{ $myInvestments->where('status', 'active')->count() }}</b></div>
     </div>
   </section>
+
+  @include('investment._status')
 
   @if(! $isVerified)
     <section class="inv-glass inv-section">
@@ -56,7 +58,7 @@
         <span class="inv-tag">{{ config('investment.types')[$p->type] ?? $p->type }}</span>
         <b>{{ $p->title }}</b>
         <div class="inv-bar"><span style="width: {{ $p->progressPercent() }}%"></span></div>
-        <small>{{ number_format($p->raised_q) }} of {{ number_format($p->goal_q) }} Q · {{ $p->progressPercent() }}%</small>
+        <small>{{ number_format($p->raised_q) }} of ₦{{ number_format($p->goal_q) }} · {{ $p->progressPercent() }}%</small>
       </a>
     @empty
       <p class="inv-muted">No open projects right now.</p>
@@ -69,7 +71,7 @@
       @forelse($myInvestments as $inv)
         <div class="inv-row">
           <a href="{{ route('investment.show', $inv->project) }}"><b>{{ $inv->project->title }}</b></a>
-          <span>{{ number_format($inv->amount_q) }} Q <span class="inv-status {{ $inv->status === 'active' ? '' : 'off' }}">{{ ucfirst($inv->status) }}</span></span>
+          <span>₦{{ number_format($inv->amount_q) }} <span class="inv-status {{ $inv->status === 'active' ? '' : 'off' }}">{{ ucfirst($inv->status) }}</span></span>
         </div>
       @empty
         <p class="inv-muted">You have not invested yet.</p>

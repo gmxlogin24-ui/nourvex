@@ -1,30 +1,37 @@
-/* App dark mode: variables and page backgrounds only. Light mode untouched. */
-html[data-theme="dark"]{ color-scheme:dark; background:#1E2128; }
+/* App dark mode: one neutral black palette. Light mode untouched. */
+html[data-theme="dark"]{
+  color-scheme:dark; background:#0A0A0B;
+  --nv-bg:#0A0A0B; --nv-surface:#111113; --nv-card:rgba(24,24,27,.86); --nv-card-hi:#1F1F23;
+  --nv-line:rgba(255,255,255,.08); --nv-ink:#F5F5F7; --nv-mute:#9A9AA3;
+  --nv-accent:#FF9A00; --nv-accent-ink:#1A1203;
+  --color-bg:#0A0A0B; --color-surface:#111113; --color-card:#18181B;
+  --color-text:#F5F5F7; --color-muted:#9A9AA3; --border-color:rgba(255,255,255,.08);
+}
 html[data-theme="dark"]:has(body.ws2-profile),
 html[data-theme="dark"]:has(body[data-page="dashboard"]),
 html[data-theme="dark"]:has(body[data-page="marketplace"]),
-html[data-theme="dark"]:has(body[data-page="gigs"]){ background:#1E2128 !important; }
+html[data-theme="dark"]:has(body[data-page="gigs"]){ background:var(--nv-bg) !important; }
 html[data-theme="dark"] body[data-page="marketplace"] .app-push-content,
-html[data-theme="dark"] body[data-page="gigs"] .app-push-content{ background:#1E2128 !important; }
-html[data-theme="dark"] body.ws2-profile{ --pfx-ink:#F2F4F8; --pfx-mute:#9AA3B5; --pfx-line:rgba(255,255,255,.14); }
-html[data-theme="dark"] .dg{ --ink:#F2F4F8; --mute:#9AA3B5; }
-html[data-theme="dark"] .dg{ background:linear-gradient(180deg,#1E2128 0%,#262A33 50%,#1E2128 100%); }
+html[data-theme="dark"] body[data-page="gigs"] .app-push-content{ background:var(--nv-bg) !important; }
+html[data-theme="dark"] body.ws2-profile{ --pfx-ink:#F5F5F7; --pfx-mute:#9A9AA3; --pfx-line:rgba(255,255,255,.12); }
+html[data-theme="dark"] .dg{ --ink:#F5F5F7; --mute:#9A9AA3; }
+html[data-theme="dark"] .dg{ background:linear-gradient(180deg,#0A0A0B 0%,#101012 50%,#0A0A0B 100%); }
 
 /* ---- dark cards, borders, buttons ---- */
 html[data-theme="dark"] :is(.dg-glass,.dg-card,.dg-earn,.dg-sheet,.pfx-glass,.pfx-card,.pfx-tile,.pfx-stat,
   .glass-card,.stat-card,.pulse-card,.inv-glass,.dqm-card,.dqp-card,.nvp-card,.bg-card,.dgx-card){
-  background:rgba(255,255,255,.07) !important;
-  border-color:rgba(255,255,255,.08) !important;
-  box-shadow:0 12px 24px -16px rgba(0,0,0,.7) !important;
-  color:#F2F4F8;
+  background:var(--nv-card) !important;
+  border-color:var(--nv-line) !important;
+  box-shadow:0 12px 24px -16px rgba(0,0,0,.8) !important;
+  color:var(--nv-ink);
 }
-html[data-theme="dark"] .pfx-glass{ border:1px solid rgba(255,255,255,.08) !important; }
-html[data-theme="dark"] .pfx-btn.ghost{ background:rgba(255,255,255,.08) !important; border-color:rgba(255,255,255,.1) !important; color:#F2F4F8 !important; }
-html[data-theme="dark"] .pfx-btn:not(.ghost){ background:#F2F4F8 !important; color:#1E2128 !important; }
-html[data-theme="dark"] :is(.dg-it b,.pfx-card h2,.pfx-name,.pfx-stat b,.pfx-tile b,.pfx-link){ color:#F2F4F8; }
-html[data-theme="dark"] .dg-hint{ background:rgba(255,255,255,.14); color:#F2F4F8; }
+html[data-theme="dark"] .pfx-glass{ border:1px solid var(--nv-line) !important; }
+html[data-theme="dark"] .pfx-btn.ghost{ background:rgba(255,255,255,.06) !important; border-color:rgba(255,255,255,.10) !important; color:var(--nv-ink) !important; }
+html[data-theme="dark"] .pfx-btn:not(.ghost){ background:var(--nv-accent) !important; color:var(--nv-accent-ink) !important; }
+html[data-theme="dark"] :is(.dg-it b,.pfx-card h2,.pfx-name,.pfx-stat b,.pfx-tile b,.pfx-link){ color:var(--nv-ink); }
+html[data-theme="dark"] .dg-hint{ background:rgba(255,255,255,.12); color:var(--nv-ink); }
 
-/* dock tiles */
+/* dock tiles (unchanged) */
 html[data-theme="dark"] .ovd .ovd-tile{ background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.1);
   box-shadow:0 10px 18px -10px rgba(0,0,0,.7); }
 html[data-theme="dark"] .ovd .ovd-in{ color:#F2F4F8; }
@@ -32,5 +39,5 @@ html[data-theme="dark"] .ovd .ovd-lbl{ color:#C9CFDB; text-shadow:none; }
 html[data-theme="dark"] .ovd .ovd-btn.on .ovd-lbl{ color:var(--dglow-ink,#9AA0F5); }
 
 /* inputs, tables, dividers */
-html[data-theme="dark"] :is(input,select,textarea){ background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.12); color:#F2F4F8; }
+html[data-theme="dark"] :is(input,select,textarea){ background:var(--nv-surface); border-color:rgba(255,255,255,.12); color:var(--nv-ink); }
 html[data-theme="dark"] :is(hr,.sn-divider){ border-color:rgba(255,255,255,.08); }

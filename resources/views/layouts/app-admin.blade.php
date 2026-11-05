@@ -17,8 +17,7 @@
     <link rel="stylesheet" href="{{ asset('css/dispute-ring.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/admin-shell.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/split-view.css') }}?v={{ time() }}">
-    <link rel="stylesheet" href="{{ asset('css/preloader.css') }}?v={{ time() }}">
-    <script>
+        <script>
         if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
@@ -31,8 +30,7 @@
 <body data-page="admin" data-theme-style="{{ auth()->user()->theme_style ?? 'glass' }}" data-admin-nav="sidebar"
     style="--user-accent: {{ auth()->user()->accent_color ?? '#38D9E8' }};">
     <script>document.body.setAttribute('data-admin-nav', window.__adminNavStyle);</script>
-    @include('partials.preloader')
-    @include('partials.nav-admin', ['activeRoute' => $routeName])
+        @include('partials.nav-admin', ['activeRoute' => $routeName])
     <div class="admin-page-body">
         @yield('content')
     </div>
@@ -49,12 +47,19 @@
             const html = document.documentElement;
             const isDark = html.getAttribute('data-theme') === 'dark';
             html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark'); var lc2 = document.getElementById('adminLightCss'); if (lc2) lc2.disabled = !isDark;
         }
     </script>
     <script src="{{ asset('js/dispute-ring.js') }}?v={{ time() }}"></script>
     <script src="{{ asset('js/lazy-mode.js') }}?v={{ time() }}"></script>
-    <script src="{{ asset('js/preloader.js') }}?v={{ time() }}"></script>
-    @yield('scripts')
+        <link rel="stylesheet" id="adminLightCss" href="{{ asset('css/admin-light.css') }}?v={{ time() }}">
+<script>if(document.documentElement.getAttribute('data-theme')==='dark'){var lc=document.getElementById('adminLightCss');if(lc)lc.disabled=true;}</script>
+<link rel="stylesheet" href="{{ asset('css/admin-pages.css') }}?v={{ time() }}">
+<script src="{{ asset('js/admin-palette.js') }}?v={{ time() }}" defer></script>
+<link rel="stylesheet" href="{{ asset('css/admin-studio-pages.css') }}?v={{ time() }}">
+<script src="{{ asset('js/admin-studio-pages.js') }}?v={{ time() }}" defer></script>
+<link rel="stylesheet" href="{{ asset('css/admin-rail.css') }}?v={{ time() }}">
+@include('partials.admin-rail')
+@yield('scripts')
 </body>
 </html>

@@ -1,0 +1,27 @@
+/* SITE-SCALE-V1: one number shrinks the content of every page on phones. 0.9 = 90 percent. Set 1 to turn off. */
+:root{ --site-scale:.9; }
+@media (max-width:899px){
+  html body:not([data-page="admin"]):not([data-page="games"]):not([data-page="golfvex"]) #appPushContent{ zoom:var(--site-scale); }
+  html body:not([data-page="admin"]):not([data-page="games"]):not([data-page="golfvex"]) .ws2-main:not(#appPushContent .ws2-main){ zoom:var(--site-scale); }
+
+  /* keep the dock space and the top offset correct after scaling */
+  html body[data-mobile-nav-style^="merged_"]:not([data-page="admin"]):not([data-page="games"]):not([data-page="golfvex"]) .dg{
+    padding-bottom:calc((100px + env(safe-area-inset-bottom,0px)) / var(--site-scale)) !important;
+  }
+  html body[data-mobile-nav-style="merged_footer"]:not([data-page="admin"]):not([data-page="games"]):not([data-page="golfvex"]) .dg{
+    padding-bottom:calc((132px + env(safe-area-inset-bottom,0px)) / var(--site-scale)) !important;
+  }
+  html body[data-mobile-nav-style^="merged_"]:not([data-page="admin"]):not([data-page="games"]):not([data-page="golfvex"]) #appPushContent,
+  html body[data-mobile-nav-style^="merged_"]:not([data-page="admin"]):not([data-page="games"]):not([data-page="golfvex"]) .app-push-content,
+  html body[data-mobile-nav-style^="merged_"]:not([data-page="admin"]):not([data-page="games"]):not([data-page="golfvex"]) .ws2-main{
+    padding-bottom:calc((104px + env(safe-area-inset-bottom,0px)) / var(--site-scale)) !important;
+  }
+  html body[data-mobile-nav-style="merged_footer"]:not([data-page="admin"]):not([data-page="games"]):not([data-page="golfvex"]) #appPushContent,
+  html body[data-mobile-nav-style="merged_footer"]:not([data-page="admin"]):not([data-page="games"]):not([data-page="golfvex"]) .app-push-content,
+  html body[data-mobile-nav-style="merged_footer"]:not([data-page="admin"]):not([data-page="games"]):not([data-page="golfvex"]) .ws2-main{
+    padding-bottom:calc((136px + env(safe-area-inset-bottom,0px)) / var(--site-scale)) !important;
+  }
+  html body.pb-on:not([data-mobile-nav-style^="merged_"]):not([data-page="admin"]):not([data-page="games"]):not([data-page="golfvex"]) .dg > .dg-in{
+    padding-top:calc(var(--pb-h,64px) / var(--site-scale)) !important;
+  }
+}

@@ -9,19 +9,19 @@
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div class="stat-card">
             <p class="text-muted text-xs">All-Time</p>
-            <p class="text-2xl font-bold mt-1">₦{{ number_format($totalAllTime, 2) }}</p>
+            <p class="text-2xl font-bold mt-1">{!! \App\Support\Money::coin($totalAllTime) !!}</p>
         </div>
         <div class="stat-card">
             <p class="text-muted text-xs">This Month</p>
-            <p class="text-2xl font-bold mt-1">₦{{ number_format($totalThisMonth, 2) }}</p>
+            <p class="text-2xl font-bold mt-1">{!! \App\Support\Money::coin($totalThisMonth) !!}</p>
         </div>
         <div class="stat-card">
             <p class="text-muted text-xs">This Week</p>
-            <p class="text-2xl font-bold mt-1">₦{{ number_format($totalThisWeek, 2) }}</p>
+            <p class="text-2xl font-bold mt-1">{!! \App\Support\Money::coin($totalThisWeek) !!}</p>
         </div>
         <div class="stat-card">
             <p class="text-muted text-xs">Today</p>
-            <p class="text-2xl font-bold mt-1">₦{{ number_format($totalToday, 2) }}</p>
+            <p class="text-2xl font-bold mt-1">{!! \App\Support\Money::coin($totalToday) !!}</p>
         </div>
     </div>
 
@@ -39,7 +39,7 @@
                 @forelse($bySource as $row)
                 <tr class="border-b" style="border-color:var(--border-color);">
                     <td class="py-2 pr-4">{{ ucfirst($row->source) }}</td>
-                    <td class="py-2 pr-4">₦{{ number_format($row->total, 2) }}</td>
+                    <td class="py-2 pr-4">{!! \App\Support\Money::coin($row->total) !!}</td>
                     <td class="py-2 pr-4">{{ $row->count }}</td>
                 </tr>
                 @empty
@@ -64,7 +64,7 @@
                 @forelse($recent as $entry)
                 <tr class="border-b" style="border-color:var(--border-color);">
                     <td class="py-2 pr-4">{{ ucfirst($entry->source) }}</td>
-                    <td class="py-2 pr-4">₦{{ number_format($entry->amount, 2) }}</td>
+                    <td class="py-2 pr-4">{!! \App\Support\Money::coin($entry->amount) !!}</td>
                     <td class="py-2 pr-4 text-muted">{{ $entry->description }}</td>
                     <td class="py-2 pr-4 text-muted">{{ $entry->created_at->diffForHumans() }}</td>
                 </tr>

@@ -1,0 +1,86 @@
+body .ovd .ovd-btn{
+  width:62px !important; min-width:0 !important; max-width:none !important; flex:none !important;
+  gap:3px !important; padding:9px 4px 7px !important; border-radius:20px !important;
+  background:rgba(255,255,255,.92) !important; border:1px solid rgba(15,17,21,.08) !important;
+  box-shadow:0 10px 22px -10px rgba(15,17,21,.45), 0 2px 5px rgba(15,17,21,.08) !important;
+  backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+  position:relative; box-sizing:border-box;
+}
+body .ovd .ovd-btn .ovd-tile{
+  width:auto !important; height:auto !important; border-radius:0 !important;
+  background:none !important; border:0 !important; box-shadow:none !important; outline:none !important;
+  backdrop-filter:none !important; -webkit-backdrop-filter:none !important; transform:none !important;
+  position:relative; display:flex; align-items:center; justify-content:center;
+}
+body .ovd .ovd-btn .ovd-in{
+  width:28px !important; height:28px !important; background:none !important; box-shadow:none !important;
+  color:#0F1115 !important; border-radius:0 !important;
+}
+body .ovd .ovd-btn .ovd-in svg{ width:22px !important; height:22px !important; stroke-width:2 !important; }
+body .ovd .ovd-btn .ovd-lbl{
+  display:block !important; visibility:visible !important; opacity:1 !important;
+  font-size:9px !important; font-weight:800 !important; line-height:1.1 !important;
+  color:#0F1115 !important; text-shadow:none !important; white-space:nowrap;
+}
+body .ovd .ovd-btn.on{
+  background:rgba(var(--dglow,124,130,240),.24) !important;
+  border-color:rgba(var(--dglow,124,130,240),.7) !important;
+  box-shadow:0 0 14px 2px rgba(var(--dglow,124,130,240),.5), 0 10px 22px -10px rgba(15,17,21,.45) !important;
+}
+body .ovd .ovd-btn.on .ovd-in, body .ovd .ovd-btn.on .ovd-lbl{ color:var(--dglow-ink,#4B52C9) !important; }
+html[data-theme="dark"] body .ovd .ovd-btn{ background:rgba(28,30,38,.94) !important; border-color:rgba(255,255,255,.12) !important; }
+html[data-theme="dark"] body .ovd .ovd-btn .ovd-in, html[data-theme="dark"] body .ovd .ovd-btn .ovd-lbl{ color:#F2F4F8 !important; }
+html[data-theme="dark"] body .ovd .ovd-btn.on .ovd-in, html[data-theme="dark"] body .ovd .ovd-btn.on .ovd-lbl{ color:var(--dglow-ink,#9AA0F5) !important; }
+@media (min-width:900px){
+  body .ovd .ovd-btn{ width:80px !important; padding:11px 4px 9px !important; border-radius:22px !important; }
+  body .ovd .ovd-btn .ovd-in svg{ width:24px !important; height:24px !important; }
+  body .ovd .ovd-btn .ovd-lbl{ font-size:11px !important; }
+}
+
+/* DOCK-ON-SOLID */
+html body .ovd .ovd-btn.on,
+html body.ws2-gigs .nv-dock-fixed .ovd .ovd-btn.on,
+html body.ws2 .nv-dock-fixed .ovd .ovd-btn.on{
+  background:#0B9C73 !important; border-color:#0B9C73 !important; outline:none !important;
+  box-shadow:0 10px 22px -10px rgba(11,156,115,.7), 0 2px 5px rgba(15,17,21,.12) !important;
+  transform:none !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+}
+html body .ovd .ovd-btn.on .ovd-tile,
+html body.ws2-gigs .nv-dock-fixed .ovd .ovd-btn.on .ovd-tile,
+html body.ws2 .nv-dock-fixed .ovd .ovd-btn.on .ovd-tile{
+  background:none !important; border:0 !important; outline:none !important; box-shadow:none !important; transform:none !important;
+}
+html body .ovd .ovd-btn.on .ovd-in,
+html body .ovd .ovd-btn.on .ovd-lbl,
+html body.ws2-gigs .nv-dock-fixed .ovd .ovd-btn.on .ovd-in,
+html body.ws2-gigs .nv-dock-fixed .ovd .ovd-btn.on .ovd-lbl,
+html body.ws2 .nv-dock-fixed .ovd .ovd-btn.on .ovd-in,
+html body.ws2 .nv-dock-fixed .ovd .ovd-btn.on .ovd-lbl,
+html[data-theme="dark"] body .ovd .ovd-btn.on .ovd-in,
+html[data-theme="dark"] body .ovd .ovd-btn.on .ovd-lbl{ color:#fff !important; }
+
+/* DOCK-ON-BLUE */
+html body .ovd .ovd-btn.on,
+html body.ws2-gigs .nv-dock-fixed .ovd .ovd-btn.on,
+html body.ws2 .nv-dock-fixed .ovd .ovd-btn.on{
+  background:linear-gradient(145deg, rgba(37,99,235,.74), rgba(11,12,16,.8)) !important;
+  border-color:rgba(37,99,235,.5) !important; outline:none !important;
+  box-shadow:0 10px 22px -12px rgba(37,99,235,.6), 0 2px 5px rgba(15,17,21,.12) !important;
+}
+
+/* DOCK-ON-WHITE */
+html body .nv-dock-fixed .ovd .ovd-btn.on .ovd-in,
+html body .nv-dock-fixed .ovd .ovd-btn.on .ovd-in svg,
+html body .nv-dock-fixed .ovd .ovd-btn.on .ovd-in svg *,
+html body .nv-dock-fixed .ovd .ovd-btn.on .ovd-lbl,
+html body .ovd .ovd-btn.on .ovd-in,
+html body .ovd .ovd-btn.on .ovd-in svg,
+html body .ovd .ovd-btn.on .ovd-in svg *,
+html body .ovd .ovd-btn.on .ovd-lbl,
+html body.ws2 .nv-dock-fixed .ovd .ovd-btn.on .ovd-in,
+html body.ws2 .nv-dock-fixed .ovd .ovd-btn.on .ovd-lbl,
+html body.ws2-gigs .nv-dock-fixed .ovd .ovd-btn.on .ovd-in,
+html body.ws2-gigs .nv-dock-fixed .ovd .ovd-btn.on .ovd-lbl,
+html[data-theme="dark"] body .nv-dock-fixed .ovd .ovd-btn.on .ovd-in,
+html[data-theme="dark"] body .nv-dock-fixed .ovd .ovd-btn.on .ovd-in svg,
+html[data-theme="dark"] body .nv-dock-fixed .ovd .ovd-btn.on .ovd-lbl{ color:#FFFFFF !important; stroke:#FFFFFF !important; text-shadow:none !important; }

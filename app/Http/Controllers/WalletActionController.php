@@ -29,14 +29,20 @@ class WalletActionController extends Controller
             return back()->withErrors(['pin' => 'Set a transaction PIN before withdrawing.']);
         }
         if (!$user->verifyTransactionPin($validated['pin'])) {
-            return back()->withErrors(['pin' => 'Incorrect transaction PIN.']);
+            return back()->withErrors(['pin' => $user->pinErrorMessage()]);
         }
         if (!$user->payout_account_number) {
             return back()->withErrors(['amount' => 'Add a payout bank account before withdrawing.']);
         }
 
-        $hasVirtualAccount = (bool) $user->virtual_account_number;
-        $fee = $hasVirtualAccount ? 0 : round($validated['amount'] * self::NO_BVN_WITHDRAWAL_FEE_RATE, 2);
+        if ($reason = \App\Services\SpendLimit::blockedReason($user, (float) $validated['amount'])) {
+            return back()->withErrors(['amount' => $reason]);
+        }
+        $hasVirtualAccount = ($user->tier ?? 'free') !== 'free'; // paid plans waive the fee
+        $feeRate = ($user->tier ?: 'free') === 'free'
+            ? \App\Support\Pricing::withdrawalFeeRate()
+            : (float) config('fees.withdrawal.' . $user->tier, 0);
+        $fee = round($validated['amount'] * $feeRate, 2);
         $totalDebit = $validated['amount'] + $fee;
         $txRef = 'WD-' . $user->id . '-' . time();
 
@@ -81,7 +87,7 @@ class WalletActionController extends Controller
                     'user_id' => $lockedUser->id,
                     'type' => 'withdrawal_fee',
                     'amount' => -$fee,
-                    'description' => 'No-BVN withdrawal fee (1.5%)',
+                    'description' => 'Withdrawal fee (' . \App\Support\Pricing::withdrawalFeeLabel() . ' on free plan)',
                 ]);
             }
 
@@ -94,7 +100,7 @@ class WalletActionController extends Controller
                 return back()->withErrors(['amount' => 'Your wallet is restricted due to an unresolved payment issue. Clear your balance to make withdrawals.']);
             }
             $msg = $fee > 0
-                ? 'Insufficient balance. You need ₦' . number_format($totalDebit, 2) . ' (amount + 1.5% no-BVN fee).'
+                ? 'Insufficient balance. You need ' . \App\Support\Money::q($totalDebit) . ' (amount + ' . \App\Support\Pricing::withdrawalFeeLabel() . ' withdrawal fee).'
                 : 'Insufficient balance.';
             return back()->withErrors(['amount' => $msg]);
         }
@@ -136,7 +142,7 @@ class WalletActionController extends Controller
             return back()->withErrors(['amount' => 'Could not start the transfer. Your wallet has not been charged.']);
         }
 
-        return redirect()->route('wallet.index')->with('status', 'Withdrawal of ₦' . number_format($validated['amount'], 2) . ' is processing.');
+        return redirect()->route('wallet.index')->with('status', 'Withdrawal of ' . \App\Support\Money::q($validated['amount']) . ' (₦' . number_format($validated['amount'], 2) . ') is processing.');
     }
 
     public function reverseWithdrawal(string $txRef, string $reason): void

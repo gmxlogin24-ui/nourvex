@@ -17,5 +17,5 @@
       @if(!empty($item->location))<span class="mk2-l"><i data-lucide="map-pin"></i>{{ $item->location }}</span>@endif
     </span>
   </a>
-  <button type="button" class="mk2-heart {{ in_array($item->id, $mkLoved) ? 'on' : '' }}" data-url="{{ route('marketplace.love', $item->id) }}" aria-label="Save and add to cart"><i data-lucide="heart"></i></button>
+  <button type="button" class="mk2-heart {{ in_array($item->id, $mkLoved) ? 'on' : '' }}" data-url="{{ route('marketplace.love', $item->id) }}" aria-label="Add to wishlist"><i data-lucide="heart"></i></button>
 </div>

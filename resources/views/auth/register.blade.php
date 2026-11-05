@@ -103,4 +103,14 @@
     <p class="text-sm text-center mt-4" style="opacity:0.75;">
         Already have an account? <a href="{{ route('login') }}" class="text-accent">Log in</a>
     </p>
+
+<script>
+// ref-prefill: fill the referral code from ?ref= in the link
+(function(){
+  var f = document.querySelector('input[name="referral_code"]');
+  if (!f || f.value) return;
+  var r = new URLSearchParams(location.search).get('ref');
+  if (r) f.value = r.trim().toUpperCase();
+})();
+</script>
 @endsection

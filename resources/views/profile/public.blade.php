@@ -36,7 +36,7 @@
       <a href="{{ $go('profile.account') }}" class="pu-btn">Edit profile</a>
       <button type="button" class="pu-btn" id="puShare">Share profile</button>
     @else
-      <a href="{{ $go('chat.index') }}" class="pu-btn main"><i data-lucide="send"></i>Message</a>
+      <a href="{{ $go('cx.index') }}" class="pu-btn main"><i data-lucide="send"></i>Message</a>
       <button type="button" class="pu-btn" id="puShare">Share</button>
     @endif
   </div>

@@ -157,7 +157,7 @@ class ProfileController extends Controller
             'username' => ['nullable', 'regex:/^[a-z0-9_]{3,20}$/', Rule::unique('users', 'username')->ignore($user->id)],
             'accent_color' => 'nullable|string|max:7',
             'theme_style' => 'nullable|string|in:glass,neumorphic,plain,aurora',
-            'mobile_nav_style' => 'nullable|string|in:painted_pill,edge_dock,halo_dock,liquid_glass',
+            'mobile_nav_style' => 'nullable|string|in:painted_pill,edge_dock,halo_dock,liquid_glass,merged_bar,merged_footer',
             'sidebar_style' => 'nullable|string|in:classic,rail',
             'avatar' => 'nullable|image|max:4096',
             'background' => 'nullable|image|max:8192',

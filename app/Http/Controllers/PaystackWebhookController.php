@@ -62,6 +62,11 @@ class PaystackWebhookController extends Controller
             return response('OK', 200);
         }
 
+        if ($txRef && str_starts_with($txRef, 'ORDER-')) {
+            \App\Http\Controllers\OrderCheckoutController::settleByRef($txRef, $amount);
+            return response('OK', 200);
+        }
+
         if ($txRef && str_starts_with($txRef, 'QELVO-')) {
             $this->settleTopupByRef($txRef, $amount);
             return response('OK', 200);

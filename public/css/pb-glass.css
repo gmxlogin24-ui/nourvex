@@ -32,3 +32,7 @@ body.pb-on:has(.pfn){ padding-top:0 !important; }
 .pb-tg svg{color:#fff !important;stroke:#fff !important;transform:translate(-1px,1px) rotate(-8deg)}
 .pb-tg .nv-badge{top:-4px !important;right:-4px !important}
 .pb-inv{border-radius:50% !important;border:1px solid rgba(128,128,128,.35) !important}
+
+/* wishlist heart in top bar (market pages only) */
+.pb-wl{border-radius:50% !important;border:1px solid rgba(128,128,128,.35) !important}
+.pb-wl.on svg{color:#FF4757 !important;stroke:#FF4757 !important}

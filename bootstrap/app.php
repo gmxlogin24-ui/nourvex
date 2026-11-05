@@ -12,6 +12,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->appendToGroup('web', \App\Http\Middleware\AdminGuard::class);
+        $middleware->appendToGroup('web', \App\Http\Middleware\SecurityHeaders::class);
         $middleware->alias([
             'tier' => \App\Http\Middleware\RequireTier::class,
             'admin' => \App\Http\Middleware\IsAdmin::class,

@@ -131,12 +131,34 @@ class User extends Authenticatable
 
     public function wouldExceedNoBvnCap(float $incomingAmount): bool
     {
-        if ($this->virtual_account_number) {
+        $cap = $this->walletCap();
+        if ($cap === null) {
             return false;
         }
-        return ($this->wallet_balance + $incomingAmount) > self::NO_BVN_WALLET_CAP;
+        return ($this->wallet_balance + $incomingAmount) > $cap;
+    }
+    public function kycLevel(): int
+    {
+        // 0 = no BVN linked. 1 = BVN linked. 2 = ID approved by an admin.
+        // 3 = BVN linked, ID approved, and address and selfie on file and approved.
+        $level = $this->virtual_account_number ? 1 : 0;
+        $kyc = \Illuminate\Support\Facades\DB::table('kyc_profiles')
+            ->where('user_id', $this->id)->where('status', 'approved')->first();
+        if ($kyc && !empty($kyc->id_type) && !empty($kyc->id_front_path)) {
+            $level = max($level, 2);
+            if ($this->virtual_account_number && !empty($kyc->address_line) && !empty($kyc->selfie_path)) {
+                $level = 3;
+            }
+        }
+        return $level;
     }
 
+    public function walletCap(): ?float
+    {
+        // null means no cap at this level.
+        $cap = config('kyc.wallet_cap.' . $this->kycLevel());
+        return $cap === null ? null : (float) $cap;
+    }
     public function hasTransactionPin(): bool
     {
         return !empty($this->transaction_pin);
@@ -144,7 +166,30 @@ class User extends Authenticatable
 
     public function verifyTransactionPin(string $pin): bool
     {
-        return Hash::check($pin, $this->transaction_pin ?? '');
+        // After 5 wrong tries the PIN is locked for 15 minutes. While locked, even the right PIN is refused,
+        // so nobody can keep guessing.
+        $key = 'pin-fail:' . $this->id;
+        if ((int) \Illuminate\Support\Facades\Cache::get($key, 0) >= 5) {
+            return false;
+        }
+        $ok = Hash::check($pin, $this->transaction_pin ?? '');
+        if ($ok) {
+            \Illuminate\Support\Facades\Cache::forget($key);
+        } else {
+            \Illuminate\Support\Facades\Cache::add($key, 0, now()->addMinutes(15));
+            \Illuminate\Support\Facades\Cache::increment($key);
+        }
+        return $ok;
+    }
+
+    public function pinLocked(): bool
+    {
+        return (int) \Illuminate\Support\Facades\Cache::get('pin-fail:' . $this->id, 0) >= 5;
+    }
+
+    public function pinErrorMessage(): string
+    {
+        return $this->pinLocked() ? 'Too many wrong PINs. Try again in 15 minutes.' : 'Incorrect transaction PIN.';
     }
 
     public function isAdmin(): bool

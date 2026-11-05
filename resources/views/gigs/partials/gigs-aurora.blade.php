@@ -16,7 +16,7 @@
         <a href="{{ route('profile.index') }}" class="au-avatar-btn">
             @if($gaAvatar)<img src="{{ $gaAvatar }}" alt="">@else<span>{{ $gaInitial }}</span>@endif
         </a>
-        <a href="{{ Route::has('chat.index') ? route('chat.index') : '#' }}" class="au-icon-btn" title="Chat"><i class="bi bi-chat-dots-fill"></i></a>
+        <a href="{{ Route::has('inbox.hustles') ? route('inbox.hustles') : '#' }}" class="au-icon-btn" title="Chat"><i class="bi bi-chat-dots-fill"></i></a>
         <a href="{{ Route::has('notifications.index') ? route('notifications.index') : '#' }}" class="au-icon-btn" title="Notifications"><i class="bi bi-bell-fill"></i></a>
     </div>
 

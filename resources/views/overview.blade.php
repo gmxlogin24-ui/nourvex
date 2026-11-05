@@ -2,6 +2,8 @@
 @section('title', 'Overview')
 
 @section('content')
+<style>.ov, .ov *, .ov *::before, .ov *::after, .ov-coin, .ov-coin * { animation: none !important; transition: none !important; }</style>
+
 @php
   $net = $weekIn - $weekOut;
   $lagos = now()->setTimezone('Africa/Lagos');
@@ -92,7 +94,7 @@
   .ov-white { position:absolute; inset:11%; border-radius:50%; background:#fff; box-shadow:0 32px 48px -12px rgba(15,17,21,.5); }
   .ov-spin { position:absolute; inset:17%; border-radius:50%;
     background:conic-gradient(#9AA3B0, #FF7A1A, #12B886, #9AA3B0, #FF7A1A, #12B886, #9AA3B0);
-    animation:ovSpin 7s linear infinite; box-shadow:0 26px 40px -10px rgba(15,17,21,.5); }
+    animation:none; box-shadow:0 26px 40px -10px rgba(15,17,21,.5); }
   .ov-black { position:absolute; inset:20%; border-radius:50%; background:#07090C; }
 
   .ov-cycle { position:absolute; top:16.5%; bottom:16.5%; left:16.5%; right:50%; z-index:3; pointer-events:none; }
@@ -186,6 +188,7 @@
 </style>
 
 <link rel="stylesheet" href="{{ asset('css/overview-desktop.css') }}?v={{ time() }}">
+<link rel="stylesheet" href="{{ asset("css/overview-redesign.css") }}?v={{ time() }}">
 <div class="ov">
   <header class="ov-head">
     <div class="ov-left">
@@ -381,8 +384,8 @@
     stxLine.classList.remove('show');
     var d = DATA.day, mx = Math.max(d.in, d.out, 1);
     gsap.set([fillIn, fillOut], { width: '0%' });
-    gsap.to(fillIn,  { width: (d.in / mx * 100) + '%',  duration: animate && !reduce ? .9 : 0, ease: 'power3.out' });
-    gsap.to(fillOut, { width: (d.out / mx * 100) + '%', duration: animate && !reduce ? .9 : 0, ease: 'power3.out', delay: .08 });
+    gsap.to(fillIn,  { width: (d.in / mx * 100) + '%',  duration: animate && !reduce ? .6 : 0, ease: 'power3.out' });
+    gsap.to(fillOut, { width: (d.out / mx * 100) + '%', duration: animate && !reduce ? .6 : 0, ease: 'power3.out', delay: .08 });
     valIn.textContent = money(d.in); valOut.textContent = money(d.out);
     subEl.textContent = 'In ' + money(d.in) + ' · Out ' + money(d.out);
     countTo(d.net);
@@ -396,10 +399,10 @@
     countTo(w.net);
     var bars = [].slice.call(stxWeek.querySelectorAll('.stx-bar'));
     if (animate && !reduce) {
-      gsap.fromTo(bars, { scaleY: 0 }, { scaleY: 1, duration: .8, ease: 'back.out(1.3)', stagger: { each: .05, from: 'start' } });
+      gsap.fromTo(bars, { scaleY: 0 }, { scaleY: 1, duration: .5, ease: 'back.out(1.3)', stagger: { each: .03, from: 'start' } });
       if (lenPoly) {
         gsap.set(poly, { strokeDasharray: lenPoly, strokeDashoffset: lenPoly });
-        gsap.to(poly, { strokeDashoffset: 0, duration: 1.4, delay: .35, ease: 'power2.inOut' });
+        gsap.to(poly, { strokeDashoffset: 0, duration: .8, delay: .1, ease: 'power2.inOut' });
       }
     } else {
       gsap.set(bars, { scaleY: 1 });
@@ -417,10 +420,12 @@
   });
   setTab('day', true);
 
+  gsap.globalTimeline.timeScale(1000);
   /* overview's own entrance */
-  gsap.from('.ov-head > *', { y: 14, opacity: 0, duration: .6, stagger: .08, ease: 'power3.out' });
-  gsap.from('.ov-stage', { x: 60, opacity: 0, duration: .9, delay: .2, ease: 'power3.out' });
-  gsap.from('#stx', { y: 22, opacity: 0, duration: .7, delay: .4, ease: 'power3.out' });
+  var ovIntro = gsap.timeline();
+  
+  
+  
 
   /* hustles: falls once, stays down (remembered), and the whole strip sways from its top */
   var drop = document.getElementById('ovDrop');
@@ -431,11 +436,11 @@
     if (already || reduce) {
       gsap.set(drop, { y: 0 });
     } else {
-      gsap.set(drop, { y: -300 });
-      gsap.to(drop, { y: 0, duration: 1.1, delay: 1.2, ease: 'bounce.out',
+      gsap.set(drop, { y: 0 });
+      ovIntro.to(drop, { y: 0, duration: 0, ease: 'none',
         onComplete: function () { try { localStorage.setItem(KEY, '1'); } catch (e) {} } });
     }
-    if (swing && !reduce) gsap.to(swing, { rotation: 3, duration: 1.8, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+    
   }
 
   /* coin: floats, slides, taps through to Market */
@@ -449,8 +454,8 @@
   }
   var tl = null;
   if (!reduce) {
-    gsap.to('#ovCoinIn', { rotationY: 360, duration: 2.4, repeat: -1, ease: 'none' });
-    tl = gsap.timeline({ repeat: -1, repeatDelay: 3, delay: 2.6 });
+    
+    tl = gsap.timeline({ paused: true }); gsap.set(coin, { x: 96 });
     tl.to(coin, { x: 96, duration: .55, ease: 'back.out(1.6)' })
       .to(coin, { x: 0, duration: .5, ease: 'power2.in' }, '+=2');
   } else {

@@ -66,9 +66,9 @@ Route::get('/auth/google', [App\Http\Controllers\SocialAuthController::class, 'r
 Route::get('/auth/google/callback', [App\Http\Controllers\SocialAuthController::class, 'callback'])->name('auth.google.callback');
 
 Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
-Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email')->middleware('throttle:5,1');
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
-Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update')->middleware('throttle:5,1');
 
 Route::post('/webhooks/paystack', [PaystackWebhookController::class, 'handle']);
 
@@ -275,10 +275,10 @@ Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index
     Route::get('/services', [ServicesController::class, 'index'])->name('services.index');
     Route::get('/services/{service}', [ServicesController::class, 'show'])->where('service', 'airtime|data|cable')->name('services.show');
     Route::get('/services/data-plans', [ServicesController::class, 'dataPlans'])->name('services.data-plans');
-    Route::post('/services/airtime', [ServicesController::class, 'buyAirtime'])->name('services.airtime');
-    Route::post('/services/data', [ServicesController::class, 'buyData'])->name('services.data');
+    Route::post('/services/airtime', [ServicesController::class, 'buyAirtime'])->name('services.airtime')->middleware('throttle:10,1');
+    Route::post('/services/data', [ServicesController::class, 'buyData'])->name('services.data')->middleware('throttle:10,1');
     Route::get('/services/cable-plans', [ServicesController::class, 'cablePlans'])->name('services.cable-plans');
-    Route::post('/services/cable', [ServicesController::class, 'buyCable'])->name('services.cable');
+    Route::post('/services/cable', [ServicesController::class, 'buyCable'])->name('services.cable')->middleware('throttle:10,1');
     Route::get('/services/receipt/{purchase}', [ServicesController::class, 'receipt'])->name('services.receipt');
     Route::get('/wallet/pin', [TransactionPinController::class, 'edit'])->name('wallet.pin.edit');
     Route::post('/wallet/pin', [TransactionPinController::class, 'update'])->name('wallet.pin.update')->middleware('throttle:5,1');
@@ -297,10 +297,10 @@ Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
     Route::get('/wallet/deposit', [\App\Http\Controllers\WalletController::class, 'deposit'])->name('wallet.deposit');
     Route::get('/wallet/deposit/status/{reference}', [\App\Http\Controllers\WalletController::class, 'depositStatus'])->name('wallet.deposit.status');
-    Route::post('/wallet/send', [WalletController::class, 'sendMoney'])->name('wallet.send');
+    Route::post('/wallet/send', [WalletController::class, 'sendMoney'])->name('wallet.send')->middleware('throttle:10,1');
     Route::get('/wallet/transactions/{id}', [WalletController::class, 'showTransaction'])->name('wallet.transaction.show');
     Route::get('/wallet/send', [WalletController::class, 'sendMoneyForm'])->name('wallet.send.form');
-    Route::post('/wallet/send/resolve', [WalletController::class, 'resolveRecipient'])->name('wallet.send.resolve');
+    Route::post('/wallet/send/resolve', [WalletController::class, 'resolveRecipient'])->name('wallet.send.resolve')->middleware('throttle:30,1');
     Route::post('/wallet/paystack/initiate', [PaystackController::class, 'initiate'])->name('paystack.initiate');
     Route::get('/wallet/paystack/callback', [PaystackController::class, 'callback'])->name('paystack.callback');
     Route::get('/wallet/virtual-account', [VirtualAccountController::class, 'create'])->name('wallet.virtual-account');
@@ -331,7 +331,7 @@ Route::post('/gigs/{gig}/withdraw', [App\Http\Controllers\GigController::class, 
 
 // Signup fee (₦1,000 account activation) - requires login (user exists) but not signup_fee_paid
 Route::middleware('auth')->group(function () {
-    Route::get('/activate', function () { return view('auth.signup-fee-activate'); })->name('signup-fee.activate');
+    Route::get('/activate', function () { return redirect()->route('dashboard'); /* sign-up fee removed */ })->name('signup-fee.activate');
     Route::get('/signup-fee', [App\Http\Controllers\PaystackController::class, 'initiateSignupFee'])->name('signup-fee.initiate');
     Route::get('/signup-fee/callback', [App\Http\Controllers\PaystackController::class, 'signupFeeCallback'])->name('signup-fee.callback');
 });
@@ -463,3 +463,97 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
 // ANNOUNCEMENTS (all, for users)
 Route::middleware('auth')->get('/announcements', [\App\Http\Controllers\AnnouncementsController::class, 'index'])->name('announcements.index');
+
+// WORLD INBOXES (each world has its own messages page)
+Route::middleware('auth')->prefix('inbox')->name('inbox.')->group(function () {
+    Route::get('/profile', [\App\Http\Controllers\InboxController::class, 'profile'])->name('profile');
+    Route::get('/hustles', [\App\Http\Controllers\InboxController::class, 'hustles'])->name('hustles');
+    Route::get('/market', [\App\Http\Controllers\InboxController::class, 'market'])->name('market');
+});
+
+// INSIGHTS ("Your dashboard" on the profile)
+Route::middleware('auth')->prefix('insights')->name('insights.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\InsightsController::class, 'dashboard'])->name('dashboard');
+    Route::get('/tools', [\App\Http\Controllers\InsightsController::class, 'tools_page'])->name('tools');
+    Route::post('/saved-replies', [\App\Http\Controllers\InsightsController::class, 'storeReply'])->name('replies.store');
+    Route::delete('/saved-replies/{id}', [\App\Http\Controllers\InsightsController::class, 'destroyReply'])->name('replies.destroy');
+    Route::get('/{slug}', [\App\Http\Controllers\InsightsController::class, 'page'])->name('page');
+});
+
+// CX CHAT (new shared chat for overview + profile)
+Route::middleware('auth')->prefix('cx')->name('cx.')->group(function () {
+    $c = \App\Http\Controllers\ChatXController::class;
+    Route::get('/', [$c, 'index'])->name('index');
+    Route::get('/people', [$c, 'people'])->name('people');
+    Route::post('/start', [$c, 'start'])->name('start');
+    Route::post('/msg/{mid}/edit', [$c, 'edit'])->whereNumber('mid')->name('edit');
+    Route::post('/msg/{mid}/delete', [$c, 'delete'])->whereNumber('mid')->name('delete');
+    Route::post('/msg/{mid}/react', [$c, 'react'])->whereNumber('mid')->name('react');
+    Route::get('/{id}', [$c, 'thread'])->whereNumber('id')->name('thread');
+    Route::get('/{id}/messages', [$c, 'messages'])->whereNumber('id')->name('messages');
+    Route::post('/{id}/send', [$c, 'send'])->whereNumber('id')->name('send');
+    Route::post('/{id}/typing', [$c, 'typing'])->whereNumber('id')->name('typing');
+});
+
+// AX SECURITY (re-auth page + audit log viewer)
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    $c = \App\Http\Controllers\AdminSecurityController::class;
+    Route::get('/confirm', [$c, 'confirm'])->name('confirm');
+    Route::post('/confirm', [$c, 'confirmPost'])->middleware('throttle:6,1')->name('confirm.post');
+    Route::get('/audit', [$c, 'audit'])->name('audit');
+});
+
+// AX COMMAND HOME (overrides the admin index page)
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin', [\App\Http\Controllers\AdminStudioController::class, 'studio'])->name('admin.index');
+    Route::get('/admin/map', [\App\Http\Controllers\AdminHomeController::class, 'index'])->name('admin.map');
+});
+
+// AX COIN LAB
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/coin', [\App\Http\Controllers\AdminCoinController::class, 'index'])->name('coin');
+});
+
+// ===== FINANCE: profit pool, costs, withdrawals =====
+Route::prefix('admin/finance')->name('admin.finance.')->middleware(['auth', 'admin'])->group(function () {
+    Route::get('/', [\App\Http\Controllers\AdminFinanceController::class, 'profit'])->name('profit');
+    Route::post('/settings', [\App\Http\Controllers\AdminFinanceController::class, 'saveSettings'])->name('settings');
+    Route::post('/expenses', [\App\Http\Controllers\AdminFinanceController::class, 'storeExpense'])->name('expenses.store');
+    Route::delete('/expenses/{id}', [\App\Http\Controllers\AdminFinanceController::class, 'deleteExpense'])->name('expenses.delete');
+    Route::get('/withdrawals', [\App\Http\Controllers\AdminFinanceController::class, 'withdrawals'])->name('withdrawals');
+});
+
+// ===== PRICES AND FEES =====
+Route::prefix('admin/finance')->name('admin.finance.')->middleware(['auth', 'admin'])->group(function () {
+    Route::get('/pricing', [\App\Http\Controllers\AdminPricingController::class, 'index'])->name('pricing');
+    Route::post('/pricing', [\App\Http\Controllers\AdminPricingController::class, 'save'])->name('pricing.save');
+});
+
+// ===== INVESTMENT COMPLIANCE =====
+Route::middleware(['auth', 'signup.paid'])->prefix('investment')->name('investment.')->group(function () {
+    Route::get('/profile', [\App\Http\Controllers\InvestmentComplianceController::class, 'profile'])->name('profile');
+    Route::post('/profile', [\App\Http\Controllers\InvestmentComplianceController::class, 'saveProfile'])->name('profile.save')->middleware('throttle:10,1');
+    Route::post('/investments/{investment}/cancel', [\App\Http\Controllers\InvestmentComplianceController::class, 'cancel'])->name('cancel')->middleware('throttle:10,1');
+});
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/kyc', [\App\Http\Controllers\InvestmentComplianceController::class, 'kycIndex'])->name('admin.kyc.index');
+    Route::get('/admin/kyc/{profile}/file/{kind}', [\App\Http\Controllers\InvestmentComplianceController::class, 'kycFile'])->whereIn('kind', ['id_front', 'id_back', 'selfie'])->name('admin.kyc.file');
+    Route::post('/admin/kyc/{profile}/decision', [\App\Http\Controllers\InvestmentComplianceController::class, 'kycDecide'])->name('admin.kyc.decision');
+});
+Route::middleware(['auth', 'admin'])->prefix('admin/investment')->name('admin.investment.')->group(function () {
+    Route::get('/projects/{project}/diligence', [\App\Http\Controllers\InvestmentComplianceController::class, 'diligence'])->name('diligence');
+    Route::post('/projects/{project}/diligence', [\App\Http\Controllers\InvestmentComplianceController::class, 'diligenceSave'])->name('diligence.save');
+    Route::post('/projects/{project}/milestones', [\App\Http\Controllers\InvestmentComplianceController::class, 'milestoneStore'])->name('milestones.store');
+    Route::delete('/milestones/{milestone}', [\App\Http\Controllers\InvestmentComplianceController::class, 'milestoneDelete'])->name('milestones.delete');
+    Route::post('/milestones/{milestone}/release', [\App\Http\Controllers\InvestmentComplianceController::class, 'milestoneRelease'])->name('milestones.release');
+    Route::post('/projects/{project}/updates', [\App\Http\Controllers\InvestmentComplianceController::class, 'updatePost'])->name('updates.store');
+});
+
+// ===== INVESTMENT EXTRAS =====
+Route::middleware(['auth', 'admin'])->get('/admin/investment/audit', [\App\Http\Controllers\InvestmentExtrasController::class, 'audit'])->name('admin.investment.audit');
+
+// Pay-per-order: card payment for one order, no wallet needed before buying.
+Route::middleware('auth')->group(function () {
+    Route::post('/checkout/order', [\App\Http\Controllers\OrderCheckoutController::class, 'initiate'])->name('order.checkout.initiate')->middleware('throttle:10,1');
+    Route::get('/checkout/order/callback', [\App\Http\Controllers\OrderCheckoutController::class, 'callback'])->name('order.checkout.callback');
+});

@@ -1,6 +1,6 @@
 @extends('layouts.world-shell')
 @section('world', 'market')
-@section('title', 'Saved')
+@section('title', 'Wishlist')
 @section('content')
 @php $spInCart = session('cart', []); @endphp
 <link rel="stylesheet" href="{{ asset('css/market-new.css') }}?v={{ time() }}">
@@ -9,7 +9,7 @@
   <section class="sp-s sp-s0">
     <div class="sp-head">
       <a href="{{ route('marketplace.index') }}" class="sp-back" aria-label="Back to market"><i data-lucide="arrow-left"></i></a>
-      <h1>Saved</h1>
+      <h1>Wishlist</h1>
       <span>{{ count($listings) }} {{ count($listings) === 1 ? 'item' : 'items' }}</span>
     </div>
     @include('marketplace.partials.shop-tabs', ['active' => 'saved'])
@@ -17,7 +17,7 @@
 
   @if(count($listings))
     <section class="sp-s">
-      <h2 class="sp-h">Your saved items</h2>
+      <h2 class="sp-h">Your wishlist</h2>
       <div class="mk-grid" id="mkGrid" data-token="{{ csrf_token() }}">
         @foreach($listings as $item)
           @php $spImg = $item->image_url ?: optional($item->images->first())->image_url; @endphp
@@ -30,7 +30,7 @@
                 @if($item->location)<span class="mc2-l"><i data-lucide="map-pin"></i>{{ $item->location }}</span>@endif
               </span>
             </a>
-            <button type="button" class="mc2-heart on" data-url="{{ route('marketplace.love', $item->id) }}" aria-label="Remove from saved"><i data-lucide="heart"></i></button>
+            <button type="button" class="mc2-heart on" data-url="{{ route('marketplace.love', $item->id) }}" aria-label="Remove from wishlist"><i data-lucide="heart"></i></button>
           </div>
         @endforeach
       </div>
@@ -39,7 +39,7 @@
     <section class="sp-s sp-empty">
       <i data-lucide="heart"></i>
       <h2>Nothing saved yet</h2>
-      <p>Tap the heart on any listing to save it here and add it to your cart.</p>
+      <p>Tap the heart on any listing to add it to your wishlist.</p>
       <a href="{{ route('marketplace.index') }}" class="btn-primary sp-btn">Browse Campus Market</a>
     </section>
   @endif

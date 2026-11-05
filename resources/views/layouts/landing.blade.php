@@ -47,6 +47,6 @@
         <script src="{{ asset('js/preloader.js') }}?v={{ @filemtime(public_path('js/preloader.js')) }}"></script>
     @yield('scripts')
 <script src="/js/auto-contrast.js?v=3" defer></script>
-<script src="/js/auto-dark.js?v=8" defer></script>
+<script src="/js/auto-dark.js?v=9" defer></script>
 </body>
 </html>

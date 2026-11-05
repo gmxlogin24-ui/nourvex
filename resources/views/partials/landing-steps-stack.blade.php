@@ -75,7 +75,7 @@
         mob: '(max-width: 900px), (max-height: 639px)'
     }, function (ctx) {
         var mob = !!ctx.conditions.mob;
-        var CLOSED = mob ? 58 : 76;
+        var CLOSED = mob ? 58 : 60;
         var rots = base.map(function (r) { return mob ? r * 0.5 : r; });
 
         function openH() {

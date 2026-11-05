@@ -2,29 +2,30 @@
   if (empty($nvItems)) {
     $nvR = fn ($name, $fb = '#') => \Illuminate\Support\Facades\Route::has($name) ? route($name) : $fb;
     $nvUnread = (int) ($navUnreadChats ?? 0);
+    $nvWU = auth()->check() ? \App\Http\Controllers\InboxController::unreadByWorld() : [];
     $nvCartN = count(session('cart', []));
-    if (request()->routeIs('profile.*', 'leaderboard.*')) {
+    if (request()->routeIs('profile.*', 'leaderboard.*', 'inbox.profile')) {
       $nvItems = [
         ['home', 'Home', $nvR('dashboard'), false, 0],
-        ['message-circle', 'Message', $nvR('chat.index'), false, $nvUnread],
+        ['message-circle', 'Message', $nvR('inbox.profile'), request()->routeIs('inbox.profile'), $nvWU['profile'] ?? 0],
         ['plus-circle', 'Post', $nvR('posts.index'), false, 0, 'pfnCreate'],
         ['briefcase', 'Jobs', $nvR('gigs.index'), false, 0],
         ['trophy', 'Ranking', $nvR('leaderboard.index'), request()->routeIs('leaderboard.*'), 0],
       ];
-    } elseif (request()->routeIs('gigs.*', 'posts.*')) {
+    } elseif (request()->routeIs('gigs.*', 'posts.*', 'inbox.hustles')) {
       $nvItems = [
         ['home', 'Home', $nvR('dashboard'), false, 0],
         ['briefcase', 'Jobs', $nvR('gigs.index'), request()->routeIs('gigs.index', 'gigs.show', 'gigs.edit'), 0],
         ['plus-circle', 'Post', $nvR('gigs.create'), request()->routeIs('gigs.create'), 0],
         ['layers', 'My posts', $nvR('posts.index'), request()->routeIs('posts.*'), 0],
-        ['message-circle', 'Messages', $nvR('chat.index'), false, $nvUnread],
+        ['message-circle', 'Messages', $nvR('inbox.hustles'), request()->routeIs('inbox.hustles'), $nvWU['hustles'] ?? 0],
       ];
-    } elseif (request()->routeIs('marketplace.*', 'cart.*')) {
+    } elseif (request()->routeIs('marketplace.*', 'cart.*', 'inbox.market')) {
       $nvItems = [
         ['home', 'Home', $nvR('dashboard'), false, 0],
         ['shopping-bag', 'Shop', $nvR('marketplace.index'), request()->routeIs('marketplace.index', 'marketplace.show', 'marketplace.edit'), 0],
         ['plus-circle', 'Post', $nvR('marketplace.create'), request()->routeIs('marketplace.create'), 0],
-        ['message-circle', 'Messages', $nvR('marketplace.inbox'), request()->routeIs('marketplace.inbox'), $nvUnread],
+        ['message-circle', 'Messages', $nvR('inbox.market'), request()->routeIs('inbox.market'), $nvWU['market'] ?? 0],
         ['shopping-cart', 'Cart', $nvR('cart.index'), request()->routeIs('cart.*'), $nvCartN],
       ];
     }
@@ -45,6 +46,7 @@
 <div class="nv-dock-fixed" id="nvDock">
   @if(!empty($nvItems))
   <link rel="stylesheet" href="{{ asset('css/ov-dock.css') }}?v={{ time() }}">
+<link rel="stylesheet" href="{{ asset("css/dock-solid.css") }}?v={{ time() }}">
   <nav class="ovd" aria-label="World">
     @foreach($nvItems as $n)
     <a href="{{ $n[2] }}" class="ovd-btn {{ $n[3] ? 'on' : '' }}" @if(!empty($n[5])) data-dock-sheet="{{ $n[5] }}" @endif aria-label="{{ $n[1] }}" title="{{ $n[1] }}">
@@ -72,3 +74,10 @@
     if (window.lucide) { lucide.createIcons(); }
 })();
 </script>
+
+<link rel="stylesheet" href="{{ asset('css/merged-bar.css') }}?v={{ time() }}">
+<link rel="stylesheet" href="{{ asset('css/site-scale.css') }}?v={{ time() }}">
+<script src="{{ asset('js/merged-bar.js') }}?v={{ time() }}" defer></script>
+<script src="{{ asset('js/mb-curve.js') }}?v={{ time() }}" defer></script>
+{{-- MB-STYLE-FALLBACK: pages that do not set the dock style themselves still get a merged style --}}
+<script>(function(){var s='{{ auth()->check() ? (auth()->user()->mobile_nav_style ?? "painted_pill") : "" }}';if(s.indexOf('merged_')===0&&!document.body.getAttribute('data-mobile-nav-style')){document.body.setAttribute('data-mobile-nav-style',s);}})();</script>

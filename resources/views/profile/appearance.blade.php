@@ -75,6 +75,8 @@
                         'liquid_glass' => ['label' => 'Liquid Glass', 'desc' => 'Clear glass pill that magnifies what is behind it'],
                         'edge_dock' => ['label' => 'Edge Dock', 'desc' => 'Draggable floating handle'],
                         'halo_dock' => ['label' => 'Halo Dock', 'desc' => 'Notched bar, floating center button'],
+                        'merged_bar' => ['label' => 'Merged Bar', 'desc' => 'Top bar and dock in one floating bar, More opens the rest'],
+                        'merged_footer' => ['label' => 'Black Footer', 'desc' => 'Top bar and dock in one full-width black bar, More opens the rest'],
                     ] as $style => $meta)
                     <label class="theme-style-option" style="cursor:pointer;">
                         <input type="radio" name="mobile_nav_style" value="{{ $style }}" {{ ($user->mobile_nav_style ?? 'painted_pill') === $style ? 'checked' : '' }} class="dock-style-radio" style="display:none;" onchange="previewDockStyle('{{ $style }}')">

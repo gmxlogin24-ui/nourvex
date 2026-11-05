@@ -8,7 +8,7 @@
   <header style="margin-top:10px">
     <p class="inv-kicker">New</p>
     <h1>List a project</h1>
-    <p class="inv-sub">Goal range {{ number_format(config('investment.min_goal_q')) }} to {{ number_format(config('investment.max_goal_q')) }} Q. Each investor is capped at {{ config('investment.max_share_of_goal_percent') }}% of the goal.</p>
+    <p class="inv-sub">Goal range ₦{{ number_format(config('investment.min_goal_q')) }} to ₦{{ number_format(config('investment.max_goal_q')) }}. Each investor is capped at {{ config('investment.max_share_of_goal_percent') }}% of the goal.</p>
   </header>
 
   @if($errors->any())
@@ -30,15 +30,16 @@
     <h2 style="margin-top:14px">What is this project?</h2>
     <textarea class="inv-input" name="description" rows="6" maxlength="3000" required>{{ old('description') }}</textarea>
 
-    <h2 style="margin-top:14px">Goal (Q)</h2>
+    <h2 style="margin-top:14px">Goal (₦)</h2>
     <input class="inv-input" type="number" name="goal_q" min="{{ config('investment.min_goal_q') }}" max="{{ config('investment.max_goal_q') }}" required value="{{ old('goal_q') }}">
 
-    <h2 style="margin-top:14px">Max per investor (Q)</h2>
+    <h2 style="margin-top:14px">Max per investor (₦)</h2>
     <input class="inv-input" type="number" name="max_invest_q" min="1" required value="{{ old('max_invest_q') }}">
 
     <h2 style="margin-top:14px">Days open</h2>
     <input class="inv-input" type="number" name="duration_days" min="{{ config('investment.min_duration_days') }}" max="{{ config('investment.max_duration_days') }}" required value="{{ old('duration_days', 30) }}">
 
+    @include('investment._owner-fields')
     <button class="inv-btn" type="submit">Submit for review</button>
   </form>
 </div>

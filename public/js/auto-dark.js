@@ -3,10 +3,10 @@ if(document.querySelector(".gx"))return;
 if(window.__nvAutoDark)return;window.__nvAutoDark=1;
 var R=document.documentElement,STATE=new WeakMap(),TOUCHED=[],ON=false,G=0;
 var SKIP={SCRIPT:1,STYLE:1,LINK:1,META:1,HEAD:1,NOSCRIPT:1,TEMPLATE:1,IMG:1,VIDEO:1,CANVAS:1,IFRAME:1,PICTURE:1,SVG:1};
-var TEXT='#f5f5f5',LINE='rgba(255,255,255,0.18)',BLACK='#000';
+var TEXT='#F5F5F7',LINE='rgba(255,255,255,0.10)',BLACK='#0A0A0B',CARD='#18181B';
 var SHEEN_CSS='.nv-sheen{position:relative;isolation:isolate}'+
 '.nv-sheen::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;'+
-'background:linear-gradient(160deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.42) 55%,rgba(0,0,0,.85) 100%)}';
+'background:linear-gradient(180deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,0) 45%)}';
 
 function isDark(){var c=R.classList;if(c.contains('nv-dark'))return true;if(c.contains('nv-light'))return false;return R.getAttribute('data-theme')==='dark'}
 function parse(s){if(!s||s.indexOf('color(')===0)return null;var m=s.match(/[\d.]+/g);if(!m||m.length<3)return null;var a=m.length>3?+m[3]:1;if(a>1)a/=100;return{r:+m[0],g:+m[1],b:+m[2],a:a}}
@@ -22,14 +22,14 @@ function isCard(el,cs){
   return parseFloat(cs.borderTopLeftRadius)>=8;
 }
 
-function fix(el){
+function fix(el){/*nvmb*/if(el.closest){if(el.closest("#nvDock,#mbSheet")){if(/^merged_/.test(document.body.getAttribute("data-mobile-nav-style")||"")){return;}}}
   if(SKIP[el.tagName]||el.namespaceURI!=='http://www.w3.org/1999/xhtml')return;
   var cs=getComputedStyle(el),bg=parse(cs.backgroundColor);
-  if(mustBlack(bg))set(el,'background-color',BLACK);
+  if(mustBlack(bg))set(el,'background-color',isCard(el,cs)?CARD:BLACK);
 
   var bi=cs.backgroundImage;
   if(bi&&bi!=='none'&&bi.indexOf('gradient')>-1){
-    var nb=bi.replace(/rgba?\([^)]*\)/g,function(m){var c=parse(m);return mustBlack(c)?'rgba(0,0,0,'+c.a+')':m});
+    var nb=bi.replace(/rgba?\([^)]*\)/g,function(m){var c=parse(m);return mustBlack(c)?'rgba(10,10,11,'+c.a+')':m});
     if(nb!==bi)set(el,'background-image',nb);
   }
 

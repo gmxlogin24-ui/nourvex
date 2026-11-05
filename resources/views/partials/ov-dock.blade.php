@@ -10,6 +10,7 @@
   ];
 @endphp
 <link rel="stylesheet" href="{{ asset('css/ov-dock.css') }}?v={{ time() }}">
+<link rel="stylesheet" href="{{ asset("css/dock-solid.css") }}?v={{ time() }}">
 <nav class="ovd" aria-label="Main">
 @foreach($ovDockItems as $it)
   <a href="{{ $it[3] }}" class="ovd-btn {{ $ovDockActive === $it[0] ? 'on' : '' }}" aria-label="{{ $it[1] }}" title="{{ $it[1] }}">

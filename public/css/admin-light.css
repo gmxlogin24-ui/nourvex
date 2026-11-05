@@ -1,0 +1,177 @@
+body[data-page="admin"]{color:#0F1115;background:radial-gradient(900px 600px at 15% -5%,#fff,transparent 60%),radial-gradient(800px 560px at 100% 100%,#d9dadd,transparent 60%),#E9EAEC !important;background-attachment:fixed !important}
+body .ax-top{background:rgba(255,255,255,.62);border-bottom:1px solid rgba(255,255,255,.9);color:#0F1115;box-shadow:0 10px 30px -22px rgba(20,22,30,.5)}
+body .ax-logo{color:#0F1115}
+body .ax-logo em{background:#0B0C10;color:#fff}
+body .ax-mark{background:radial-gradient(circle at 35% 30%,#fff,#c9ccd2 55%,#6f737b);box-shadow:0 6px 14px -4px rgba(20,22,30,.45);animation:none}
+body .ax-title{color:#0F1115;opacity:.55}
+body .ax-live{color:#166534}
+body .ax-exit{background:#0B0C10;color:#fff}
+body .axd{background:linear-gradient(180deg,rgba(255,255,255,.8),rgba(255,255,255,.5));border:1px solid #fff;box-shadow:inset 0 1px 0 #fff,0 22px 44px -18px rgba(20,22,30,.45)}
+body .axd-t{background:#fff;box-shadow:0 12px 24px -10px rgba(15,17,21,.45),0 3px 6px rgba(15,17,21,.1)}
+body .axd-c{background:#0B0C10;color:#fff}
+body .axd-l{color:#0F1115;text-shadow:0 1px 0 rgba(255,255,255,.9)}
+body .axd a.on .axd-t{background:#0B0C10;outline-color:rgba(11,12,16,.25);box-shadow:0 14px 26px -8px rgba(0,0,0,.6)}
+body .axd a.on .axd-c{background:#fff;color:#0B0C10}
+body .axd a.on .axd-l{color:#0B0C10}
+body .ax-bk{background:rgba(20,22,30,.35)}
+body .ax-pn{background:rgba(244,244,246,.97);border:1px solid #fff}
+body .ax-tile{background:#fff;color:#0F1115;box-shadow:0 10px 20px -14px rgba(20,22,30,.5)}
+body .ax-tile.on{background:#0B0C10;color:#fff}
+body .ax-card{background:rgba(255,255,255,.6);border:1px solid #fff;color:#0F1115;box-shadow:0 18px 40px -26px rgba(20,22,30,.45)}
+body .ax-tbl td{border-top:1px solid rgba(15,17,21,.08)}
+body .ax-rail{background:linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,.5));border:1px solid #fff;box-shadow:0 20px 50px -26px rgba(20,22,30,.5)}
+body .ax-col{background:rgba(15,17,21,.05);color:#6b6f77}
+body .ax-gh{color:#0F1115;opacity:.4}
+body .ax-rail a{color:#5d6168}
+body .ax-rail a:hover{background:rgba(15,17,21,.06);color:#0F1115}
+body .ax-rail a.on{background:#0B0C10;color:#fff}
+body .ax-rail a.on::before{display:none}
+body .cm{color:#0F1115}
+body .cm-view{background-image:radial-gradient(520px 380px at 50% 45%,rgba(255,255,255,.95),transparent 70%),linear-gradient(rgba(15,17,21,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(15,17,21,.06) 1px,transparent 1px)}
+body .cm-view::after{background:radial-gradient(ellipse at center,transparent 55%,rgba(222,223,226,.95))}
+body .cm-wires path{stroke:rgba(15,17,21,.38)}
+body .cm-wires path.hot{stroke:#0B0C10;filter:none}
+body .cm-core b{color:#0F1115}
+body .cm-core small{color:#0F1115}
+body .cm-orb{background:radial-gradient(circle at 35% 30%,#fff,#d6d8dd 45%,#8b8e96);box-shadow:0 26px 40px -16px rgba(20,22,30,.55),inset 0 -6px 14px rgba(15,17,21,.18)}
+body .cm-orb i{border-color:rgba(15,17,21,.28)}
+body .cm-orb i:nth-child(2){border-color:rgba(15,17,21,.2)}
+body .cm-orb i:nth-child(3){border-color:rgba(15,17,21,.18)}
+body .cm-n{background:rgba(255,255,255,.82);border:1px solid #fff;color:#0F1115;box-shadow:0 14px 28px -14px rgba(20,22,30,.5)}
+body .cm-i{background:#0B0C10;color:#fff}
+body .cm-n.p::after{border-color:#0B0C10}
+body .cm-n.on{background:#0B0C10;color:#fff;border-color:#0B0C10;box-shadow:0 18px 34px -12px rgba(0,0,0,.6)}
+body .cm-n.on .cm-i{background:#fff;color:#0B0C10}
+body .cm-chip{background:rgba(255,255,255,.72);border:1px solid #fff;color:#0F1115;box-shadow:0 10px 22px -16px rgba(20,22,30,.5)}
+body .cm-modes button{background:rgba(255,255,255,.75);border:1px solid #fff;color:#5d6168}
+body .cm-modes button.on{background:#0B0C10;border-color:#0B0C10;color:#fff}
+body .cm-panel{background:rgba(11,12,16,.96);color:#fff;border:1px solid rgba(255,255,255,.08);box-shadow:0 30px 60px -20px rgba(0,0,0,.7)}
+body .cm-panel .cm-i{background:#fff;color:#0B0C10}
+body .cm-x{color:#fff}
+body .cm-tabs button{background:rgba(255,255,255,.08);color:#b7bac2}
+body .cm-tabs button.on{background:#fff;color:#0B0C10}
+body .cm-big,body .cm-grid div{background:rgba(255,255,255,.08)}
+body #cmTg a{background:rgba(255,255,255,.08);color:#fff}
+body .cm-open{background:#fff;color:#0B0C10}
+body .cm-ask{background:rgba(255,255,255,.85);border:1px solid #fff;box-shadow:0 18px 36px -18px rgba(20,22,30,.55)}
+body .cm-ask input{color:#0F1115}
+body .cm-ask button{background:#0B0C10;color:#fff}
+body .cm-sug{background:#fff;border:1px solid rgba(15,17,21,.08)}
+body .cm-sug button{color:#0F1115;border-bottom:1px solid rgba(15,17,21,.06)}
+body .cl{color:#0F1115}
+body .cl-live div,body .cl-out div{background:rgba(255,255,255,.75);border:1px solid #fff;box-shadow:0 12px 24px -18px rgba(20,22,30,.5)}
+body .cl-card{background:rgba(255,255,255,.6);border:1px solid #fff;box-shadow:0 18px 40px -26px rgba(20,22,30,.45)}
+body .cl-in input[type=range]{accent-color:#0B0C10}
+body .cl-in label b{color:#0B0C10}
+body .cl-cv{background:rgba(255,255,255,.6)}
+body .cl-verdict.ok{background:rgba(22,163,74,.12);color:#166534}
+body .cl-verdict.mid{background:rgba(202,138,4,.14);color:#854D0E}
+body .cl-verdict.bad{background:rgba(220,38,38,.12);color:#991B1B}
+body .cl-types div{border-top:1px solid rgba(15,17,21,.08)}
+
+/* AX v6: stop old wrapper styles from trapping fixed elements */
+body[data-page="admin"] .admin-page-body{transform:none !important;animation:none !important;filter:none !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;perspective:none !important;contain:none !important;will-change:auto !important;overflow:visible !important;opacity:1 !important}
+body[data-page="admin"] #cm{position:static}
+
+/* AX v8: command map in normal flow, no dependence on position:fixed */
+body.ax-lock{overflow:hidden !important}
+body.ax-lock .admin-page-body{display:none !important}
+body.ax-lock #cm{position:relative !important;display:block !important;overflow:hidden;margin-top:calc(56px + env(safe-area-inset-top,0px));height:calc(100vh - 56px - env(safe-area-inset-top,0px));height:calc(100dvh - 56px - env(safe-area-inset-top,0px))}
+body.ax-lock #cm .cm-view{position:absolute !important;left:var(--axl,0px) !important;right:0 !important;top:0 !important;bottom:0 !important}
+body.ax-lock #cm .cm-strip{position:absolute !important;top:8px !important}
+body.ax-lock #cm .cm-modes{position:absolute !important;top:66px !important}
+body.ax-lock #cm .cm-panel{position:absolute !important;left:0 !important;right:0 !important;bottom:0 !important;top:auto !important}
+body.ax-lock #cm .cm-ask{position:absolute !important;bottom:112px !important}
+body.ax-lock #cm .cm-sug{position:absolute !important;bottom:168px !important}
+@media (min-width:901px){
+  body.ax-lock #cm .cm-panel{left:auto !important;right:16px !important;top:12px !important;bottom:auto !important}
+  body.ax-lock #cm .cm-ask{bottom:20px !important}
+  body.ax-lock #cm .cm-sug{bottom:76px !important}
+}
+
+/* AX v9: photo map, bigger glass nodes */
+body.ax-lock .cm-view{background-image:linear-gradient(rgba(0,0,0,.10),rgba(0,0,0,.30)),url('/img/admin-map-bg.jpg') !important;background-size:cover !important;background-position:center !important;animation:none !important}
+body.ax-lock .cm-view::after{background:radial-gradient(ellipse at center,transparent 62%,rgba(0,0,0,.38)) !important}
+body.ax-lock .cm-wires path{stroke:rgba(255,255,255,.8) !important;stroke-width:1.8;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6))}
+body.ax-lock .cm-wires path.hot{stroke:#fff !important;stroke-width:2.8;filter:drop-shadow(0 0 8px #fff)}
+body.ax-lock .cm-core b,body.ax-lock .cm-core small{color:#fff !important;opacity:1;text-shadow:0 2px 8px rgba(0,0,0,.8)}
+body.ax-lock .cm-orb{width:96px;height:96px}
+body.ax-lock .cm-n{width:116px;padding:12px 6px 10px;gap:5px;border-radius:24px;color:#fff;background:linear-gradient(180deg,rgba(255,255,255,.24),rgba(255,255,255,.07)) !important;border:1px solid rgba(255,255,255,.38) !important;backdrop-filter:blur(14px) saturate(1.8);-webkit-backdrop-filter:blur(14px) saturate(1.8);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 18px 36px -14px rgba(0,0,0,.6) !important}
+html.ax-lens body.ax-lock .cm-n{backdrop-filter:url(#axLens) blur(5px) saturate(1.8)}
+body.ax-lock .cm-n b{font-size:14px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+body.ax-lock .cm-n em{font-size:19px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+body.ax-lock .cm-i{width:54px;height:54px;border-radius:18px;color:#fff;background:radial-gradient(circle at center,#0B0C10 0 57%,transparent 58%),#fff !important;box-shadow:0 10px 18px -8px rgba(0,0,0,.6)}
+body.ax-lock .cm-i svg{width:22px;height:22px}
+body.ax-lock .cm-n.p::after{border-color:#fff}
+body.ax-lock .cm-n.on{background:linear-gradient(180deg,rgba(11,12,16,.88),rgba(11,12,16,.7)) !important;border-color:rgba(255,255,255,.5) !important}
+body.ax-lock .cm-view[data-mode=tree] .cm-n{width:190px;flex-direction:row;padding:8px 14px 8px 8px;gap:10px}
+body.ax-lock .cm-view[data-mode=tree] .cm-n b{flex:1;text-align:left}
+body.ax-lock .cm-chip{background:linear-gradient(180deg,rgba(255,255,255,.26),rgba(255,255,255,.08)) !important;border:1px solid rgba(255,255,255,.38) !important;color:#fff !important;backdrop-filter:blur(14px) saturate(1.8);-webkit-backdrop-filter:blur(14px) saturate(1.8);box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
+body.ax-lock .cm-chip small{color:#fff;opacity:.8}
+body.ax-lock .cm-modes button{background:linear-gradient(180deg,rgba(255,255,255,.26),rgba(255,255,255,.08)) !important;border:1px solid rgba(255,255,255,.38) !important;color:#fff !important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+body.ax-lock .cm-modes button.on{background:#0B0C10 !important;border-color:#0B0C10 !important}
+body.ax-lock .cm-ask{background:linear-gradient(180deg,rgba(255,255,255,.26),rgba(255,255,255,.08)) !important;border:1px solid rgba(255,255,255,.4) !important;backdrop-filter:blur(14px) saturate(1.8);-webkit-backdrop-filter:blur(14px) saturate(1.8);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 18px 36px -16px rgba(0,0,0,.6) !important}
+body.ax-lock .cm-ask input{color:#fff !important}
+body.ax-lock .cm-ask input::placeholder{color:rgba(255,255,255,.75)}
+body.ax-lock .cm-ask svg{color:#fff;opacity:.85}
+
+/* AX v10: bigger, more spread nodes */
+body.ax-lock .cm-n{width:136px;padding:14px 6px 12px;gap:6px;border-radius:28px}
+body.ax-lock .cm-n b{font-size:16px}
+body.ax-lock .cm-n em{font-size:22px}
+body.ax-lock .cm-i{width:62px;height:62px;border-radius:20px}
+body.ax-lock .cm-i svg{width:26px;height:26px}
+body.ax-lock .cm-orb{width:104px;height:104px}
+body.ax-lock .cm-core b{font-size:15px}
+body.ax-lock .cm-view[data-mode=tree] .cm-n{width:220px;flex-direction:row;padding:8px 16px 8px 8px;gap:12px}
+body.ax-lock .cm-view[data-mode=tree] .cm-i{width:56px;height:56px}
+body.ax-lock .cm-view[data-mode=tree] .cm-n b{font-size:17px}
+body.ax-lock .cm-view[data-mode=tree] .cm-n em{font-size:20px}
+
+/* AX v11: medium node size */
+body.ax-lock .cm-n{width:112px;padding:11px 5px 9px;gap:4px;border-radius:24px}
+body.ax-lock .cm-n b{font-size:13.5px}
+body.ax-lock .cm-n em{font-size:18px}
+body.ax-lock .cm-i{width:48px;height:48px;border-radius:16px}
+body.ax-lock .cm-i svg{width:21px;height:21px}
+body.ax-lock .cm-orb{width:92px;height:92px}
+body.ax-lock .cm-core b{font-size:13px}
+body.ax-lock .cm-view[data-mode=tree] .cm-n{width:185px;padding:7px 14px 7px 7px;gap:10px}
+body.ax-lock .cm-view[data-mode=tree] .cm-i{width:46px;height:46px}
+body.ax-lock .cm-view[data-mode=tree] .cm-n b{font-size:15px}
+body.ax-lock .cm-view[data-mode=tree] .cm-n em{font-size:18px}
+
+/* AX v12: v9 node size on phone */
+body.ax-lock .cm-n{width:116px;padding:12px 6px 10px;gap:5px;border-radius:24px}
+body.ax-lock .cm-n b{font-size:14px}
+body.ax-lock .cm-n em{font-size:19px}
+body.ax-lock .cm-i{width:54px;height:54px;border-radius:18px}
+body.ax-lock .cm-i svg{width:22px;height:22px}
+body.ax-lock .cm-orb{width:96px;height:96px}
+body.ax-lock .cm-core b{font-size:13px}
+body.ax-lock .cm-view[data-mode=tree] .cm-n{width:190px;padding:8px 14px 8px 8px;gap:10px}
+body.ax-lock .cm-view[data-mode=tree] .cm-i{width:54px;height:54px}
+body.ax-lock .cm-view[data-mode=tree] .cm-n b{font-size:15px}
+body.ax-lock .cm-view[data-mode=tree] .cm-n em{font-size:19px}
+/* AX v12: desktop uses the original top bar */
+@media (min-width:901px){
+  .ax-top,.ax-rail{display:none !important}
+  body[data-page="admin"]{--axl:0px !important}
+  body.ax-lock #cm{margin-top:84px !important;height:calc(100vh - 84px) !important;height:calc(100dvh - 84px) !important}
+  body.ax-lock #cm .cm-panel{top:12px !important}
+}
+
+/* AX v13: original small node size on phone */
+@media (max-width:900px){
+  body.ax-lock .cm-n{width:90px;padding:8px 4px;gap:3px;border-radius:18px}
+  body.ax-lock .cm-n b{font-size:11.5px}
+  body.ax-lock .cm-n em{font-size:14px}
+  body.ax-lock .cm-i{width:38px;height:38px;border-radius:13px}
+  body.ax-lock .cm-i svg{width:18px;height:18px}
+  body.ax-lock .cm-orb{width:78px;height:78px}
+  body.ax-lock .cm-core b{font-size:12px}
+  body.ax-lock .cm-view[data-mode=tree] .cm-n{width:158px;padding:6px 12px 6px 6px;gap:8px}
+  body.ax-lock .cm-view[data-mode=tree] .cm-i{width:38px;height:38px}
+  body.ax-lock .cm-view[data-mode=tree] .cm-n b{font-size:12.5px}
+  body.ax-lock .cm-view[data-mode=tree] .cm-n em{font-size:14px}
+}

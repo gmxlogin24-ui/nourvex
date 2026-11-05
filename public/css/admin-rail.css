@@ -1,0 +1,37 @@
+/* AX v20: sidebar on every page, old top bar removed, full-width phone panel */
+body[data-page="admin"]:not(.ax-lock) .ax-top,body[data-page="admin"]:not(.ax-lock) .ax-rail,body[data-page="admin"]:not(.ax-lock) .axd,body[data-page="admin"]:not(.ax-lock) .ax-dock,body[data-page="admin"]:not(.ax-lock) .ax-sheet,body[data-page="admin"]:not(.ax-lock) .admin-topbar-float,body[data-page="admin"]:not(.ax-lock) .admin-edge-logo,body[data-page="admin"]:not(.ax-lock) .admin-edge-selected,body[data-page="admin"]:not(.ax-lock) .admin-sidebar{display:none !important}
+.ar,.ar-m,#arBk{display:none}
+body.ax-lock .ar,body.ax-lock .ar-m,body.ax-lock #arBk{display:none !important}
+body[data-page="admin"]:not(.ax-lock) .ar{display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;width:250px;z-index:90;padding:16px 12px;gap:10px;background:rgba(250,250,251,.98);border-right:1px solid #fff;box-shadow:0 30px 60px -20px rgba(0,0,0,.5);transform:translateX(-105%);transition:transform .25s ease}
+body.ar-open .ar{transform:none !important}
+body[data-page="admin"]:not(.ax-lock) .ar-m{display:flex;align-items:center;justify-content:center;position:fixed;left:12px;top:12px;z-index:70;width:46px;height:46px;border-radius:16px;border:1px solid #fff;background:#0B0C10;color:#fff;box-shadow:0 14px 28px -10px rgba(0,0,0,.6)}
+body.ar-open #arBk{display:block;position:fixed;inset:0;z-index:89;background:rgba(20,22,30,.4);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+.ar-logo{width:46px;height:46px;border-radius:16px;background:#0B0C10;color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+.ar nav{display:flex;flex-direction:column;gap:2px;flex:1;overflow:auto}
+.ar nav a{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:14px;font-size:14px;color:#3a3d45;text-decoration:none}
+.ar nav a:hover{background:rgba(15,17,21,.06)}
+.ar nav a.on{background:#0B0C10;color:#fff}
+.ar nav i,.ar nav svg{width:18px;height:18px;flex:none}
+.ar-me{display:flex;align-items:center;gap:10px;padding:10px;border-radius:18px;background:rgba(15,17,21,.05)}
+.ar-me i{width:36px;height:36px;border-radius:50%;background:#0B0C10;color:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:800}
+.ar-me b{font-size:12.5px}
+/* page area */
+html body[data-page="admin"]:not(.ax-lock) .admin-page-body{margin-left:0 !important;margin-right:0 !important;width:100% !important;max-width:none !important;padding-top:66px !important;padding-left:12px;padding-right:12px}
+html body[data-page="admin"]:not(.ax-lock) .admin-page-body.sp-on{border-radius:0 !important;border-left:0 !important;border-right:0 !important}
+html body[data-page="admin"]:not(.ax-lock) .admin-page-body .max-w-7xl,html body[data-page="admin"]:not(.ax-lock) .admin-page-body .max-w-6xl,html body[data-page="admin"]:not(.ax-lock) .admin-page-body .max-w-5xl,html body[data-page="admin"]:not(.ax-lock) .admin-page-body .max-w-4xl{padding-left:0 !important;padding-right:0 !important}
+html body[data-page="admin"]:not(.ax-lock) .admin-page-body:has(.stu){padding-left:0 !important;padding-right:0 !important}
+.stu{padding:0 0 100px !important;max-width:none !important}
+.st-rail{display:none !important}
+.st-shell{grid-template-columns:1fr !important}
+.st-panel{border-radius:0 !important;border-left:0 !important;border-right:0 !important;padding:12px}
+@media (min-width:901px){
+  body[data-page="admin"]:not(.ax-lock) .ar-m,body.ar-open #arBk{display:none !important}
+  body[data-page="admin"]:not(.ax-lock) .ar{left:12px;top:12px;bottom:12px;width:86px;padding:14px 8px;align-items:center;border-radius:30px;border:1px solid #fff;background:rgba(255,255,255,.72);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 22px 46px -30px rgba(20,22,30,.5);transform:none;z-index:55}
+  .ar nav{width:100%}
+  .ar nav a{flex-direction:column;gap:3px;padding:9px 2px;font-size:9.5px;text-align:center;color:#5d6168}
+  .ar-me{flex-direction:column;gap:2px;padding:10px 4px;width:100%;text-align:center}
+  html body[data-page="admin"]:not(.ax-lock) .admin-page-body{margin-left:112px !important;margin-right:14px !important;width:auto !important;padding-top:16px !important;padding-left:22px;padding-right:22px}
+  html body[data-page="admin"]:not(.ax-lock) .admin-page-body.sp-on{border-radius:38px !important;border:1px solid rgba(255,255,255,.95) !important}
+  html body[data-page="admin"]:not(.ax-lock) .admin-page-body:has(.stu){padding-left:0 !important;padding-right:0 !important}
+  .st-panel{border-radius:38px !important;border-left:1px solid #fff !important;border-right:1px solid #fff !important;padding:18px}
+}

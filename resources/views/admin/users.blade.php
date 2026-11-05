@@ -37,7 +37,7 @@
                     <td class="py-2 pr-4">{{ $u->name }}</td>
                     <td class="py-2 pr-4 text-muted">{{ $u->email }}</td>
                     <td class="py-2 pr-4">{{ $u->tier }}</td>
-                    <td class="py-2 pr-4">₦{{ number_format($u->wallet_balance, 2) }}</td>
+                    <td class="py-2 pr-4">{!! \App\Support\Money::coin($u->wallet_balance) !!}</td>
                     <td class="py-2 pr-4">
                         {{ $u->is_admin ? 'Admin' : ($u->role === 'customer_care' ? 'Customer Care' : 'User') }}{{ $u->is_banned ? ' · Banned' : '' }}
                     </td>

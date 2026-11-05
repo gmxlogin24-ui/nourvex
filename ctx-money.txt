@@ -1,0 +1,1199 @@
+=== config/qcoin.php ===
+<?php
+
+return [
+    // test = preview only, nothing credited, Q not redeemable. live = credits real Q.
+    'mode' => env('QCOIN_MODE', 'test'),
+
+    // Display rate: how many Q equal ₦1. Naira stays the stored balance.
+    'q_per_naira_display' => 10,
+
+    // Daily streak bonus: +step_bonus every step_days consecutive days, capped at max_bonus.
+    'streak_step_days' => 7,
+    'streak_step_bonus' => 1,
+    'streak_max_bonus' => 5,
+
+    'profit_share' => [
+        'pool_share' => 0.40,   // 40% of (revenue - costs) goes into the pool
+        'q_per_naira' => 10,    // 10 Q per ₦1 of pool
+    ],
+
+    // Q Coin price per ad duration (days => coins). Edit here.
+    'ad_prices' => [3 => 10000, 7 => 20000, 14 => 30000],
+];
+
+=== app/Services/QCoinService.php ===
+<?php
+
+namespace App\Services;
+
+use App\Models\QCoinTransaction;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use RuntimeException;
+
+class QCoinService
+{
+    // Kept for older code that may still reference it. Daily claims now come from
+    // config/plans.php (qcoin_daily) plus the personal streak bonus (config/qcoin.php).
+    public const DAILY_CLAIM_AMOUNT = 50;
+
+    /**
+     * Credit Q Coins to a user. Atomic: row-locks the user, updates balance,
+     * writes the ledger entry, all inside one DB transaction. This is the
+     * ONLY method in the codebase that should increase q_coin_balance.
+     */
+    public function earn(User $user, int $amount, string $type, ?string $description = null, ?string $referenceId = null): QCoinTransaction
+    {
+        if ($amount <= 0) {
+            throw new RuntimeException('Earn amount must be positive.');
+        }
+
+        return DB::transaction(function () use ($user, $amount, $type, $description, $referenceId) {
+            $locked = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+
+            $locked->q_coin_balance += $amount;
+            $locked->save();
+
+            $txn = QCoinTransaction::create([
+                'user_id' => $locked->id,
+                'amount' => $amount,
+                'balance_after' => $locked->q_coin_balance,
+                'type' => $type,
+                'description' => $description,
+                'reference_id' => $referenceId,
+            ]);
+
+            // Keep the caller's in-memory model in sync.
+            $user->q_coin_balance = $locked->q_coin_balance;
+
+            return $txn;
+        });
+    }
+
+    /**
+     * Debit Q Coins from a user (spend/redemption). Throws if insufficient balance.
+     * ONLY method that should decrease q_coin_balance.
+     */
+    public function spend(User $user, int $amount, string $type, ?string $description = null, ?string $referenceId = null): QCoinTransaction
+    {
+        if ($amount <= 0) {
+            throw new RuntimeException('Spend amount must be positive.');
+        }
+
+        return DB::transaction(function () use ($user, $amount, $type, $description, $referenceId) {
+            $locked = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+
+            if ($locked->q_coin_balance < $amount) {
+                throw new RuntimeException('Insufficient Q Coin balance.');
+            }
+
+            $locked->q_coin_balance -= $amount;
+            $locked->save();
+
+            $txn = QCoinTransaction::create([
+                'user_id' => $locked->id,
+                'amount' => -$amount,
+                'balance_after' => $locked->q_coin_balance,
+                'type' => $type,
+                'description' => $description,
+                'reference_id' => $referenceId,
+            ]);
+
+            $user->q_coin_balance = $locked->q_coin_balance;
+
+            return $txn;
+        });
+    }
+
+    // Base daily claim for the user's plan (admins get the top plan's amount).
+    public function baseFor(User $user): int
+    {
+        if ($user->isAdmin()) {
+            return (int) config('plans.tier3.qcoin_daily', 0);
+        }
+        return (int) $user->planRule('qcoin_daily', 0);
+    }
+
+    // Personal streak bonus: grows by step_bonus every step_days consecutive days, capped.
+    public function streakBonusFor(int $streakDays): int
+    {
+        $stepDays = max(1, (int) config('qcoin.streak_step_days', 7));
+        $stepBonus = (int) config('qcoin.streak_step_bonus', 5);
+        $max = (int) config('qcoin.streak_max_bonus', 25);
+
+        return min(intdiv(max($streakDays, 0), $stepDays) * $stepBonus, $max);
+    }
+
+    /**
+     * Daily claim, with the "already claimed today" check done INSIDE the
+     * lock so two simultaneous requests can't both succeed.
+     */
+    public function claimDaily(User $user): QCoinTransaction
+    {
+        $today = now()->toDateString();
+        $yesterday = now()->subDay()->toDateString();
+
+        return DB::transaction(function () use ($user, $today, $yesterday) {
+            $locked = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+
+            if ($locked->q_coin_last_claim_date === $today) {
+                throw new RuntimeException('Already claimed today.');
+            }
+
+            $base = $this->baseFor($locked);
+            if ($base <= 0) {
+                throw new RuntimeException('Your plan does not include daily Q Coins.');
+            }
+
+            $newStreak = ($locked->q_coin_last_claim_date === $yesterday)
+                ? $locked->q_coin_streak_days + 1
+                : 1;
+
+            $bonus = $this->streakBonusFor($newStreak);
+            $total = $base + $bonus;
+
+            $locked->q_coin_balance += $total;
+            $locked->q_coin_last_claim_date = $today;
+            $locked->q_coin_streak_days = $newStreak;
+            $locked->save();
+
+            $txn = QCoinTransaction::create([
+                'user_id' => $locked->id,
+                'amount' => $total,
+                'balance_after' => $locked->q_coin_balance,
+                'type' => 'daily_claim',
+                'description' => $bonus > 0
+                    ? "Daily claim + streak bonus (day {$newStreak})"
+                    : 'Daily Q Coin claim',
+            ]);
+
+            $user->q_coin_balance = $locked->q_coin_balance;
+            $user->q_coin_last_claim_date = $today;
+            $user->q_coin_streak_days = $newStreak;
+
+            return $txn;
+        });
+    }
+}
+
+=== app/Models/Withdrawal.php ===
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Withdrawal extends Model
+{
+    protected $fillable = [
+        'user_id', 'tx_ref', 'amount', 'fee',
+        'bank_code', 'bank_name', 'account_number', 'account_name', 'status',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}
+
+=== app/Models/QCoinTransaction.php ===
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Model;
+
+#[Fillable(['user_id', 'amount', 'balance_after', 'type', 'description', 'reference_id'])]
+class QCoinTransaction extends Model
+{
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}
+
+=== app/Models/Transaction.php ===
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Transaction extends Model
+{
+    protected $fillable = ['user_id', 'related_user_id', 'type', 'amount', 'description', 'reference', 'status'];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function relatedUser()
+    {
+        return $this->belongsTo(User::class, 'related_user_id');
+    }
+}
+
+=== app/Http/Controllers/WalletActionController.php ===
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Transaction;
+use App\Models\User;
+use App\Models\Withdrawal;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+
+class WalletActionController extends Controller
+{
+    // No-BVN accounts pay a 1.5% withdrawal fee; verified (virtual account / BVN)
+    // accounts withdraw free. This is the only friction non-BVN users face -
+    // withdrawals are never blocked, just costlier, matching the deposit cap logic.
+    const NO_BVN_WITHDRAWAL_FEE_RATE = 0.015;
+
+    public function withdraw(Request $request)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:100',
+            'pin' => 'required|string',
+        ]);
+        $user = Auth::user();
+
+        if (!$user->hasTransactionPin()) {
+            return back()->withErrors(['pin' => 'Set a transaction PIN before withdrawing.']);
+        }
+        if (!$user->verifyTransactionPin($validated['pin'])) {
+            return back()->withErrors(['pin' => 'Incorrect transaction PIN.']);
+        }
+        if (!$user->payout_account_number) {
+            return back()->withErrors(['amount' => 'Add a payout bank account before withdrawing.']);
+        }
+
+        $hasVirtualAccount = (bool) $user->virtual_account_number;
+        $fee = $hasVirtualAccount ? 0 : round($validated['amount'] * self::NO_BVN_WITHDRAWAL_FEE_RATE, 2);
+        $totalDebit = $validated['amount'] + $fee;
+        $txRef = 'WD-' . $user->id . '-' . time();
+
+        // Debit immediately so the funds can't be double-spent while the
+        // transfer is in flight. If the Paystack call fails to even
+        // initiate, we reverse this below. If it initiates but the bank
+        // payout later fails, the transfer.completed webhook reverses it.
+        $debited = DB::transaction(function () use ($user, $validated, $fee, $totalDebit, $txRef) {
+            $lockedUser = User::where('id', $user->id)->lockForUpdate()->first();
+
+            if ($lockedUser->wallet_restricted) {
+                return false;
+            }
+
+            if ($lockedUser->wallet_balance < $totalDebit) {
+                return false;
+            }
+
+            $lockedUser->decrement('wallet_balance', $totalDebit);
+
+            Withdrawal::create([
+                'user_id' => $lockedUser->id,
+                'tx_ref' => $txRef,
+                'amount' => $validated['amount'],
+                'fee' => $fee,
+                'bank_code' => $lockedUser->payout_bank_code,
+                'bank_name' => $lockedUser->payout_bank_name,
+                'account_number' => $lockedUser->payout_account_number,
+                'account_name' => $lockedUser->payout_account_name,
+                'status' => 'pending',
+            ]);
+
+            Transaction::create([
+                'user_id' => $lockedUser->id,
+                'type' => 'withdrawal',
+                'amount' => -$validated['amount'],
+                'description' => 'Withdrawal to ' . $lockedUser->payout_bank_name . ' ****' . substr($lockedUser->payout_account_number, -4),
+            ]);
+
+            if ($fee > 0) {
+                Transaction::create([
+                    'user_id' => $lockedUser->id,
+                    'type' => 'withdrawal_fee',
+                    'amount' => -$fee,
+                    'description' => 'No-BVN withdrawal fee (1.5%)',
+                ]);
+            }
+
+            return true;
+        });
+
+        if (!$debited) {
+            $restricted = User::where('id', $user->id)->value('wallet_restricted');
+            if ($restricted) {
+                return back()->withErrors(['amount' => 'Your wallet is restricted due to an unresolved payment issue. Clear your balance to make withdrawals.']);
+            }
+            $msg = $fee > 0
+                ? 'Insufficient balance. You need ₦' . number_format($totalDebit, 2) . ' (amount + 1.5% no-BVN fee).'
+                : 'Insufficient balance.';
+            return back()->withErrors(['amount' => $msg]);
+        }
+
+        try {
+            $secret = config('services.paystack.secret');
+
+            // Paystack requires a transfer recipient to exist before you can pay it.
+            $recipientRes = Http::withToken($secret)->post('https://api.paystack.co/transferrecipient', [
+                'type' => 'nuban',
+                'name' => $user->payout_account_name,
+                'account_number' => $user->payout_account_number,
+                'bank_code' => $user->payout_bank_code,
+                'currency' => 'NGN',
+            ]);
+            $recipientData = $recipientRes->json();
+            $recipientCode = $recipientData['data']['recipient_code'] ?? null;
+
+            if (!$recipientCode) {
+                $initiated = false;
+            } else {
+                $response = Http::withToken($secret)->post('https://api.paystack.co/transfer', [
+                    'source' => 'balance',
+                    'amount' => (int) round($validated['amount'] * 100),
+                    'recipient' => $recipientCode,
+                    'reference' => $txRef,
+                    'reason' => 'NAURVEX withdrawal',
+                ]);
+                $data = $response->json();
+                $initiated = ($data['status'] ?? false) === true && !in_array($data['data']['status'] ?? '', ['otp', 'failed', 'reversed'], true);
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Withdrawal transfer init failed: ' . $e->getMessage());
+            $initiated = false;
+        }
+
+        if (!$initiated) {
+            $this->reverseWithdrawal($txRef, 'Withdrawal could not be started - refunded to wallet');
+            return back()->withErrors(['amount' => 'Could not start the transfer. Your wallet has not been charged.']);
+        }
+
+        return redirect()->route('wallet.index')->with('status', 'Withdrawal of ₦' . number_format($validated['amount'], 2) . ' is processing.');
+    }
+
+    public function reverseWithdrawal(string $txRef, string $reason): void
+    {
+        DB::transaction(function () use ($txRef, $reason) {
+            $withdrawal = Withdrawal::where('tx_ref', $txRef)->lockForUpdate()->first();
+            if (!$withdrawal || $withdrawal->status !== 'pending') {
+                return;
+            }
+
+            $withdrawal->update(['status' => 'failed']);
+            $user = User::where('id', $withdrawal->user_id)->lockForUpdate()->first();
+            $refundAmount = (float) $withdrawal->amount + (float) $withdrawal->fee;
+            $user->increment('wallet_balance', $refundAmount);
+
+            Transaction::create([
+                'user_id' => $user->id,
+                'type' => 'withdrawal_reversal',
+                'amount' => $refundAmount,
+                'description' => $reason,
+            ]);
+        });
+    }
+}
+
+=== app/Http/Controllers/WalletController.php ===
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Transaction;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+class WalletController extends Controller
+{
+    public function sendMoneyForm()
+    {
+        return view('wallet.send', [
+            'hasPin' => Auth::user()->hasTransactionPin(),
+        ]);
+    }
+
+    // AJAX: show the sender the recipient's real name before they commit to
+    // sending. Display-only - sendMoney() below re-looks-up the recipient
+    // itself before crediting anything, so this can't be tampered with
+    // client-side, matching BankAccountController::resolve()'s pattern.
+    public function resolveRecipient(Request $request)
+    {
+        $validated = $request->validate([
+            'recipient_identifier' => 'required|string',
+        ]);
+
+        $sender = Auth::user();
+        $recipient = User::where('email', $validated['recipient_identifier'])
+            ->orWhere('id', $validated['recipient_identifier'])
+            ->first();
+
+        if (!$recipient) {
+            return response()->json(['error' => 'No user found with that email or ID.'], 422);
+        }
+        if ($recipient->id === $sender->id) {
+            return response()->json(['error' => 'You cannot send money to yourself.'], 422);
+        }
+
+        return response()->json(['name' => $recipient->name]);
+    }
+
+    // Locked transaction, mirrors the pattern used everywhere else in this app
+    // (GigController deposit, NewsController::storeAd, ServicesController::processPurchase)
+    // to prevent race conditions on concurrent transfer requests.
+    public function sendMoney(Request $request)
+    {
+        $sender = Auth::user();
+        $validated = $request->validate([
+            'recipient_identifier' => 'required|string',
+            'amount' => 'required|numeric|min:1',
+            'note' => 'nullable|string|max:255',
+            'pin' => 'required|string',
+        ]);
+
+        if (!$sender->hasTransactionPin()) {
+            return back()->withErrors(['pin' => 'Set a transaction PIN before sending money.'])->withInput();
+        }
+        if (!$sender->verifyTransactionPin($validated['pin'])) {
+            return back()->withErrors(['pin' => 'Incorrect transaction PIN.'])->withInput();
+        }
+
+        $recipient = User::where('email', $validated['recipient_identifier'])
+            ->orWhere('id', $validated['recipient_identifier'])
+            ->first();
+
+        if (!$recipient) {
+            return back()->withErrors(['recipient_identifier' => 'No user found with that email or ID.'])->withInput();
+        }
+
+        if ($recipient->id === $sender->id) {
+            return back()->withErrors(['recipient_identifier' => 'You cannot send money to yourself.'])->withInput();
+        }
+
+        $result = DB::transaction(function () use ($sender, $recipient, $validated) {
+            $lockedSender = User::where('id', $sender->id)->lockForUpdate()->first();
+
+            if ($lockedSender->wallet_restricted) {
+                return ['status' => 'restricted'];
+            }
+            if ($lockedSender->wallet_balance < $validated['amount']) {
+                return ['status' => 'insufficient'];
+            }
+
+            $lockedRecipient = User::where('id', $recipient->id)->lockForUpdate()->first();
+
+            if ($lockedRecipient->wouldExceedNoBvnCap($validated['amount'])) {
+                return ['status' => 'recipient_capped'];
+            }
+
+            $lockedSender->decrement('wallet_balance', $validated['amount']);
+            $lockedRecipient->increment('wallet_balance', $validated['amount']);
+
+            $note = $validated['note'] ?? '';
+
+            // Internal wallet-to-wallet transfer - no bank/Paystack is involved,
+            // so NAURVEX generates its own reference, shared by both legs of
+            // the transfer (same convention banks use between debit/credit legs).
+            $reference = 'NRX' . now()->format('ymd') . strtoupper(substr(bin2hex(random_bytes(4)), 0, 6));
+
+            $senderTxn = Transaction::create([
+                'user_id' => $lockedSender->id,
+                'related_user_id' => $lockedRecipient->id,
+                'type' => 'transfer_sent',
+                'amount' => -$validated['amount'],
+                'description' => 'Sent to ' . $lockedRecipient->name . ($note ? ': ' . $note : ''),
+                'reference' => $reference,
+                'status' => 'successful',
+            ]);
+            Transaction::create([
+                'user_id' => $lockedRecipient->id,
+                'related_user_id' => $lockedSender->id,
+                'type' => 'transfer_received',
+                'amount' => $validated['amount'],
+                'description' => 'Received from ' . $lockedSender->name . ($note ? ': ' . $note : ''),
+                'reference' => $reference,
+                'status' => 'successful',
+            ]);
+            $lockedRecipient->notify(new \App\Notifications\MoneyReceived($lockedSender, $validated['amount'], $note ?: null));
+
+            return ['status' => 'ok', 'txn_id' => $senderTxn->id];
+        });
+
+        return match ($result['status']) {
+            'restricted' => back()->withErrors(['amount' => 'Your wallet is restricted due to an unresolved payment issue.'])->withInput(),
+            'insufficient' => back()->withErrors(['amount' => 'Insufficient wallet balance.'])->withInput(),
+            'recipient_capped' => back()->withErrors(['recipient_identifier' => 'This recipient has an unverified wallet and cannot receive that much right now.'])->withInput(),
+            default => redirect()->route('wallet.transaction.show', $result['txn_id']),
+        };
+    }
+
+    public function showTransaction($id)
+    {
+        $transaction = Transaction::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+
+        return view('wallet.receipt', ['tx' => $transaction]);
+    }
+
+    public function index()
+    {
+        $user = Auth::user();
+
+        return view('wallet.index', [
+            'balance' => $user->wallet_balance,
+            'transactions' => Transaction::where('user_id', $user->id)->latest()->get(),
+            'hasPin' => $user->hasTransactionPin(),
+            'hasBankAccount' => (bool) $user->payout_account_number,
+            'isVerified' => (bool) $user->virtual_account_number,
+            'walletCapRemaining' => $user->virtual_account_number ? null : max(0, \App\Models\User::NO_BVN_WALLET_CAP - $user->wallet_balance),
+        ]);
+    }
+
+    public function moneyTracker()
+    {
+        $user = Auth::user();
+
+        abort_unless(in_array($user->tier, ['tier2', 'tier3'], true), 403, 'Money Tracker is available on the Gold plan and above. Upgrade to unlock detailed cash flow tracking.');
+
+        $totalIn = Transaction::where('user_id', $user->id)->where('amount', '>', 0)->sum('amount');
+        $totalOut = abs(Transaction::where('user_id', $user->id)->where('amount', '<', 0)->sum('amount'));
+
+        $categoryTotals = Transaction::where('user_id', $user->id)
+            ->selectRaw('type, SUM(ABS(amount)) as total')
+            ->groupBy('type')
+            ->pluck('total', 'type');
+
+        $driver = \DB::connection()->getDriverName();
+        $ymExpr = match ($driver) {
+            'pgsql' => "TO_CHAR(created_at, 'YYYY-MM')",
+            'sqlite' => "strftime('%Y-%m', created_at)",
+            default => "DATE_FORMAT(created_at, '%Y-%m')", // mysql/mariadb
+        };
+
+        $monthly = Transaction::where('user_id', $user->id)
+            ->where('created_at', '>=', now()->subMonths(6))
+            ->selectRaw("$ymExpr as ym, SUM(CASE WHEN amount > 0 THEN amount ELSE 0 END) as inflow, SUM(CASE WHEN amount < 0 THEN ABS(amount) ELSE 0 END) as outflow")
+            ->groupBy('ym')
+            ->orderBy('ym')
+            ->get();
+
+        return view('money-tracker.index', [
+            'balance' => $user->wallet_balance,
+            'totalIn' => $totalIn,
+            'totalOut' => $totalOut,
+            'categoryTotals' => $categoryTotals,
+            'monthly' => $monthly,
+            'transactions' => Transaction::where('user_id', $user->id)->latest()->take(30)->get(),
+        ]);
+    }
+
+    public function deposit()
+    {
+        $user = Auth::user();
+
+        return view('wallet.deposit', [
+            'user' => $user,
+            'balance' => $user->wallet_balance,
+            'hasVirtual' => (bool) $user->virtual_account_number,
+            'walletCapRemaining' => $user->virtual_account_number ? null : max(0, \App\Models\User::NO_BVN_WALLET_CAP - $user->wallet_balance),
+            'recent' => \App\Models\Transaction::where('user_id', $user->id)->where('type', 'wallet_topup')->latest()->limit(5)->get(),
+        ]);
+    }
+
+    public function depositStatus($reference)
+    {
+        $topup = \App\Models\WalletTopup::where('tx_ref', $reference)->where('user_id', Auth::id())->firstOrFail();
+        $tx = $topup->status === 'successful'
+            ? \App\Models\Transaction::where('user_id', Auth::id())->where('type', 'wallet_topup')->where('amount', $topup->amount)->latest()->first()
+            : null;
+
+        return view('wallet.deposit-status', [
+            'topup' => $topup,
+            'tx' => $tx,
+            'balance' => Auth::user()->wallet_balance,
+        ]);
+    }
+}
+
+=== app/Http/Controllers/AdminCoinController.php ===
+<?php
+namespace App\Http\Controllers;
+
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
+class AdminCoinController extends Controller
+{
+    private function safe(callable $f)
+    {
+        try { return $f(); } catch (\Throwable $e) { return null; }
+    }
+
+    public function index()
+    {
+        $rate = 20.0;
+        foreach (['qcoin.rate', 'qcoin.display_rate', 'qcoin.per_naira', 'qcoin.q_per_naira', 'investment.qcoin_per_naira'] as $k) {
+            $v = config($k);
+            if (is_numeric($v) && $v > 0) { $rate = (float) $v; break; }
+        }
+        $daily = [];
+        $fees = [];
+        $defD = [0, 10, 15, 20];
+        $defF = [0.05, 0.03, 0, 0];
+        for ($t = 0; $t < 4; $t++) {
+            $daily[] = (float) config("plans.rules.tier$t.qcoin_daily", config("plans.tier$t.qcoin_daily", $defD[$t]));
+            $fees[] = (float) config("plans.rules.tier$t.gigs_commission", config("plans.tier$t.gigs_commission", $defF[$t]));
+        }
+        $hasTx = $this->safe(fn () => Schema::hasTable('q_coin_transactions'));
+        $hasBal = $this->safe(fn () => Schema::hasColumn('users', 'q_coin_balance'));
+        $tiers = $this->safe(fn () => DB::table('users')->selectRaw('tier, count(*) as c')->groupBy('tier')->pluck('c', 'tier')->all()) ?: [];
+        $day = now()->subDay();
+        $data = [
+            'rate' => $rate,
+            'users' => (int) $this->safe(fn () => DB::table('users')->count()),
+            'tiers' => $tiers,
+            'daily' => $daily,
+            'fees' => $fees,
+            'platformFee' => (float) config('investment.platform_fee_percent', 5),
+            'supply' => $hasBal ? (float) $this->safe(fn () => DB::table('users')->sum('q_coin_balance')) : 0,
+            'holders' => $hasBal ? (int) $this->safe(fn () => DB::table('users')->where('q_coin_balance', '>', 0)->count()) : 0,
+            'tx' => $hasTx ? (int) $this->safe(fn () => DB::table('q_coin_transactions')->count()) : 0,
+            'tx24' => $hasTx ? (int) $this->safe(fn () => DB::table('q_coin_transactions')->where('created_at', '>=', $day)->count()) : 0,
+            'in24' => $hasTx ? (float) $this->safe(fn () => DB::table('q_coin_transactions')->where('created_at', '>=', $day)->where('amount', '>', 0)->sum('amount')) : 0,
+            'out24' => $hasTx ? (float) $this->safe(fn () => DB::table('q_coin_transactions')->where('created_at', '>=', $day)->where('amount', '<', 0)->sum('amount')) : 0,
+            'types' => $hasTx ? ($this->safe(fn () => DB::table('q_coin_transactions')->where('created_at', '>=', now()->subDays(30))
+                ->select('type', DB::raw('count(*) as c'), DB::raw('sum(amount) as s'))->groupBy('type')->orderByDesc('c')->limit(12)->get()
+                ->map(fn ($r) => ['type' => (string) $r->type, 'c' => (int) $r->c, 's' => round((float) $r->s, 2)])->values()->all()) ?: []) : [],
+            'cfg' => collect(config('qcoin', []))->filter(fn ($v, $k) => is_scalar($v) && !preg_match('/key|secret|token|pass/i', (string) $k))->all(),
+        ];
+        return view('admin.coin', ['data' => $data]);
+    }
+}
+
+=== app/Http/Controllers/QCoinController.php ===
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\QCoinTransaction;
+use App\Services\QCoinService;
+use RuntimeException;
+
+class QCoinController extends Controller
+{
+    public function index(QCoinService $qcoin)
+    {
+        $user = auth()->user();
+        $today = now()->toDateString();
+
+        $todayEarned = QCoinTransaction::where('user_id', $user->id)
+            ->whereDate('created_at', $today)
+            ->where('amount', '>', 0)
+            ->sum('amount');
+        $totalEarned = QCoinTransaction::where('user_id', $user->id)->where('amount', '>', 0)->sum('amount');
+        $totalSpent = abs(QCoinTransaction::where('user_id', $user->id)->where('amount', '<', 0)->sum('amount'));
+        $history = QCoinTransaction::where('user_id', $user->id)->latest()->limit(30)->get();
+
+        $canClaimToday = $user->q_coin_last_claim_date !== $today;
+        $nextStreak = $user->q_coin_last_claim_date === now()->subDay()->toDateString() ? $user->q_coin_streak_days + 1 : 1;
+        $nextStreakBonus = $qcoin->streakBonusFor($nextStreak);
+        $dailyBase = $qcoin->baseFor($user);
+
+        return view('q-coin.index', [
+            'pageKey' => 'qcoin',
+            'balance' => $user->q_coin_balance,
+            'todayEarned' => $todayEarned,
+            'totalEarned' => $totalEarned,
+            'totalSpent' => $totalSpent,
+            'streakDays' => $user->q_coin_streak_days,
+            'canClaimToday' => $canClaimToday,
+            'nextStreakBonus' => $nextStreakBonus,
+            'dailyBase' => $dailyBase,
+            'qcoinLocked' => $dailyBase <= 0,
+            'history' => $history,
+        ]);
+    }
+
+    public function claim(QCoinService $qcoin)
+    {
+        $user = auth()->user();
+
+        if ($qcoin->baseFor($user) <= 0) {
+            return back()->with('error', 'Daily Q Coin claims start on the Silver plan. Upgrade to unlock them.');
+        }
+
+        try {
+            $txn = $qcoin->claimDaily($user);
+        } catch (RuntimeException $e) {
+            return back()->with('error', $e->getMessage() === 'Already claimed today.'
+                ? "You've already claimed today's Q Coins."
+                : $e->getMessage());
+        }
+
+        app(\App\Services\LevelBadgeService::class)->refresh($user);
+
+        try {
+            app(\App\Services\RankingService::class)->award($user, 'qcoin_claim', null, 'claim:' . now()->toDateString());
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        return back()->with('success', 'You claimed ' . $txn->amount . ' Q Coins!');
+    }
+}
+
+=== app/Services/GigPayoutService.php ===
+<?php
+
+namespace App\Services;
+
+use App\Models\Gig;
+use App\Models\Transaction;
+use App\Models\User;
+
+class GigPayoutService
+{
+    /**
+     * Pays a worker (and their referrer's bonus, if any) for a gig.
+     * Must always be called from inside a DB::transaction() with $worker
+     * already locked (lockForUpdate) by the caller — this method does not
+     * open its own transaction or lock.
+     *
+     * $overrideAmount: if given, pays out based on this amount instead of
+     * the gig's full price — used for partial dispute resolutions where
+     * the worker is only paid for a percentage of the job. Null (default)
+     * keeps the normal full-payout behavior.
+     */
+    public function payout(Gig $gig, User $worker, ?float $overrideAmount = null): void
+    {
+        $baseAmount = $overrideAmount ?? $gig->amount;
+
+        $rate = (float) $worker->planRule('gigs_commission', 0.05);
+        $commission = round($baseAmount * $rate, 2);
+        $payout = $baseAmount - $commission;
+
+        $worker->increment('wallet_balance', $payout);
+        Transaction::create([
+            'user_id' => $worker->id,
+            'type' => 'gig_earning',
+            'amount' => $payout,
+            'description' => 'Completed gig: ' . $gig->title . ($commission > 0 ? ' (after ₦' . number_format($commission) . ' platform fee)' : '') . ($overrideAmount !== null ? ' (partial payout)' : ''),
+        ]);
+        \App\Models\PlatformRevenue::record('gigs', $commission, 'Commission: ' . $gig->title, 'gig', $gig->id);
+
+        try {
+            app(\App\Services\RankingService::class)->award($worker, 'gig_completed', null, 'gig:' . $gig->id);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        if ($worker->referred_by) {
+            $referrer = User::where('id', $worker->referred_by)->lockForUpdate()->first();
+            if ($referrer && !$referrer->wallet_restricted) {
+                $pct = (float) $referrer->planRule('referral_pct', 0);
+                $bonus = $payout * $pct;
+                if ($bonus > 0) {
+                    $referrer->increment('wallet_balance', $bonus);
+                    Transaction::create([
+                        'user_id' => $referrer->id,
+                        'type' => 'referral_bonus',
+                        'amount' => $bonus,
+                        'description' => 'Referral bonus from ' . $worker->name . ' completing a gig',
+                    ]);
+                }
+            }
+        }
+    }
+}
+
+=== database/migrations/2026_09_07_151422_create_withdrawals_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('withdrawals', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('tx_ref')->unique();
+            $table->decimal('amount', 12, 2);
+            $table->decimal('fee', 12, 2)->default(0);
+            $table->string('bank_code');
+            $table->string('bank_name');
+            $table->string('account_number');
+            $table->string('account_name')->nullable();
+            $table->string('status')->default('pending'); // pending, successful, failed
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('withdrawals');
+    }
+};
+
+=== database/migrations/2026_08_25_000000_add_q_coin_balance_to_users_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->unsignedBigInteger('q_coin_balance')->default(0)->after('wallet_balance');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('q_coin_balance');
+        });
+    }
+};
+
+=== database/migrations/2026_08_25_000001_create_q_coin_transactions_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('q_coin_transactions', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            // Signed - earning is positive, redemption/spend is negative. Kept
+            // entirely separate from the real-money `transactions` table so
+            // Q Coin activity can never be summed into Naira totalIn/totalOut.
+            $table->integer('amount');
+            $table->string('type'); // e.g. daily_claim, task_reward, referral, redemption
+            $table->string('description')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('q_coin_transactions');
+    }
+};
+
+=== resources/views/wallet/index.blade.php ===
+@extends('layouts.app-authenticated')
+@section('title', 'Wallet')
+@section('content')
+@php
+  $wlDark = (auth()->user()->theme_style ?? '') === 'qelvo-dark';
+  $wlTxCount = count($transactions);
+  $wlTier = auth()->user()->tier ?? 'free';
+@endphp
+<link rel="stylesheet" href="{{ asset('css/wallet-redesign.css') }}?v={{ time() }}">
+<div class="wl {{ $wlDark ? 'wl-dark' : '' }}">
+  <header class="wl-head">
+    <h1>Wallet</h1>
+    <p>Money in, money out, all in one place.</p>
+  </header>
+
+  @if(session('status'))<div class="wl-flash ok">{{ session('status') }}</div>@endif
+  @if($errors->any())<div class="wl-flash bad">{{ $errors->first() }}</div>@endif
+  @if(!($isVerified ?? true))
+    <div class="wl-notice">
+      <b>Unverified wallet limit</b>
+      <span>You can hold up to ₦{{ number_format($walletCapRemaining ?? 0) }} more before you need to verify your BVN. Earnings from gigs, sales and referrals aren't affected.</span>
+    </div>
+  @endif
+
+  <div class="wl-grid">
+    <div class="wl-col-a">
+      <section class="wl-balance">
+        <p class="wl-lbl">Total balance</p>
+        <p class="wl-amt">₦{{ number_format($balance, 2) }}</p>
+        <div class="wl-actions">
+          <button type="button" class="wl-act primary" onclick="document.getElementById('withdrawModal').classList.add('open')"><i data-lucide="arrow-down-to-line"></i><span>Withdraw</span></button>
+          <a href="{{ route('wallet.deposit') }}" class="wl-act"><i data-lucide="plus"></i><span>Top up</span></a>
+          <a href="{{ route('wallet.send.form') }}" class="wl-act"><i data-lucide="send"></i><span>Send</span></a>
+        </div>
+      </section>
+
+      <a href="{{ route('wallet.virtual-account') }}" class="wl-link">
+        <span class="ib"><i data-lucide="landmark"></i></span>
+        <span><b>Activate NAURVEX Pay</b><small>Fund your wallet by bank transfer, anytime</small></span>
+        <i data-lucide="chevron-right" class="go"></i>
+      </a>
+
+      <a href="{{ route('wallet.bank-account.edit') }}" class="wl-link">
+        <span class="ib"><i data-lucide="building-2"></i></span>
+        <span><b>{{ $hasBankAccount ? 'Payout bank account' : 'Add payout bank account' }}</b><small>{{ $hasBankAccount ? 'Where your withdrawals are sent' : 'Required before you can withdraw' }}</small></span>
+        <i data-lucide="chevron-right" class="go"></i>
+      </a>
+
+      @if(in_array($wlTier, ['tier2', 'tier3'], true))
+      <a href="{{ route('money-tracker.index') }}" class="wl-link">
+        <span class="ib"><i data-lucide="trending-up"></i></span>
+        <span><b>Money Tracker</b><small>See your cash flow by month</small></span>
+        <i data-lucide="chevron-right" class="go"></i>
+      </a>
+      @endif
+    </div>
+
+    <div class="wl-col-b">
+      <section class="wl-card">
+        <div class="wl-card-head"><h2>Transaction history</h2><span>{{ $wlTxCount }} {{ $wlTxCount === 1 ? 'entry' : 'entries' }}</span></div>
+        @if($wlTxCount === 0)
+          <p class="wl-empty">No transactions yet. Earnings from gigs, sales and referrals will show up here.</p>
+        @else
+          <div class="wl-list">
+            @foreach($transactions as $tx)
+            <a href="{{ route('wallet.transaction.show', $tx->id) }}" class="wl-row">
+              <span style="min-width:0">
+                <span class="wl-rt" style="display:block">{{ $tx->description }}</span>
+                <span class="wl-rs">{{ $tx->created_at->diffForHumans() }}{{ $tx->reference ? ' · ' . $tx->reference : '' }}</span>
+              </span>
+              <span class="wl-amt-row {{ $tx->amount >= 0 ? 'in' : '' }}">{{ $tx->amount >= 0 ? '+' : '' }}₦{{ number_format($tx->amount, 2) }}</span>
+            </a>
+            @endforeach
+          </div>
+        @endif
+      </section>
+    </div>
+  </div>
+</div>
+
+<div id="topupModal" class="modal-overlay">
+    <div class="glass-card p-6 max-w-sm mx-auto mt-24">
+        <h3 class="font-semibold mb-3">Top Up Wallet</h3>
+        <form method="POST" action="{{ route('paystack.initiate') }}">
+            @csrf
+            <input type="number" name="amount" min="100" max="1000000" step="0.01" inputmode="decimal" autocomplete="off" placeholder="Amount (₦)" required class="input-field !mt-0 mb-3">
+            <button type="submit" class="btn-primary w-full justify-center">Continue to Payment</button>
+        </form>
+        <button onclick="document.getElementById('topupModal').classList.remove('open')" class="text-muted text-sm mt-3 w-full text-center">Cancel</button>
+    </div>
+</div>
+
+<div id="withdrawModal" class="modal-overlay">
+    <div class="glass-card p-6 max-w-sm mx-auto mt-24">
+        <h3 class="font-semibold mb-3">Withdraw Funds</h3>
+        @unless($hasPin ?? false)
+        <p class="text-sm text-muted mb-3">You need a transaction PIN before withdrawing. <a href="{{ route('wallet.pin.edit') }}" class="underline font-semibold">Set one now</a>.</p>
+        @endunless
+        @unless($hasBankAccount ?? false)
+        <p class="text-sm text-muted mb-3">Add a payout bank account before withdrawing. <a href="{{ route('wallet.bank-account.edit') }}" class="underline font-semibold">Add one now</a>.</p>
+        @endunless
+        <form method="POST" action="{{ route('wallet.withdraw') }}" onsubmit="return confirm('Withdraw this amount to your bank account? This cannot be reversed once submitted.');">
+            @csrf
+            <input type="number" name="amount" min="100" max="1000000" step="0.01" inputmode="decimal" autocomplete="off" placeholder="Amount (₦)" required class="input-field !mt-0 mb-3">
+            <input type="password" name="pin" inputmode="numeric" maxlength="6" placeholder="Transaction PIN" required class="input-field !mt-0 mb-3">
+            <button type="submit" class="btn-primary w-full justify-center" {{ (($hasPin ?? false) && ($hasBankAccount ?? false)) ? '' : 'disabled' }}>Confirm Withdraw</button>
+        </form>
+        <button onclick="document.getElementById('withdrawModal').classList.remove('open')" class="text-muted text-sm mt-3 w-full text-center">Cancel</button>
+    </div>
+</div>
+@endsection
+
+=== resources/views/partials/glass-balance-card.blade.php ===
+<div class="balance-folder reveal-on-scroll" id="balanceFolder">
+    <span class="folder-tab"></span>
+    <div class="folder-stack-edge"></div>
+
+    <div class="folder-card-slot" id="folderCardSlot">
+        <div class="glass-balance-card" id="glassBalanceCard">
+            <div class="glass-balance-eyebrow">
+                <span><span class="live-dot"></span>Total Balance</span>
+                <span>{{ now()->format('M j') }}</span>
+            </div>
+            <p class="glass-balance-amount" id="glassBalanceAmount" data-target="{{ (float) ($balance ?? 0) }}">₦0.00</p>
+            <p class="glass-balance-sub">Available across wallet &amp; virtual account</p>
+            <div class="glass-balance-actions">
+                <a href="{{ route('wallet.index') }}" class="glass-chip primary"><i data-lucide="plus" class="w-4 h-4"></i> Top Up</a>
+                <a href="{{ route('wallet.index') }}" class="glass-chip"><i data-lucide="arrow-down-to-line" class="w-4 h-4"></i> Withdraw</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="folder-front"></div>
+</div>
+
+<script>
+(function(){
+    var folder = document.getElementById('balanceFolder');
+    var slot = document.getElementById('folderCardSlot');
+    if (!folder || !slot) return;
+
+    var tapTimer = null, tapCount = 0;
+
+    function openFull(){ folder.classList.remove('is-peek'); folder.classList.add('is-open'); }
+    function peek(){ folder.classList.toggle('is-peek'); }
+    function closeAll(){ folder.classList.remove('is-open','is-peek'); }
+
+    function handleTap(e){
+        var link = e.target.closest('a,button');
+        if (link) {
+            if (!folder.classList.contains('is-open')) { e.preventDefault(); }
+            else { return; }
+        }
+        tapCount++;
+        if (tapCount === 1) {
+            tapTimer = setTimeout(function(){
+                tapCount = 0;
+                folder.classList.contains('is-open') ? closeAll() : peek();
+            }, 280);
+        } else if (tapCount === 2) {
+            clearTimeout(tapTimer);
+            tapCount = 0;
+            folder.classList.contains('is-open') ? closeAll() : openFull();
+        }
+    }
+
+    slot.addEventListener('click', handleTap);
+    document.addEventListener('click', function(e){
+        if (folder.classList.contains('is-open') && !folder.contains(e.target)) closeAll();
+    });
+})();
+</script>
+
+=== resources/views/admin/coin.blade.php ===
+@extends('layouts.app-admin')
+@section('title', 'Coin Lab')
+@section('content')
+<link rel="stylesheet" href="{{ asset('css/admin-home.css') }}?v={{ time() }}">
+<main class="cl" id="coinSim">
+  <h1 class="cl-h">Coin Lab <small>Q-coin economy</small></h1>
+  <section class="cl-live" id="clLive"></section>
+  <section class="cl-card">
+    <h2>Simulator <small>nothing is saved</small></h2>
+    <div class="cl-in" id="clIn"></div>
+  </section>
+  <section class="cl-card">
+    <h2>Result</h2>
+    <div class="cl-out" id="clOut"></div>
+    <canvas id="clCv" class="cl-cv" height="220"></canvas>
+    <div class="cl-leg"><span><s style="background:#0B0C10"></s>Coin liability (₦)</span><span><s style="background:#9A9DA5"></s>Cumulative revenue (₦)</span></div>
+    <p class="cl-verdict" id="clV"></p>
+  </section>
+  <section class="cl-card">
+    <h2>Last 30 days by type</h2>
+    <div class="cl-types" id="clTy"></div>
+  </section>
+  <section class="cl-card">
+    <h2>Current config <small>read only</small></h2>
+    <div class="cl-types" id="clCfg"></div>
+  </section>
+</main>
+<script>
+(function () {
+  var D = @json($data);
+  var $ = function (i) { return document.getElementById(i); };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function f(v) { v = Number(v) || 0; var a = Math.abs(v); return a >= 1e9 ? (v / 1e9).toFixed(2) + 'B' : a >= 1e6 ? (v / 1e6).toFixed(2) + 'M' : a >= 1e4 ? (v / 1e3).toFixed(1) + 'K' : Math.round(v * 100) / 100 + ''; }
+
+  $('clLive').innerHTML = [['Q in wallets', f(D.supply)], ['Holders', f(D.holders)], ['Q txs 24h', f(D.tx24)], ['Q issued 24h', f(D.in24)], ['Q spent 24h', f(Math.abs(D.out24))], ['Rate', D.rate + ' Q = ₦1']]
+    .map(function (x) { return '<div><small>' + x[0] + '</small><b>' + x[1] + '</b></div>'; }).join('');
+  $('clTy').innerHTML = D.types.length ? D.types.map(function (t) { return '<div><span>' + esc(t.type || '—') + '</span><b>' + f(t.c) + ' txs · ' + f(t.s) + ' Q</b></div>'; }).join('') : '<p class="cm-dim">No Q-coin transactions yet.</p>';
+  var cfg = Object.keys(D.cfg);
+  $('clCfg').innerHTML = (cfg.length ? cfg.map(function (k) { return '<div><span>' + esc(k) + '</span><b>' + esc(String(D.cfg[k])) + '</b></div>'; }).join('') : '') + '<div><span>investment.platform_fee_percent</span><b>' + D.platformFee + '</b></div>';
+
+  var cnt = [0, 0, 0, 0], tot = 0;
+  Object.keys(D.tiers || {}).forEach(function (k) { var n = parseInt(k, 10), c = Number(D.tiers[k]) || 0; if (k !== '' && n >= 0 && n <= 3) { cnt[n] += c; tot += c; } });
+  var mix = tot ? cnt.map(function (c) { return Math.round(c / tot * 100); }) : [100, 0, 0, 0];
+  var spec = [
+    ['rate', 'Q per ₦1 (rate)', D.rate, 1, 200, 1], ['users', 'Users today', D.users, 0, Math.max(1000, D.users * 20), 1],
+    ['dau', 'Daily active %', 30, 1, 100, 1], ['grow', 'User growth % / week', 3, 0, 40, 0.5],
+    ['m1', 'Tier 1 share %', mix[1], 0, 100, 1], ['m2', 'Tier 2 share %', mix[2], 0, 100, 1], ['m3', 'Tier 3 share %', mix[3], 0, 100, 1],
+    ['d0', 'Daily Q, free tier', D.daily[0], 0, 200, 1], ['d1', 'Daily Q, tier 1', D.daily[1], 0, 200, 1], ['d2', 'Daily Q, tier 2', D.daily[2], 0, 200, 1], ['d3', 'Daily Q, tier 3', D.daily[3], 0, 200, 1],
+    ['spend', 'Q spent back to platform %', 40, 0, 100, 1], ['avg', '₦ spent per active user / day', 500, 0, 20000, 50], ['fee', 'Platform fee %', D.platformFee, 0, 30, 0.5], ['days', 'Days to project', 90, 7, 365, 1]
+  ];
+  $('clIn').innerHTML = spec.map(function (s) {
+    return '<label><span>' + s[1] + '<b id="v_' + s[0] + '">' + s[2] + '</b></span><input type="range" id="i_' + s[0] + '" min="' + s[3] + '" max="' + s[4] + '" step="' + s[5] + '" value="' + s[2] + '"></label>';
+  }).join('');
+  function val() { var o = {}; spec.forEach(function (s) { o[s[0]] = parseFloat($('i_' + s[0]).value) || 0; $('v_' + s[0]).textContent = $('i_' + s[0]).value; }); return o; }
+
+  function calc() {
+    var v = val(), m = [Math.max(0, 100 - v.m1 - v.m2 - v.m3), v.m1, v.m2, v.m3], avg = 0, i;
+    for (i = 0; i < 4; i++) avg += m[i] / 100 * v['d' + i];
+    var s = D.supply || 0, cm = 0, cr = 0, L = [], R = [], day1 = 0;
+    for (var d = 1; d <= v.days; d++) {
+      var act = v.users * Math.pow(1 + v.grow / 100, d / 7) * v.dau / 100, mint = act * avg;
+      if (d === 1) day1 = mint;
+      s += mint * (1 - v.spend / 100); cm += mint; cr += act * v.avg * v.fee / 100;
+      L.push(s / v.rate); R.push(cr);
+    }
+    var cost = cm / v.rate, cov = cost > 0 ? cr / cost : 0;
+    $('clOut').innerHTML = [['Q minted / day', f(day1)], ['Mint cost / day', '₦' + f(day1 / v.rate)], ['Supply at end', f(s) + ' Q'], ['Liability at end', '₦' + f(s / v.rate)], ['Revenue (period)', '₦' + f(cr)], ['Revenue ÷ mint cost', cov.toFixed(2) + '×']]
+      .map(function (x) { return '<div><small>' + x[0] + '</small><b>' + x[1] + '</b></div>'; }).join('');
+    $('clV').textContent = cost === 0 ? 'No coins are being minted with these settings.' : cov >= 1.5 ? 'Healthy: revenue covers coin issuance with room to spare.' : cov >= 1 ? 'Tight: revenue only just covers coin issuance. Watch growth.' : 'Danger: issuing coins costs more than you earn. Lower daily Q, raise the rate, or raise the spend sink.';
+    $('clV').className = 'cl-verdict ' + (cov >= 1.5 ? 'ok' : cov >= 1 ? 'mid' : 'bad');
+    chart(L, R);
+  }
+  function chart(L, R) {
+    var c = $('clCv'), r = window.devicePixelRatio || 1, w = c.clientWidth, h = 220;
+    c.width = w * r; c.height = h * r; var x = c.getContext('2d'); x.scale(r, r); x.clearRect(0, 0, w, h);
+    var mx = Math.max.apply(null, L.concat(R).concat([1])), n = L.length;
+    x.strokeStyle = 'rgba(15,17,21,.08)'; x.lineWidth = 1;
+    for (var g = 0; g < 5; g++) { var yy = 10 + (h - 30) * g / 4; x.beginPath(); x.moveTo(0, yy); x.lineTo(w, yy); x.stroke(); }
+    [[L, '#0B0C10'], [R, '#9A9DA5']].forEach(function (a) {
+      x.strokeStyle = a[1]; x.lineWidth = 2.2; x.beginPath();
+      a[0].forEach(function (y, i) { var px = n > 1 ? i / (n - 1) * (w - 4) + 2 : 2, py = h - 20 - y / mx * (h - 30); if (i) x.lineTo(px, py); else x.moveTo(px, py); });
+      x.stroke();
+    });
+    x.fillStyle = 'rgba(15,17,21,.55)'; x.font = '11px system-ui'; x.fillText('₦' + f(mx), 4, 12); x.fillText('day ' + n, w - 52, h - 4);
+  }
+  $('clIn').addEventListener('input', calc);
+  window.addEventListener('resize', calc);
+  calc();
+})();
+</script>
+@endsection
+
+=== AdminController withdraw lines ===
+=== routes ===
+8:use App\Http\Controllers\WalletController;
+114:    Route::get('/q-coin', [\App\Http\Controllers\QCoinController::class, 'index'])->name('qcoin.index');
+115:    Route::post('/q-coin/claim', [\App\Http\Controllers\QCoinController::class, 'claim'])->name('qcoin.claim');
+283:    Route::get('/wallet/pin', [TransactionPinController::class, 'edit'])->name('wallet.pin.edit');
+284:    Route::post('/wallet/pin', [TransactionPinController::class, 'update'])->name('wallet.pin.update')->middleware('throttle:5,1');
+296:    Route::get('/money-tracker', [WalletController::class, 'moneyTracker'])->name('money-tracker.index');
+297:    Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
+298:    Route::get('/wallet/deposit', [\App\Http\Controllers\WalletController::class, 'deposit'])->name('wallet.deposit');
+299:    Route::get('/wallet/deposit/status/{reference}', [\App\Http\Controllers\WalletController::class, 'depositStatus'])->name('wallet.deposit.status');
+300:    Route::post('/wallet/send', [WalletController::class, 'sendMoney'])->name('wallet.send');
+301:    Route::get('/wallet/transactions/{id}', [WalletController::class, 'showTransaction'])->name('wallet.transaction.show');
+302:    Route::get('/wallet/send', [WalletController::class, 'sendMoneyForm'])->name('wallet.send.form');
+303:    Route::post('/wallet/send/resolve', [WalletController::class, 'resolveRecipient'])->name('wallet.send.resolve');
+304:    Route::post('/wallet/paystack/initiate', [PaystackController::class, 'initiate'])->name('paystack.initiate');
+305:    Route::get('/wallet/paystack/callback', [PaystackController::class, 'callback'])->name('paystack.callback');
+306:    Route::get('/wallet/virtual-account', [VirtualAccountController::class, 'create'])->name('wallet.virtual-account');
+307:    Route::post('/wallet/virtual-account', [VirtualAccountController::class, 'store'])->name('wallet.virtual-account.store');
+308:    Route::get('/wallet/bank-account', [App\Http\Controllers\BankAccountController::class, 'edit'])->name('wallet.bank-account.edit');
+309:    Route::post('/wallet/bank-account/resolve', [App\Http\Controllers\BankAccountController::class, 'resolve'])->name('wallet.bank-account.resolve');
+310:    Route::post('/wallet/bank-account', [App\Http\Controllers\BankAccountController::class, 'store'])->name('wallet.bank-account.store');
+311:    Route::post('/wallet/withdraw', [App\Http\Controllers\WalletActionController::class, 'withdraw'])->name('wallet.withdraw')->middleware('throttle:5,1');
+326:// Gig accept/deliver/withdraw: work for both logged-in users and guests (guest identity via qelvo_guest_token cookie, checked inside the controller).
+330:Route::post('/gigs/{gig}/withdraw', [App\Http\Controllers\GigController::class, 'withdraw'])->name('gigs.withdraw')->middleware(['web']);
+447:    $r = app('router')->getRoutes()->getByName('wallet.index');
+512:// AX COIN LAB
+514:    Route::get('/coin', [\App\Http\Controllers\AdminCoinController::class, 'index'])->name('coin');
+=== helpers ===
+35:        "files": [
+[["id","name","email","email_verified_at","password","remember_token","created_at","updated_at","is_admin","wallet_balance","referral_code","referred_by","tier","tier_upgraded_at","is_verified_seller","virtual_account_number","virtual_account_bank","virtual_account_ref","account_type","business_name","business_logo","business_whatsapp","is_vendor_active","interests","streak_days","last_active_date","leaderboard_opt_in","gender","spoken_language","avatar_url","background_url","accent_color","subscription_expires_at","is_banned","bio","skills","badge_tier","signup_fee_paid","wallet_restricted","google_id","transaction_pin","theme_style","navbar_style","topbar_style","notif_style","sidebar_style","card_style","mobile_nav_style","card_token","card_last4","card_type","free_messages_used","role","q_coin_balance","q_coin_last_claim_date","q_coin_streak_days","level_id","has_seen_tour","customer_care_permissions","payout_bank_code","payout_bank_name","payout_account_number","payout_account_name","q_coin_reminder_sent_date","area","area_verified_at","username","last_seen_at"],["id","user_id","type","amount","description","created_at","updated_at","related_user_id"],["id","user_id","tx_ref","amount","fee","bank_code","bank_name","account_number","account_name","status","created_at","updated_at"]]

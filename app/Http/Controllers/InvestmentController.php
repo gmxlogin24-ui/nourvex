@@ -20,7 +20,7 @@ class InvestmentController extends Controller
         $myInvestments = Investment::with('project')->where('user_id', $user->id)->latest()->get();
 
         return view('investment.index', [
-            'qBalance' => (int) $user->q_coin_balance,
+            'qBalance' => (int) floor((float) $user->wallet_balance),
             'verification' => InvestmentVerification::where('user_id', $user->id)->first(),
             'isVerified' => $svc->isVerified($user),
             'openProjects' => InvestmentProject::where('status', 'open')->where('closes_at', '>', now())->latest()->get(),
@@ -48,10 +48,16 @@ class InvestmentController extends Controller
             'goal_q' => 'required|integer|min:' . config('investment.min_goal_q') . '|max:' . config('investment.max_goal_q'),
             'max_invest_q' => 'required|integer|min:1',
             'duration_days' => 'required|integer|min:' . config('investment.min_duration_days') . '|max:' . config('investment.max_duration_days'),
+            'location_state' => 'required|string|max:100',
+            'location_address' => 'required|string|max:255',
+            'cac_number' => 'required|string|max:40',
+            'use_of_funds' => 'required|string|max:2000',
+            'risk_disclosure' => 'required|string|max:2000',
         ]);
 
         try {
             $project = $svc->createProject(Auth::user(), $data);
+            app(\App\Services\InvestorGate::class)->saveDiligence($project, $request);
         } catch (RuntimeException $e) {
             return back()->withErrors(['project' => $e->getMessage()])->withInput();
         }
@@ -83,7 +89,7 @@ class InvestmentController extends Controller
             'mine' => $mine,
             'isOwner' => $isOwner,
             'canInvest' => $project->isOpen() && ! $isOwner && $maxAllowed > 0,
-            'qBalance' => (int) $user->q_coin_balance,
+            'qBalance' => (int) floor((float) $user->wallet_balance),
             'myActive' => $myActive,
             'maxAllowed' => $maxAllowed,
             'idemKey' => (string) Str::uuid(),
@@ -95,10 +101,12 @@ class InvestmentController extends Controller
         $data = $request->validate([
             'amount_q' => 'required|integer|min:1',
             'idempotency_key' => 'required|string|max:64',
+            'risk_ack' => 'accepted',
+            'pin' => 'required|string|max:12',
         ]);
 
         try {
-            $svc->invest(Auth::user(), $project, (int) $data['amount_q'], $data['idempotency_key']);
+            app(\App\Services\InvestorGate::class)->invest(Auth::user(), $project, (int) $data['amount_q'], $data['idempotency_key'], ['accepted' => true, 'ip' => $request->ip()], (string) $data['pin']);
         } catch (RuntimeException $e) {
             return back()->withErrors(['amount_q' => $e->getMessage()])->withInput();
         }

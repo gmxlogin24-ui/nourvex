@@ -111,6 +111,10 @@ class KycController extends Controller
             $profile->update(array_filter($data, fn ($v) => $v !== null && $v !== ''));
         }
 
+        if ($profile->status === 'approved' && $profile->wasChanged()) {
+            $profile->update(['status' => 'submitted', 'submitted_at' => now()]);
+            $message = 'Saved. Your details changed, so they need to be reviewed again.';
+        }
         return redirect()->route('kyc.show', ['step' => $this->nextStep($step)])->with('status', $message);
     }
 

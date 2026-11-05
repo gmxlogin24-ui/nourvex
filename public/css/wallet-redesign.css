@@ -41,3 +41,41 @@
   .wl-col-a{position:sticky;top:24px}
   .wl-card{padding:22px}
 }
+
+/* wlwhite-v1: white wallet, always light, soft cards */
+body[data-page="wallet"][data-page]:not([data-page="pulse"]):not([data-page="dashboard"]){background:#FFFFFF !important}
+body[data-page="wallet"] .auth-reveal-content,body[data-page="wallet"] .app-push-content,body[data-page="wallet"] .auth-page-shell{background:transparent !important}
+html:root body[data-page="wallet"] .wl{--wcard:#FFFFFF;--wtext:#0F172A;--wmute:#6B7280;--wline:#EEF0F3;--wsoft:#F4F5F7;--wshadow:none;--wac:#16A34A;
+  box-sizing:border-box;padding:20px 20px 150px;max-width:720px;color:var(--wtext)}
+html:root body[data-page="wallet"] .wl .wl-amt-row.in{color:#16A34A}
+.wl-head h1{font-size:28px;font-weight:800;letter-spacing:-.02em}
+.wl-head p{font-size:13px}
+.wl-notice{background:var(--wsoft) !important;border:0 !important;border-radius:16px !important}
+.wl-flash{border-radius:14px}
+
+/* balance card */
+.wl-balance{position:relative;overflow:hidden;padding:26px 22px 20px;border-radius:28px;color:#fff;
+  background:radial-gradient(260px 180px at 100% 0%,rgba(34,197,94,.45),transparent 70%),linear-gradient(145deg,#0F172A,#1E293B);
+  box-shadow:0 22px 40px -24px rgba(15,23,42,.7)}
+.wl-lbl{opacity:.7;letter-spacing:.1em}
+.wl-amt{font-size:38px;letter-spacing:-.02em;margin:8px 0 20px}
+.wl-actions{gap:10px}
+.wl-act{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:13px 6px}
+.wl-act.primary{background:#22C55E;color:#fff;border-color:transparent;box-shadow:0 10px 20px -10px #22C55E}
+
+/* link rows */
+.wl-link{background:var(--wsoft) !important;border:0 !important;box-shadow:none !important;border-radius:18px;padding:14px 16px}
+.wl-link .ib{background:#fff !important;border-radius:12px}
+.wl-link:active{opacity:.75}
+
+/* history */
+.wl-card{background:#fff !important;border:0 !important;box-shadow:none !important;padding:4px 0 0 !important;border-radius:0}
+.wl-card-head{margin-bottom:6px}
+.wl-card-head h2{font-size:18px;font-weight:800}
+.wl-card-head span{background:var(--wsoft);padding:4px 10px;border-radius:99px;font-weight:700}
+.wl-row{padding:14px 2px;border-top:1px solid var(--wline)}
+.wl-row:active{background:var(--wsoft)}
+.wl-rt{font-size:14px;font-weight:700}
+.wl-amt-row{font-size:15px}
+.wl-empty{background:var(--wsoft);border-radius:18px;padding:30px 0}
+@media (min-width:900px){html:root body[data-page="wallet"] .wl{max-width:1180px;padding:28px 28px 60px}}
