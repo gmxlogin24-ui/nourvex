@@ -57,3 +57,5 @@ storage/logs/
 *.bak-*
 *.bak
 *.bak-*
+/setup_resend.sh
+/storage/backups/
